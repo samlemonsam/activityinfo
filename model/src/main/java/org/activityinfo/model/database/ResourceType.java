@@ -19,6 +19,7 @@
 package org.activityinfo.model.database;
 
 public enum  ResourceType {
-  FOLDER,
-  FORM
+    DATABASE,
+    FOLDER,
+    FORM
 }

@@ -27,48 +27,90 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Grants a user a set of permissions within a folder
+ * Grants a user permission to perform specified operations within a given resource,
+ * with a set of record filters applied
  */
 public class GrantModel implements JsonSerializable {
 
     private String id;
     private ResourceId resourceId;
     private Set<Operation> operations = new HashSet<>();
+    private Set<String> filters = new HashSet<>();
 
     private GrantModel() {
     }
 
     /**
-     * @return this grant's unique id within the database.
+     * @return This grant's unique id within the database.
      */
     public String getId() {
         return id;
     }
 
     /**
-     * @return the id of the database, folder, or form to which this grant applies.
+     * @return The id of the {@link Resource} to which this grant applies. The {@code Resource} may be a
+     * {@link ResourceType#FORM}, {@link ResourceType#FOLDER}, or {@link ResourceType#DATABASE}
      */
     public ResourceId getResourceId() {
         return resourceId;
     }
 
+    /**
+     * @return The set of {@link Operation}s the user is allowed to perform within the {@link Resource}
+     * this grant applies to.
+     */
+    public Set<Operation> getOperations() {
+        return operations;
+    }
+
+    /**
+     * @return The set of filters to be applied within the {@link Resource} this grant applies to.
+     */
+    public Set<String> getFilters() {
+        return filters;
+    }
+
     @Override
     public JsonValue toJson() {
 
-        JsonValue operationsArray = Json.createArray();
+        JsonValue operationArray = Json.createArray();
         for (Operation operation : operations) {
-            operationsArray.add(Json.create(operation.name()));
+            operationArray.add(Json.create(operation.name()));
+        }
+
+        JsonValue filterArray = Json.createArray();
+        for (String filter : filters) {
+            filterArray.add(Json.create(filter));
         }
 
         JsonValue object = Json.createObject();
-        object.put("folderId", resourceId.asString());
-        object.put("operations", operationsArray);
+        object.put("resourceId", resourceId.asString());
+        object.put("operations", operationArray);
+        object.put("filters", filterArray);
         return object;
     }
 
-    public static GrantModel fromJson(JsonValue value) {
+    public static GrantModel fromJson(JsonValue object) {
         GrantModel grant = new GrantModel();
-        grant.resourceId = ResourceId.valueOf(value.getString("folderId"));
+
+        // Must accommodate legacy grant models (which specified only folder grants)
+        JsonValue resourceId = object.hasKey("folderId") ? object.get("folderId") : object.get("resourceId");
+        grant.resourceId = ResourceId.valueOf(resourceId.asString());
+
+        if (object.hasKey("operations") && object.get("operations").isJsonArray()) {
+            JsonValue operationsArray = object.get("operations");
+            for (int i=0; i<operationsArray.length(); i++) {
+                grant.operations.add(Operation.valueOf(operationsArray.get(i).asString()));
+            }
+        }
+
+        if (object.hasKey("filters") && object.get("filters").isJsonArray()) {
+            JsonValue filterArray = object.get("filters");
+            for (int i=0; i<filterArray.length(); i++) {
+                grant.filters.add(filterArray.get(i).asString());
+            }
+        }
+
         return grant;
     }
 
@@ -77,9 +119,8 @@ public class GrantModel implements JsonSerializable {
         private GrantModel model = new GrantModel();
 
         /**
-         * Sets the resource to which this grant applies. This can be id
-         * of a folder, form, or the database itself.
-         *
+         * Sets the {@link Resource} to which this grant applies. This can be the id of a
+         * {@link ResourceType#FORM}, {@link ResourceType#FOLDER} or {@link ResourceType#DATABASE}.
          */
         public Builder setResourceId(ResourceId resourceId) {
             model.resourceId = resourceId;
@@ -87,14 +128,26 @@ public class GrantModel implements JsonSerializable {
         }
 
         /**
-         * Adds a permitted operation to this grant.
+         * Adds a permitted {@link Operation} to this grant.
          */
         public void addOperation(Operation operation) {
             model.operations.add(operation);
         }
 
+        /**
+         * Adds a filter to this grant. This filter is applied to the records within the
+         * {@link Resource} this grant applies to.
+         */
+        public void addFilter(String recordFilter) {
+            model.filters.add(recordFilter);
+        }
+
+        /**
+         * Adds a permitted {@link Operation} and filter to this grant.
+         */
         public void addOperation(Operation operation, String recordFilter) {
-            model.operations.add(operation);
+            addOperation(operation);
+            addFilter(recordFilter);
         }
 
         public GrantModel build() {
