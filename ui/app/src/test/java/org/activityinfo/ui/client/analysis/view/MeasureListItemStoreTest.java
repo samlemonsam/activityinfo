@@ -22,6 +22,7 @@ import org.activityinfo.analysis.pivot.viewModel.AnalysisViewModel;
 import org.activityinfo.model.analysis.pivot.ImmutableMeasureModel;
 import org.activityinfo.model.analysis.pivot.MeasureModel;
 import org.activityinfo.ui.client.store.TestingFormStore;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -30,6 +31,11 @@ import static org.junit.Assert.assertThat;
 public class MeasureListItemStoreTest {
 
     private TestingFormStore formStore;
+
+    @Before
+    public void setup() {
+        formStore = new TestingFormStore();
+    }
 
     @Test
     public void test() {
