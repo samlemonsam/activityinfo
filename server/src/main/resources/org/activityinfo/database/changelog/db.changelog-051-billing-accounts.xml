@@ -52,5 +52,9 @@
                                  referencedTableName="billingaccount"
                                  referencedColumnNames="id"/>
     </changeSet>
-
+    <changeSet id="051-04" author="akbertram">
+        <addColumn tableName="userlogin">
+            <column name="trialEndDate" type="datetime"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

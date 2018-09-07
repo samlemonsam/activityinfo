@@ -52,6 +52,7 @@ public class User implements java.io.Serializable {
     private String features;
     private boolean bounced;
     private BillingAccount billingAccount;
+    private Date trialEndDate;
 
     public User() {
         dateCreated = new Date();
@@ -256,6 +257,15 @@ public class User implements java.io.Serializable {
 
     public void setBillingAccount(BillingAccount billingAccount) {
         this.billingAccount = billingAccount;
+    }
+
+    @Temporal(TemporalType.DATE)
+    public Date getTrialEndDate() {
+        return trialEndDate;
+    }
+
+    public void setTrialEndDate(Date trialEndDate) {
+        this.trialEndDate = trialEndDate;
     }
 
     @Override

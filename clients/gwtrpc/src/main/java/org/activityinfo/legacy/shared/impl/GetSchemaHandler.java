@@ -265,6 +265,11 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                     .isNull()
                     .orderBy("d.Name");
 
+            if(context.isRemote()) {
+                query.leftJoin("billingaccount ba").on("ba.id=o.billingAccountId");
+                query.appendColumn("ba.name", "baName");
+            }
+
             // this is quite hackesh. we ultimately need to split up GetSchema()
             // into
             // GetDatabases() and GetDatabaseSchema() so that the client has
@@ -292,6 +297,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                         db.setCountry(countries.get(row.getInt("CountryId")));
                         db.setOwnerName(row.getString("OwnerName"));
                         db.setOwnerEmail(row.getString("OwnerEmail"));
+                        db.setBillingAccountName(row.getString("baName"));
 
                         if (db.getAmOwner()) {
                             db.setHasPendingTransfer(row.getBoolean("pendingTransfer"));

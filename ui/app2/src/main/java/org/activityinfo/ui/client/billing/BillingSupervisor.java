@@ -1,7 +1,7 @@
-package org.activityinfo.ui.client;
+package org.activityinfo.ui.client.billing;
 
-import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.google.common.base.Function;
+import com.google.gwt.user.client.ui.RootPanel;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
 import org.activityinfo.model.account.AccountStatus;
@@ -27,11 +27,9 @@ public class BillingSupervisor {
 
 
     private void maybeShowStatus(AccountStatus accountStatus) {
-        if(accountStatus.getUserCount() > accountStatus.getUserLimit()) {
-            MessageBox.alert("Account Problem", "You currently have " + accountStatus.getUserCount() +
-                " users, while your plan is limited to " + accountStatus.getUserLimit() +
-                    ". Please contact us within the next seven days to upgrade your plan and avoid interruption " +
-                    " to your account.", null);
+        if(!accountStatus.isTrial() && accountStatus.getExpirationTime() > 0) {
+            BillingWarning warning = new BillingWarning(accountStatus);
+            RootPanel.get().add(warning);
         }
     }
 }

@@ -37,7 +37,7 @@ public class AccountResource {
         User userAccount = entityManager.find(User.class, user.getId());
 
         if(userAccount.getBillingAccount() == null) {
-            return queryPersonalStatus(userAccount);
+            return queryTrialStatus(userAccount);
         } else {
             return queryBillingStatus(userAccount);
         }
@@ -46,19 +46,20 @@ public class AccountResource {
     /**
      * Queries the status of a user who is not linked to a billing account
      */
-    private AccountStatus queryPersonalStatus(User userAccount) {
+    private AccountStatus queryTrialStatus(User userAccount) {
 
-        Number userCount = (Number) entityManager.createNativeQuery("SELECT count(distinct up.userId) " +
+        Number databaseCount = (Number) entityManager.createNativeQuery("SELECT count(distinct d.databaseId) " +
                 "FROM userdatabase d " +
-                "LEFT JOIN userpermission up ON (up.databaseId=d.DatabaseId) " +
-                "WHERE d.ownerUserId = :userId")
+                "WHERE d.ownerUserId = :userId AND d.dateDeleted IS NULL")
                 .setParameter("userId", userAccount.getId())
                 .getSingleResult();
 
         return new AccountStatus.Builder()
                 .setSubscribed(false)
-                .setUserCount(userCount.intValue())
+                .setUserCount(1)
                 .setUserLimit(10)
+                .setDatabaseCount(databaseCount.intValue())
+                .setExpirationTime(userAccount.getTrialEndDate())
                 .build();
 
     }
@@ -70,7 +71,7 @@ public class AccountResource {
                 "FROM userlogin u " +
                 "LEFT JOIN userdatabase d ON (d.OwnerUserId=u.userId) " +
                 "LEFT JOIN userpermission up ON (up.databaseId=d.DatabaseId) " +
-                "WHERE u.billingAccountId = :accountId")
+                "WHERE u.billingAccountId = :accountId and d.dateDeleted IS NULL and up.AllowView=1")
                 .setParameter("accountId", userAccount.getBillingAccount().getId())
                 .getSingleResult();
 

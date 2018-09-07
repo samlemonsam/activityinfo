@@ -11,16 +11,17 @@ import java.util.Date;
  */
 public class AccountStatus implements JsonSerializable {
 
-    private boolean subscribed;
+    private boolean trial;
     private int expirationTime;
     private int userLimit;
     private int userCount;
+    private int databaseCount;
 
     private AccountStatus() {
     }
 
-    public boolean isSubscribed() {
-        return subscribed;
+    public boolean isTrial() {
+        return trial;
     }
 
     public int getExpirationTime() {
@@ -35,30 +36,38 @@ public class AccountStatus implements JsonSerializable {
         return userCount;
     }
 
+    public int getDatabaseCount() {
+        return databaseCount;
+    }
+
     @Override
     public JsonValue toJson() {
         JsonValue object = Json.createObject();
-        object.put("subscribed", subscribed);
+        object.put("trial", trial);
         object.put("expirationTime", expirationTime);
         object.put("userLimit", userLimit);
         object.put("userCount", userCount);
+        object.put("databaseCount", databaseCount);
         return object;
     }
 
     public static AccountStatus fromJson(JsonValue object) {
         AccountStatus status = new AccountStatus();
-        status.subscribed = object.getBoolean("subscribed");
+        status.trial = object.getBoolean("trial");
         status.expirationTime = (int) object.getNumber("expirationTime");
         status.userLimit = (int) object.getNumber("userLimit");
         status.userCount = (int) object.getNumber("userCount");
+        status.databaseCount = (int)object.getNumber("databaseCount");
         return status;
     }
 
     public static class Builder {
         private AccountStatus status = new AccountStatus();
 
-        public Builder setExpirationTime(Date time){
-            status.expirationTime = (int) (time.getTime() / 1000);
+        public Builder setExpirationTime(Date time) {
+            if(time != null) {
+                status.expirationTime = (int) (time.getTime() / 1000);
+            }
             return this;
         }
 
@@ -72,8 +81,13 @@ public class AccountStatus implements JsonSerializable {
             return this;
         }
 
+        public Builder setDatabaseCount(int count) {
+            status.databaseCount = count;
+            return this;
+        }
+
         public Builder setSubscribed(boolean subscribed) {
-            status.subscribed = subscribed;
+            status.trial = subscribed;
             return this;
         }
 

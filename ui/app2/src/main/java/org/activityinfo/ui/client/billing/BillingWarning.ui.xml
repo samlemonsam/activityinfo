@@ -1,0 +1,60 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:style>
+        .warning {
+            background-color: rgba(255, 206, 96, 0.95);
+            opacity: 0.95;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+        .inner {
+            font-family: tahoma,arial,verdana,sans-serif;
+            max-width: 780px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 2em;
+            margin-bottom: 2em;
+            position: relative;
+            padding-right: 2em;
+        }
+
+        .inner h1 {
+            text-transform: uppercase;
+        }
+        .inner a {
+            color: black;
+        }
+
+        .inner a:visited {
+            color: black;
+        }
+
+        .inner button {
+            position: absolute;
+            top: 0;
+            right: 0;
+            border: 0;
+            margin: 0;
+            padding: 0;
+            font-size: 2em;
+            width: auto;
+            overflow: visible;
+            background: transparent;
+            color: black;
+            line-height: normal;
+            -webkit-font-smoothing: inherit;
+            -moz-osx-font-smoothing: inherit;
+            -webkit-appearance: none;
+        }
+    </ui:style>
+    <g:HTMLPanel addStyleNames="{style.warning}">
+        <div class="{style.inner}">
+            <h2>Account Expiry</h2>
+            <div ui:field="warningText">
+            </div>
+            <g:Button text="×" ui:field="closeButton"></g:Button>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>
