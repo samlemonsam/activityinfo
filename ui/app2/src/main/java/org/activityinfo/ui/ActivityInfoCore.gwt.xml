@@ -65,15 +65,6 @@
   <set-configuration-property name="gin.classloading.exceptedPackages" value="com.google.gwt.core.client"/>
 
 
-  <!-- Configure deferred binding for offline module depending on browser capability -->
-
-  <replace-with class="org.activityinfo.ui.client.local.capability.WebKitCapabilityProfile">
-    <when-type-is class="org.activityinfo.ui.client.local.capability.LocalCapabilityProfile"/>
-    <any>
-      <when-property-is name="user.agent" value="safari"/>
-    </any>
-  </replace-with>
-
   <!-- Include generated sources -->
   <source path='client'/>
   <source path="shared"/>

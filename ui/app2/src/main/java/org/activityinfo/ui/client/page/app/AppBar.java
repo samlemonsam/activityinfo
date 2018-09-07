@@ -39,7 +39,7 @@ import org.activityinfo.i18n.shared.ApplicationLocale;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.LocaleSwitcher;
-import org.activityinfo.ui.client.local.LocalController;
+import org.activityinfo.ui.client.offline.OfflineController;
 import org.activityinfo.ui.client.page.NavigationEvent;
 import org.activityinfo.ui.client.page.NavigationHandler;
 
@@ -56,7 +56,7 @@ public class AppBar extends Composite {
 
     private EventBus eventBus;
 
-    private LocalController offlineController;
+    private OfflineController offlineController;
 
     public static final int HEIGHT = 50;
     private Menu localeMenu;
@@ -65,7 +65,7 @@ public class AppBar extends Composite {
     }
 
     @Inject
-    public AppBar(EventBus eventBus, LocalController offlineController) {
+    public AppBar(EventBus eventBus, OfflineController offlineController) {
         this.eventBus = eventBus;
         this.offlineController = offlineController;
 

@@ -29,13 +29,12 @@ import org.activityinfo.ui.client.component.report.editor.map.MapModule;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
 import org.activityinfo.ui.client.dispatch.remote.cache.AdminEntityCache;
 import org.activityinfo.ui.client.dispatch.remote.cache.SchemaCache;
-import org.activityinfo.ui.client.local.LocalController;
-import org.activityinfo.ui.client.local.LocalModule;
+import org.activityinfo.ui.client.offline.OfflineController;
+import org.activityinfo.ui.client.offline.OfflineModule;
 import org.activityinfo.ui.client.page.FormPageLoader;
 import org.activityinfo.ui.client.page.HistoryManager;
 import org.activityinfo.ui.client.page.app.AppLoader;
 import org.activityinfo.ui.client.page.config.ConfigLoader;
-import org.activityinfo.ui.client.page.config.ConfigModule;
 import org.activityinfo.ui.client.page.dashboard.DashboardLoader;
 import org.activityinfo.ui.client.page.entry.DataEntryLoader;
 import org.activityinfo.ui.client.page.entry.EntryModule;
@@ -50,8 +49,7 @@ import org.activityinfo.ui.client.page.report.ReportModule;
         ReportModule.class,
         EntryModule.class,
         MapModule.class,
-        ConfigModule.class,
-        LocalModule.class})
+        OfflineModule.class})
 public interface AppInjector extends Ginjector {
     EventBus getEventBus();
 
@@ -63,7 +61,7 @@ public interface AppInjector extends Ginjector {
 
     ConfigLoader createConfigLoader();
 
-    LocalController createOfflineController();
+    OfflineController createOfflineController();
 
     UsageTracker getUsageTracker();
 

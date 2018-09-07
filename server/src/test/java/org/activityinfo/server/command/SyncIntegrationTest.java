@@ -48,8 +48,8 @@ import org.activityinfo.server.database.hibernate.entity.Location;
 import org.activityinfo.server.database.hibernate.entity.LocationType;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
-import org.activityinfo.ui.client.local.LocalModuleStub;
-import org.activityinfo.ui.client.local.sync.pipeline.InstallPipeline;
+import org.activityinfo.ui.client.offline.LocalModuleStub;
+import org.activityinfo.ui.client.offline.sync.pipeline.InstallPipeline;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -77,7 +77,7 @@ import static org.junit.Assert.assertTrue;
         TestHibernateModule.class,
         GwtRpcModule.class,
 })
-public class SyncIntegrationTest extends LocalHandlerTestCase {
+public class SyncIntegrationTest extends OfflineHandlerTestCase {
     @Inject
     private KeyGenerator keyGenerator;
 

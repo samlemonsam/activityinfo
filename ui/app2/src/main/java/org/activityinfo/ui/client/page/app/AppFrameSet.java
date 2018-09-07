@@ -33,7 +33,7 @@ import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
-import org.activityinfo.ui.client.local.ui.SyncStatusBar;
+import org.activityinfo.ui.client.offline.ui.SyncStatusBar;
 import org.activityinfo.ui.client.page.*;
 import org.activityinfo.ui.client.page.config.DbListPageState;
 import org.activityinfo.ui.client.page.dashboard.DashboardPlace;
