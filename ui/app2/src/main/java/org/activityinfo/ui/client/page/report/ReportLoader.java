@@ -19,7 +19,6 @@
 package org.activityinfo.ui.client.page.report;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -55,27 +54,17 @@ public class ReportLoader implements PageLoader {
     @Override
     public void load(final PageId pageId, final PageState pageState, final AsyncCallback<Page> callback) {
 
-        GWT.runAsync(new RunAsyncCallback() {
-            @Override
-            public void onFailure(Throwable reason) {
-                callback.onFailure(reason);
-            }
+        if (ReportsPage.PAGE_ID.equals(pageId)) {
+            callback.onSuccess(reportsPage.get());
 
-            @Override
-            public void onSuccess() {
-                if (ReportsPage.PAGE_ID.equals(pageId)) {
-                    callback.onSuccess(reportsPage.get());
+        } else if (ReportDesignPage.PAGE_ID.equals(pageId)) {
+            ReportDesignPage page = reportDesignPage.get();
+            page.navigate(pageState);
+            callback.onSuccess(page);
 
-                } else if (ReportDesignPage.PAGE_ID.equals(pageId)) {
-                    ReportDesignPage page = reportDesignPage.get();
-                    page.navigate(pageState);
-                    callback.onSuccess(page);
-
-                } else {
-                    GWT.log("ReportLoader received a request it didn't know how to handle: " + pageState.toString(),
-                            null);
-                }
-            }
-        });
+        } else {
+            GWT.log("ReportLoader received a request it didn't know how to handle: " + pageState.toString(),
+                    null);
+        }
     }
 }
