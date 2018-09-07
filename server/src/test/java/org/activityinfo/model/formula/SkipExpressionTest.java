@@ -32,6 +32,7 @@ import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -48,6 +49,12 @@ public class SkipExpressionTest {
     private static final ResourceId QUANTITY_FIELD_ID = ResourceId.valueOf("test_quantity");
 
     FormClass formClass;
+
+    @Before
+    public void setUp() {
+        formClass = createFormClass();
+    }
+
 
     @Test
     public void enumType() {
