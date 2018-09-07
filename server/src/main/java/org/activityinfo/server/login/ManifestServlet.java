@@ -74,23 +74,4 @@ public class ManifestServlet extends AbstractManifestServlet {
         }
     }
 
-    @VisibleForTesting
-    static String localeFromPath(String path) {
-        // The request should be in the form
-        //    /{module}/{locale}.appcache
-        // For example:
-        //    /ActivityInfo/en.appcache
-        //    /ActivityInfo/fr.appcache
-
-
-
-        if(path.endsWith(".appcache") && path.length() > ".appcache".length() + 2) {
-            int lastSlash = path.lastIndexOf('/');
-            String locale = path.substring(lastSlash + 1, lastSlash + 3);
-            return locale;
-        }
-
-        return "en";
-    }
-
 }

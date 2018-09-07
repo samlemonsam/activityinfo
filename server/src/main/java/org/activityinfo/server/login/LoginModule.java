@@ -33,8 +33,8 @@ public class LoginModule extends ServletModule {
     @Override
     protected void configureServlets() {
 
-        serveRegex("/ActivityInfo/ActivityInfo.appcache").with(ManifestServlet.class);
-        serveRegex("/App/App.appcache").with(ManifestServlet.class);
+        serveRegex("/ActivityInfo.appcache").with(ManifestServlet.class);
+        serveRegex("/App.appcache").with(ManifestServlet.class);
 
 
         Map<String, String> initParams = Maps.newHashMap();
