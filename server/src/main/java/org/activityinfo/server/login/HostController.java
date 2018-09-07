@@ -68,14 +68,21 @@ public class HostController {
             return Response.seeOther(uri.getAbsolutePathBuilder().replacePath(ENDPOINT).build()).build();
         }
 
+        // Load the normal production application, based on the user's preferred
+        // locale or the one explicitly provided
+        if(Strings.isNullOrEmpty(locale)) {
+            locale = authProvider.get().getUserLocale();
+        }
+
+
         String appUri = uri.getAbsolutePathBuilder().replaceQuery("").build().toString();
 
         HostPageModel model = new HostPageModel(appUri);
 
-
         User authenticatedUser = entityManager.get().find(User.class, authProvider.get().getUserId());
         model.setFeatureFlags(authenticatedUser.getFeatures());
         model.setNewUI("3".equals(ui) || "3dev".equals(ui));
+        model.setLocale(locale);
 
         if("3dev".equals(ui)) {
             model.setBootstrapScript("/App/App.nocache.js");
@@ -90,11 +97,7 @@ public class HostController {
             model.setBootstrapScript("/ActivityInfoLogging/ActivityInfoLogging.nocache.js");
             
         } else {
-            // Load the normal production application, based on the user's preferred 
-            // locale or the one explicitly provided
-            if(Strings.isNullOrEmpty(locale)) {
-                locale = authProvider.get().getUserLocale();
-            }
+
             String module;
             if(model.isNewUI()) {
                 module = "App";

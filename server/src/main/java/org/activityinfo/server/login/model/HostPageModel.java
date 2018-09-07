@@ -27,6 +27,7 @@ public class HostPageModel extends PageModel {
     private String bootstrapScript;
     private String appCacheManifest;
     private String featureFlags;
+    private String locale;
     
     public HostPageModel(String appUrl) {
         this.appUrl = appUrl;
@@ -80,4 +81,13 @@ public class HostPageModel extends PageModel {
     public BuildProperties getBuildProperties() {
         return BuildProperties.PROPERTIES;
     }
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
+    }
+
 }
