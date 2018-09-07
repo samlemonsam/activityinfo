@@ -31,6 +31,7 @@ import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DatabaseProviderImpl implements DatabaseProvider {
@@ -86,8 +87,8 @@ public class DatabaseProviderImpl implements DatabaseProvider {
             if (meta.isVisible()) {
                 meta.setLabel(database.getName());
                 meta.addLocks(queryLocks(database));
-                meta.addResources(queryFolders(database));
-                meta.addResources(queryForms(database));
+                meta.addResources(queryFolders(database, meta.folderGrants()));
+                meta.addResources(queryForms(database, meta.folderGrants(), meta.formGrants()));
             }
         }
         return meta.build();
@@ -97,8 +98,7 @@ public class DatabaseProviderImpl implements DatabaseProvider {
     public static Optional<UserPermission> getUserPermission(EntityManager entityManager, Database database, int userId) {
         List<UserPermission> permissions = entityManager
                 .createQuery(
-                        "select u from UserPermission u where u.user.id = :userId and u" +
-                                ".database = :db",
+                        "select u from UserPermission u where u.user.id = :userId and u.database = :db",
                         UserPermission.class)
                 .setParameter("userId", userId)
                 .setParameter("db", database)
@@ -125,21 +125,23 @@ public class DatabaseProviderImpl implements DatabaseProvider {
                 .collect(Collectors.toList());
     }
 
-    public List<Resource> queryFolders(Database database) {
+    public List<Resource> queryFolders(Database database, Set<ResourceId> folderGrants) {
         return entityManager.get()
                 .createQuery("select f from Folder f where f.database = :database", Folder.class)
                 .setParameter("database", database)
                 .getResultList()
                 .stream()
+                .filter(folder -> folderGrants.isEmpty() || folderGrants.contains(CuidAdapter.folderId(folder.getId())))
                 .map(Folder::asResource)
                 .collect(Collectors.toList());
     }
 
 
-    private List<Resource> queryForms(Database database) {
+    private List<Resource> queryForms(Database database, Set<ResourceId> folderGrants, Set<ResourceId> formGrants) {
         return database.getActivities()
                 .stream()
                 .filter(a -> !a.isDeleted())
+                .filter(a -> folderGrants.isEmpty() || folderGrants.contains(a.getParentResourceId()) || formGrants.contains(a.getFormId()))
                 .map(Activity::asResource)
                 .collect(Collectors.toList());
     }

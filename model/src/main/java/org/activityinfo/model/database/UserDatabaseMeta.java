@@ -26,6 +26,8 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Describes a single user's view of database, including the folders, forms,
@@ -210,6 +212,20 @@ public class UserDatabaseMeta {
 
         public boolean isVisible() {
             return meta.owner || !meta.grants.isEmpty();
+        }
+
+        public Set<ResourceId> folderGrants() {
+            assert isVisible();
+            return meta.grants.keySet().stream()
+                    .filter(grantResource -> grantResource.getDomain() == CuidAdapter.FOLDER_DOMAIN)
+                    .collect(Collectors.toSet());
+        }
+
+        public Set<ResourceId> formGrants() {
+            assert isVisible();
+            return meta.grants.keySet().stream()
+                    .filter(grantResource -> grantResource.getDomain() == CuidAdapter.ACTIVITY_DOMAIN)
+                    .collect(Collectors.toSet());
         }
 
         public UserDatabaseMeta build() {
