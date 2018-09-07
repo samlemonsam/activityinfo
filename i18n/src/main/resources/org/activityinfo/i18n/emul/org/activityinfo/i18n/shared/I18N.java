@@ -18,6 +18,7 @@
  */
 package org.activityinfo.i18n.shared;
 
+import com.google.gwt.core.shared.GWT;
 import net.lightoze.gwt.i18n.client.LocaleFactory;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 
@@ -33,8 +34,7 @@ public final class I18N {
     public static final UiMessages MESSAGES;
 
     static {
-        LocaleProxy.initialize();
-        CONSTANTS = LocaleFactory.get(UiConstants.class);
-        MESSAGES = LocaleFactory.get(UiMessages.class);
+        CONSTANTS = GWT.create(UiConstants.class);
+        MESSAGES = GWT.create(UiMessages.class);
     }
 }
