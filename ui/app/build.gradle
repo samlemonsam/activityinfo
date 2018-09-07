@@ -112,7 +112,7 @@ task compileApp(type: JavaExec) {
 
     args '-logLevel', 'INFO'
     args '-sourceLevel', '1.8'
-    args '-localWorkers', Integer.toString(Runtime.runtime.availableProcessors())
+    args '-localWorkers', Integer.toString(Runtime.runtime.availableProcessors() - 2)
     args '-war', outputDir
     args '-extra', "${buildDir}/gwt-extra"
     args 'org.activityinfo.ui.AppProd'

@@ -63,7 +63,7 @@ task compileApp(type: JavaExec) {
     jvmArgs "-Dgwt.persistentunitcachedir=${buildDir}/gwtCache"
 
     args '-logLevel', 'INFO'
-    args '-localWorkers', Integer.toString(Runtime.runtime.availableProcessors())
+    args '-localWorkers', Integer.toString(Runtime.runtime.availableProcessors() - 2)
 
     // Disable class metadata -- Class.getName() will not
     // be available to compiled code, but we save ~150k
