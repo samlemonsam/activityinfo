@@ -211,6 +211,7 @@ public class UserDatabaseMeta {
         }
 
         public UserDatabaseMeta build() {
+            meta.visible = isVisible();
             return meta;
         }
     }
