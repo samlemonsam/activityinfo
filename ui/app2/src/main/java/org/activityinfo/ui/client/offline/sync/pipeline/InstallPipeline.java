@@ -19,14 +19,14 @@
 package org.activityinfo.ui.client.offline.sync.pipeline;
 
 import com.bedatadriven.rebar.async.AsyncPipeline;
-import com.bedatadriven.rebar.sql.client.SqlDatabase;
-import org.activityinfo.ui.client.EventBus;
-import org.activityinfo.ui.client.dispatch.Dispatcher;
+import com.google.inject.Inject;
 import org.activityinfo.ui.client.offline.sync.DownSynchronizer;
 
 public class InstallPipeline extends AsyncPipeline {
 
-    public InstallPipeline(SqlDatabase database, EventBus eventBus, Dispatcher dispatcher) {
-        super(new DropAll(database), new DownSynchronizer(eventBus, dispatcher, database));
+    @Inject
+    public InstallPipeline(DropAll dropAll,
+                           DownSynchronizer downSychronizer) {
+        super(dropAll, downSychronizer);
     }
 }

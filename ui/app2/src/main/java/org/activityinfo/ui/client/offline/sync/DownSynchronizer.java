@@ -23,6 +23,7 @@ import com.bedatadriven.rebar.sql.client.SqlDatabase;
 import com.bedatadriven.rebar.sql.client.SqlException;
 import com.bedatadriven.rebar.sql.client.SqlTransactionCallback;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
@@ -62,6 +63,7 @@ public class DownSynchronizer implements AsyncCommand {
 
     private SynchronizerStats stats = new SynchronizerStats();
 
+    @Inject
     public DownSynchronizer(EventBus eventBus, @Remote Dispatcher remoteDispatcher, SqlDatabase conn) {
         this.eventBus = eventBus;
         this.conn = conn;

@@ -24,6 +24,7 @@ import com.bedatadriven.rebar.sql.client.SqlException;
 import com.bedatadriven.rebar.sql.client.SqlTransaction;
 import com.bedatadriven.rebar.sql.client.SqlTransactionCallback;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.BatchCommand;
@@ -34,6 +35,7 @@ import org.activityinfo.legacy.shared.util.Collector;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.remote.AbstractDispatcher;
+import org.activityinfo.ui.client.dispatch.remote.Remote;
 import org.activityinfo.ui.client.offline.sync.ServerStateChangeEvent;
 
 /**
@@ -47,10 +49,11 @@ public class OfflineDispatcher extends AbstractDispatcher {
     private final Dispatcher remoteDispatcher;
     private final EventBus eventBus;
 
+    @Inject
     public OfflineDispatcher(EventBus eventBus,
                              SqlDatabase database, AuthenticatedUser auth,
-                             Dispatcher remoteDispatcher, CommandQueue commandQueue) {
-        Log.trace("LocalDispatcher constructor starting...");
+                             @Remote Dispatcher remoteDispatcher, CommandQueue commandQueue) {
+        Log.trace("OfflineDispatcher constructor starting...");
         this.eventBus = eventBus;
         this.auth = auth;
         this.database = database;

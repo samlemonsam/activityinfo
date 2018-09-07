@@ -13,6 +13,7 @@ import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.inject.ClientSideAuthProvider;
 import org.activityinfo.ui.client.offline.sync.*;
+import org.activityinfo.ui.client.offline.sync.pipeline.DropAll;
 import org.activityinfo.ui.client.offline.sync.pipeline.InstallPipeline;
 
 import javax.annotation.Nullable;
@@ -92,7 +93,10 @@ public class SwitchingMode extends Mode {
     @Override
     public void install() {
         changeState(OfflineStateChangeEvent.State.INSTALLING);
-        InstallPipeline pipeline = new InstallPipeline(database, eventBus, remoteDispatcher);
+        InstallPipeline pipeline = new InstallPipeline(
+                new DropAll(database),
+                new DownSynchronizer(eventBus, remoteDispatcher, database));
+
         pipeline.start(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
