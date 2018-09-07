@@ -331,11 +331,14 @@ public class UserPermission implements Serializable {
             return Collections.emptyList();
         }
 
-        if(model == null) {
-            GrantModel.Builder databaseGrant = new GrantModel.Builder();
-            databaseGrant.setResourceId(CuidAdapter.databaseId(database.getId()));
-            setOperations(databaseGrant);
-            return Collections.singletonList(databaseGrant.build());
+        List<GrantModel> grants = new ArrayList<>();
+        GrantModel.Builder databaseGrant = new GrantModel.Builder();
+        databaseGrant.setResourceId(CuidAdapter.databaseId(database.getId()));
+        setOperations(databaseGrant);
+        grants.add(databaseGrant.build());
+
+        if (model == null) {
+            return grants;
         }
 
         JsonValue modelObject = Json.parse(model);
@@ -345,14 +348,9 @@ public class UserPermission implements Serializable {
             throw new UnsupportedOperationException("Unsupported model");
         }
 
-        List<GrantModel> grants = new ArrayList<>();
         modelObject.get("grants").values().forEach(grant -> {
-            if (grant.hasKey("folderId")) {
-                GrantModel.Builder folderGrant = new GrantModel.Builder();
-                folderGrant.setResourceId(ResourceId.valueOf(grant.getString("folderId")));
-                setFolderOperations(folderGrant, grant);
-                grants.add(folderGrant.build());
-            }
+            GrantModel grantModel = GrantModel.fromJson(grant);
+            grants.add(grantModel);
         });
         return grants;
     }
