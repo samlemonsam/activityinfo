@@ -18,7 +18,6 @@
  */
 package org.activityinfo.ui.client.component.importDialog.model.type.converter;
 
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.io.match.coord.CoordinateAxis;
 import org.activityinfo.io.match.coord.CoordinateFormatException;
@@ -37,7 +36,6 @@ public class CoordinateParserTest {
 
     @Before
     public void before() {
-        LocaleProxy.initialize();
         ThreadLocalLocaleProvider.pushLocale(Locale.ENGLISH);
     }
 

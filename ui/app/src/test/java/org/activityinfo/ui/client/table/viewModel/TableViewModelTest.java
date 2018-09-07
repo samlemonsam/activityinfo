@@ -19,7 +19,6 @@
 package org.activityinfo.ui.client.table.viewModel;
 
 import com.google.common.base.Optional;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.analysis.table.*;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
@@ -42,7 +41,6 @@ import org.activityinfo.store.testing.LocaliteForm;
 import org.activityinfo.store.testing.ReferralSubForm;
 import org.activityinfo.ui.client.store.TestSetup;
 import org.activityinfo.ui.client.table.view.DeleteRecordAction;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -55,11 +53,6 @@ import static org.junit.Assert.assertThat;
 public class TableViewModelTest {
 
     private TestSetup setup = new TestSetup();
-
-    @Before
-    public void setup() {
-        LocaleProxy.initialize();
-    }
 
 
     @Test

@@ -18,7 +18,6 @@
  */
 package org.activityinfo.model.formula;
 
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormField;
@@ -33,7 +32,6 @@ import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -50,13 +48,6 @@ public class SkipExpressionTest {
     private static final ResourceId QUANTITY_FIELD_ID = ResourceId.valueOf("test_quantity");
 
     FormClass formClass;
-
-    @Before
-    public void setUp() {
-        LocaleProxy.initialize();
-
-        formClass = createFormClass();
-    }
 
     @Test
     public void enumType() {

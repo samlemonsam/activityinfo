@@ -19,7 +19,6 @@
 package org.activityinfo.ui.client.store;
 
 import com.google.gwt.core.client.testing.StubScheduler;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.indexedb.IDBFactoryStub;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormRecord;
@@ -38,8 +37,10 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.store.query.shared.FormOfflineStatus;
 import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.store.http.HttpStore;
-import org.activityinfo.ui.client.store.offline.*;
-import org.junit.Before;
+import org.activityinfo.ui.client.store.offline.OfflineStore;
+import org.activityinfo.ui.client.store.offline.PendingStatus;
+import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
+import org.activityinfo.ui.client.store.offline.SnapshotStatus;
 import org.junit.Test;
 
 import static org.activityinfo.observable.ObservableTesting.connect;
@@ -50,10 +51,6 @@ import static org.junit.Assert.*;
 
 public class FormStoreTest {
 
-    @Before
-    public void setup() {
-        LocaleProxy.initialize();
-    }
 
     private final StubScheduler scheduler = new StubScheduler();
 

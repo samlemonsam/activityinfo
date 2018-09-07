@@ -1912,4 +1912,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Delete Target")
     String deleteTarget();
 
+    @DefaultStringValue("Billing Account")
+    String billingAccount();
+
 }

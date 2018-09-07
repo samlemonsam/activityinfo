@@ -20,6 +20,7 @@ package org.activityinfo.i18n.shared;
 
 import com.google.gwt.core.shared.GWT;
 import net.lightoze.gwt.i18n.client.LocaleFactory;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 
 /**
  * Contains global instances of UiConstants and UiMessages
@@ -37,8 +38,7 @@ public final class I18N {
             CONSTANTS = GWT.create(UiConstants.class);
             MESSAGES = GWT.create(UiMessages.class);
         } else {
-            // on the server side: LocaleProxy is initialized in LocaleModule
-            // locale is set for each request in CommandServlet
+            LocaleProxy.initialize();
             CONSTANTS = LocaleFactory.get(UiConstants.class);
             MESSAGES = LocaleFactory.get(UiMessages.class);
         }

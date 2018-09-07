@@ -24,7 +24,6 @@ import com.google.common.base.Optional;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.VoidWork;
 import com.googlecode.objectify.util.Closeable;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormSyncSet;
@@ -48,7 +47,6 @@ import org.activityinfo.store.query.shared.plan.QueryPlanBuilder;
 import org.activityinfo.store.spi.*;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -75,11 +73,7 @@ public class HrdCatalogTest {
         helper.setUp();
         objectifyCloseable = ObjectifyService.begin();
     }
-    
-    @BeforeClass
-    public static void setUpLocale() {
-        LocaleProxy.initialize();
-    }
+
 
     @After
     public void tearDown() {

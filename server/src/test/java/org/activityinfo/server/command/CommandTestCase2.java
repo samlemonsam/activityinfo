@@ -24,7 +24,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.googlecode.objectify.ObjectifyService;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.fixtures.TestHibernateModule;
@@ -49,7 +48,6 @@ import org.activityinfo.ui.client.dispatch.ResourceLocatorAdaptor;
 import org.activityinfo.ui.client.dispatch.remote.AbstractDispatcher;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 
 import javax.persistence.EntityManager;
 import java.io.Closeable;
@@ -93,10 +91,6 @@ public class CommandTestCase2 {
         helper.tearDown();
     }
 
-    @BeforeClass
-    public static void setupI18N() {
-        LocaleProxy.initialize();
-    }
 
     @Inject
     protected CommandServlet2 servlet;

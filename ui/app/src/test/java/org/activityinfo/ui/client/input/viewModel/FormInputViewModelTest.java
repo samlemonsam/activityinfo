@@ -18,7 +18,6 @@
  */
 package org.activityinfo.ui.client.input.viewModel;
 
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.database.RecordLock;
 import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.database.ResourceType;
@@ -54,7 +53,6 @@ import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.store.TestSetup;
 import org.activityinfo.ui.client.store.TestingFormStore;
 import org.easymock.EasyMock;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -67,12 +65,6 @@ import static org.junit.Assert.*;
 public class FormInputViewModelTest {
 
     private TestSetup setup = new TestSetup();
-
-    @Before
-    public void setup() {
-        LocaleProxy.initialize();
-    }
-
 
     @Test
     public void testSurveyRelevance() {

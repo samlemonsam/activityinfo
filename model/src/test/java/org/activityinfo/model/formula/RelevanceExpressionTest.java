@@ -18,7 +18,6 @@
  */
 package org.activityinfo.model.formula;
 
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormField;
@@ -34,7 +33,6 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -53,11 +51,6 @@ public class RelevanceExpressionTest {
 
     FormClass formClass;
 
-    @BeforeClass
-    public static void setupLocale() {
-        LocaleProxy.initialize();
-    }
-    
     @Before
     public void setUp() {
         formClass = createFormClass();

@@ -19,17 +19,12 @@
 package org.activityinfo.server.util.locale;
 
 import com.google.inject.AbstractModule;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.i18n.shared.UiMessages;
 
 import java.util.Locale;
 
 public class LocaleModule extends AbstractModule {
-
-    public LocaleModule() {
-        LocaleProxy.initialize();
-    }
 
     @Override
     protected void configure() {

@@ -20,7 +20,6 @@ package org.activityinfo.store.testing;
 
 import com.google.common.base.Optional;
 import com.google.gwt.core.shared.GwtIncompatible;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FormTree;
@@ -43,10 +42,6 @@ import java.util.Map;
 
 @GwtIncompatible
 public class TestingStorageProvider implements FormStorageProvider, TransactionalStorageProvider {
-
-    static {
-        LocaleProxy.initialize();
-    }
 
     private final LocaliteForm localiteForm;
     private Map<ResourceId, TestingFormStorage> formMap = new HashMap<>();
