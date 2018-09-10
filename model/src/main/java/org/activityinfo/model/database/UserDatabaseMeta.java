@@ -28,7 +28,6 @@ import org.activityinfo.model.resource.ResourceId;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Describes a single user's view of database, including the folders, forms,
