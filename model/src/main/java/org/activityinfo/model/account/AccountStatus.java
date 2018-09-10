@@ -3,6 +3,7 @@ package org.activityinfo.model.account;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.type.time.LocalDate;
 
 import java.util.Date;
 
@@ -11,6 +12,8 @@ import java.util.Date;
  */
 public class AccountStatus implements JsonSerializable {
 
+    public static final int DAYS_PER_WEEK = 7;
+    private boolean legacy;
     private boolean trial;
     private int expirationTime;
     private int userLimit;
@@ -28,6 +31,10 @@ public class AccountStatus implements JsonSerializable {
         return expirationTime;
     }
 
+    public LocalDate getExpirationDate() {
+        return new LocalDate(new Date(expirationTime * 1000));
+    }
+
     public int getUserLimit() {
         return userLimit;
     }
@@ -40,6 +47,85 @@ public class AccountStatus implements JsonSerializable {
         return databaseCount;
     }
 
+    public int hoursUntilExpiration(Date now) {
+        int secondsNow = (int) (now.getTime() / 1000);
+        int secondsUntil = getExpirationTime() - secondsNow;
+        int hours = Math.floorDiv(secondsUntil, 3600);
+        return hours;
+    }
+
+    public int daysUntilExpiration(Date now) {
+        int hours = hoursUntilExpiration(now);
+        return Math.floorDiv(hours, 24);
+    }
+
+    /**
+     * @return human readable string
+     */
+    public String expiringIn(Date now) {
+        String until;
+        int hours = hoursUntilExpiration(now);
+        if (hours < 1) {
+            return "expired";
+        } else if (hours <= 48) {
+            return "expiring in " + hours + " hours";
+        } else {
+            int days = Math.floorDiv(hours, 24);
+            if (days < 21) {
+                return "expiring in " + days + " days";
+            } else {
+                int weeks = Math.floorDiv(days, 7);
+                return "expiring in " + weeks + " weeks";
+            }
+        }
+    }
+
+    /**
+     * True if the user should be warned about expiration
+     */
+    public boolean shouldWarn(Date now) {
+        int daysLeft = daysUntilExpiration(now);
+        if(trial) {
+            if(legacy) {
+                return true;
+            } else {
+                return daysLeft <= (2 * DAYS_PER_WEEK);
+            }
+        } else {
+            return daysLeft <= (8 * DAYS_PER_WEEK);
+        }
+    }
+
+    /**
+     * @return the date after which the user should be again warned
+     */
+    public LocalDate snoozeDate(Date now) {
+        int daysLeft = daysUntilExpiration(now);
+        LocalDate today = new LocalDate(now);
+
+        if(trial) {
+            if(daysLeft < 7) {
+                return today.plusDays(1);
+            } else {
+                return today.plusDays(4);
+            }
+        } else {
+            LocalDate expirationDay = new LocalDate(new Date(expirationTime * 1000));
+            int weeksLeft = Math.floorDiv(daysLeft, 7);
+            if(weeksLeft <= 6) {
+                return expirationDay.plusDays(-4 * DAYS_PER_WEEK);
+            } else if(weeksLeft <= 4) {
+                return expirationDay.plusDays(-3 * DAYS_PER_WEEK);
+            } else if(weeksLeft <= 3) {
+                return expirationDay.plusDays(-2 * DAYS_PER_WEEK);
+            } else if(weeksLeft <= 2) {
+                return expirationDay.plusDays(-1 * DAYS_PER_WEEK);
+            } else {
+                return today.plusDays(1);
+            }
+        }
+    }
+
     @Override
     public JsonValue toJson() {
         JsonValue object = Json.createObject();
@@ -48,12 +134,14 @@ public class AccountStatus implements JsonSerializable {
         object.put("userLimit", userLimit);
         object.put("userCount", userCount);
         object.put("databaseCount", databaseCount);
+        object.put("legacy", legacy);
         return object;
     }
 
     public static AccountStatus fromJson(JsonValue object) {
         AccountStatus status = new AccountStatus();
         status.trial = object.getBoolean("trial");
+        status.legacy = object.getBoolean("legacy");
         status.expirationTime = (int) object.getNumber("expirationTime");
         status.userLimit = (int) object.getNumber("userLimit");
         status.userCount = (int) object.getNumber("userCount");
@@ -71,6 +159,11 @@ public class AccountStatus implements JsonSerializable {
             return this;
         }
 
+
+        public Builder setExpirationTime(LocalDate date) {
+            return setExpirationTime(date.atMidnightInMyTimezone());
+        }
+
         public Builder setUserLimit(int limit) {
             status.userLimit = limit;
             return this;
@@ -86,13 +179,19 @@ public class AccountStatus implements JsonSerializable {
             return this;
         }
 
-        public Builder setSubscribed(boolean subscribed) {
-            status.trial = subscribed;
+        public Builder setTrial(boolean trial) {
+            status.trial = trial;
+            return this;
+        }
+
+        public Builder setLegacy(boolean legacy) {
+            status.legacy = legacy;
             return this;
         }
 
         public AccountStatus build() {
             return status;
         }
+
     }
 }

@@ -12,6 +12,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Date;
 
 @Path("/resources/account")
 public class AccountResource {
@@ -55,9 +56,11 @@ public class AccountResource {
                 .getSingleResult();
 
         return new AccountStatus.Builder()
-                .setSubscribed(false)
+                .setTrial(false)
                 .setUserCount(1)
                 .setUserLimit(10)
+                .setLegacy(userAccount.getDateCreated() == null ||
+                        userAccount.getDateCreated().before(new Date(1536624000000L)))
                 .setDatabaseCount(databaseCount.intValue())
                 .setExpirationTime(userAccount.getTrialEndDate())
                 .build();
@@ -76,7 +79,7 @@ public class AccountResource {
                 .getSingleResult();
 
         return new AccountStatus.Builder()
-                .setSubscribed(true)
+                .setTrial(true)
                 .setUserCount(userCount.intValue())
                 .setUserLimit(userAccount.getBillingAccount().getUserLimit())
                 .build();
