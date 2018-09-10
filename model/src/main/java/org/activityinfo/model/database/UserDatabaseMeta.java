@@ -69,8 +69,22 @@ public class UserDatabaseMeta implements JsonSerializable {
         return resources.values();
     }
 
-    public Collection<GrantModel> getGrants() {
-        return grants.values();
+    public boolean hasResource(ResourceId resourceId) {
+        return resources.containsKey(resourceId);
+    }
+
+    public Resource getResource(ResourceId resourceId) {
+        assert hasResource(resourceId) : "No resource found for given resourceId";
+        return resources.get(resourceId);
+    }
+
+    public boolean hasGrant(ResourceId resourceId) {
+        return grants.containsKey(resourceId);
+    }
+
+    public GrantModel getGrant(ResourceId resourceId) {
+        assert hasGrant(resourceId) : "No grant found for given resourceId";
+        return grants.get(resourceId);
     }
 
     public Collection<RecordLock> getLocks() {

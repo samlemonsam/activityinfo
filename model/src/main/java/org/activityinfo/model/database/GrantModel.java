@@ -64,6 +64,10 @@ public class GrantModel implements JsonSerializable {
         return operations.keySet();
     }
 
+    public boolean hasOperation(Operation operation) {
+        return operations.containsKey(operation);
+    }
+
     /**
      * @return The (optional) filter to be applied when performing the specified operation on the
      * {@link Resource} this grant applies to.

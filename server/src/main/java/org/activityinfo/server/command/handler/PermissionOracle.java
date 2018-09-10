@@ -18,17 +18,24 @@
  */
 package org.activityinfo.server.command.handler;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.util.Providers;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.Published;
+import org.activityinfo.model.database.*;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.FormulaParser;
+import org.activityinfo.model.formula.Formulas;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
@@ -41,16 +48,141 @@ import static org.activityinfo.model.legacy.CuidAdapter.DATABASE_DOMAIN;
 public class PermissionOracle {
 
     private final Provider<EntityManager> em;
+    private final DatabaseProvider provider;
 
     private static final Logger LOGGER = Logger.getLogger(PermissionOracle.class.getName());
 
     @Inject
     public PermissionOracle(Provider<EntityManager> em) {
         this.em = em;
+        this.provider = new DatabaseProviderImpl(em);
     }
 
     public PermissionOracle(EntityManager em) {
         this(Providers.of(em));
+    }
+
+    public Permission query(PermissionQuery query) {
+        UserDatabaseMeta db = provider.getDatabaseMetadata(CuidAdapter.databaseId(query.getDatabase()), query.getUser());
+        return query(query, db);
+    }
+
+    /**
+     * Allow the owner of a database full permissions with no record filters
+     */
+    private Permission allowOwner(Operation operation) {
+        return new Permission(operation, true, Optional.absent());
+    }
+
+    /**
+     * Deny permission outright for the specified operation
+     */
+    private Permission denyUser(Operation operation) {
+        return new Permission(operation, false, Optional.absent());
+    }
+
+    public Permission query(PermissionQuery query, UserDatabaseMeta db) {
+        if (db.isOwner()) {
+            return allowOwner(query.getOperation());
+        }
+        if (!db.isVisible()) {
+            return denyUser(query.getOperation());
+        }
+        switch(query.getOperation()) {
+            case VIEW:
+                return view(db.getResource(query.getResource()), db);
+            case CREATE_RECORD:
+            case EDIT_RECORD:
+            case DELETE_RECORD:
+            case CREATE_FORM:
+            case EDIT_FORM:
+            case DELETE_FORM:
+            default:
+                throw new UnsupportedOperationException(query.getOperation().name());
+        }
+    }
+
+    /**
+     * <p> A user can <i>View</i> a {@link Resource} if:
+     *  <ol>
+     *      <li>The {@code resource} appears in the {@link UserDatabaseMeta} {@code resources} map</li>
+     *      <li>They have an explicit {@link Operation#VIEW} grant on this {@code resource} or a
+     *      parent {@code resource} </li>
+     *  </ol>
+     * </p>
+     */
+    private Permission view(Resource resource, UserDatabaseMeta db) {
+        Permission permission = new Permission(Operation.VIEW);
+        boolean permitted = db.hasResource(resource.getId()) && granted(Operation.VIEW, resource, db);
+        permission.setPermitted(permitted);
+        if (permitted) {
+            permission.setFilter(collectFilters(Operation.VIEW, resource, db));
+        }
+        return permission;
+    }
+
+    /**
+     * Checks whether the specified {@link Operation} has been granted on the given {@link Resource}.
+     */
+    private boolean granted(Operation operation, Resource resource, UserDatabaseMeta db) {
+        // If there is an explicit grant, check whether the operation is granted at this level
+        if (db.hasGrant(resource.getId()) && db.getGrant(resource.getId()).hasOperation(operation)) {
+            return true;
+        }
+        // As the operation is not granted at this level, we need to check further up the Resource tree
+        // If the parent of this resource is the root database, then check whether operation exists on database grant
+        if (isDatabase(resource.getParentId())) {
+            return db.getGrant(resource.getParentId()).hasOperation(operation);
+        }
+        // Otherwise, we climb the resource tree to determine whether the operation is granted there
+        return granted(operation, db.getResource(resource.getParentId()), db);
+    }
+
+    /**
+     * Concatenates all filters defined for the given operation at each level of the resource tree.
+     *
+     * Filters defined on different levels for the same operation imply an AND relationship. E.g. A user is given
+     * permission to only view a certain partner across a database, but is also restricted to only view records from
+     * a certain location within a folder. This is equivalent to setting a record-level filter of:
+     *      partner==pXXX && location.name=="Gaza"
+     *
+     * This relationship must be reflected in the returned filter by ANDing filters from different levels.
+     */
+    private Optional<String> collectFilters(Operation operation, Resource resource, UserDatabaseMeta db) {
+        // Get the filter (if any) for operations granted on this level
+        Optional<String> filter = getFilter(operation, resource.getId(), db);
+        if (isDatabase(resource.getParentId())) {
+            Optional<String> dbFilter = getFilter(operation, resource.getParentId(), db);
+            return and(filter, dbFilter);
+        }
+        return and(filter, collectFilters(operation, db.getResource(resource.getParentId()), db));
+    }
+
+    private Optional<String> getFilter(Operation operation, ResourceId resource, UserDatabaseMeta db) {
+        Optional<String> filter = Optional.absent();
+        if (db.hasGrant(resource) && db.getGrant(resource).hasOperation(operation)) {
+            filter = db.getGrant(resource).getFilter(operation);
+        }
+        return filter;
+    }
+
+    private Optional<String> and(Optional<String> filter1, Optional<String> filter2) {
+        if (!filter1.isPresent() && !filter2.isPresent()) {
+            return Optional.absent();
+        } else if (!filter1.isPresent()) {
+            return filter2;
+        } else if (!filter2.isPresent()) {
+            return filter1;
+        } else {
+            FormulaNode filterFormula1 = FormulaParser.parse(filter1.get());
+            FormulaNode filterFormula2 = FormulaParser.parse(filter2.get());
+            FormulaNode and = Formulas.allTrue(Lists.newArrayList(filterFormula1, filterFormula2));
+            return Optional.of(and.asExpression());
+        }
+    }
+
+    private boolean isDatabase(ResourceId resourceId) {
+        return resourceId.getDomain() == CuidAdapter.DATABASE_DOMAIN;
     }
 
     /**
@@ -287,7 +419,7 @@ public class PermissionOracle {
     
     public boolean isEditAllowed(AttributeGroup entity, User user) {
         if(entity.getActivities().isEmpty()) {
-            LOGGER.severe("Unable to check authorization to delete attribute group " +
+            LOGGER.severe(() -> "Unable to check authorization to delete attribute group " +
                     entity.getName() + ": there are no associated activities.");
             return false;
         }
