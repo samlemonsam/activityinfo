@@ -18,12 +18,14 @@
  */
 package org.activityinfo.model.database;
 
+import com.google.common.base.Optional;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -34,8 +36,7 @@ public class GrantModel implements JsonSerializable {
 
     private String id;
     private ResourceId resourceId;
-    private Set<Operation> operations = new HashSet<>();
-    private Set<String> filters = new HashSet<>();
+    private Map<Operation,Optional<String>> operations = new HashMap<>();
 
     private GrantModel() {
     }
@@ -60,33 +61,31 @@ public class GrantModel implements JsonSerializable {
      * this grant applies to.
      */
     public Set<Operation> getOperations() {
-        return operations;
+        return operations.keySet();
     }
 
     /**
-     * @return The set of filters to be applied within the {@link Resource} this grant applies to.
+     * @return The (optional) filter to be applied when performing the specified operation on the
+     * {@link Resource} this grant applies to.
      */
-    public Set<String> getFilters() {
-        return filters;
+    public Optional<String> getFilter(Operation operation) {
+        assert operations.containsKey(operation);
+        return operations.get(operation);
     }
 
     @Override
     public JsonValue toJson() {
-
-        JsonValue operationArray = Json.createArray();
-        for (Operation operation : operations) {
-            operationArray.add(Json.create(operation.name()));
-        }
-
-        JsonValue filterArray = Json.createArray();
-        for (String filter : filters) {
-            filterArray.add(Json.create(filter));
+        JsonValue opArray = Json.createArray();
+        for (Map.Entry<Operation, Optional<String>> op : operations.entrySet()) {
+            JsonValue opObject = Json.createObject();
+            opObject.add("operation", Json.create(op.getKey().name()));
+            opObject.add("filter", op.getValue().isPresent() ? Json.create(op.getValue().get()) : Json.createNull());
+            opArray.add(opObject);
         }
 
         JsonValue object = Json.createObject();
         object.put("resourceId", resourceId.asString());
-        object.put("operations", operationArray);
-        object.put("filters", filterArray);
+        object.put("operations", opArray);
         return object;
     }
 
@@ -98,16 +97,12 @@ public class GrantModel implements JsonSerializable {
         grant.resourceId = ResourceId.valueOf(resourceId.asString());
 
         if (object.hasKey("operations") && object.get("operations").isJsonArray()) {
-            JsonValue operationsArray = object.get("operations");
-            for (int i=0; i<operationsArray.length(); i++) {
-                grant.operations.add(Operation.valueOf(operationsArray.get(i).asString()));
-            }
-        }
-
-        if (object.hasKey("filters") && object.get("filters").isJsonArray()) {
-            JsonValue filterArray = object.get("filters");
-            for (int i=0; i<filterArray.length(); i++) {
-                grant.filters.add(filterArray.get(i).asString());
+            JsonValue opArray = object.get("operations");
+            for (int i=0; i<opArray.length(); i++) {
+                JsonValue opObject = opArray.get(i);
+                Operation operation = Operation.valueOf(opObject.get("operation").asString());
+                Optional<String> filter = Optional.fromNullable(opObject.get("filter").asString());
+                grant.operations.put(operation, filter);
             }
         }
 
@@ -131,23 +126,22 @@ public class GrantModel implements JsonSerializable {
          * Adds a permitted {@link Operation} to this grant.
          */
         public void addOperation(Operation operation) {
-            model.operations.add(operation);
-        }
-
-        /**
-         * Adds a filter to this grant. This filter is applied to the records within the
-         * {@link Resource} this grant applies to.
-         */
-        public void addFilter(String recordFilter) {
-            model.filters.add(recordFilter);
+            model.operations.put(operation, Optional.absent());
         }
 
         /**
          * Adds a permitted {@link Operation} and filter to this grant.
          */
         public void addOperation(Operation operation, String recordFilter) {
-            addOperation(operation);
-            addFilter(recordFilter);
+            model.operations.put(operation, Optional.of(recordFilter));
+        }
+
+        /**
+         * Adds a filter to the specified operation on this grant. This filter is applied to the records
+         * within the {@link Resource} this grant applies to when performing the specified operation.
+         */
+        public void addFilter(Operation operation, String recordFilter) {
+            model.operations.put(operation, Optional.of(recordFilter));
         }
 
         public GrantModel build() {
