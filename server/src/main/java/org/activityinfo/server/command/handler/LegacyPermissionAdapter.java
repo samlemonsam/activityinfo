@@ -44,7 +44,7 @@ import java.util.logging.Logger;
 import static org.activityinfo.model.legacy.CuidAdapter.DATABASE_DOMAIN;
 
 /**
- * Class to adapt legacy permission requests (e.g. isDesignAllowed) to {@link PermissionOracle}
+ * Class to adapt legacy permission requests (e.g. isDesignAllowed) for {@link PermissionOracle}
  */
 public class LegacyPermissionAdapter {
 
@@ -63,17 +63,26 @@ public class LegacyPermissionAdapter {
         this(Providers.of(em));
     }
 
-    public Permission query(PermissionQuery query) {
-        UserDatabaseMeta db = provider.getDatabaseMetadata(CuidAdapter.databaseId(query.getDatabase()), query.getUser());
-        return PermissionOracle.query(query, db);
-    }
-
     /**
      * Returns true if the given user is allowed to modify the structure of the
      * database.
      */
     public boolean isDesignAllowed(Database database, User user) {
-        return getPermissionByUser(database, user).isAllowDesign();
+        PermissionQuery query;
+        ResourceId databaseId = CuidAdapter.databaseId(database.getId());
+        UserDatabaseMeta db = provider.getDatabaseMetadata(databaseId, user.getId());
+
+        // Legacy Design requires CREATE_FORM, EDIT_FORM and DELETE_FORM permissions on root database
+        query= new PermissionQuery(user.getId(),database.getId(), Operation.CREATE_FORM, databaseId);
+        Permission createForm = PermissionOracle.query(query, db);
+
+        query= new PermissionQuery(user.getId(), database.getId(), Operation.CREATE_FORM, databaseId);
+        Permission editForm = PermissionOracle.query(query, db);
+
+        query= new PermissionQuery(user.getId(), database.getId(), Operation.CREATE_FORM, databaseId);
+        Permission deleteForm = PermissionOracle.query(query, db);
+
+        return createForm.isPermitted() && editForm.isPermitted() && deleteForm.isPermitted();
     }
 
     public boolean isViewAllowed(Database database, User user) {
