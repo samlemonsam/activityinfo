@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityManager;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.*;
@@ -26,13 +26,13 @@ import static org.junit.Assert.*;
 public class PermissionOracleTest {
 
     @Inject
-    private EntityManagerFactory emf;
+    private EntityManager em;
 
     private PermissionOracle oracle;
 
     @Before
     public void setUp() {
-        this.oracle = new PermissionOracle(emf.createEntityManager());
+        this.oracle = new PermissionOracle(em);
     }
 
     @Test
