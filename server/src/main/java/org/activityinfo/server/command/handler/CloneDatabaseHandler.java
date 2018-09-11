@@ -70,7 +70,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
     private static final Logger LOGGER = Logger.getLogger(CloneDatabaseHandler.class.getName());
 
     private final EntityManager em;
-    private final PermissionOracle permissionOracle;
+    private final LegacyPermissionAdapter legacyPermissionAdapter;
     private final KeyGenerator generator = new KeyGenerator();
     private final Provider<FormStorageProvider> formCatalog;
 
@@ -87,7 +87,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
     @Inject
     public CloneDatabaseHandler(Injector injector, Provider<FormStorageProvider> formCatalog) {
         this.em = injector.getInstance(EntityManager.class);
-        this.permissionOracle = injector.getInstance(PermissionOracle.class);
+        this.legacyPermissionAdapter = injector.getInstance(LegacyPermissionAdapter.class);
         this.formCatalog = formCatalog;
     }
 
@@ -99,7 +99,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
         createDefaultPartner(user);
 
-        if (!permissionOracle.isViewAllowed(sourceDb, user)) {
+        if (!legacyPermissionAdapter.isViewAllowed(sourceDb, user)) {
             throw new IllegalAccessCommandException();
         }
 
@@ -109,7 +109,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         }
 
         // 2. copy user permissions : without design privileges the user shouldn't be able to see the list of users.
-        if (command.isCopyUserPermissions() && permissionOracle.isDesignAllowed(sourceDb, user)) {
+        if (command.isCopyUserPermissions() && legacyPermissionAdapter.isDesignAllowed(sourceDb, user)) {
             copyUserPermissions();
         }
 
@@ -117,7 +117,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         copyForms();
 
         // 4. Map old folder ids to new folder ids on permission model
-        if (command.isCopyUserPermissions() && permissionOracle.isDesignAllowed(sourceDb, user)) {
+        if (command.isCopyUserPermissions() && legacyPermissionAdapter.isDesignAllowed(sourceDb, user)) {
             mapFolderPermissions();
         }
         

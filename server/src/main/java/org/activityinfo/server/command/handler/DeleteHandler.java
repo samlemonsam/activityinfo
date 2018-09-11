@@ -30,12 +30,12 @@ import javax.persistence.EntityManager;
 public class DeleteHandler implements CommandHandler<Delete> {
 
     private EntityManager em;
-    private PermissionOracle permissionOracle;
+    private LegacyPermissionAdapter legacyPermissionAdapter;
 
     @Inject
-    public DeleteHandler(EntityManager em, PermissionOracle permissionOracle) {
+    public DeleteHandler(EntityManager em, LegacyPermissionAdapter legacyPermissionAdapter) {
         this.em = em;
-        this.permissionOracle = permissionOracle;
+        this.legacyPermissionAdapter = legacyPermissionAdapter;
     }
 
     @Override
@@ -51,7 +51,7 @@ public class DeleteHandler implements CommandHandler<Delete> {
         }
 
         // Ensure that the user is authorized to perform deletion
-        permissionOracle.assertDeletionAuthorized(entity, user);
+        legacyPermissionAdapter.assertDeletionAuthorized(entity, user);
 
         // Mark the entity as deleted
         entity.delete();

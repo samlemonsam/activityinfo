@@ -22,7 +22,7 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.UpdatePartner;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
-import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
 import org.activityinfo.server.command.handler.UpdatePartnerHandler;
 import org.activityinfo.server.database.hibernate.dao.CountryDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
@@ -93,7 +93,7 @@ public class UserDatabasePolicy implements EntityPolicy<Database> {
     @Override
     public void update(User user, Object entityId, PropertyMap changes) {
         Database database = em.find(Database.class, entityId);
-        PermissionOracle.using(em).assertDesignPrivileges(database, user);
+        LegacyPermissionAdapter.using(em).assertDesignPrivileges(database, user);
         applyProperties(database, changes);
     }
 

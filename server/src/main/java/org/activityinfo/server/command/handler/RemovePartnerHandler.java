@@ -48,7 +48,7 @@ public class RemovePartnerHandler implements CommandHandler<RemovePartner> {
 
         // verify the current user has access to this site
         Database db = em.getReference(Database.class, cmd.getDatabaseId());
-        PermissionOracle.using(em).isManagePartnersAllowed(db, user);
+        LegacyPermissionAdapter.using(em).isManagePartnersAllowed(db, user);
 
         // check to see if there are already sites associated with this partner
         int siteCount = ((Number) em.createQuery("select count(s) " +

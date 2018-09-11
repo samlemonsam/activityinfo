@@ -38,7 +38,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.command.CommandTestCase2;
-import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.store.spi.BlobAuthorizerStub;
 import org.activityinfo.store.spi.FormStorageProvider;
@@ -98,7 +98,7 @@ public class XFormResourceTest extends CommandTestCase2 {
 
         Provider<AuthenticatedUser> authProvider = Providers.of(new AuthenticatedUser("", USER_ID, "jorden@bdd.com"));
         resourceLocator = new ResourceLocatorSyncImpl(injector.getProvider(FormStorageProvider.class),
-                authProvider, new PermissionOracle(injector.getProvider(EntityManager.class)), new BlobAuthorizerStub());
+                authProvider, new LegacyPermissionAdapter(injector.getProvider(EntityManager.class)), new BlobAuthorizerStub());
 
         OdkFormFieldBuilderFactory fieldFactory = new OdkFormFieldBuilderFactory(resourceLocator);
 

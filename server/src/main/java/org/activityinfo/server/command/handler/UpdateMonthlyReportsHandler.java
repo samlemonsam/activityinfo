@@ -56,7 +56,7 @@ public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthly
     private final EntityManager em;
     private final KeyGenerator keyGenerator;
     private final SiteHistoryProcessor siteHistoryProcessor;
-    private final PermissionOracle permissionOracle;
+    private final LegacyPermissionAdapter legacyPermissionAdapter;
 
     @Inject
     public UpdateMonthlyReportsHandler(EntityManager em,
@@ -65,7 +65,7 @@ public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthly
         this.em = em;
         this.keyGenerator = keyGenerator;
         this.siteHistoryProcessor = siteHistoryProcessor;
-        this.permissionOracle = new PermissionOracle(em);
+        this.legacyPermissionAdapter = new LegacyPermissionAdapter(em);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthly
                 throw new CommandException(cmd, "site " + cmd.getSiteId() + " not found for user " + user.getEmail());
             }
 
-            if (!permissionOracle.isEditAllowed(site, user)) {
+            if (!legacyPermissionAdapter.isEditAllowed(site, user)) {
                 throw new IllegalAccessCommandException("Not authorized to modify sites");
             }
 

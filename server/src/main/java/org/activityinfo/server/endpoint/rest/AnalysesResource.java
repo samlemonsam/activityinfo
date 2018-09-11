@@ -29,7 +29,7 @@ import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
 import org.activityinfo.store.hrd.Hrd;
 import org.activityinfo.store.hrd.entity.AnalysisEntity;
 import org.activityinfo.store.hrd.entity.AnalysisSnapshotEntity;
@@ -42,11 +42,11 @@ import static org.activityinfo.json.Json.parse;
 
 public class AnalysesResource {
 
-    private final PermissionOracle permissionOracle;
+    private final LegacyPermissionAdapter legacyPermissionAdapter;
     private final Provider<AuthenticatedUser> userProvider;
 
-    public AnalysesResource(PermissionOracle permissionOracle, Provider<AuthenticatedUser> userProvider) {
-        this.permissionOracle = permissionOracle;
+    public AnalysesResource(LegacyPermissionAdapter legacyPermissionAdapter, Provider<AuthenticatedUser> userProvider) {
+        this.legacyPermissionAdapter = legacyPermissionAdapter;
         this.userProvider = userProvider;
     }
 
@@ -125,7 +125,7 @@ public class AnalysesResource {
 
     private boolean isVisible(AnalysisEntity entity) {
         ResourceId databaseId = ResourceId.valueOf(entity.getParentId());
-        return permissionOracle.isViewAllowed(databaseId, userProvider.get());
+        return legacyPermissionAdapter.isViewAllowed(databaseId, userProvider.get());
     }
 
     private void assertAuthorized(AnalysisUpdate update) {
@@ -134,7 +134,7 @@ public class AnalysesResource {
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("No such folder: " + databaseId).build());
         }
 
-        permissionOracle.assertDesignPrivileges(CuidAdapter.getLegacyIdFromCuid(databaseId), userProvider.get());
+        legacyPermissionAdapter.assertDesignPrivileges(CuidAdapter.getLegacyIdFromCuid(databaseId), userProvider.get());
     }
 
 

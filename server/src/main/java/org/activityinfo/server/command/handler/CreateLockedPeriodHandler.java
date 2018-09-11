@@ -31,12 +31,12 @@ import java.util.Date;
 
 public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPeriod> {
     private EntityManager em;
-    private PermissionOracle permissionOracle;
+    private LegacyPermissionAdapter legacyPermissionAdapter;
 
     @Inject
-    public CreateLockedPeriodHandler(EntityManager em, PermissionOracle permissionOracle) {
+    public CreateLockedPeriodHandler(EntityManager em, LegacyPermissionAdapter legacyPermissionAdapter) {
         this.em = em;
-        this.permissionOracle = permissionOracle;
+        this.legacyPermissionAdapter = legacyPermissionAdapter;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
             lockedPeriod.setDatabase(database);
             databaseId = database.getId();
 
-            permissionOracle.assertDesignPrivileges(database, user);
+            legacyPermissionAdapter.assertDesignPrivileges(database, user);
 
         } else if (cmd.getProjectId() != 0) {
             project = em.find(Project.class, cmd.getProjectId());
@@ -68,7 +68,7 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
             lockedPeriod.setDatabase(project.getDatabase());
             databaseId = project.getDatabase().getId();
 
-            permissionOracle.assertDesignPrivileges(project.getDatabase(), user);
+            legacyPermissionAdapter.assertDesignPrivileges(project.getDatabase(), user);
 
         } else if (cmd.getActivityId() != 0) {
             activity = em.find(Activity.class, cmd.getActivityId());
@@ -76,7 +76,7 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
             lockedPeriod.setDatabase(activity.getDatabase());
             databaseId = activity.getDatabase().getId();
 
-            permissionOracle.assertDesignPrivileges(activity, user);
+            legacyPermissionAdapter.assertDesignPrivileges(activity, user);
 
         } else if (cmd.getFolderId() != 0) {
             folder = em.find(Folder.class, cmd.getFolderId());
@@ -84,7 +84,7 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
             lockedPeriod.setDatabase(folder.getDatabase());
             databaseId = folder.getDatabase().getId();
 
-            permissionOracle.assertDesignPrivileges(folder, user);
+            legacyPermissionAdapter.assertDesignPrivileges(folder, user);
 
         } else {
             throw new CommandException("One of the following must be provided: userDatabaseId, projectId, activityId, folderId");

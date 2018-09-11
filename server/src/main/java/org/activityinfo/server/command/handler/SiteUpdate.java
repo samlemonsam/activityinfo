@@ -51,16 +51,16 @@ public class SiteUpdate {
     private static final String LOCATION_ID = "locationId";
 
     private final EntityManager entityManager;
-    private final PermissionOracle permissionOracle;
+    private final LegacyPermissionAdapter legacyPermissionAdapter;
     private final DispatcherSync dispatcher;
     
     
     private static final Logger LOGGER = Logger.getLogger(SiteUpdate.class.getName());
 
     @Inject
-    public SiteUpdate(EntityManager entityManager, PermissionOracle permissionOracle, DispatcherSync dispatcher) {
+    public SiteUpdate(EntityManager entityManager, LegacyPermissionAdapter legacyPermissionAdapter, DispatcherSync dispatcher) {
         this.entityManager = entityManager;
-        this.permissionOracle = permissionOracle;
+        this.legacyPermissionAdapter = legacyPermissionAdapter;
         this.dispatcher = dispatcher;
     }
 
@@ -80,7 +80,7 @@ public class SiteUpdate {
         Activity activity = activityReference(propertyMap);
         Partner partner = partnerReference(propertyMap);
 
-        permissionOracle.assertEditSiteAllowed(user, activity, partner);
+        legacyPermissionAdapter.assertEditSiteAllowed(user, activity, partner);
         
         long newVersion = incrementVersion(activity);
         
@@ -105,7 +105,7 @@ public class SiteUpdate {
     }
 
     private void updateSite(User user, Site site, PropertyMap changes) {
-        permissionOracle.assertEditAllowed(site, user);
+        legacyPermissionAdapter.assertEditAllowed(site, user);
         
         // Before do anything else, increment the activity version and flush
         // so that we establish essentially a lock on this region
@@ -115,7 +115,7 @@ public class SiteUpdate {
         
         if(changes.containsKey(PARTNER_ID)) {
             Partner newPartner = partnerReference(changes);
-            permissionOracle.assertEditSiteAllowed(user, site.getActivity(), newPartner);
+            legacyPermissionAdapter.assertEditSiteAllowed(user, site.getActivity(), newPartner);
             site.setPartner(newPartner);
         }
 

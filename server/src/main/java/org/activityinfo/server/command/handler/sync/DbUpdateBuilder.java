@@ -24,7 +24,7 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
 import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.legacy.shared.impl.Tables;
-import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.json.JSONException;
 
@@ -40,16 +40,16 @@ public class DbUpdateBuilder implements UpdateBuilder {
     private static final int MINIMUM_DB_VERSION = 1;
 
     private final EntityManager entityManager;
-    private final PermissionOracle permissionOracle;
+    private final LegacyPermissionAdapter legacyPermissionAdapter;
 
     private JpaBatchBuilder batch;
     private Database database;
     private UserPermission permission;
 
     @Inject
-    public DbUpdateBuilder(EntityManager entityManager, PermissionOracle permissionOracle) {
+    public DbUpdateBuilder(EntityManager entityManager, LegacyPermissionAdapter legacyPermissionAdapter) {
         this.entityManager = entityManager;
-        this.permissionOracle = permissionOracle;
+        this.legacyPermissionAdapter = legacyPermissionAdapter;
     }
 
     @SuppressWarnings("unchecked") @Override
@@ -59,7 +59,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
         // otherwise they will be excluded
 
         this.database = entityManager.find(Database.class, request.getRegionId());
-        this.permission = permissionOracle.getPermissionByUser(database, user);
+        this.permission = legacyPermissionAdapter.getPermissionByUser(database, user);
 
         Preconditions.checkNotNull(database, "Failed to fetch database by id:" + 
                 request.getRegionId() + ", region: " + request);

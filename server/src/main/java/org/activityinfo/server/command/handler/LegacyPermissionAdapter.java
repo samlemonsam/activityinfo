@@ -18,8 +18,6 @@
  */
 package org.activityinfo.server.command.handler;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.util.Providers;
@@ -28,10 +26,10 @@ import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.Published;
 import org.activityinfo.model.database.*;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.formula.FormulaNode;
-import org.activityinfo.model.formula.FormulaParser;
-import org.activityinfo.model.formula.Formulas;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.Permission;
+import org.activityinfo.model.permission.PermissionOracle;
+import org.activityinfo.model.permission.PermissionQuery;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
@@ -45,157 +43,29 @@ import java.util.logging.Logger;
 
 import static org.activityinfo.model.legacy.CuidAdapter.DATABASE_DOMAIN;
 
-public class PermissionOracle {
+/**
+ * Class to adapt legacy permission requests (e.g. isDesignAllowed) to {@link PermissionOracle}
+ */
+public class LegacyPermissionAdapter {
 
     private final Provider<EntityManager> em;
     private final DatabaseProvider provider;
 
-    private static final Logger LOGGER = Logger.getLogger(PermissionOracle.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(LegacyPermissionAdapter.class.getName());
 
     @Inject
-    public PermissionOracle(Provider<EntityManager> em) {
+    public LegacyPermissionAdapter(Provider<EntityManager> em) {
         this.em = em;
         this.provider = new DatabaseProviderImpl(em);
     }
 
-    public PermissionOracle(EntityManager em) {
+    public LegacyPermissionAdapter(EntityManager em) {
         this(Providers.of(em));
     }
 
     public Permission query(PermissionQuery query) {
         UserDatabaseMeta db = provider.getDatabaseMetadata(CuidAdapter.databaseId(query.getDatabase()), query.getUser());
-        return query(query, db);
-    }
-
-    /**
-     * Allow the owner of a database full permissions with no record filters
-     */
-    private Permission allowOwner(Operation operation) {
-        return new Permission(operation, true, Optional.absent());
-    }
-
-    /**
-     * Deny permission outright for the specified operation
-     */
-    private Permission deny(Operation operation) {
-        return new Permission(operation, false, Optional.absent());
-    }
-
-    public Permission query(PermissionQuery query, UserDatabaseMeta db) {
-        if (db.isOwner()) {
-            return allowOwner(query.getOperation());
-        }
-        if (!db.isVisible()) {
-            return deny(query.getOperation());
-        }
-        if (!isDatabase(query.getResourceId()) && !db.hasResource(query.getResourceId())) {
-            return deny(query.getOperation());
-        }
-        return determinePermission(query.getOperation(), query.getResourceId(), db);
-    }
-
-    /**
-     * <p> A user can perform a given {@link Operation} on a {@link Resource} if they have an explicit grant for the
-     * {@code operation} on this {@code resource} or on the <b>closest</b> parent {@code resource}</p>
-     *
-     * <p> A user may also be limited in the records available to view, defined by a record filter composed of the
-     * filters applied at each level of the resource tree for this operation. </p>
-     */
-    private Permission determinePermission(Operation operation, ResourceId resourceId, UserDatabaseMeta db) {
-        Permission permission = new Permission(operation);
-        permission.setPermitted(operationPermitted(operation, resourceId, db));
-        if (permission.isPermitted()) {
-            permission.setFilter(operationFilter(operation, resourceId, db));
-        }
-        return permission;
-    }
-
-    /**
-     * If user is requesting permission on a database, need to check specified database is the provided
-     * {@link UserDatabaseMeta} and whether the specified operation is permitted.
-     *
-     * Otherwise, we ensure that the specified resource is visible and then check whether the specified operation
-     * is permitted.
-     */
-    private boolean operationPermitted(Operation operation, ResourceId resourceId, UserDatabaseMeta db) {
-        if (isDatabase(resourceId)) {
-            return db.getDatabaseId().equals(resourceId) && db.getGrant(resourceId).hasOperation(operation);
-        } else {
-            return db.hasResource(resourceId) && granted(operation, db.getResource(resourceId), db);
-        }
-    }
-
-    /**
-     * Checks whether the specified {@link Operation} has been granted on the given {@link Resource}, or on the
-     * <b>closest</b> parent resource with an explicit grant
-     */
-    private boolean granted(Operation operation, Resource resource, UserDatabaseMeta db) {
-        // If there is an explicit grant, check whether the operation is granted at this level
-        if (db.hasGrant(resource.getId())) {
-            return db.getGrant(resource.getId()).hasOperation(operation);
-        }
-        // As there is no grant defined at this level, we need to check further up the Resource tree
-        // If the parent of this resource is the root database, then check whether operation exists on database grant
-        if (isDatabase(resource.getParentId())) {
-            return db.getGrant(resource.getParentId()).hasOperation(operation);
-        }
-        // Otherwise, we climb the resource tree to determine whether the operation is granted there
-        return granted(operation, db.getResource(resource.getParentId()), db);
-    }
-
-    private Optional<String> operationFilter(Operation operation, ResourceId resourceId, UserDatabaseMeta db) {
-        if (isDatabase(resourceId)) {
-            return getFilter(operation, resourceId, db);
-        } else {
-            return collectFilters(operation, db.getResource(resourceId), db);
-        }
-    }
-
-    /**
-     * Concatenates all filters defined for the given operation at each level of the resource tree.
-     *
-     * Filters defined on different levels for the same operation imply an AND relationship. E.g. A user is given
-     * permission to only view a certain partner across a database, but is also restricted to only view records from
-     * a certain location within a folder. This is equivalent to setting a record-level filter of:
-     *      partner==pXXX && location.name=="Gaza"
-     *
-     * This relationship must be reflected in the returned filter by ANDing filters from different levels.
-     */
-    private Optional<String> collectFilters(Operation operation, Resource resource, UserDatabaseMeta db) {
-        // Get the filter (if any) for operations granted on this level
-        Optional<String> filter = getFilter(operation, resource.getId(), db);
-        if (isDatabase(resource.getParentId())) {
-            Optional<String> dbFilter = getFilter(operation, resource.getParentId(), db);
-            return and(filter, dbFilter);
-        }
-        return and(filter, collectFilters(operation, db.getResource(resource.getParentId()), db));
-    }
-
-    private Optional<String> getFilter(Operation operation, ResourceId resourceId, UserDatabaseMeta db) {
-        Optional<String> filter = Optional.absent();
-        if (db.hasGrant(resourceId) && db.getGrant(resourceId).hasOperation(operation)) {
-            filter = db.getGrant(resourceId).getFilter(operation);
-        }
-        return filter;
-    }
-
-    private Optional<String> and(Optional<String> filter1, Optional<String> filter2) {
-        if (!filter1.isPresent() && !filter2.isPresent()) {
-            return Optional.absent();
-        } else if (!filter1.isPresent()) {
-            return filter2;
-        } else if (!filter2.isPresent()) {
-            return filter1;
-        } else {
-            FormulaNode filterFormula1 = FormulaParser.parse(filter1.get());
-            FormulaNode filterFormula2 = FormulaParser.parse(filter2.get());
-            FormulaNode and = Formulas.allTrue(Lists.newArrayList(filterFormula1, filterFormula2));
-            return Optional.of(and.asExpression());
-        }
-    }
-
-    private boolean isDatabase(ResourceId resourceId) {
-        return resourceId.getDomain() == CuidAdapter.DATABASE_DOMAIN;
+        return PermissionOracle.query(query, db);
     }
 
     /**
@@ -261,7 +131,7 @@ public class PermissionOracle {
 
     private Database lookupDatabase(FormClass formClass) {
         ResourceId databaseId = formClass.getDatabaseId();
-        
+
         if(databaseId.getDomain() == DATABASE_DOMAIN) {
             return em.get().getReference(Database.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
         }
@@ -415,9 +285,9 @@ public class PermissionOracle {
             assertDesignPrivileges(((Folder) entity).getDatabase(), user);
 
         } else {
-            LOGGER.log(Level.SEVERE, "Unable to determine permissions for deleting entity of type " + 
+            LOGGER.log(Level.SEVERE, "Unable to determine permissions for deleting entity of type " +
                     entity.getClass().getName());
-            
+
             throw new UnsupportedOperationException();
         }
     }
@@ -429,23 +299,23 @@ public class PermissionOracle {
             throw new IllegalAccessCommandException();
         }
     }
-    
+
     public boolean isEditAllowed(AttributeGroup entity, User user) {
         if(entity.getActivities().isEmpty()) {
             LOGGER.severe(() -> "Unable to check authorization to delete attribute group " +
                     entity.getName() + ": there are no associated activities.");
             return false;
         }
-        
+
         for(Activity activity : entity.getActivities()) {
             if(!isDesignAllowed(activity.getDatabase(), user)) {
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
     public void assertEditAllowed(AttributeGroup group, User user) {
         if(!isEditAllowed(group, user)) {
             throw new IllegalAccessCommandException();
@@ -453,8 +323,8 @@ public class PermissionOracle {
     }
 
 
-    public static PermissionOracle using(EntityManager em) {
-        return new PermissionOracle(em);
+    public static LegacyPermissionAdapter using(EntityManager em) {
+        return new LegacyPermissionAdapter(em);
     }
 
 

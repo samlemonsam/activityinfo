@@ -38,7 +38,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.DeploymentEnvironment;
-import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
 import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
@@ -304,7 +304,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
     }
 
     private boolean viewAllowed(Database database, User user) {
-        return PermissionOracle.using(em.get()).isViewAllowed(database, user);
+        return LegacyPermissionAdapter.using(em.get()).isViewAllowed(database, user);
     }
 
     public void assertNotAnonymousUser(@InjectParam AuthenticatedUser user) {

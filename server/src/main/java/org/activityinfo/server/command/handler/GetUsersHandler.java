@@ -67,7 +67,7 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
 
         Database db = em.getReference(Database.class, cmd.getDatabaseId());
 
-        UserPermission currentUserPermission = PermissionOracle.using(em).getPermissionByUser(db, currentUser);
+        UserPermission currentUserPermission = LegacyPermissionAdapter.using(em).getPermissionByUser(db, currentUser);
 
         assertAuthorized(currentUserPermission);
 

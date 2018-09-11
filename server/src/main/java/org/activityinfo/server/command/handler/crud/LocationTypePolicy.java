@@ -22,7 +22,7 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
-import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
 import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.LocationType;
@@ -49,7 +49,7 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
         int databaseId = properties.get(DATABASE_ID_PROPERTY);
         Database database = em.find(Database.class, databaseId);
 
-        PermissionOracle.using(em).assertDesignPrivileges(database, user);
+        LegacyPermissionAdapter.using(em).assertDesignPrivileges(database, user);
 
         // create the entity
         LocationType locationType = new LocationType();
@@ -69,7 +69,7 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
     public void update(User user, Object entityId, PropertyMap changes) {
         LocationType locationType = em.find(LocationType.class, entityId);
 
-        PermissionOracle.using(em).assertDesignPrivileges(locationType.getDatabase(), user);
+        LegacyPermissionAdapter.using(em).assertDesignPrivileges(locationType.getDatabase(), user);
 
         applyProperties(locationType, changes);
         

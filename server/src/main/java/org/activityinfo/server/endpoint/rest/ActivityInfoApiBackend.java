@@ -22,7 +22,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
 import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.mysql.MySqlRecordHistoryBuilder;
@@ -74,8 +74,8 @@ public class ActivityInfoApiBackend implements ApiBackend {
     @Override
     public void createNewForm(FormClass formClass) {
         // Check that we have the permission to create in this database
-        PermissionOracle permissionOracle = injector.getInstance(PermissionOracle.class);
-        permissionOracle.assertDesignPrivileges(formClass, getAuthenticatedUser());
+        LegacyPermissionAdapter legacyPermissionAdapter = injector.getInstance(LegacyPermissionAdapter.class);
+        legacyPermissionAdapter.assertDesignPrivileges(formClass, getAuthenticatedUser());
 
         ((MySqlStorageProvider) getStorage()).createOrUpdateFormSchema(formClass);
 

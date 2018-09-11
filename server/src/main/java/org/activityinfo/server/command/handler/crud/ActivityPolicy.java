@@ -24,7 +24,7 @@ import org.activityinfo.json.JsonParser;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
 import org.activityinfo.server.command.handler.json.JsonHelper;
 import org.activityinfo.server.database.hibernate.dao.ActivityDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
@@ -54,7 +54,7 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
     public Object create(User user, PropertyMap properties) {
 
         Database database = getDatabase(properties);
-        PermissionOracle.using(em).assertDesignPrivileges(database, user);
+        LegacyPermissionAdapter.using(em).assertDesignPrivileges(database, user);
 
         // create the entity
         Activity activity = new Activity();
@@ -82,7 +82,7 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
     public void update(User user, Object entityId, PropertyMap changes) {
         Activity activity = em.find(Activity.class, entityId);
         
-        PermissionOracle.using(em).assertDesignPrivileges(activity.getDatabase(), user);
+        LegacyPermissionAdapter.using(em).assertDesignPrivileges(activity.getDatabase(), user);
        
         activity.incrementSchemaVersion();
 

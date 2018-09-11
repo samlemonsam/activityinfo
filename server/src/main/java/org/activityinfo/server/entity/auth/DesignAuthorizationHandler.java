@@ -21,7 +21,7 @@ package org.activityinfo.server.entity.auth;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
-import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.SchemaElement;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
@@ -32,7 +32,7 @@ import org.activityinfo.server.database.hibernate.entity.UserPermission;
 public class DesignAuthorizationHandler implements AuthorizationHandler<SchemaElement> {
 
     @Inject
-    public DesignAuthorizationHandler(PermissionOracle permissionOracle) {
+    public DesignAuthorizationHandler(LegacyPermissionAdapter legacyPermissionAdapter) {
     }
 
     @Override

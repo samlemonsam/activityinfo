@@ -44,12 +44,12 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
     private static final Logger LOGGER = Logger.getLogger(GetMonthlyReportsHandler.class.getName());
 
     private final EntityManager em;
-    private final PermissionOracle permissionOracle;
+    private final LegacyPermissionAdapter legacyPermissionAdapter;
 
     @Inject
-    public GetMonthlyReportsHandler(EntityManager em, PermissionOracle permissionOracle) {
+    public GetMonthlyReportsHandler(EntityManager em, LegacyPermissionAdapter legacyPermissionAdapter) {
         this.em = em;
-        this.permissionOracle = permissionOracle;
+        this.legacyPermissionAdapter = legacyPermissionAdapter;
     }
 
     @Override
@@ -63,7 +63,7 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
                 .setParameter("siteId", cmd.getSiteId())
                 .getSingleResult();
 
-        if(!permissionOracle.isViewAllowed(site, user)) {
+        if(!legacyPermissionAdapter.isViewAllowed(site, user)) {
             LOGGER.severe(() -> "User " + user.getEmail() + " has no view privs on site " + site.getId() + "," +
                           "partner = " + site.getPartner().getName() + " " + site.getPartner().getId());
             throw new IllegalAccessCommandException();

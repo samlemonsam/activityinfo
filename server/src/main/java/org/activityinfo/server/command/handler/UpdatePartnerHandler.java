@@ -53,7 +53,7 @@ public class UpdatePartnerHandler implements CommandHandler<UpdatePartner> {
     public CommandResult execute(UpdatePartner cmd, User user) {
 
         Database db = em.find(Database.class, cmd.getDatabaseId());
-        PermissionOracle.using(em).assertManagePartnerAllowed(db, user);
+        LegacyPermissionAdapter.using(em).assertManagePartnerAllowed(db, user);
 
         // Does this partner already exist?
         if (cmd.getPartner().hasId()) {

@@ -51,12 +51,12 @@ import static org.activityinfo.legacy.shared.util.StringUtil.truncate;
 public class BaseEntityHandler {
 
     protected final EntityManager em;
-    protected final PermissionOracle permissionsOracle;
+    protected final LegacyPermissionAdapter permissionsOracle;
 
 
     public BaseEntityHandler(EntityManager em) {
         this.em = em;
-        this.permissionsOracle = new PermissionOracle(Providers.of(em));
+        this.permissionsOracle = new LegacyPermissionAdapter(Providers.of(em));
     }
 
     protected void updateIndicatorProperties(Indicator indicator, Map<String, Object> changeMap) {

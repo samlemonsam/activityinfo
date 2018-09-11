@@ -33,7 +33,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.command.DispatcherSync;
-import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
@@ -61,7 +61,7 @@ public class RootResource {
     private Provider<FormStorageProvider> catalog;
     private Provider<AuthenticatedUser> userProvider;
     private ServerSideAuthProvider authProvider;
-    private PermissionOracle permissionOracle;
+    private LegacyPermissionAdapter legacyPermissionAdapter;
     private MailSender mailSender;
 
     private ApiBackend backend;
@@ -73,7 +73,7 @@ public class RootResource {
                         DeploymentConfiguration config,
                         Provider<AuthenticatedUser> userProvider,
                         ServerSideAuthProvider authProvider,
-                        PermissionOracle permissionOracle,
+                        LegacyPermissionAdapter legacyPermissionAdapter,
                         ApiBackend backend,
                         MailSender mailSender) {
         super();
@@ -83,7 +83,7 @@ public class RootResource {
         this.config = config;
         this.userProvider = userProvider;
         this.authProvider = authProvider;
-        this.permissionOracle = permissionOracle;
+        this.legacyPermissionAdapter = legacyPermissionAdapter;
         this.backend = backend;
         this.mailSender = mailSender;
 
@@ -222,7 +222,7 @@ public class RootResource {
 
     @Path("/analysis")
     public AnalysesResource getAnalysis() {
-        return new AnalysesResource(permissionOracle, userProvider);
+        return new AnalysesResource(legacyPermissionAdapter, userProvider);
     }
 
     @Path("/accounts")

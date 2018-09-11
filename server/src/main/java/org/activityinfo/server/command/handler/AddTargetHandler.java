@@ -31,12 +31,12 @@ import java.util.Date;
 public class AddTargetHandler implements CommandHandler<AddTarget> {
 
     private final EntityManager em;
-    private final PermissionOracle permissionOracle;
+    private final LegacyPermissionAdapter legacyPermissionAdapter;
 
     @Inject
-    public AddTargetHandler(EntityManager em, PermissionOracle permissionOracle) {
+    public AddTargetHandler(EntityManager em, LegacyPermissionAdapter legacyPermissionAdapter) {
         this.em = em;
-        this.permissionOracle = permissionOracle;
+        this.legacyPermissionAdapter = legacyPermissionAdapter;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
         TargetDTO form = cmd.getTarget();
         Database db = em.find(Database.class, cmd.getDatabaseId());
 
-        permissionOracle.assertDesignPrivileges(db, user);
+        legacyPermissionAdapter.assertDesignPrivileges(db, user);
         
         Partner partner = null;
         if (form.get("partnerId") != null) {

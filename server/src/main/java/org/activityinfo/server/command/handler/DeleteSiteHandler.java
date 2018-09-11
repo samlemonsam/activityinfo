@@ -22,7 +22,6 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.DeleteSite;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
-import org.activityinfo.server.database.hibernate.entity.ReportingPeriod;
 import org.activityinfo.server.database.hibernate.entity.Site;
 import org.activityinfo.server.database.hibernate.entity.SiteHistory;
 import org.activityinfo.server.database.hibernate.entity.User;
@@ -35,12 +34,12 @@ import java.util.Date;
 public class DeleteSiteHandler implements CommandHandler<DeleteSite> {
     
     private final EntityManager entityManager;
-    private final PermissionOracle permissionOracle;
+    private final LegacyPermissionAdapter legacyPermissionAdapter;
 
     @Inject
-    public DeleteSiteHandler(EntityManager entityManager, PermissionOracle permissionOracle) {
+    public DeleteSiteHandler(EntityManager entityManager, LegacyPermissionAdapter legacyPermissionAdapter) {
         this.entityManager = entityManager;
-        this.permissionOracle = permissionOracle;
+        this.legacyPermissionAdapter = legacyPermissionAdapter;
     }
 
     @Override
@@ -48,7 +47,7 @@ public class DeleteSiteHandler implements CommandHandler<DeleteSite> {
 
         Site site = entityManager.find(Site.class, cmd.getSiteId());
         
-        permissionOracle.assertEditAllowed(site, user);
+        legacyPermissionAdapter.assertEditAllowed(site, user);
         
         site.setDateDeleted(new Date());
         site.setVersion(site.getActivity().incrementSiteVersion());

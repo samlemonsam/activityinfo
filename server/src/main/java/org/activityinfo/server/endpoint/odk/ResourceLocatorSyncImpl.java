@@ -33,7 +33,7 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
-import org.activityinfo.server.command.handler.PermissionOracle;
+import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
@@ -52,15 +52,15 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
 
     private Provider<FormStorageProvider> catalog;
     private Provider<AuthenticatedUser> authenticatedUser;
-    private PermissionOracle permissionOracle;
+    private LegacyPermissionAdapter legacyPermissionAdapter;
     private BlobAuthorizer blobAuthorizer;
 
     @Inject
     public ResourceLocatorSyncImpl(Provider<FormStorageProvider> catalog, Provider<AuthenticatedUser> authenticatedUser,
-                                   PermissionOracle permissionOracle, BlobAuthorizer blobAuthorizer) {
+                                   LegacyPermissionAdapter legacyPermissionAdapter, BlobAuthorizer blobAuthorizer) {
         this.catalog = catalog;
         this.authenticatedUser = authenticatedUser;
-        this.permissionOracle = permissionOracle;
+        this.legacyPermissionAdapter = legacyPermissionAdapter;
         this.blobAuthorizer = blobAuthorizer;
     }
 
