@@ -47,7 +47,7 @@ public class BillingWarning extends Composite {
 
     @UiHandler("closeButton")
     public void closeButtonClick(ClickEvent event) {
-        BillingSupervisor.snooze(status.snoozeDate(new Date()));
+        BillingSupervisor.snooze(status);
         getElement().removeFromParent();
     }
 

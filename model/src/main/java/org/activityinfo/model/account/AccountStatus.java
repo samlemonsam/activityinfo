@@ -13,6 +13,7 @@ import java.util.Date;
 public class AccountStatus implements JsonSerializable {
 
     public static final int DAYS_PER_WEEK = 7;
+    private int userAccountId;
     private boolean legacy;
     private boolean trial;
     private int expirationTime;
@@ -25,6 +26,10 @@ public class AccountStatus implements JsonSerializable {
 
     public boolean isTrial() {
         return trial;
+    }
+
+    public int getUserAccountId() {
+        return userAccountId;
     }
 
     public int getExpirationTime() {
@@ -186,6 +191,11 @@ public class AccountStatus implements JsonSerializable {
 
         public Builder setLegacy(boolean legacy) {
             status.legacy = legacy;
+            return this;
+        }
+
+        public Builder setUserAccountId(int userAccountId) {
+            status.userAccountId = userAccountId;
             return this;
         }
 

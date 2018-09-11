@@ -13,7 +13,7 @@ import java.util.Date;
 
 public class BillingSupervisor {
 
-    public static final String SNOOZE_KEY = "accountSnooze";
+    public static final String SNOOZE_KEY_PREFIX = "accountSnooze";
 
     private final ActivityInfoClientAsync client = new ActivityInfoClientAsyncImpl();
 
@@ -31,7 +31,7 @@ public class BillingSupervisor {
 
     private void maybeShowStatus(AccountStatus status) {
         Date now = new Date();
-        if(status.shouldWarn(now) && !isSnoozed()) {
+        if(status.shouldWarn(now) && !isSnoozed(status)) {
             BillingWarning warning = new BillingWarning(status);
             RootPanel.get().add(warning);
         }
@@ -40,21 +40,23 @@ public class BillingSupervisor {
     /**
      * Snooze account warnings until the given {@code snoozeDate}. Billing warnings
      * will appear again starting *on* this date.
+     * @param snoozeDate
      */
-    static void snooze(LocalDate snoozeDate) {
+    static void snooze(AccountStatus status) {
+        LocalDate snoozeDate = status.snoozeDate(new Date());
         Storage storage = Storage.getLocalStorageIfSupported();
         if(storage != null) {
-            storage.setItem(SNOOZE_KEY, snoozeDate.toString());
+            storage.setItem(SNOOZE_KEY_PREFIX + status.getUserAccountId(), snoozeDate.toString());
         }
     }
 
-    static boolean isSnoozed() {
+    static boolean isSnoozed(AccountStatus status) {
         try {
             Storage storage = Storage.getLocalStorageIfSupported();
             if(storage == null) {
                 return false;
             }
-            String accountSnooze = storage.getItem(SNOOZE_KEY);
+            String accountSnooze = storage.getItem(SNOOZE_KEY_PREFIX + status.getUserAccountId());
             if(accountSnooze == null) {
                 return false;
             }

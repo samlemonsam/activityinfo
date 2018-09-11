@@ -56,7 +56,8 @@ public class AccountResource {
                 .getSingleResult();
 
         return new AccountStatus.Builder()
-                .setTrial(false)
+                .setUserAccountId(userAccount.getId())
+                .setTrial(true)
                 .setUserCount(1)
                 .setUserLimit(10)
                 .setLegacy(userAccount.getDateCreated() == null ||
@@ -79,7 +80,8 @@ public class AccountResource {
                 .getSingleResult();
 
         return new AccountStatus.Builder()
-                .setTrial(true)
+                .setUserAccountId(userAccount.getId())
+                .setTrial(false)
                 .setUserCount(userCount.intValue())
                 .setUserLimit(userAccount.getBillingAccount().getUserLimit())
                 .build();
