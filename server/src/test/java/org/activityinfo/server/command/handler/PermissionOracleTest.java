@@ -8,6 +8,7 @@ import org.activityinfo.model.database.Operation;
 import org.activityinfo.model.database.Permission;
 import org.activityinfo.model.database.PermissionQuery;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.OnDataSet;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +26,13 @@ import static org.junit.Assert.*;
 @OnDataSet("/dbunit/sites-simple1.db.xml")
 public class PermissionOracleTest {
 
+    private static final int DB_ID = 2;
+    private static final ResourceId FORM_ID = CuidAdapter.activityFormClass(3);
+
+    private static final int OWNER_ID = 1;
+    private static final int AUTH_USER_ID = 2;
+    private static final int UNAUTH_USER_ID = 3;
+
     @Inject
     private EntityManager em;
 
@@ -40,7 +48,7 @@ public class PermissionOracleTest {
         // Owner should be entitled to perform any operation without any record filters
         Operation[] operations = Operation.values();
         for (Operation operation : operations) {
-            PermissionQuery query = new PermissionQuery(1,2,operation,CuidAdapter.activityFormClass(3));
+            PermissionQuery query = new PermissionQuery(OWNER_ID, DB_ID, operation, FORM_ID);
             Permission permission = oracle.query(query);
             assertThat(permission.getOperation(), equalTo(operation));
             assertTrue(permission.isPermitted());
@@ -54,7 +62,7 @@ public class PermissionOracleTest {
         // operation
         Operation[] operations = Operation.values();
         for (Operation operation : operations) {
-            PermissionQuery query = new PermissionQuery(4,2,operation,CuidAdapter.activityFormClass(3));
+            PermissionQuery query = new PermissionQuery(UNAUTH_USER_ID, DB_ID, operation, FORM_ID);
             Permission permission = oracle.query(query);
             assertThat(permission.getOperation(), equalTo(operation));
             assertFalse(permission.isPermitted());
@@ -63,11 +71,20 @@ public class PermissionOracleTest {
 
     @Test
     public void queryViewPermission() {
-        PermissionQuery query = new PermissionQuery(1, 2, Operation.VIEW, CuidAdapter.activityFormClass(3));
+        // Query for authorised user
+        PermissionQuery query = new PermissionQuery(AUTH_USER_ID, DB_ID, Operation.VIEW, FORM_ID);
         Permission permission = oracle.query(query);
         assertThat(permission.getOperation(), equalTo(Operation.VIEW));
         assertTrue(permission.isPermitted());
+
+        // Query for unauthorized user
+        query = new PermissionQuery(UNAUTH_USER_ID, DB_ID, Operation.VIEW, FORM_ID);
+        permission = oracle.query(query);
+        assertThat(permission.getOperation(), equalTo(Operation.VIEW));
+        assertFalse(permission.isPermitted());
     }
+
+
 
 
 }
