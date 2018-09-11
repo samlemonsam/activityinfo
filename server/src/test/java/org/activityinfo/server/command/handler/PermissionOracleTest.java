@@ -84,7 +84,20 @@ public class PermissionOracleTest {
         assertFalse(permission.isPermitted());
     }
 
+    @Test
+    public void queryCreateRecordPermission() {
+        // Query for authorized user
+        PermissionQuery query = new PermissionQuery(AUTH_USER_ID, DB_ID, Operation.CREATE_RECORD, FORM_ID);
+        Permission permission = oracle.query(query);
+        assertThat(permission.getOperation(), equalTo(Operation.CREATE_RECORD));
+        assertTrue(permission.isPermitted());
 
+        // Query for authorized user
+        query = new PermissionQuery(UNAUTH_USER_ID, DB_ID, Operation.CREATE_RECORD, FORM_ID);
+        permission = oracle.query(query);
+        assertThat(permission.getOperation(), equalTo(Operation.CREATE_RECORD));
+        assertFalse(permission.isPermitted());
+    }
 
 
 }

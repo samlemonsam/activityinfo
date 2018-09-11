@@ -107,10 +107,12 @@ public class PermissionOracle {
      * <p> A user can <i>View</i> a {@link Resource} if:
      *  <ol>
      *      <li>The {@code resource} appears in the {@link UserDatabaseMeta} {@code resources} map</li>
-     *      <li>They have an explicit {@link Operation#VIEW} grant on this {@code resource} or a
+     *      <li>They have an explicit {@link Operation#VIEW} grant on this {@code resource} or the <b>closest</b>
      *      parent {@code resource} </li>
      *  </ol>
      * </p>
+     * <p> A user may also be limited in the records available to view, defined by a record filter composed of the
+     * filters applied at each level of the resource tree for this operation. </p>
      */
     private Permission view(Resource resource, UserDatabaseMeta db) {
         Permission permission = new Permission(Operation.VIEW);
@@ -123,14 +125,36 @@ public class PermissionOracle {
     }
 
     /**
-     * Checks whether the specified {@link Operation} has been granted on the given {@link Resource}.
+     * <p> A user can <i>Create a Record</i> on/within a {@link Resource} if:
+     *  <ol>
+     *      <li>The {@code resource} appears in the {@link UserDatabaseMeta} {@code resources} map</li>
+     *      <li>They have an explicit {@link Operation#CREATE_RECORD} grant on this {@code resource} or the
+     *      <b>closest</b> parent resource </li>
+     *  </ol>
+     * </p>
+     * <p> A user may also be limited in the records available to view, defined by a record filter composed of the
+     * filters applied at each level of the resource tree for this operation. </p>
+     */
+    private Permission createRecord(Resource resource, UserDatabaseMeta db) {
+        Permission permission = new Permission(Operation.CREATE_RECORD);
+        boolean permitted = db.hasResource(resource.getId()) && granted(Operation.CREATE_RECORD, resource, db);
+        permission.setPermitted(permitted);
+        if (permitted) {
+            permission.setFilter(collectFilters(Operation.CREATE_RECORD, resource, db));
+        }
+        return permission;
+    }
+
+    /**
+     * Checks whether the specified {@link Operation} has been granted on the given {@link Resource}, or on the
+     * <b>closest</b> parent resource with an explicit grant
      */
     private boolean granted(Operation operation, Resource resource, UserDatabaseMeta db) {
         // If there is an explicit grant, check whether the operation is granted at this level
-        if (db.hasGrant(resource.getId()) && db.getGrant(resource.getId()).hasOperation(operation)) {
-            return true;
+        if (db.hasGrant(resource.getId())) {
+            return db.getGrant(resource.getId()).hasOperation(operation);
         }
-        // As the operation is not granted at this level, we need to check further up the Resource tree
+        // As there is no grant defined at this level, we need to check further up the Resource tree
         // If the parent of this resource is the root database, then check whether operation exists on database grant
         if (isDatabase(resource.getParentId())) {
             return db.getGrant(resource.getParentId()).hasOperation(operation);
