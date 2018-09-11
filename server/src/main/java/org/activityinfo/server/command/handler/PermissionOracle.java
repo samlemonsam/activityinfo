@@ -77,7 +77,7 @@ public class PermissionOracle {
     /**
      * Deny permission outright for the specified operation
      */
-    private Permission denyUser(Operation operation) {
+    private Permission deny(Operation operation) {
         return new Permission(operation, false, Optional.absent());
     }
 
@@ -86,105 +86,27 @@ public class PermissionOracle {
             return allowOwner(query.getOperation());
         }
         if (!db.isVisible()) {
-            return denyUser(query.getOperation());
+            return deny(query.getOperation());
         }
-        switch(query.getOperation()) {
-            case VIEW:
-                return view(db.getResource(query.getResourceId()), db);
-            case CREATE_RECORD:
-                return createRecord(db.getResource(query.getResourceId()), db);
-            case EDIT_RECORD:
-                return editRecord(db.getResource(query.getResourceId()), db);
-            case DELETE_RECORD:
-                return deleteRecord(db.getResource(query.getResourceId()), db);
-            case CREATE_FORM:
-            case EDIT_FORM:
-            case DELETE_FORM:
-            default:
-                throw new UnsupportedOperationException(query.getOperation().name());
+        if (!db.hasResource(query.getResourceId())) {
+            return deny(query.getOperation());
         }
+        return determinePermission(query.getOperation(), db.getResource(query.getResourceId()), db);
     }
 
     /**
-     * <p> A user can <i>View</i> a {@link Resource} if:
-     *  <ol>
-     *      <li>The {@code resource} appears in the {@link UserDatabaseMeta} {@code resources} map</li>
-     *      <li>They have an explicit {@link Operation#VIEW} grant on this {@code resource} or the <b>closest</b>
-     *      parent {@code resource} </li>
-     *  </ol>
-     * </p>
+     * <p> A user can perform a given {@link Operation} on a {@link Resource} if they have an explicit grant for the
+     * {@code operation} on this {@code resource} or on the <b>closest</b> parent {@code resource}</p>
+     *
      * <p> A user may also be limited in the records available to view, defined by a record filter composed of the
      * filters applied at each level of the resource tree for this operation. </p>
      */
-    private Permission view(Resource resource, UserDatabaseMeta db) {
-        Permission permission = new Permission(Operation.VIEW);
-        boolean permitted = db.hasResource(resource.getId()) && granted(Operation.VIEW, resource, db);
+    private Permission determinePermission(Operation operation, Resource resource, UserDatabaseMeta db) {
+        Permission permission = new Permission(operation);
+        boolean permitted = db.hasResource(resource.getId()) && granted(operation, resource, db);
         permission.setPermitted(permitted);
         if (permitted) {
-            permission.setFilter(collectFilters(Operation.VIEW, resource, db));
-        }
-        return permission;
-    }
-
-    /**
-     * <p> A user can <i>Create a Record</i> on/within a {@link Resource} if:
-     *  <ol>
-     *      <li>The {@code resource} appears in the {@link UserDatabaseMeta} {@code resources} map</li>
-     *      <li>They have an explicit {@link Operation#CREATE_RECORD} grant on this {@code resource} or the
-     *      <b>closest</b> parent resource </li>
-     *  </ol>
-     * </p>
-     * <p> A user may also be limited in the records available to view, defined by a record filter composed of the
-     * filters applied at each level of the resource tree for this operation. </p>
-     */
-    private Permission createRecord(Resource resource, UserDatabaseMeta db) {
-        Permission permission = new Permission(Operation.CREATE_RECORD);
-        boolean permitted = db.hasResource(resource.getId()) && granted(Operation.CREATE_RECORD, resource, db);
-        permission.setPermitted(permitted);
-        if (permitted) {
-            permission.setFilter(collectFilters(Operation.CREATE_RECORD, resource, db));
-        }
-        return permission;
-    }
-
-    /**
-     * <p> A user can <i>Edit a Record</i> on/within a {@link Resource} if:
-     *  <ol>
-     *      <li>The {@code resource} appears in the {@link UserDatabaseMeta} {@code resources} map</li>
-     *      <li>They have an explicit {@link Operation#EDIT_RECORD} grant on this {@code resource} or the
-     *      <b>closest</b> parent resource </li>
-     *  </ol>
-     * </p>
-     * <p> A user may also be limited in the records available to view, defined by a record filter composed of the
-     * filters applied at each level of the resource tree for this operation. </p>
-     */
-    private Permission editRecord(Resource resource, UserDatabaseMeta db) {
-        Permission permission = new Permission(Operation.EDIT_RECORD);
-        boolean permitted = db.hasResource(resource.getId()) && granted(Operation.EDIT_RECORD, resource, db);
-        permission.setPermitted(permitted);
-        if (permitted) {
-            permission.setFilter(collectFilters(Operation.EDIT_RECORD, resource, db));
-        }
-        return permission;
-    }
-
-    /**
-     * <p> A user can <i>Delete a Record</i> on/within a {@link Resource} if:
-     *  <ol>
-     *      <li>The {@code resource} appears in the {@link UserDatabaseMeta} {@code resources} map</li>
-     *      <li>They have an explicit {@link Operation#DELETE_RECORD} grant on this {@code resource} or the
-     *      <b>closest</b> parent resource </li>
-     *  </ol>
-     * </p>
-     * <p> A user may also be limited in the records available to view, defined by a record filter composed of the
-     * filters applied at each level of the resource tree for this operation. </p>
-     */
-    private Permission deleteRecord(Resource resource, UserDatabaseMeta db) {
-        Permission permission = new Permission(Operation.DELETE_RECORD);
-        boolean permitted = db.hasResource(resource.getId()) && granted(Operation.DELETE_RECORD, resource, db);
-        permission.setPermitted(permitted);
-        if (permitted) {
-            permission.setFilter(collectFilters(Operation.DELETE_RECORD, resource, db));
+            permission.setFilter(collectFilters(operation, resource, db));
         }
         return permission;
     }
