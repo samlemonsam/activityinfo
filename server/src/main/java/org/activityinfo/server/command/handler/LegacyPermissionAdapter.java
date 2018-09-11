@@ -79,7 +79,7 @@ public class LegacyPermissionAdapter {
         query= new PermissionQuery(user.getId(), database.getId(), Operation.CREATE_FORM, databaseId);
         Permission editForm = PermissionOracle.query(query, db);
 
-        query= new PermissionQuery(user.getId(), database.getId(), Operation.CREATE_FORM, databaseId);
+        query= new PermissionQuery(user.getId(), database.getId(), Operation.DELETE_FORM, databaseId);
         Permission deleteForm = PermissionOracle.query(query, db);
 
         return createForm.isPermitted() && editForm.isPermitted() && deleteForm.isPermitted();
