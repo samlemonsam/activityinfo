@@ -106,6 +106,7 @@ public class SignUpConfirmationController {
             user.changePassword(password);
             user.clearChangePasswordKey();
             user.setEmailNotification(true);
+            user.startFreeTrial();
 
             // add user to default database
             addUserToDefaultDatabase(user);
@@ -128,7 +129,6 @@ public class SignUpConfirmationController {
                 .build();
         }
     }
-
     protected void addUserToDefaultDatabase(User user) {
         Database database = entityManager.find(Database.class, DEFAULT_DATABASE_ID);
         if(database == null) {

@@ -59,6 +59,12 @@ public class UserDatabasePolicy implements EntityPolicy<Database> {
 
         addDefaultPartner(database.getId(), user);
 
+        // Creating a new database without a billing account effectively starts
+        // a free trial
+        if(user.getBillingAccount() == null && user.getTrialEndDate() == null) {
+            user.startFreeTrial();
+        }
+
         return database.getId();
     }
 

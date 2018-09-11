@@ -23,6 +23,9 @@ import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.mindrot.bcrypt.BCrypt;
 
 import javax.persistence.*;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Locale;
 
@@ -284,5 +287,12 @@ public class User implements java.io.Serializable {
 
     public AuthenticatedUser asAuthenticatedUser() {
         return new AuthenticatedUser("XYZ", getId(), getEmail(), getLocale());
+    }
+
+    public void startFreeTrial() {
+        ZoneId zoneId = ZoneId.of( "Europe/Paris" );
+        ZonedDateTime now = ZonedDateTime.ofInstant( Instant.now() , zoneId );
+        ZonedDateTime endTime = now.plusDays( 30 );
+        setTrialEndDate(Date.from(endTime.toInstant()));
     }
 }
