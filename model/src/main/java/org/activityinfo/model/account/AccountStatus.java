@@ -89,6 +89,9 @@ public class AccountStatus implements JsonSerializable {
      * True if the user should be warned about expiration
      */
     public boolean shouldWarn(Date now) {
+        if(databaseCount == 0) {
+            return false;
+        }
         int daysLeft = daysUntilExpiration(now);
         if(trial) {
             if(legacy) {
