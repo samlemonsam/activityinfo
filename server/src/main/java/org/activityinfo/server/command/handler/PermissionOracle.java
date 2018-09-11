@@ -90,8 +90,9 @@ public class PermissionOracle {
         }
         switch(query.getOperation()) {
             case VIEW:
-                return view(db.getResource(query.getResource()), db);
+                return view(db.getResource(query.getResourceId()), db);
             case CREATE_RECORD:
+                return createRecord(db.getResource(query.getResourceId()), db);
             case EDIT_RECORD:
             case DELETE_RECORD:
             case CREATE_FORM:

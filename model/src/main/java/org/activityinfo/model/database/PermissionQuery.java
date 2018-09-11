@@ -17,16 +17,16 @@ public class PermissionQuery implements JsonSerializable {
     private int user;
     private int database;
     private Operation operation;
-    private ResourceId resource;
+    private ResourceId resourceId;
 
     public PermissionQuery() {
     }
 
-    public PermissionQuery(int user, int database, Operation operation, ResourceId resource) {
+    public PermissionQuery(int user, int database, Operation operation, ResourceId resourceId) {
         this.user = user;
         this.database = database;
         this.operation = operation;
-        this.resource = resource;
+        this.resourceId = resourceId;
     }
 
     public int getUser() {
@@ -41,8 +41,8 @@ public class PermissionQuery implements JsonSerializable {
         return operation;
     }
 
-    public ResourceId getResource() {
-        return resource;
+    public ResourceId getResourceId() {
+        return resourceId;
     }
 
     public static PermissionQuery fromJson(JsonValue object) {
@@ -50,7 +50,7 @@ public class PermissionQuery implements JsonSerializable {
         query.user = object.get("user").asInt();
         query.database = object.get("database").asInt();
         query.operation = Operation.valueOf(object.get("operation").asString());
-        query.resource = ResourceId.valueOf(object.get("resource").asString());
+        query.resourceId = ResourceId.valueOf(object.get("resource").asString());
         return query;
     }
 
@@ -60,7 +60,7 @@ public class PermissionQuery implements JsonSerializable {
         object.put("user", user);
         object.put("database", database);
         object.put("operation", operation.name());
-        object.put("resource", resource.asString());
+        object.put("resource", resourceId.asString());
         return object;
     }
 
