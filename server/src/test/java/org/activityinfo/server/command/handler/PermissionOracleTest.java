@@ -201,4 +201,20 @@ public class PermissionOracleTest {
         assertFalse(permission.isPermitted());
     }
 
+    @Test
+    public void queryDeleteFormPermission() {
+        // Query for authorized user who can create forms on database
+        PermissionQuery query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.DELETE_FORM, FORM_ID);
+        Permission permission = oracle.query(query);
+        assertThat(permission.getOperation(), equalTo(Operation.DELETE_FORM));
+        assertTrue(permission.isPermitted());
+        assertFalse(permission.getFilter().isPresent());
+
+        // Query for user on database without permissions to create forms
+        query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.DELETE_FORM, FORM_ID);
+        permission = oracle.query(query);
+        assertThat(permission.getOperation(), equalTo(Operation.DELETE_FORM));
+        assertFalse(permission.isPermitted());
+    }
+
 }
