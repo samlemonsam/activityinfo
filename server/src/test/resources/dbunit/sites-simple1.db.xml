@@ -296,9 +296,15 @@
 
   <!-- Marlene is a supervisor and has only Design and User Management (on partner) permissions -->
   <userPermission userPermissionId="4888" databaseId="2"
-                  userId="4" partnerId="1" allowView="0" allowViewAll="0" allowEdit="0"
+                  userId="4" partnerId="1" allowView="1" allowViewAll="0" allowEdit="0"
                   allowEditAll="0" allowManageUsers="1" allowManageAllUsers="0"
                   allowDesign="1" lastSchemaUpdate="2009-01-01"/>
+
+  <!-- Christian at NRC had access, but has been fired -->
+  <userPermission userPermissionId="2222" databaseId="2"
+                  userId="5" partnerId="1" allowView="0" allowViewAll="0" allowEdit="0"
+                  allowEditAll="0" allowDesign="0" allowManageUsers="0"
+                  allowManageAllUsers="0" lastSchemaUpdate="2009-01-01"/>
 
   <!-- id=1 NFI Distribution at Penekusu, Sud Kivu 2 jan 2009 -->
 

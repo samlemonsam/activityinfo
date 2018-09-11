@@ -38,6 +38,8 @@ public class PermissionOracleTest {
     private static final int AUTH_RESTRICTED_USER_ID = 21;
     // SUPERVISOR_USER has only design and manageUsers (on partner) permissions
     private static final int SUPERVISOR_USER_ID = 4;
+    // REMOVED_USER used to have permissions but has now had them revoked
+    private static final int REVOKED_USER = 5;
 
     @Inject
     private EntityManager em;
@@ -92,7 +94,7 @@ public class PermissionOracleTest {
         assertTrue(permission.getFilter().isPresent());
 
         // Query for user on database without permissions to view records
-        query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.VIEW, FORM_ID);
+        query = new PermissionQuery(REVOKED_USER, DB_ID, Operation.VIEW, FORM_ID);
         permission = oracle.query(query);
         assertThat(permission.getOperation(), equalTo(Operation.VIEW));
         assertFalse(permission.isPermitted());
