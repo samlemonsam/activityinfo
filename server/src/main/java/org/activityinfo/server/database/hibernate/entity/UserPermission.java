@@ -349,8 +349,9 @@ public class UserPermission implements Serializable {
         }
 
         modelObject.get("grants").values().forEach(grant -> {
-            GrantModel grantModel = GrantModel.fromJson(grant);
-            grants.add(grantModel);
+            GrantModel.Builder folderGrantModel = new GrantModel.Builder();
+            setFolderOperations(folderGrantModel, grant);
+            grants.add(folderGrantModel.build());
         });
         return grants;
     }
