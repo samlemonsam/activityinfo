@@ -30,9 +30,14 @@ public class PermissionOracleTest {
     private static final ResourceId FORM_ID = CuidAdapter.activityFormClass(3);
 
     private static final int OWNER_ID = 1;
+    // AUTH_USER has all permissions other than design
     private static final int AUTH_USER_ID = 2;
+    // UNAUTH_USER has no permissions at all
     private static final int UNAUTH_USER_ID = 3;
+    // AUTH_RESTRICTED_USER has only view and edit permissions on partner
     private static final int AUTH_RESTRICTED_USER_ID = 21;
+    // SUPERVISOR_USER has only design and manageUsers (on partner) permissions
+    private static final int SUPERVISOR_USER_ID = 4;
 
     @Inject
     private EntityManager em;
@@ -72,14 +77,22 @@ public class PermissionOracleTest {
 
     @Test
     public void queryViewPermission() {
-        // Query for authorised user
+        // Query for authorized user who can view records for any partner
         PermissionQuery query = new PermissionQuery(AUTH_USER_ID, DB_ID, Operation.VIEW, FORM_ID);
         Permission permission = oracle.query(query);
         assertThat(permission.getOperation(), equalTo(Operation.VIEW));
         assertTrue(permission.isPermitted());
+        assertFalse(permission.getFilter().isPresent());
 
-        // Query for unauthorized user
-        query = new PermissionQuery(UNAUTH_USER_ID, DB_ID, Operation.VIEW, FORM_ID);
+        // Query for authorized user who is restricted by partner
+        query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.VIEW, FORM_ID);
+        permission = oracle.query(query);
+        assertThat(permission.getOperation(), equalTo(Operation.VIEW));
+        assertTrue(permission.isPermitted());
+        assertTrue(permission.getFilter().isPresent());
+
+        // Query for user on database without permissions to view records
+        query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.VIEW, FORM_ID);
         permission = oracle.query(query);
         assertThat(permission.getOperation(), equalTo(Operation.VIEW));
         assertFalse(permission.isPermitted());
@@ -94,15 +107,15 @@ public class PermissionOracleTest {
         assertTrue(permission.isPermitted());
         assertFalse(permission.getFilter().isPresent());
 
-        // Query for authorised user who is restricted by partner
+        // Query for authorized user who is restricted by partner
         query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.CREATE_RECORD, FORM_ID);
         permission = oracle.query(query);
         assertThat(permission.getOperation(), equalTo(Operation.CREATE_RECORD));
         assertTrue(permission.isPermitted());
         assertTrue(permission.getFilter().isPresent());
 
-        // Query for unauthorized user
-        query = new PermissionQuery(UNAUTH_USER_ID, DB_ID, Operation.CREATE_RECORD, FORM_ID);
+        // Query for user on database without permissions to create records
+        query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.CREATE_RECORD, FORM_ID);
         permission = oracle.query(query);
         assertThat(permission.getOperation(), equalTo(Operation.CREATE_RECORD));
         assertFalse(permission.isPermitted());
@@ -117,14 +130,14 @@ public class PermissionOracleTest {
         assertTrue(permission.isPermitted());
         assertFalse(permission.getFilter().isPresent());
 
-        // Query for authorised user can edit records but is restricted by partner
+        // Query for authorized user who is restricted by partner
         query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.EDIT_RECORD, FORM_ID);
         permission = oracle.query(query);
         assertThat(permission.getOperation(), equalTo(Operation.EDIT_RECORD));
         assertTrue(permission.isPermitted());
         assertTrue(permission.getFilter().isPresent());
 
-        // Query for unauthorized user
+        // Query for user on database without permissions to edit records
         query = new PermissionQuery(UNAUTH_USER_ID, DB_ID, Operation.EDIT_RECORD, FORM_ID);
         permission = oracle.query(query);
         assertThat(permission.getOperation(), equalTo(Operation.EDIT_RECORD));
