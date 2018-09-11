@@ -172,14 +172,14 @@ public class PermissionOracleTest {
     @Test
     public void queryCreateFormPermission() {
         // Query for authorized user who can create forms on database
-        PermissionQuery query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.CREATE_FORM, FORM_ID);
+        PermissionQuery query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.CREATE_FORM, CuidAdapter.databaseId(DB_ID));
         Permission permission = oracle.query(query);
         assertThat(permission.getOperation(), equalTo(Operation.CREATE_FORM));
         assertTrue(permission.isPermitted());
         assertFalse(permission.getFilter().isPresent());
 
         // Query for user on database without permissions to create forms
-        query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.CREATE_FORM, FORM_ID);
+        query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.CREATE_FORM, CuidAdapter.databaseId(DB_ID));
         permission = oracle.query(query);
         assertThat(permission.getOperation(), equalTo(Operation.CREATE_FORM));
         assertFalse(permission.isPermitted());

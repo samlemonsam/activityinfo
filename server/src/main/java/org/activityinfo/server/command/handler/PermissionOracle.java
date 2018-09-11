@@ -88,10 +88,10 @@ public class PermissionOracle {
         if (!db.isVisible()) {
             return deny(query.getOperation());
         }
-        if (!db.hasResource(query.getResourceId())) {
+        if (!isDatabase(query.getResourceId()) && !db.hasResource(query.getResourceId())) {
             return deny(query.getOperation());
         }
-        return determinePermission(query.getOperation(), db.getResource(query.getResourceId()), db);
+        return determinePermission(query.getOperation(), query.getResourceId(), db);
     }
 
     /**
@@ -101,14 +101,28 @@ public class PermissionOracle {
      * <p> A user may also be limited in the records available to view, defined by a record filter composed of the
      * filters applied at each level of the resource tree for this operation. </p>
      */
-    private Permission determinePermission(Operation operation, Resource resource, UserDatabaseMeta db) {
+    private Permission determinePermission(Operation operation, ResourceId resourceId, UserDatabaseMeta db) {
         Permission permission = new Permission(operation);
-        boolean permitted = db.hasResource(resource.getId()) && granted(operation, resource, db);
-        permission.setPermitted(permitted);
-        if (permitted) {
-            permission.setFilter(collectFilters(operation, resource, db));
+        permission.setPermitted(operationPermitted(operation, resourceId, db));
+        if (permission.isPermitted()) {
+            permission.setFilter(operationFilter(operation, resourceId, db));
         }
         return permission;
+    }
+
+    /**
+     * If user is requesting permission on a database, need to check specified database is the provided
+     * {@link UserDatabaseMeta} and whether the specified operation is permitted.
+     *
+     * Otherwise, we ensure that the specified resource is visible and then check whether the specified operation
+     * is permitted.
+     */
+    private boolean operationPermitted(Operation operation, ResourceId resourceId, UserDatabaseMeta db) {
+        if (isDatabase(resourceId)) {
+            return db.getDatabaseId().equals(resourceId) && db.getGrant(resourceId).hasOperation(operation);
+        } else {
+            return db.hasResource(resourceId) && granted(operation, db.getResource(resourceId), db);
+        }
     }
 
     /**
@@ -127,6 +141,14 @@ public class PermissionOracle {
         }
         // Otherwise, we climb the resource tree to determine whether the operation is granted there
         return granted(operation, db.getResource(resource.getParentId()), db);
+    }
+
+    private Optional<String> operationFilter(Operation operation, ResourceId resourceId, UserDatabaseMeta db) {
+        if (isDatabase(resourceId)) {
+            return getFilter(operation, resourceId, db);
+        } else {
+            return collectFilters(operation, db.getResource(resourceId), db);
+        }
     }
 
     /**
@@ -149,10 +171,10 @@ public class PermissionOracle {
         return and(filter, collectFilters(operation, db.getResource(resource.getParentId()), db));
     }
 
-    private Optional<String> getFilter(Operation operation, ResourceId resource, UserDatabaseMeta db) {
+    private Optional<String> getFilter(Operation operation, ResourceId resourceId, UserDatabaseMeta db) {
         Optional<String> filter = Optional.absent();
-        if (db.hasGrant(resource) && db.getGrant(resource).hasOperation(operation)) {
-            filter = db.getGrant(resource).getFilter(operation);
+        if (db.hasGrant(resourceId) && db.getGrant(resourceId).hasOperation(operation)) {
+            filter = db.getGrant(resourceId).getFilter(operation);
         }
         return filter;
     }
