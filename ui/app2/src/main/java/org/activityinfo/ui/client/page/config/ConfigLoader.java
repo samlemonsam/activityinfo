@@ -149,6 +149,9 @@ public class ConfigLoader implements PageLoader {
         } else if(pageId.equals(DbTargetEditor.PAGE_ID)) {
             return new DbTargetEditor(eventBus, dispatch, stateMgr, new DbTargetGrid());
 
+        } else if(pageId.equals(LockedPeriodsPresenter.PAGE_ID)) {
+            return new LockedPeriodsPresenter(dispatch, eventBus, new LockedPeriodGrid());
+
         } else if(pageId.equals(IndicatorLinkPage.PAGE_ID)) {
             return new IndicatorLinkPage(dispatch);
         } else {
