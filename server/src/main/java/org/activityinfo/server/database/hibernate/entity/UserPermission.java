@@ -376,9 +376,11 @@ public class UserPermission implements Serializable {
         if(isAllowEditAll()) {
             grantModel.addOperation(Operation.EDIT_RECORD);
             grantModel.addOperation(Operation.CREATE_RECORD);
+            grantModel.addOperation(Operation.DELETE_RECORD);
         } else if(isAllowEdit()) {
             grantModel.addOperation(Operation.EDIT_RECORD, getPartnerFilter());
             grantModel.addOperation(Operation.CREATE_RECORD, getPartnerFilter());
+            grantModel.addOperation(Operation.DELETE_RECORD, getPartnerFilter());
         }
         if(isAllowManageAllUsers()) {
             grantModel.addOperation(Operation.MANAGE_USERS);
