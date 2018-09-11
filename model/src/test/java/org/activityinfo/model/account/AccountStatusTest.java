@@ -14,6 +14,7 @@ public class AccountStatusTest {
     @Test
     public void testTrialAccountExpiring() {
         AccountStatus status = new AccountStatus.Builder()
+                .setDatabaseCount(215)
                 .setExpirationTime(new LocalDate(2018, 10, 14))
                 .setTrial(true)
                 .setLegacy(true)
@@ -39,6 +40,7 @@ public class AccountStatusTest {
 
 
         AccountStatus status = new AccountStatus.Builder()
+                .setDatabaseCount(215)
                 .setExpirationTime(new LocalDate(2018, 12, 31))
                 .setTrial(true)
                 .setLegacy(false)
