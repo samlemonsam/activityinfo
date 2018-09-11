@@ -108,5 +108,27 @@ public class PermissionOracleTest {
         assertFalse(permission.isPermitted());
     }
 
+    @Test
+    public void queryEditRecordPermission() {
+        // Query for authorized user who can edit records for any partner
+        PermissionQuery query = new PermissionQuery(AUTH_USER_ID, DB_ID, Operation.EDIT_RECORD, FORM_ID);
+        Permission permission = oracle.query(query);
+        assertThat(permission.getOperation(), equalTo(Operation.EDIT_RECORD));
+        assertTrue(permission.isPermitted());
+        assertFalse(permission.getFilter().isPresent());
+
+        // Query for authorised user can edit records but is restricted by partner
+        query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.EDIT_RECORD, FORM_ID);
+        permission = oracle.query(query);
+        assertThat(permission.getOperation(), equalTo(Operation.EDIT_RECORD));
+        assertTrue(permission.isPermitted());
+        assertTrue(permission.getFilter().isPresent());
+
+        // Query for unauthorized user
+        query = new PermissionQuery(UNAUTH_USER_ID, DB_ID, Operation.EDIT_RECORD, FORM_ID);
+        permission = oracle.query(query);
+        assertThat(permission.getOperation(), equalTo(Operation.EDIT_RECORD));
+        assertFalse(permission.isPermitted());
+    }
 
 }
