@@ -116,7 +116,6 @@ public class LegacyPermissionAdapter {
     }
 
     public void assertDesignPrivileges(AttributeGroup group, User user) {
-
         Set<Activity> activities = group.getActivities();
         if(activities.isEmpty()) {
             LOGGER.severe(String.format(
@@ -174,18 +173,27 @@ public class LegacyPermissionAdapter {
      * given site.
      */
     public boolean isEditAllowed(Site site, User user) {
-        UserPermission permission = getPermissionByUser(site.getActivity().getDatabase(), user);
+        Database database = site.getActivity().getDatabase();
+        ResourceId databaseId = CuidAdapter.databaseId(database.getId());
+        ResourceId activityId = site.getActivity().getFormId();
+        UserDatabaseMeta db = provider.getDatabaseMetadata(databaseId, user.getId());
+        PermissionQuery query = new PermissionQuery(user.getId(), database.getId(), Operation.EDIT_RECORD, activityId);
+        Permission edit = PermissionOracle.query(query, db);
 
-        if (permission.isAllowEditAll()) {
+        if (!edit.isPermitted()) {
+            return false;
+        } else if (!edit.getFilter().isPresent()) {
             return true;
+        } else {
+            String permissionFilter = edit.getFilter().get();
+            String partnerFilter = partnerFilter(database, site.getPartner());
+            return partnerFilter.equals(permissionFilter);
         }
+    }
 
-        if (permission.isAllowEdit()) {
-            // without AllowEditAll, edit permission is contingent on the site's partner
-            return site.getPartner().getId() == permission.getPartner().getId();
-        }
-
-        return false;
+    private String partnerFilter(Database database, Partner partner) {
+        return CuidAdapter.partnerFormId(database.getId()).asString() + "==" +
+                CuidAdapter.partnerRecordId(partner.getId()).asString();
     }
 
 
