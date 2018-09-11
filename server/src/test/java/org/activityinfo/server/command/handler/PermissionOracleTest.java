@@ -32,6 +32,7 @@ public class PermissionOracleTest {
     private static final int OWNER_ID = 1;
     private static final int AUTH_USER_ID = 2;
     private static final int UNAUTH_USER_ID = 3;
+    private static final int AUTH_RESTRICTED_USER_ID = 21;
 
     @Inject
     private EntityManager em;
@@ -86,13 +87,21 @@ public class PermissionOracleTest {
 
     @Test
     public void queryCreateRecordPermission() {
-        // Query for authorized user
+        // Query for authorized user who can create records for any partner
         PermissionQuery query = new PermissionQuery(AUTH_USER_ID, DB_ID, Operation.CREATE_RECORD, FORM_ID);
         Permission permission = oracle.query(query);
         assertThat(permission.getOperation(), equalTo(Operation.CREATE_RECORD));
         assertTrue(permission.isPermitted());
+        assertFalse(permission.getFilter().isPresent());
 
-        // Query for authorized user
+        // Query for authorised user who is restricted by partner
+        query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.CREATE_RECORD, FORM_ID);
+        permission = oracle.query(query);
+        assertThat(permission.getOperation(), equalTo(Operation.CREATE_RECORD));
+        assertTrue(permission.isPermitted());
+        assertTrue(permission.getFilter().isPresent());
+
+        // Query for unauthorized user
         query = new PermissionQuery(UNAUTH_USER_ID, DB_ID, Operation.CREATE_RECORD, FORM_ID);
         permission = oracle.query(query);
         assertThat(permission.getOperation(), equalTo(Operation.CREATE_RECORD));
