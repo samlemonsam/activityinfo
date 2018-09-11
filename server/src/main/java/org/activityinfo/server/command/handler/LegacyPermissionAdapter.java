@@ -86,8 +86,11 @@ public class LegacyPermissionAdapter {
     }
 
     public boolean isViewAllowed(Database database, User user) {
-        UserPermission permission = getPermissionByUser(database, user);
-        return permission.isAllowView() || permission.isAllowViewAll();
+        ResourceId databaseId = CuidAdapter.databaseId(database.getId());
+        UserDatabaseMeta db = provider.getDatabaseMetadata(databaseId, user.getId());
+        PermissionQuery query = new PermissionQuery(user.getId(), database.getId(), Operation.VIEW, databaseId);
+        Permission view = PermissionOracle.query(query, db);
+        return view.isPermitted();
     }
 
     public boolean isManagePartnersAllowed(Database db, User user) {
