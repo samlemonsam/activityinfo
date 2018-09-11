@@ -93,9 +93,16 @@ public class LegacyPermissionAdapter {
         return view.isPermitted();
     }
 
-    public boolean isManagePartnersAllowed(Database db, User user) {
-        UserPermission perm = getPermissionByUser(db, user);
-        return perm.isAllowDesign() || perm.isAllowManageAllUsers();
+    // Need to determine whether user can manage all users and has design permissions
+    public boolean isManagePartnersAllowed(Database database, User user) {
+        if (!isDesignAllowed(database, user)) {
+            return false;
+        }
+        ResourceId databaseId = CuidAdapter.databaseId(database.getId());
+        UserDatabaseMeta db = provider.getDatabaseMetadata(databaseId, user.getId());
+        PermissionQuery query = new PermissionQuery(user.getId(), database.getId(), Operation.MANAGE_USERS, databaseId);
+        Permission manageUsers = PermissionOracle.query(query, db);
+        return manageUsers.isPermitted() && !manageUsers.getFilter().isPresent();
     }
 
     public void assertDesignPrivileges(Database database, User user) {
