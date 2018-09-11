@@ -20,8 +20,10 @@ package org.activityinfo.server.command.handler.crud;
 
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.UpdatePartner;
+import org.activityinfo.legacy.shared.command.result.BillingException;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
+import org.activityinfo.model.account.AccountStatus;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.command.handler.UpdatePartnerHandler;
 import org.activityinfo.server.database.hibernate.dao.CountryDAO;
@@ -29,6 +31,7 @@ import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
 import org.activityinfo.server.database.hibernate.entity.Country;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -38,16 +41,20 @@ public class UserDatabasePolicy implements EntityPolicy<Database> {
     private final EntityManager em;
     private final UserDatabaseDAO databaseDAO;
     private final CountryDAO countryDAO;
+    private final BillingAccountOracle billingAccounts;
 
     @Inject
-    public UserDatabasePolicy(EntityManager em, UserDatabaseDAO databaseDAO, CountryDAO countryDAO) {
+    public UserDatabasePolicy(EntityManager em, UserDatabaseDAO databaseDAO, CountryDAO countryDAO, BillingAccountOracle billingAccounts) {
         this.em = em;
         this.databaseDAO = databaseDAO;
         this.countryDAO = countryDAO;
+        this.billingAccounts = billingAccounts;
     }
 
     @Override
     public Object create(User user, PropertyMap properties) {
+
+        checkBillingLimitations(user);
 
         Database database = new Database();
         database.setCountry(findCountry(properties));
@@ -59,13 +66,15 @@ public class UserDatabasePolicy implements EntityPolicy<Database> {
 
         addDefaultPartner(database.getId(), user);
 
-        // Creating a new database without a billing account effectively starts
-        // a free trial
-        if(user.getBillingAccount() == null && user.getTrialEndDate() == null) {
-            user.startFreeTrial();
-        }
-
         return database.getId();
+    }
+
+    private void checkBillingLimitations(User user) {
+        AccountStatus status = billingAccounts.getStatusOrStartFreeTrial(user);
+
+        if(!status.isNewDatabaseAllowed()) {
+            throw new BillingException(status);
+        }
     }
 
     private void addDefaultPartner(int databaseId, User user) {

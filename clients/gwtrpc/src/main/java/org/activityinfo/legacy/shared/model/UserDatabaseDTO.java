@@ -186,12 +186,21 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         return folders;
     }
 
+
     public String getBillingAccountName() {
         return get("billingAccountName");
     }
 
     public void setBillingAccountName(String name) {
         set("billingAccountName", name);
+    }
+
+    public String getAccountEndDate() {
+        return get("accountEndDate");
+    }
+
+    public void setAccountEndDate(String dateString) {
+        set("accountEndDate", dateString);
     }
 
     /**

@@ -335,4 +335,19 @@ public class PermissionOracle {
         return isViewAllowed(database, user);
     }
 
+    /**
+     * True if the user is allowed to view the account status for the given database id
+     * @param user
+     * @param databaseId
+     */
+    public boolean isViewAccountStatusAllowed(AuthenticatedUser user, int databaseId) {
+        Database database = em.get().find(Database.class, databaseId);
+        if(database.getOwner().getId() == user.getId()) {
+            return true;
+        }
+        UserPermission permission = getPermissionByUser(database, em.get().find(User.class, user.getId()));
+        return (permission.isAllowDesign() ||
+            permission.isAllowManageAllUsers() ||
+            permission.isAllowManageUsers());
+    }
 }

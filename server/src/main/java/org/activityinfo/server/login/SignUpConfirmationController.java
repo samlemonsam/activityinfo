@@ -30,6 +30,7 @@ import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
+import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.server.login.model.SignUpConfirmationInvalidPageModel;
 import org.activityinfo.server.login.model.SignUpConfirmationPageModel;
 import org.activityinfo.server.util.MailingListClient;
@@ -62,6 +63,7 @@ public class SignUpConfirmationController {
     private final Provider<UserDAO> userDAO;
     private final EntityManager entityManager;
     private final AuthTokenProvider authTokenProvider;
+    private final BillingAccountOracle billingAccountOracle;
 
     @Inject
     public SignUpConfirmationController(Provider<UserDAO> userDAO,
@@ -69,12 +71,14 @@ public class SignUpConfirmationController {
                                         EntityManager entityManager, Provider<PartnerDAO> partnerDAO,
                                         Provider<UserPermissionDAO> permissionDAO,
                                         MailingListClient mailChimp,
-                                        AuthTokenProvider authTokenProvider) {
+                                        AuthTokenProvider authTokenProvider,
+                                        BillingAccountOracle billingAccountOracle) {
         super();
         this.userDAO = userDAO;
         this.entityManager = entityManager;
         this.authTokenProvider = authTokenProvider;
         this.mailingList = mailChimp;
+        this.billingAccountOracle = billingAccountOracle;
     }
 
     @GET
@@ -106,7 +110,8 @@ public class SignUpConfirmationController {
             user.changePassword(password);
             user.clearChangePasswordKey();
             user.setEmailNotification(true);
-            user.startFreeTrial();
+
+            billingAccountOracle.startFreeTrial(user);
 
             // add user to default database
             addUserToDefaultDatabase(user);

@@ -36,9 +36,11 @@ import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
+import org.activityinfo.model.account.AccountStatus;
 import org.activityinfo.ui.client.AppEvents;
 import org.activityinfo.ui.client.ClientContext;
 import org.activityinfo.ui.client.EventBus;
+import org.activityinfo.ui.client.billing.BillingErrors;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.callback.Created;
@@ -215,15 +217,34 @@ public class DbListPresenter implements ActionListener {
     }
 
     public void onAdd() {
-        NewDbDialog newDbDialog = new NewDbDialog(dispatcher);
-        newDbDialog.show();
-        newDbDialog.setSuccessCallback(new SuccessCallback<Void>() {
+
+        // Check account status first...
+        ActivityInfoClientAsyncImpl client = new ActivityInfoClientAsyncImpl();
+        client.getAccountStatus().then(new AsyncCallback<AccountStatus>() {
             @Override
-            public void onSuccess(Void result) {
-                eventBus.fireEvent(AppEvents.SCHEMA_CHANGED);
-                loader.load();
+            public void onFailure(Throwable caught) {
+                MessageBox.alert(I18N.CONSTANTS.connectionProblem(), I18N.CONSTANTS.connectionProblemText(), null);
+            }
+
+            @Override
+            public void onSuccess(AccountStatus status) {
+                if(!status.isNewDatabaseAllowed()) {
+                    BillingErrors.freeTrialExpired();
+                } else {
+                    NewDbDialog newDbDialog = new NewDbDialog(dispatcher);
+                    newDbDialog.show();
+                    newDbDialog.setSuccessCallback(new SuccessCallback<Void>() {
+                        @Override
+                        public void onSuccess(Void result) {
+                            eventBus.fireEvent(AppEvents.SCHEMA_CHANGED);
+                            loader.load();
+                        }
+                    });
+                }
             }
         });
+
+
     }
 
     public void onTransfer() {

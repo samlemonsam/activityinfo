@@ -35,13 +35,14 @@ public class BillingWarning extends Composite {
 
         if(status.isTrial()) {
             warningText.setInnerHTML("<strong>Your free trial is " + status.expiringIn(new Date()) + ".</strong> " +
-                    "After this, you won't be able to access " + status.getDatabaseCount() + " database(s) you own. " +
+                    "After this, you won't be able to access " +
+                    "<a href=\"#dblist\">" + status.getDatabaseCount() + " database(s)</a> you own. " +
                     "Please <a href=\"mailto:info@activityinfo.org\">contact us</a> to set up billing. " +
-                    "Questions? Take a look at the <a href=\"http://help.activityinfo.org/\">FAQ</a>");
+                    "Questions? Take a look at the <a href=\"https://www.activityinfo.org/about/faq.html\">FAQ</a>.");
         } else {
             warningText.setInnerHTML("<strong>Your account is " + status.expiringIn(new Date()) + ".</strong> " +
-                    "To avoid interruption in service, <a href=\"mailto:info@activityinfo.org\">contact us</a>" +
-                    " us to start the renewal process. ");
+                    "To avoid interruption in service, <a href=\"mailto:info@activityinfo.org\">contact us</a> " +
+                    "to start the renewal process. ");
         }
     }
 

@@ -27,12 +27,14 @@ import com.extjs.gxt.ui.client.widget.Dialog;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.BatchCommand;
 import org.activityinfo.legacy.shared.command.UpdateUserPermissions;
 import org.activityinfo.legacy.shared.command.result.BatchResult;
+import org.activityinfo.legacy.shared.command.result.BillingException;
 import org.activityinfo.legacy.shared.command.result.UserExistsException;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
@@ -46,7 +48,12 @@ import org.activityinfo.ui.client.page.config.form.FolderAssignmentException;
 import org.activityinfo.ui.client.page.config.form.PermissionAssignmentException;
 import org.activityinfo.ui.client.page.config.form.UserForm;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class DbUserEditorActions {
+
+    private static final Logger LOGGER = Logger.getLogger(DbUserEditorActions.class.getName());
 
     private DbUserEditor panel;
     private Dispatcher dispatcher;
@@ -138,7 +145,10 @@ public class DbUserEditorActions {
                                 public void onFailure(Throwable caught) {
                                     if (caught instanceof UserExistsException) {
                                         MessageBox.alert(I18N.CONSTANTS.userExistsTitle(), I18N.CONSTANTS.userExistsMessage(), null);
+                                    } else if(caught instanceof BillingException) {
+                                        showBillingProblem((BillingException) caught);
                                     } else {
+                                        LOGGER.log(Level.SEVERE, "Add user failed", caught);
                                         MessageBox.alert(I18N.CONSTANTS.serverError(), I18N.CONSTANTS.errorUnexpectedOccured(), null);
                                     }
                                 }
@@ -157,6 +167,21 @@ public class DbUserEditorActions {
                 }
             }
         });
+    }
+
+    private void showBillingProblem(BillingException billingException) {
+        if(billingException.isTrial()) {
+            MessageBox.alert(SafeHtmlUtils.fromString(I18N.CONSTANTS.usersExceeded()),
+                    SafeHtmlUtils.fromTrustedString("During your free trial, you may not add more than " +
+                            billingException.getUserLimit() + " unique users across all of your databases." +
+                            "Please <a href=\"mailto:info@activityinfo.org\">contact us</a> to set up billing."), null);
+        } else {
+            MessageBox.alert(SafeHtmlUtils.fromString(I18N.CONSTANTS.usersExceeded()),
+                    SafeHtmlUtils.fromTrustedString("You cannot add this user without exceeding the user limits " +
+                            "(" + billingException.getUserLimit()+ " users) of the " +
+                            "\"" + billingException.getBillingAccountName() + "\". " +
+                            "Please <a href=\"mailto:info@activityinfo.org\">contact us</a> to increase your plan."), null);
+        }
     }
 
     public void delete() {

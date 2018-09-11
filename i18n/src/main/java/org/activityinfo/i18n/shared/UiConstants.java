@@ -1915,4 +1915,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Billing Account")
     String billingAccount();
 
+    @DefaultStringValue("User limit exceeded")
+    String usersExceeded();
 }

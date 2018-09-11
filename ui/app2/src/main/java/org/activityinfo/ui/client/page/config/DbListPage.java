@@ -113,9 +113,10 @@ public class DbListPage extends ContentPanel implements DbListPresenter.View, Pa
         List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
         columns.add(new ColumnConfig("name", I18N.CONSTANTS.name(), 100));
         columns.add(new ColumnConfig("fullName", I18N.CONSTANTS.fullName(), 150));
+        columns.add(createCountryColumn());
         columns.add(new ColumnConfig("ownerName", I18N.CONSTANTS.ownerName(), 150));
         columns.add(new ColumnConfig("billingAccountName", I18N.CONSTANTS.billingAccount(), 150));
-        columns.add(createCountryColumn());
+        columns.add(new ColumnConfig("accountEndDate", "Billing Account Expiration", 150));
         return new ColumnModel(columns);
     }
 

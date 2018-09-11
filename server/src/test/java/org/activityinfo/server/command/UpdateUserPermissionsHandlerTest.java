@@ -89,7 +89,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
         handler = new UpdateUserPermissionsHandler(
                 db.getDAO(UserDatabaseDAO.class), db.getDAO(PartnerDAO.class),
                 db.getDAO(UserDAO.class),
-                db.getDAO(UserPermissionDAO.class), mailer);
+                db.getDAO(UserPermissionDAO.class), billingAccountOracle, mailer);
 
         owner = new User();
         owner.setId(99);

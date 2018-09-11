@@ -153,6 +153,9 @@ public interface ActivityInfoClientAsync {
 
     Promise<Void> cancelDatabaseTransfer(int databaseId);
 
+    /**
+     * @return the account status for the authenticated user
+     */
     Promise<AccountStatus> getAccountStatus();
 
 }

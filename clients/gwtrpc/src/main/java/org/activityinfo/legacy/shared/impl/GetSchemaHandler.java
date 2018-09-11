@@ -35,6 +35,7 @@ import org.activityinfo.model.database.GrantModel;
 import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.geo.Extents;
+import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.promise.Promise;
 
 import java.util.*;
@@ -258,9 +259,8 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                             .from("userpermission")
                             .where("userpermission.UserId")
                             .equalTo(context.getUser().getId()), "p")
-                    .on("p.DatabaseId = d.DatabaseId")
-                    .leftJoin("userlogin o")
-                    .on("d.OwnerUserId = o.UserId")
+                            .on("p.DatabaseId = d.DatabaseId")
+                    .leftJoin("userlogin o").on("d.OwnerUserId = o.UserId")
                     .where("d.DateDeleted")
                     .isNull()
                     .orderBy("d.Name");
@@ -268,6 +268,9 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
             if(context.isRemote()) {
                 query.leftJoin("billingaccount ba").on("ba.id=o.billingAccountId");
                 query.appendColumn("ba.name", "baName");
+                query.appendColumn("ba.endTime", "baEndDate");
+                query.appendColumn("o.trialEndDate", "trialEndDate");
+
             }
 
             // this is quite hackesh. we ultimately need to split up GetSchema()
@@ -297,7 +300,16 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                         db.setCountry(countries.get(row.getInt("CountryId")));
                         db.setOwnerName(row.getString("OwnerName"));
                         db.setOwnerEmail(row.getString("OwnerEmail"));
-                        db.setBillingAccountName(row.getString("baName"));
+
+                        if(context.isRemote()) {
+                            if(row.isNull("baName")) {
+                                db.setBillingAccountName("Free Trial Account");
+                                db.setAccountEndDate(new LocalDate(row.getDate("trialEndDate")).toString());
+                            } else {
+                                db.setBillingAccountName(row.get("baName"));
+                                db.setAccountEndDate(new LocalDate(row.getDate("baEndDate")).toString());
+                            }
+                        }
 
                         if (db.getAmOwner()) {
                             db.setHasPendingTransfer(row.getBoolean("pendingTransfer"));
