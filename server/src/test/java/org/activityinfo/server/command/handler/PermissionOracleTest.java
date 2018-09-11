@@ -144,4 +144,27 @@ public class PermissionOracleTest {
         assertFalse(permission.isPermitted());
     }
 
+    @Test
+    public void queryDeleteRecordPermission() {
+        // Query for authorized user who can delete records for any partner
+        PermissionQuery query = new PermissionQuery(AUTH_USER_ID, DB_ID, Operation.DELETE_RECORD, FORM_ID);
+        Permission permission = oracle.query(query);
+        assertThat(permission.getOperation(), equalTo(Operation.DELETE_RECORD));
+        assertTrue(permission.isPermitted());
+        assertFalse(permission.getFilter().isPresent());
+
+        // Query for authorized user who is restricted by partner
+        query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.DELETE_RECORD, FORM_ID);
+        permission = oracle.query(query);
+        assertThat(permission.getOperation(), equalTo(Operation.DELETE_RECORD));
+        assertTrue(permission.isPermitted());
+        assertTrue(permission.getFilter().isPresent());
+
+        // Query for user on database without permissions to delete records
+        query = new PermissionQuery(UNAUTH_USER_ID, DB_ID, Operation.DELETE_RECORD, FORM_ID);
+        permission = oracle.query(query);
+        assertThat(permission.getOperation(), equalTo(Operation.DELETE_RECORD));
+        assertFalse(permission.isPermitted());
+    }
+
 }

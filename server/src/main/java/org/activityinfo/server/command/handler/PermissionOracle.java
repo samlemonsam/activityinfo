@@ -96,6 +96,7 @@ public class PermissionOracle {
             case EDIT_RECORD:
                 return editRecord(db.getResource(query.getResourceId()), db);
             case DELETE_RECORD:
+                return deleteRecord(db.getResource(query.getResourceId()), db);
             case CREATE_FORM:
             case EDIT_FORM:
             case DELETE_FORM:
@@ -163,6 +164,27 @@ public class PermissionOracle {
         permission.setPermitted(permitted);
         if (permitted) {
             permission.setFilter(collectFilters(Operation.EDIT_RECORD, resource, db));
+        }
+        return permission;
+    }
+
+    /**
+     * <p> A user can <i>Delete a Record</i> on/within a {@link Resource} if:
+     *  <ol>
+     *      <li>The {@code resource} appears in the {@link UserDatabaseMeta} {@code resources} map</li>
+     *      <li>They have an explicit {@link Operation#DELETE_RECORD} grant on this {@code resource} or the
+     *      <b>closest</b> parent resource </li>
+     *  </ol>
+     * </p>
+     * <p> A user may also be limited in the records available to view, defined by a record filter composed of the
+     * filters applied at each level of the resource tree for this operation. </p>
+     */
+    private Permission deleteRecord(Resource resource, UserDatabaseMeta db) {
+        Permission permission = new Permission(Operation.DELETE_RECORD);
+        boolean permitted = db.hasResource(resource.getId()) && granted(Operation.DELETE_RECORD, resource, db);
+        permission.setPermitted(permitted);
+        if (permitted) {
+            permission.setFilter(collectFilters(Operation.DELETE_RECORD, resource, db));
         }
         return permission;
     }
