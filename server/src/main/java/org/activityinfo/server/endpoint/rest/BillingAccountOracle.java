@@ -34,22 +34,9 @@ public class BillingAccountOracle {
     public AccountStatus getStatus(User userAccount) {
         if(userAccount.getBillingAccount() != null) {
             return queryBillingStatus(userAccount);
-        }
-
-        if(userAccount.getTrialEndDate() != null) {
+        } else {
             return queryTrialStatus(userAccount);
         }
-
-        // Otherwise, no trial started, and no billing account
-        return new AccountStatus.Builder()
-                .setUserAccountId(userAccount.getId())
-                .setLegacy(false)
-                .setTrial(false)
-                .setDatabaseCount(0)
-                .setUserLimit(0)
-                .setUserCount(0)
-                .setExpirationTime(new LocalDate(2999,1,1))
-                .build();
     }
 
     public AccountStatus getStatusOrStartFreeTrial(User user) {
@@ -104,6 +91,11 @@ public class BillingAccountOracle {
         Number databaseCount = (Number) result[0];
         Number userCount = (Number) result[1];
 
+        Date trialEndDate = userAccount.getTrialEndDate();
+        if(trialEndDate == null) {
+            trialEndDate = new LocalDate(2999, 1, 1).atMidnightInMyTimezone();
+        }
+
         return new AccountStatus.Builder()
                 .setUserAccountId(userAccount.getId())
                 .setTrial(true)
@@ -112,7 +104,7 @@ public class BillingAccountOracle {
                 .setLegacy(userAccount.getDateCreated() == null ||
                         userAccount.getDateCreated().before(new Date(1536624000000L)))
                 .setDatabaseCount(databaseCount.intValue())
-                .setExpirationTime(userAccount.getTrialEndDate())
+                .setExpirationTime(trialEndDate)
                 .build();
 
     }

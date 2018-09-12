@@ -304,7 +304,11 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                         if(context.isRemote()) {
                             if(row.isNull("baName")) {
                                 db.setBillingAccountName("Free Trial Account");
-                                db.setAccountEndDate(new LocalDate(row.getDate("trialEndDate")).toString());
+                                if(!row.isNull("trialEndDate")) {
+                                    db.setAccountEndDate(new LocalDate(row.getDate("trialEndDate")).toString());
+                                } else {
+                                    db.setAccountEndDate(new LocalDate(2999,1,1).toString());
+                                }
                             } else {
                                 db.setBillingAccountName(row.get("baName"));
                                 db.setAccountEndDate(new LocalDate(row.getDate("baEndDate")).toString());
