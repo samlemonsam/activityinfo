@@ -96,4 +96,14 @@ public class AccountStatusTest {
     private String expiringIn(AccountStatus status, int year, int month, int day) {
         return status.expiringIn(new LocalDate(year, month, day).atMidnightInMyTimezone());
     }
+
+    @Test
+    public void integerOverflow() {
+        AccountStatus status = new AccountStatus.Builder()
+                .setExpirationTime(new LocalDate(2999, 1, 1))
+                .build();
+
+        assertTrue(status.getExpirationTime() > 0);
+        assertFalse(status.isExpired());
+    }
 }

@@ -186,7 +186,12 @@ public class AccountStatus implements JsonSerializable {
 
         public Builder setExpirationTime(Date time) {
             if(time != null) {
-                status.expirationTime = (int) (time.getTime() / 1000);
+                long seconds = (time.getTime() / 1000L);
+                if(seconds > Integer.MAX_VALUE) {
+                    status.expirationTime = Integer.MAX_VALUE;
+                } else {
+                    status.expirationTime = (int)seconds;
+                }
             }
             return this;
         }
