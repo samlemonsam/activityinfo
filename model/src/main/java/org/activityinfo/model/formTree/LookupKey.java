@@ -217,7 +217,10 @@ public class LookupKey {
     }
 
     private void collectKeys(@Nullable FormulaNode baseField, Map<LookupKey, FormulaNode> keys) {
-        keys.put(this, join(baseField, fieldId));
+        // If this key has already been added, then we do not want to overwrite
+        if (!keys.containsKey(this)) {
+            keys.put(this, join(baseField, fieldId));
+        }
 
         if(!isRoot()) {
             parentLevels.forEach(parentLevel -> {
