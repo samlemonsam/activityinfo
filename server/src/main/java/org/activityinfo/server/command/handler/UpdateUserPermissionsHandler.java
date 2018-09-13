@@ -107,6 +107,10 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
             user = userDAO.findUserByEmail(dto.getEmail());
         }
 
+        if(!billingAccountOracle.isAllowAddUser(user, database)) {
+            throw new BillingException(billingAccountOracle.getStatusForDatabase(database.getId()));
+        }
+
         if (user == null) {
             user = createNewUser(executingUser, dto);
         }
@@ -116,11 +120,6 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
          */
         UserPermission perm = queryUserPermission(user, database);
         if (perm == null) {
-
-            if(!billingAccountOracle.isAllowAddUser(user, database)) {
-                throw new BillingException(billingAccountOracle.getStatusForDatabase(database.getId()));
-            }
-
             perm = new UserPermission(database, user);
             doUpdate(perm, dto, isOwner, executingUserPermission);
             permDAO.persist(perm);

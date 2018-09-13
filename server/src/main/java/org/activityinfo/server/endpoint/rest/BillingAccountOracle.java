@@ -9,6 +9,7 @@ import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
 
+import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -59,11 +60,16 @@ public class BillingAccountOracle {
      * @param database
      * @return
      */
-    public boolean isAllowAddUser(User newUser, Database database) {
+    public boolean isAllowAddUser(@Nullable User newUser, Database database) {
 
         AccountStatus accountStatus = getStatus(database.getOwner());
         if(accountStatus.getUserCount() < accountStatus.getUserLimit()) {
             return true;
+        }
+
+        // If the user doesn't exist yet, then we are definitely over our limit
+        if(newUser == null) {
+            return false;
         }
 
         // Otherwise we need to check to see if this user is already present in another database
