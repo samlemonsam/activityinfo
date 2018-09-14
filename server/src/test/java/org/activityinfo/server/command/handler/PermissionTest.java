@@ -67,7 +67,7 @@ public class PermissionTest {
             Permission permission = PermissionOracle.query(query, getDb(OWNER_ID));
             assertThat(permission.getOperation(), equalTo(operation));
             assertTrue(permission.isPermitted());
-            assertFalse(permission.getFilter().isPresent());
+            assertFalse(permission.isFiltered());
         }
     }
 
@@ -91,14 +91,14 @@ public class PermissionTest {
         Permission permission = PermissionOracle.query(query, getDb(AUTH_USER_ID));
         assertThat(permission.getOperation(), equalTo(Operation.VIEW));
         assertTrue(permission.isPermitted());
-        assertFalse(permission.getFilter().isPresent());
+        assertFalse(permission.isFiltered());
 
         // Query for authorized user who is restricted by partner
         query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.VIEW, FORM_ID);
         permission = PermissionOracle.query(query, getDb(AUTH_RESTRICTED_USER_ID));
         assertThat(permission.getOperation(), equalTo(Operation.VIEW));
         assertTrue(permission.isPermitted());
-        assertTrue(permission.getFilter().isPresent());
+        assertTrue(permission.isFiltered());
 
         // Query for user on database without permissions to view records
         query = new PermissionQuery(REVOKED_USER, DB_ID, Operation.VIEW, FORM_ID);
@@ -114,14 +114,14 @@ public class PermissionTest {
         Permission permission = PermissionOracle.query(query, getDb(AUTH_USER_ID));
         assertThat(permission.getOperation(), equalTo(Operation.CREATE_RECORD));
         assertTrue(permission.isPermitted());
-        assertFalse(permission.getFilter().isPresent());
+        assertFalse(permission.isFiltered());
 
         // Query for authorized user who is restricted by partner
         query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.CREATE_RECORD, FORM_ID);
         permission = PermissionOracle.query(query, getDb(AUTH_RESTRICTED_USER_ID));
         assertThat(permission.getOperation(), equalTo(Operation.CREATE_RECORD));
         assertTrue(permission.isPermitted());
-        assertTrue(permission.getFilter().isPresent());
+        assertTrue(permission.isFiltered());
 
         // Query for user on database without permissions to create records
         query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.CREATE_RECORD, FORM_ID);
@@ -137,14 +137,14 @@ public class PermissionTest {
         Permission permission = PermissionOracle.query(query, getDb(AUTH_USER_ID));
         assertThat(permission.getOperation(), equalTo(Operation.EDIT_RECORD));
         assertTrue(permission.isPermitted());
-        assertFalse(permission.getFilter().isPresent());
+        assertFalse(permission.isFiltered());
 
         // Query for authorized user who is restricted by partner
         query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.EDIT_RECORD, FORM_ID);
         permission = PermissionOracle.query(query, getDb(AUTH_RESTRICTED_USER_ID));
         assertThat(permission.getOperation(), equalTo(Operation.EDIT_RECORD));
         assertTrue(permission.isPermitted());
-        assertTrue(permission.getFilter().isPresent());
+        assertTrue(permission.isFiltered());
 
         // Query for user on database without permissions to edit records
         query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.EDIT_RECORD, FORM_ID);
@@ -160,14 +160,14 @@ public class PermissionTest {
         Permission permission = PermissionOracle.query(query, getDb(AUTH_USER_ID));
         assertThat(permission.getOperation(), equalTo(Operation.DELETE_RECORD));
         assertTrue(permission.isPermitted());
-        assertFalse(permission.getFilter().isPresent());
+        assertFalse(permission.isFiltered());
 
         // Query for authorized user who is restricted by partner
         query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.DELETE_RECORD, FORM_ID);
         permission = PermissionOracle.query(query, getDb(AUTH_RESTRICTED_USER_ID));
         assertThat(permission.getOperation(), equalTo(Operation.DELETE_RECORD));
         assertTrue(permission.isPermitted());
-        assertTrue(permission.getFilter().isPresent());
+        assertTrue(permission.isFiltered());
 
         // Query for user on database without permissions to delete records
         query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.DELETE_RECORD, FORM_ID);
@@ -183,7 +183,7 @@ public class PermissionTest {
         Permission permission = PermissionOracle.query(query, getDb(SUPERVISOR_USER_ID));
         assertThat(permission.getOperation(), equalTo(Operation.CREATE_FORM));
         assertTrue(permission.isPermitted());
-        assertFalse(permission.getFilter().isPresent());
+        assertFalse(permission.isFiltered());
 
         // Query for user on database without permissions to create forms
         query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.CREATE_FORM, CuidAdapter.databaseId(DB_ID));
@@ -199,7 +199,7 @@ public class PermissionTest {
         Permission permission = PermissionOracle.query(query, getDb(SUPERVISOR_USER_ID));
         assertThat(permission.getOperation(), equalTo(Operation.EDIT_FORM));
         assertTrue(permission.isPermitted());
-        assertFalse(permission.getFilter().isPresent());
+        assertFalse(permission.isFiltered());
 
         // Query for user on database without permissions to create forms
         query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.EDIT_FORM, FORM_ID);
@@ -215,7 +215,7 @@ public class PermissionTest {
         Permission permission = PermissionOracle.query(query, getDb(SUPERVISOR_USER_ID));
         assertThat(permission.getOperation(), equalTo(Operation.DELETE_FORM));
         assertTrue(permission.isPermitted());
-        assertFalse(permission.getFilter().isPresent());
+        assertFalse(permission.isFiltered());
 
         // Query for user on database without permissions to create forms
         query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.DELETE_FORM, FORM_ID);
@@ -231,14 +231,14 @@ public class PermissionTest {
         Permission permission = PermissionOracle.query(query, getDb(AUTH_USER_ID));
         assertThat(permission.getOperation(), equalTo(Operation.MANAGE_USERS));
         assertTrue(permission.isPermitted());
-        assertFalse(permission.getFilter().isPresent());
+        assertFalse(permission.isFiltered());
 
         // Query for authorized user who is restricted by partner
         query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.MANAGE_USERS, FORM_ID);
         permission = PermissionOracle.query(query, getDb(SUPERVISOR_USER_ID));
         assertThat(permission.getOperation(), equalTo(Operation.MANAGE_USERS));
         assertTrue(permission.isPermitted());
-        assertTrue(permission.getFilter().isPresent());
+        assertTrue(permission.isFiltered());
 
         // Query for user on database without permissions to manage users
         query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.MANAGE_USERS, FORM_ID);
