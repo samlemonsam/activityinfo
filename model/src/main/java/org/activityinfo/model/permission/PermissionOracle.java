@@ -150,4 +150,12 @@ public class PermissionOracle {
         return db.isOwner();
     }
 
+    public static Permission canManageUsers(UserDatabaseMeta db) {
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
+                Operation.MANAGE_USERS,
+                db.getDatabaseId());
+        return query(query, db);
+    }
+
 }
