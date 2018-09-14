@@ -18,20 +18,9 @@
  */
 package org.activityinfo.server.database.hibernate.entity;
 
-import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.database.GrantModel;
-import org.activityinfo.model.database.Operation;
-import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.resource.ResourceId;
-
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Defines a given user's access to a given database.
@@ -49,8 +38,6 @@ import java.util.logging.Logger;
 @Entity @NamedQueries({@NamedQuery(name = "findUserPermissionByUserIdAndDatabaseId",
         query = "select p from UserPermission p where p.database.id = :databaseId and p.user.id = :userId")})
 public class UserPermission implements Serializable {
-
-    private static final Logger LOGGER = Logger.getLogger(UserPermission.class.getName());
 
     private int id;
     private Partner partner;
@@ -325,78 +312,4 @@ public class UserPermission implements Serializable {
         this.model = model;
     }
 
-    @Transient
-    public List<GrantModel> getGrants() {
-        if(!this.allowView) {
-            return Collections.emptyList();
-        }
-
-        List<GrantModel> grants = new ArrayList<>();
-        GrantModel.Builder databaseGrant = new GrantModel.Builder();
-        databaseGrant.setResourceId(CuidAdapter.databaseId(database.getId()));
-        setOperations(databaseGrant);
-        grants.add(databaseGrant.build());
-
-        if (model == null) {
-            return grants;
-        }
-
-        JsonValue modelObject = Json.parse(model);
-
-        if (!modelObject.hasKey("grants")) {
-            LOGGER.severe(() -> "Could not parse permissions model: " + model);
-            throw new UnsupportedOperationException("Unsupported model");
-        }
-
-        modelObject.get("grants").values().forEach(grant -> {
-            GrantModel.Builder folderGrantModel = new GrantModel.Builder();
-            setFolderOperations(folderGrantModel, grant);
-            grants.add(folderGrantModel.build());
-        });
-        return grants;
-    }
-
-    private void setFolderOperations(GrantModel.Builder folderGrantModel, JsonValue folderGrant) {
-        if (!folderGrant.hasKey("operations") || folderGrant.get("operations").length() == 0) {
-            // Set common operations
-            setOperations(folderGrantModel);
-            return;
-        } else {
-            folderGrant.get("operations").values()
-                    .forEach(operation -> folderGrantModel.addOperation(Operation.valueOf(operation.asString())));
-        }
-    }
-
-    private void setOperations(GrantModel.Builder grantModel) {
-        if(isAllowViewAll()) {
-            grantModel.addOperation(Operation.VIEW);
-        } else if(isAllowView()) {
-            grantModel.addOperation(Operation.VIEW, getPartnerFilter());
-        }
-        if(isAllowEditAll()) {
-            grantModel.addOperation(Operation.EDIT_RECORD);
-            grantModel.addOperation(Operation.CREATE_RECORD);
-            grantModel.addOperation(Operation.DELETE_RECORD);
-        } else if(isAllowEdit()) {
-            grantModel.addOperation(Operation.EDIT_RECORD, getPartnerFilter());
-            grantModel.addOperation(Operation.CREATE_RECORD, getPartnerFilter());
-            grantModel.addOperation(Operation.DELETE_RECORD, getPartnerFilter());
-        }
-        if(isAllowManageAllUsers()) {
-            grantModel.addOperation(Operation.MANAGE_USERS);
-        } else if(isAllowManageUsers()) {
-            grantModel.addOperation(Operation.MANAGE_USERS, getPartnerFilter());
-        }
-        if(isAllowDesign()) {
-            grantModel.addOperation(Operation.CREATE_FORM);
-            grantModel.addOperation(Operation.EDIT_FORM);
-            grantModel.addOperation(Operation.DELETE_FORM);
-        }
-    }
-
-    @Transient
-    private String getPartnerFilter() {
-        return CuidAdapter.partnerFormId(database.getId()).asString() + "==" +
-                CuidAdapter.partnerRecordId(partner.getId()).asString();
-    }
 }
