@@ -41,8 +41,9 @@ public class Permission implements JsonSerializable {
         this.permitted = permitted;
     }
 
-    public Optional<String> getFilter() {
-        return filter;
+    public String getFilter() {
+        assert filter.isPresent() : "No filter defined for current Permission.";
+        return filter.get();
     }
 
     public void setFilter(Optional<String> filter) {
