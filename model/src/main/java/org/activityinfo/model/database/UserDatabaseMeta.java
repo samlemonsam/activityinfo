@@ -34,6 +34,9 @@ import java.util.stream.Collectors;
  * and locks visible to the user, as well as their own permissions within this database.
  */
 public class UserDatabaseMeta implements JsonSerializable {
+
+    public static final String VERSION_SEP = "#";
+
     private ResourceId databaseId;
     private int userId;
     private String label;
@@ -105,9 +108,20 @@ public class UserDatabaseMeta implements JsonSerializable {
         return new RecordLockSet(effective);
     }
 
-
     public String getVersion() {
         return version;
+    }
+
+    public long getDatabaseVersion() {
+        return isOwner()
+                ? Long.valueOf(version)
+                : Long.valueOf(version.substring(0,version.indexOf(VERSION_SEP)));
+    }
+
+    public long getUserVersion() {
+        return isOwner()
+                ? Long.valueOf(version)
+                : Long.valueOf(version.substring(version.indexOf(VERSION_SEP)+1, version.length()));
     }
 
     @Override

@@ -80,7 +80,7 @@ public class DatabaseProviderImpl implements DatabaseProvider {
                 Optional<UserPermission> userPermission = getUserPermission(entityManager.get(), database, userId);
                 if(userPermission.isPresent()) {
                     meta.addGrants(userPermission.get().getGrants());
-                    meta.setVersion(database.getVersion() + "#" + userPermission.get().getVersion());
+                    meta.setVersion(database.getVersion() + UserDatabaseMeta.VERSION_SEP + userPermission.get().getVersion());
                 }
             }
 
