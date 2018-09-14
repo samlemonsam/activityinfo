@@ -22,6 +22,7 @@
     <include path="/ActivityInfo/**.gif" expiration="365d"/>
     <include path="/ActivityInfo/**.png" expiration="365d"/>
     <include path="/ActivityInfo/**.js" expiration="365d"/>
+    <include path="/ActivityInfo/**.nocache.js" expiration="0s"/>
     <include path="/ActivityInfo/**.css" expiration="365d"/>
     <include path="/ActivityInfo/**.swf" expiration="365d"/>
     <include path="/ActivityInfo/**.cache.html" expiration="365d"/>
