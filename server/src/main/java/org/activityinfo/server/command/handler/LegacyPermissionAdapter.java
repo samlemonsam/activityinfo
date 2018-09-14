@@ -37,7 +37,6 @@ import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.store.spi.DatabaseProvider;
 
-import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import java.util.Set;
 import java.util.logging.Level;
@@ -50,14 +49,12 @@ import static org.activityinfo.model.legacy.CuidAdapter.DATABASE_DOMAIN;
  */
 public class LegacyPermissionAdapter {
 
-    private final Provider<EntityManager> em;
     private final DatabaseProvider provider;
 
     private static final Logger LOGGER = Logger.getLogger(LegacyPermissionAdapter.class.getName());
 
     @Inject
     public LegacyPermissionAdapter(Provider<EntityManager> em) {
-        this.em = em;
         this.provider = new DatabaseProviderImpl(em);
     }
 
@@ -65,39 +62,43 @@ public class LegacyPermissionAdapter {
         this(Providers.of(em));
     }
 
+    public static LegacyPermissionAdapter using(EntityManager em) {
+        return new LegacyPermissionAdapter(em);
+    }
+
     /**
      * Returns true if the given user is allowed to modify the structure of the
      * database.
      */
-    public boolean isDesignAllowed(Database database, User user) {
+    public boolean isDesignAllowed(int database, int user) {
         PermissionQuery query;
-        ResourceId databaseId = CuidAdapter.databaseId(database.getId());
-        UserDatabaseMeta db = provider.getDatabaseMetadata(databaseId, user.getId());
+        ResourceId databaseId = CuidAdapter.databaseId(database);
+        UserDatabaseMeta db = provider.getDatabaseMetadata(databaseId, user);
 
         // Legacy Design requires CREATE_FORM, EDIT_FORM and DELETE_FORM permissions on root database
-        query= new PermissionQuery(user.getId(),database.getId(), Operation.CREATE_FORM, databaseId);
+        query= new PermissionQuery(user, database, Operation.CREATE_FORM, databaseId);
         Permission createForm = PermissionOracle.query(query, db);
 
-        query= new PermissionQuery(user.getId(), database.getId(), Operation.CREATE_FORM, databaseId);
+        query= new PermissionQuery(user, database, Operation.CREATE_FORM, databaseId);
         Permission editForm = PermissionOracle.query(query, db);
 
-        query= new PermissionQuery(user.getId(), database.getId(), Operation.DELETE_FORM, databaseId);
+        query= new PermissionQuery(user, database, Operation.DELETE_FORM, databaseId);
         Permission deleteForm = PermissionOracle.query(query, db);
 
         return createForm.isPermitted() && editForm.isPermitted() && deleteForm.isPermitted();
     }
 
-    public boolean isViewAllowed(Database database, User user) {
-        ResourceId databaseId = CuidAdapter.databaseId(database.getId());
-        UserDatabaseMeta db = provider.getDatabaseMetadata(databaseId, user.getId());
-        PermissionQuery query = new PermissionQuery(user.getId(), database.getId(), Operation.VIEW, databaseId);
+    public boolean isViewAllowed(int database, int user) {
+        ResourceId databaseId = CuidAdapter.databaseId(database);
+        UserDatabaseMeta db = provider.getDatabaseMetadata(databaseId,user);
+        PermissionQuery query = new PermissionQuery(user, database, Operation.VIEW, databaseId);
         Permission view = PermissionOracle.query(query, db);
         return view.isPermitted();
     }
 
     // Need to determine whether user can manage all users and has design permissions
     public boolean isManagePartnersAllowed(Database database, User user) {
-        if (!isDesignAllowed(database, user)) {
+        if (!isDesignAllowed(database.getId(), user.getId())) {
             return false;
         }
         ResourceId databaseId = CuidAdapter.databaseId(database.getId());
@@ -107,22 +108,33 @@ public class LegacyPermissionAdapter {
         return manageUsers.isPermitted() && !manageUsers.isFiltered();
     }
 
-    public void assertDesignPrivileges(Database database, User user) {
+    public boolean isViewAllowed(Database database, User user) {
+        return isViewAllowed(database.getId(), user.getId());
+    }
+
+    public boolean isDesignAllowed(Database database, User user) {
+        return isDesignAllowed(database.getId(), user.getId());
+    }
+
+    public void assertDesignPrivileges(int database, int user) {
         if (!isDesignAllowed(database, user)) {
-            LOGGER.severe(String.format(
-                    "User %d does not have design privileges on database %d",
-                    user.getId(),
-                    database.getId()));
+            LOGGER.severe(() -> String.format("User %d does not have design privileges on database %d", user, database));
             throw new IllegalAccessCommandException();
         }
+    }
+
+    public void assertDesignPrivileges(ResourceId databaseId, int user) {
+        assertDesignPrivileges(CuidAdapter.getLegacyIdFromCuid(databaseId), user);
+    }
+
+    public void assertDesignPrivileges(Database database, User user) {
+        assertDesignPrivileges(database.getId(), user.getId());
     }
 
     public void assertDesignPrivileges(AttributeGroup group, User user) {
         Set<Activity> activities = group.getActivities();
         if(activities.isEmpty()) {
-            LOGGER.severe(String.format(
-                    "AttributeGroup %d is orphaned and cannot be edited.",
-                    group.getId()));
+            LOGGER.severe(() -> String.format("AttributeGroup %d is orphaned and cannot be edited.", group.getId()));
             throw new IllegalAccessCommandException();
         }
 
@@ -143,22 +155,11 @@ public class LegacyPermissionAdapter {
     }
 
     public void assertDesignPrivileges(FormClass formClass, User user) {
-        assertDesignPrivileges(lookupDatabase(formClass), user);
+        assertDesignPrivileges(formClass.getDatabaseId(), user.getId());
     }
 
     public void assertDesignPrivileges(Target target, User user) {
         assertDesignPrivileges(target.getDatabase(), user);
-    }
-
-    private Database lookupDatabase(FormClass formClass) {
-        ResourceId databaseId = formClass.getDatabaseId();
-
-        if(databaseId.getDomain() == DATABASE_DOMAIN) {
-            return em.get().getReference(Database.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
-        }
-        LOGGER.severe(String.format("FormClass %s [%s] with owner %s cannot be matched to " +
-                "a database", formClass.getLabel(), formClass.getId(), formClass.getDatabaseId()));
-        throw new IllegalArgumentException();
     }
 
     public void assertManagePartnerAllowed(Database database, User user) {
@@ -176,22 +177,7 @@ public class LegacyPermissionAdapter {
      * given site.
      */
     public boolean isEditAllowed(Site site, User user) {
-        Database database = site.getActivity().getDatabase();
-        ResourceId databaseId = CuidAdapter.databaseId(database.getId());
-        ResourceId activityId = site.getActivity().getFormId();
-        UserDatabaseMeta db = provider.getDatabaseMetadata(databaseId, user.getId());
-        PermissionQuery query = new PermissionQuery(user.getId(), database.getId(), Operation.EDIT_RECORD, activityId);
-        Permission edit = PermissionOracle.query(query, db);
-
-        if (edit.isPermitted() && !edit.isFiltered()) {
-            return true;
-        } else if (edit.isPermitted()){
-            return filterContainsPartner(edit.getFilter(),
-                    CuidAdapter.partnerFormId(database.getId()),
-                    CuidAdapter.partnerRecordId(site.getPartner().getId()));
-        } else {
-            return false;
-        }
+        return isEditSiteAllowed(user, site.getActivity(), site.getPartner());
     }
 
     public void assertEditAllowed(Site site, User user) {
@@ -203,13 +189,22 @@ public class LegacyPermissionAdapter {
     }
 
     public boolean isEditSiteAllowed(User user, Activity activity, Partner partner) {
-        UserPermission permission = getPermissionByUser(activity.getDatabase(), user);
-        if(permission.isAllowEditAll()) {
+        Database database = activity.getDatabase();
+        ResourceId databaseId = CuidAdapter.databaseId(database.getId());
+        ResourceId activityId = activity.getFormId();
+        UserDatabaseMeta db = provider.getDatabaseMetadata(databaseId, user.getId());
+        PermissionQuery query = new PermissionQuery(user.getId(), database.getId(), Operation.EDIT_RECORD, activityId);
+        Permission edit = PermissionOracle.query(query, db);
+
+        if (edit.isPermitted() && !edit.isFiltered()) {
             return true;
-        } else if(permission.isAllowEdit()) {
-            return partner.getId() == permission.getPartner().getId();
+        } else if (edit.isPermitted()){
+            return filterContainsPartner(edit.getFilter(),
+                    CuidAdapter.partnerFormId(database.getId()),
+                    CuidAdapter.partnerRecordId(partner.getId()));
+        } else {
+            return false;
         }
-        return false;
     }
 
     public void assertEditSiteAllowed(User user, Activity activity, Partner partner) {
@@ -280,30 +275,13 @@ public class LegacyPermissionAdapter {
         return true;
     }
 
-
-    public boolean isEditAllowed(Site site, AuthenticatedUser user) {
-        return isEditAllowed(site, em.get().getReference(User.class, user.getId()));
+    public static int partnerFromFilter(String filter) {
+        FormulaNode filterFormula = FormulaParser.parse(filter);
+        FunctionCallNode equalFunctionCall = (FunctionCallNode) filterFormula;
+        SymbolNode partnerFieldNode = (SymbolNode) equalFunctionCall.getArgument(1);
+        return CuidAdapter.getLegacyIdFromCuid(partnerFieldNode.asResourceId());
     }
 
-    @Nonnull
-    public UserPermission getPermissionByUser(Database database, User user) {
-
-        if (database.getOwner().getId() == user.getId()) {
-            // owner has all rights
-            UserPermission ownersPermission = new UserPermission();
-            ownersPermission.setAllowView(true);
-            ownersPermission.setAllowViewAll(true);
-            ownersPermission.setAllowDesign(true);
-            ownersPermission.setAllowEdit(true);
-            ownersPermission.setAllowEditAll(true);
-            ownersPermission.setAllowManageAllUsers(true);
-            ownersPermission.setAllowManageUsers(true);
-            ownersPermission.setUser(user);
-            return ownersPermission;
-        }
-
-        return DatabaseProviderImpl.getUserPermission(em.get(), database, user.getId()).orElse(new UserPermission());
-    }
 
     public void assertDeletionAuthorized(Object entity, User user) {
         if(entity instanceof Database) {
@@ -368,7 +346,7 @@ public class LegacyPermissionAdapter {
         }
 
         for(Activity activity : entity.getActivities()) {
-            if(!isDesignAllowed(activity.getDatabase(), user)) {
+            if(!isDesignAllowed(activity.getDatabase().getId(), user.getId())) {
                 return false;
             }
         }
@@ -382,32 +360,19 @@ public class LegacyPermissionAdapter {
         }
     }
 
-
-    public static LegacyPermissionAdapter using(EntityManager em) {
-        return new LegacyPermissionAdapter(em);
-    }
-
-
     public void assertDesignPrivileges(FormClass formClass, AuthenticatedUser user) {
-        assertDesignPrivileges(formClass, em.get().getReference(User.class, user.getId()));
+        assertDesignPrivileges(CuidAdapter.getLegacyIdFromCuid(formClass.getDatabaseId()), user.getUserId());
     }
 
-    public void assertDesignPrivileges(int databaseId, AuthenticatedUser authenticatedUser) {
-        Database database = em.get().find(Database.class, databaseId);
-        User user = em.get().find(User.class, authenticatedUser.getId());
-
-        assertDesignPrivileges(database, user);
+    public void assertDesignPrivileges(int database, AuthenticatedUser user) {
+        assertDesignPrivileges(database, user.getUserId());
     }
 
-    public boolean isViewAllowed(ResourceId databaseId, AuthenticatedUser authenticatedUser) {
+    public boolean isViewAllowed(ResourceId databaseId, AuthenticatedUser user) {
         if(databaseId.getDomain() != DATABASE_DOMAIN) {
             return false;
         }
-
-        Database database = em.get().find(Database.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
-        User user = em.get().find(User.class, authenticatedUser.getId());
-
-        return isViewAllowed(database, user);
+        return isViewAllowed(databaseId, user);
     }
 
 }
