@@ -150,12 +150,28 @@ public class PermissionOracle {
         return db.isOwner();
     }
 
-    public static Permission canManageUsers(UserDatabaseMeta db) {
-        PermissionQuery query = new PermissionQuery(db.getUserId(),
+    public static Permission manageUsers(UserDatabaseMeta db) {
+         PermissionQuery query = new PermissionQuery(db.getUserId(),
                 CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
                 Operation.MANAGE_USERS,
                 db.getDatabaseId());
         return query(query, db);
+    }
+
+    public static boolean canManageUsers(UserDatabaseMeta db) {
+        return manageUsers(db).isPermitted();
+    }
+
+    public static Permission viewUsers(UserDatabaseMeta db) {
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
+                Operation.VIEW,
+                db.getDatabaseId());
+        return query(query, db);
+    }
+
+    public static boolean canViewUsers(UserDatabaseMeta db) {
+        return viewUsers(db).isPermitted();
     }
 
 }
