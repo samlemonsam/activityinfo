@@ -35,7 +35,7 @@ public class LoginModule extends ServletModule {
 
         serveRegex("/ActivityInfo.appcache").with(ManifestServlet.class);
         serveRegex("/App.appcache").with(ManifestServlet.class);
-
+        serveRegex("/[A-Za-z]+/[A-Za-z]+.nocache.js").with(BootscriptServlet.class);
 
         Map<String, String> initParams = Maps.newHashMap();
         filter("/login*").through(JaxRsContainer.class);
