@@ -49,6 +49,10 @@ public class Permission implements JsonSerializable {
         this.filter = filter;
     }
 
+    public boolean isFiltered() {
+        return filter.isPresent() && !filter.get().isEmpty();
+    }
+
     @Override
     public JsonValue toJson() {
         JsonValue object = Json.createObject();
