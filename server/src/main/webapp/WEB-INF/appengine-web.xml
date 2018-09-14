@@ -22,15 +22,17 @@
     <include path="/ActivityInfo/**.gif" expiration="365d"/>
     <include path="/ActivityInfo/**.png" expiration="365d"/>
     <include path="/ActivityInfo/**.js" expiration="365d"/>
-    <include path="/ActivityInfo/**.nocache.js" expiration="0s"/>
     <include path="/ActivityInfo/**.css" expiration="365d"/>
     <include path="/ActivityInfo/**.swf" expiration="365d"/>
     <include path="/ActivityInfo/**.cache.html" expiration="365d"/>
-    <include path="/**.nocache.html" expiration="0s"/>
     <include path="/static/**.png" expiration="365d"/>
     <include path="/error.html"/>
   </static-files>
- 
+  <resource-files>
+    <include path="/ActivityInfo/*.gwt.rpc" />
+    <include path="/ActivityInfo/*.nocache.*" />
+    <include path="/App/*.nocache.*" />
+  </resource-files>
   <inbound-services>
     <service>warmup</service>
   </inbound-services>
