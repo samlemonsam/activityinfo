@@ -37,6 +37,10 @@ public class Permission implements JsonSerializable {
         return permitted;
     }
 
+    public boolean isForbidden() {
+        return !isPermitted();
+    }
+
     public void setPermitted(boolean permitted) {
         this.permitted = permitted;
     }
