@@ -21,6 +21,7 @@ package org.activityinfo.server.command.handler;
 import com.extjs.gxt.ui.client.Style;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
+import com.google.inject.util.Providers;
 import org.activityinfo.json.Json;
 import org.activityinfo.legacy.shared.command.GetUsers;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
@@ -30,13 +31,17 @@ import org.activityinfo.legacy.shared.model.FolderDTO;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
 import org.activityinfo.model.database.GrantModel;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.Permission;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Folder;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
+import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -55,28 +60,32 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
 
     private static final Logger LOGGER = Logger.getLogger(GetUsersHandler.class.getName());
 
-    private EntityManager em;
+    private final EntityManager em;
+    private final DatabaseProvider provider;
 
     @Inject
     public GetUsersHandler(EntityManager em) {
         this.em = em;
+        this.provider = new DatabaseProviderImpl(Providers.of(em));
     }
 
     @Override
     public CommandResult execute(GetUsers cmd, User currentUser) {
+        UserDatabaseMeta dbMeta = provider.getDatabaseMetadata(CuidAdapter.databaseId(cmd.getDatabaseId()), currentUser.getId());
+        Permission manageUsers = PermissionOracle.manageUsers(dbMeta);
 
-        Database db = em.getReference(Database.class, cmd.getDatabaseId());
-
-        UserPermission currentUserPermission = LegacyPermissionAdapter.using(em).getPermissionByUser(db, currentUser);
-
-        assertAuthorized(currentUserPermission);
+        if (manageUsers.isForbidden()) {
+            throw new IllegalAccessCommandException(String.format(
+                    "User %d does not have permission to view user permissions in database %d",
+                    currentUser.getId(), cmd.getDatabaseId()));
+        }
 
         String whereClause = "up.database.id = :dbId and " +
                              "up.user.id <> :currentUserId and " +
                              "up.allowView = true";
 
-        if (!currentUserPermission.isAllowManageAllUsers()) {
-            whereClause += " and up.partner.id = " + currentUserPermission.getPartner().getId();
+        if (manageUsers.isFiltered()) {
+            whereClause += " and up.partner.id = " + LegacyPermissionAdapter.partnerFromFilter(manageUsers.getFilter());
         }
 
         TypedQuery<UserPermission> query = em.createQuery("select up from UserPermission up where " +
@@ -160,15 +169,6 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
         dto.setDatabaseId(folder.getDatabase().getId());
         dto.setName(folder.getName());
         return dto;
-    }
-
-    private void assertAuthorized(UserPermission currentUserPermission) {
-        if (!currentUserPermission.isAllowManageUsers()) {
-            throw new IllegalAccessCommandException(String.format(
-                    "User %d does not have permission to view user permissions in database %d",
-                    currentUserPermission.getUser().getId(),
-                    currentUserPermission.getDatabase().getId()));
-        }
     }
 
     private int queryTotalCount(GetUsers cmd, User currentUser, String whereClause) {
