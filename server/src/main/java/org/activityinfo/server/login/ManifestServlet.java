@@ -19,7 +19,6 @@
 package org.activityinfo.server.login;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -30,13 +29,13 @@ import org.realityforge.gwt.appcache.server.propertyprovider.UserAgentPropertyPr
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Overrides the behavior of the default rebar-appcache servlet to do custom
- * locale selection based on the authenticated user's profile.
+ * Serves the AppCache manifest file based on the locale specified in the path and
+ * the browser's User Agent header
  *
- * @author alex
  */
 @Singleton
 public class ManifestServlet extends AbstractManifestServlet {
@@ -66,12 +65,47 @@ public class ManifestServlet extends AbstractManifestServlet {
         @Nullable
         @Override
         public String getPropertyValue(@Nonnull HttpServletRequest request) throws Exception {
-            String locale = request.getParameter("locale");
-            if (Strings.isNullOrEmpty(locale)) {
-                return "en";
-            }
-            return locale;
+            return localeFromPath(request.getRequestURI());
         }
     }
 
+
+    @Override
+    protected String getBaseUrl(HttpServletRequest request) {
+        return "/";
+    }
+
+    @Nonnull
+    @Override
+    protected String getModuleName(@Nonnull HttpServletRequest request) throws ServletException {
+        return moduleNameFromPath(request.getRequestURI());
+    }
+
+
+    @VisibleForTesting
+    static String localeFromPath(String path) {
+        // The request should be in the form
+        //    /{module}/{locale}.appcache
+        // For example:
+        //    /ActivityInfo/en.appcache
+        //    /ActivityInfo/fr.appcache
+
+
+        if(path.endsWith(".appcache") && path.length() > ".appcache".length() + 2) {
+            int lastSlash = path.lastIndexOf('/');
+            String locale = path.substring(lastSlash + 1, lastSlash + 3);
+            return locale;
+        }
+
+        return "en";
+    }
+
+    @VisibleForTesting
+    static String moduleNameFromPath(String path) throws ServletException {
+        String[] parts = path.split("/");
+        if(parts.length < 2) {
+            throw new ServletException( "Unable to determine the module name from url: '" + path + "'" );
+        }
+        return parts[parts.length - 2];
+    }
 }
