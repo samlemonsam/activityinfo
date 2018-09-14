@@ -144,4 +144,10 @@ public class PermissionOracle {
         return resourceId.getDomain() == CuidAdapter.DATABASE_DOMAIN;
     }
 
+    ////////////////////////////////////////////////// TASK METHODS //////////////////////////////////////////////////
+
+    public static boolean canDeleteDatabase(UserDatabaseMeta db) {
+        return db.isOwner();
+    }
+
 }

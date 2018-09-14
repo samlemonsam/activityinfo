@@ -351,7 +351,9 @@ public class LegacyPermissionAdapter {
     }
 
     public void assertDatabaseDeletionAuthorized(Database entity, User user) {
-        if(entity.getOwner().getId() != user.getId()) {
+        ResourceId databaseId = CuidAdapter.databaseId(entity.getId());
+        UserDatabaseMeta database = provider.getDatabaseMetadata(databaseId, user.getId());
+        if(!PermissionOracle.canDeleteDatabase(database)) {
             LOGGER.severe(String.format("User %d is not authorized to delete " +
                     "database %d: it is owned by user %d", user.getId(), entity.getId(), entity.getOwner().getId()));
             throw new IllegalAccessCommandException();
