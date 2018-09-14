@@ -21,11 +21,16 @@ package org.activityinfo.server.command.handler.sync;
 import com.bedatadriven.rebar.sql.client.query.SqlQuery;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
+import com.google.inject.util.Providers;
 import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
 import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.legacy.shared.impl.Tables;
-import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.json.JSONException;
 
 import javax.persistence.EntityManager;
@@ -40,16 +45,16 @@ public class DbUpdateBuilder implements UpdateBuilder {
     private static final int MINIMUM_DB_VERSION = 1;
 
     private final EntityManager entityManager;
-    private final LegacyPermissionAdapter legacyPermissionAdapter;
+    private final DatabaseProvider provider;
 
     private JpaBatchBuilder batch;
     private Database database;
-    private UserPermission permission;
+    private UserDatabaseMeta databaseMeta;
 
     @Inject
-    public DbUpdateBuilder(EntityManager entityManager, LegacyPermissionAdapter legacyPermissionAdapter) {
+    public DbUpdateBuilder(EntityManager entityManager) {
         this.entityManager = entityManager;
-        this.legacyPermissionAdapter = legacyPermissionAdapter;
+        this.provider = new DatabaseProviderImpl(Providers.of(entityManager));
     }
 
     @SuppressWarnings("unchecked") @Override
@@ -59,18 +64,15 @@ public class DbUpdateBuilder implements UpdateBuilder {
         // otherwise they will be excluded
 
         this.database = entityManager.find(Database.class, request.getRegionId());
-        this.permission = legacyPermissionAdapter.getPermissionByUser(database, user);
+        this.databaseMeta = provider.getDatabaseMetadata(CuidAdapter.databaseId(request.getRegionId()), user.getId());
 
-        Preconditions.checkNotNull(database, "Failed to fetch database by id:" + 
+        Preconditions.checkNotNull(database, "Failed to fetch database by id:" +
                 request.getRegionId() + ", region: " + request);
 
         // This database's version is a function of both the database's version
         // and our permission own version, which determines whether we can see the database or not
         long localVersion = request.getLocalVersion() == null ? 0 : Long.parseLong(request.getLocalVersion());
-
-        long serverVersion = Math.max(MINIMUM_DB_VERSION,
-                Math.max(database.getVersion(), permission.getVersion()));
-
+        long serverVersion = Math.max(MINIMUM_DB_VERSION, Math.max(database.getVersion(), databaseMeta.getUserVersion()));
 
         LOGGER.info("Schema versions: local = " + localVersion + ", server = " + serverVersion);
      
@@ -126,7 +128,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
         insert(Tables.PARTNER_IN_DATABASE, inDatabase());
 
         insert(User.class, "userId = " + database.getOwner().getId());
-        insert(UserPermission.class, "userId = " + permission.getUser().getId());
+        insert(UserPermission.class, "userId = " + databaseMeta.getUserId());
     }
 
     private void insertIndicators() {
@@ -221,14 +223,14 @@ public class DbUpdateBuilder implements UpdateBuilder {
     }
 
     private void insert(Class<?> entityClass, String criteria) {
-        if(permission.isAllowView() && !database.isDeleted()) {
-            LOGGER.fine(entityClass.getName() + " Criteria: " + criteria.toLowerCase());
+        if(PermissionOracle.canViewUsers(databaseMeta) && !database.isDeleted()) {
+            LOGGER.fine(() -> entityClass.getName() + " Criteria: " + criteria.toLowerCase());
             batch.insert(entityClass, criteria.toLowerCase());
         }
     }
 
     private void insert(String tableName, String criteria) {
-        if(permission.isAllowView() && !database.isDeleted()) {
+        if(PermissionOracle.canViewUsers(databaseMeta) && !database.isDeleted()) {
             SqlQuery query = SqlQuery.selectAll().from(tableName).whereTrue(criteria.toLowerCase());
             LOGGER.fine(query.sql());
             batch.insert()
