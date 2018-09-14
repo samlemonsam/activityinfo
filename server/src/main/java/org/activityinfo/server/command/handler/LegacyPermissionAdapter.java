@@ -26,6 +26,8 @@ import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.Published;
 import org.activityinfo.model.database.*;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.formula.*;
+import org.activityinfo.model.formula.functions.EqualFunction;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.Permission;
 import org.activityinfo.model.permission.PermissionOracle;
@@ -102,7 +104,7 @@ public class LegacyPermissionAdapter {
         UserDatabaseMeta db = provider.getDatabaseMetadata(databaseId, user.getId());
         PermissionQuery query = new PermissionQuery(user.getId(), database.getId(), Operation.MANAGE_USERS, databaseId);
         Permission manageUsers = PermissionOracle.query(query, db);
-        return manageUsers.isPermitted() && !manageUsers.getFilter().isPresent();
+        return manageUsers.isPermitted() && !manageUsers.isFiltered();
     }
 
     public void assertDesignPrivileges(Database database, User user) {
@@ -135,6 +137,7 @@ public class LegacyPermissionAdapter {
     public void assertDesignPrivileges(Folder folder, User user) {
         assertDesignPrivileges(folder.getDatabase(), user);
     }
+
     public void assertDesignPrivileges(LockedPeriod lockedPeriod, User user) {
         assertDesignPrivileges(lockedPeriod.getDatabase(), user);
     }
@@ -180,22 +183,16 @@ public class LegacyPermissionAdapter {
         PermissionQuery query = new PermissionQuery(user.getId(), database.getId(), Operation.EDIT_RECORD, activityId);
         Permission edit = PermissionOracle.query(query, db);
 
-        if (!edit.isPermitted()) {
-            return false;
-        } else if (!edit.getFilter().isPresent()) {
+        if (edit.isPermitted() && !edit.isFiltered()) {
             return true;
+        } else if (edit.isPermitted()){
+            return filterContainsPartner(edit.getFilter(),
+                    CuidAdapter.partnerFormId(database.getId()),
+                    CuidAdapter.partnerRecordId(site.getPartner().getId()));
         } else {
-            String permissionFilter = edit.getFilter().get();
-            String partnerFilter = partnerFilter(database, site.getPartner());
-            return partnerFilter.equals(permissionFilter);
+            return false;
         }
     }
-
-    private String partnerFilter(Database database, Partner partner) {
-        return CuidAdapter.partnerFormId(database.getId()).asString() + "==" +
-                CuidAdapter.partnerRecordId(partner.getId()).asString();
-    }
-
 
     public void assertEditAllowed(Site site, User user) {
         if(!isEditAllowed(site, user)) {
@@ -204,8 +201,6 @@ public class LegacyPermissionAdapter {
             throw new IllegalAccessCommandException();
         }
     }
-
-
 
     public boolean isEditSiteAllowed(User user, Activity activity, Partner partner) {
         UserPermission permission = getPermissionByUser(activity.getDatabase(), user);
@@ -235,18 +230,54 @@ public class LegacyPermissionAdapter {
             return true;
         }
 
-        UserPermission permission = getPermissionByUser(site.getActivity().getDatabase(), user);
+        Database database = site.getActivity().getDatabase();
+        ResourceId databaseId = CuidAdapter.databaseId(database.getId());
+        UserDatabaseMeta db = provider.getDatabaseMetadata(databaseId, user.getId());
+        PermissionQuery query = new PermissionQuery(user.getId(), database.getId(), Operation.VIEW, databaseId);
+        Permission view = PermissionOracle.query(query, db);
 
-        if (permission.isAllowViewAll()) {
+        if (view.isPermitted() && !view.isFiltered()) {
             return true;
-        }
-
-        if (permission.isAllowView()) {
+        } else if (view.isPermitted()) {
             // without AllowViewAll, edit permission is contingent on the site's partner
-            return site.getPartner().getId() == permission.getPartner().getId();
+            return filterContainsPartner(view.getFilter(),
+                    CuidAdapter.partnerFormId(database.getId()),
+                    CuidAdapter.partnerRecordId(site.getPartner().getId()));
+        } else {
+            return false;
+        }
+    }
+
+    private boolean filterContainsPartner(String filter, ResourceId partnerFormId, ResourceId partnerId) {
+        FormulaNode filterFormula = FormulaParser.parse(filter);
+
+        if (!(filterFormula instanceof FunctionCallNode)) {
+            return false;
+        }
+        if (!(((FunctionCallNode) filterFormula).getFunction() instanceof EqualFunction)) {
+            return false;
+        }
+        if (((FunctionCallNode) filterFormula).getArgumentCount() != 2) {
+            return false;
         }
 
-        return false;
+        FunctionCallNode equalFunctionCall = (FunctionCallNode) filterFormula;
+
+        if (!(equalFunctionCall.getArgument(0 ) instanceof SymbolNode) && !(equalFunctionCall.getArgument(1) instanceof SymbolNode)) {
+            return false;
+        }
+
+        SymbolNode partnerFormNode = (SymbolNode) equalFunctionCall.getArgument(0);
+        SymbolNode partnerFieldNode = (SymbolNode) equalFunctionCall.getArgument(1);
+
+        if (!partnerFormNode.asResourceId().equals(partnerFormId)) {
+            return false;
+        }
+        if (!partnerFieldNode.asResourceId().equals(partnerId)) {
+            return false;
+        }
+
+        return true;
     }
 
 
