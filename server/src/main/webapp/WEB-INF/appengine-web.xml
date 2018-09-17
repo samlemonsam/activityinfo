@@ -17,8 +17,16 @@
 
   <runtime>java8</runtime>
 
+  <!-- The following files will be served as static files from
+       OUTSIDE the application server -->
+
   <static-files>
     <include path="/robots.txt" expiration="1d"/>
+
+    <!-- All resources that are part of the classic interface are
+         strongly named, either by the GWT compiler or by including
+         the GXT version in the path to its resources -->
+
     <include path="/ActivityInfo/**.gif" expiration="365d"/>
     <include path="/ActivityInfo/**.png" expiration="365d"/>
     <include path="/ActivityInfo/**.cache.js" expiration="365d"/>
@@ -26,19 +34,35 @@
     <include path="/ActivityInfo/**.swf" expiration="365d"/>
     <include path="/ActivityInfo/**.cache.html" expiration="365d"/>
 
+    <!-- The new module still has a few resources pulled in by GXT 4
+         that are not strongly named, but unlikely to change -->
+
     <include path="/App/**.cache.js" expiration="365d"/>
     <include path="/App/**.gif"/>
+    <include path="/App/**.css"/>
+    <include path="/App/**.html"/>
 
     <include path="/static/**.png" expiration="365d"/>
+
     <include path="/error.html"/>
   </static-files>
+
+  <!-- The following files are included in the deployment to the
+       application server and are accessible by servlets and other code
+       via javax.servlet.ServletContext.getResourceAsStream() -->
+
   <resource-files>
     <include path="/ActivityInfo/*.gwt.rpc" />
-    <include path="/ActivityInfo/*.nocache.*" />
-    <include path="/App/*.nocache.*" />
-    <include path="/App/*.nocache.*" />
 
+    <include path="/ActivityInfo/*.nocache.js" />
+    <include path="/ActivityInfo/permutations.xml" />
+    <include path="/ActivityInfo/*.appcache" />
+
+    <include path="/App/*.nocache.js" />
+    <include path="/App/permutations.xml" />
+    <include path="/App/*.appcache"/>
   </resource-files>
+
   <inbound-services>
     <service>warmup</service>
   </inbound-services>
