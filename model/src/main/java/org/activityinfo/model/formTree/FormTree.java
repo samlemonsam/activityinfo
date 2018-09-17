@@ -505,7 +505,7 @@ public class FormTree implements FormClassProvider, FormMetadataProvider {
                 paths.add(child.path);
             }
 
-            if(!child.getChildren().isEmpty() & descendPredicate.apply(child)) {
+            if(!child.getChildren().isEmpty() && descendPredicate.apply(child)) {
                 search(paths, child.getChildren(), searchOrder, descendPredicate, matchPredicate);
             }
 
