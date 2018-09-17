@@ -134,7 +134,6 @@ public class ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<Void> persist(FormClass formClass) {
-        LOGGER.info(() -> "Persist FormClass " + formClass.getLabel());
         return client.updateFormSchema(formClass.getId().asString(), formClass);
     }
 
