@@ -25,6 +25,7 @@
     <include path="/ActivityInfo/**.css" expiration="365d"/>
     <include path="/ActivityInfo/**.swf" expiration="365d"/>
     <include path="/ActivityInfo/**.cache.html" expiration="365d"/>
+    <include path="/App/**.cache.js" expiration="365d"/>
     <include path="/static/**.png" expiration="365d"/>
     <include path="/error.html"/>
   </static-files>
