@@ -42,8 +42,7 @@ import java.util.Map;
 /**
  * Exposes a legacy {@code Dispatcher} implementation as new {@code ResourceLocator}
  */
-public class
-ResourceLocatorAdaptor implements ResourceLocator {
+public class ResourceLocatorAdaptor implements ResourceLocator {
 
     private ActivityInfoClientAsync client;
 
@@ -135,6 +134,7 @@ ResourceLocatorAdaptor implements ResourceLocator {
 
     @Override
     public Promise<Void> persist(FormClass formClass) {
+        LOGGER.info(() -> "Persist FormClass " + formClass.getLabel());
         return client.updateFormSchema(formClass.getId().asString(), formClass);
     }
 

@@ -48,14 +48,17 @@ public class ConfigLoader implements PageLoader {
     private ResourceLocator resourceLocator;
 
     @Inject
-    public ConfigLoader(EventBus eventBus, Dispatcher dispatcher,
+    public ConfigLoader(EventBus eventBus,
+                        Dispatcher dispatcher,
                         NavigationHandler navigationHandler,
                         StateProvider stateMgr,
-                        PageStateSerializer placeSerializer) {
+                        PageStateSerializer placeSerializer,
+                        ResourceLocator resourceLocator) {
         this.eventBus = eventBus;
         this.dispatch = dispatcher;
         this.navigationHandler = navigationHandler;
         this.stateMgr = stateMgr;
+        this.resourceLocator = resourceLocator;
 
         register(ConfigFrameSet.PAGE_ID);
         register(DbConfigPresenter.PAGE_ID);
