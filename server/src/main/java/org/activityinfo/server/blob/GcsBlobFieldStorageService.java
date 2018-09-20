@@ -34,19 +34,16 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.DeploymentEnvironment;
-import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
 import org.activityinfo.server.database.hibernate.entity.Activity;
-import org.activityinfo.server.database.hibernate.entity.Database;
-import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.server.util.blob.DevAppIdentityService;
-import org.activityinfo.store.spi.BlobAuthorizer;
-import org.activityinfo.store.spi.BlobId;
-import org.activityinfo.store.spi.FormStorage;
-import org.activityinfo.store.spi.FormStorageProvider;
+import org.activityinfo.store.spi.*;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.Duration;
 
@@ -74,6 +71,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
 
     private AppIdentityService appIdentityService;
     private final Provider<EntityManager> em;
+    private final DatabaseProvider databaseProvider;
     private final Provider<FormStorageProvider> formStorage;
 
     private String bucketName;
@@ -84,6 +82,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
                                       Provider<FormStorageProvider> formStorage) {
         this.bucketName = config.getBlobServiceBucketName();
         this.em = em;
+        this.databaseProvider = new DatabaseProviderImpl(em);
         this.formStorage = formStorage;
 
         if (Strings.isNullOrEmpty(bucketName)) {
@@ -276,35 +275,25 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
     }
 
     private boolean hasAccessToResource(ResourceId userId, ResourceId formId) {
+        UserDatabaseMeta databaseMeta;
+        int user = CuidAdapter.getLegacyIdFromCuid(userId);
         if (formId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
             Activity activity = em.get().find(Activity.class, CuidAdapter.getLegacyIdFromCuid(formId));
-            return viewAllowed(activity.getDatabase(), userId);
+            databaseMeta = databaseProvider.getDatabaseMetadata(activity.getDatabase().getId(), user);
+            return PermissionOracle.canView(formId, databaseMeta);
         } else if (formId.getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
             // As Sub-Form is stored in HRD, FormPermissions are not set (only returns owner permissions),
             // so check user against database via PermissionOracle
             Optional<FormStorage> subFormStorage = formStorage.get().getForm(formId);
             if (subFormStorage.isPresent()) {
                 FormStorage subForm = subFormStorage.get();
-                return viewAllowed(subForm.getFormClass().getDatabaseId(), userId);
+                databaseMeta = databaseProvider.getDatabaseMetadata(subForm.getFormClass().getDatabaseId(), user);
+                return PermissionOracle.canView(databaseMeta);
             }
         } else {
             throw new UnsupportedOperationException("Blob owner is not supported, ownerId: " + formId);
         }
         return false;
-    }
-
-    private boolean viewAllowed(ResourceId databaseId, ResourceId userId) {
-        Database database = em.get().getReference(Database.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
-        return viewAllowed(database, userId);
-    }
-
-    private boolean viewAllowed(Database database, ResourceId userId) {
-        User user = em.get().getReference(User.class, CuidAdapter.getLegacyIdFromCuid(userId));
-        return viewAllowed(database, user);
-    }
-
-    private boolean viewAllowed(Database database, User user) {
-        return LegacyPermissionAdapter.using(em.get()).isViewAllowed(database, user);
     }
 
     public void assertNotAnonymousUser(@InjectParam AuthenticatedUser user) {

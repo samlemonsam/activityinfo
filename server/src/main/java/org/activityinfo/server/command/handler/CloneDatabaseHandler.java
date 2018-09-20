@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.util.Providers;
 import org.activityinfo.json.Json;
 import org.activityinfo.legacy.shared.command.CloneDatabase;
 import org.activityinfo.legacy.shared.command.UpdatePartner;
@@ -32,10 +33,12 @@ import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.model.database.GrantModel;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.AttachmentType;
@@ -51,7 +54,9 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.*;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 
 import javax.inject.Provider;
@@ -70,7 +75,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
     private static final Logger LOGGER = Logger.getLogger(CloneDatabaseHandler.class.getName());
 
     private final EntityManager em;
-    private final LegacyPermissionAdapter legacyPermissionAdapter;
+    private final DatabaseProvider databaseProvider;
     private final KeyGenerator generator = new KeyGenerator();
     private final Provider<FormStorageProvider> formCatalog;
 
@@ -83,11 +88,12 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
     private Database targetDb;
     private Database sourceDb;
+    private UserDatabaseMeta sourceDbMeta;
 
     @Inject
     public CloneDatabaseHandler(Injector injector, Provider<FormStorageProvider> formCatalog) {
         this.em = injector.getInstance(EntityManager.class);
-        this.legacyPermissionAdapter = injector.getInstance(LegacyPermissionAdapter.class);
+        this.databaseProvider = new DatabaseProviderImpl(Providers.of(em));
         this.formCatalog = formCatalog;
     }
 
@@ -96,10 +102,11 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
         this.targetDb = createDatabase(command, user);
         this.sourceDb = em.find(Database.class, command.getSourceDatabaseId());
+        this.sourceDbMeta = databaseProvider.getDatabaseMetadata(command.getSourceDatabaseId(), user.getId());
 
         createDefaultPartner(user);
 
-        if (!legacyPermissionAdapter.isViewAllowed(sourceDb, user)) {
+        if (!PermissionOracle.canView(sourceDbMeta)) {
             throw new IllegalAccessCommandException();
         }
 
@@ -108,8 +115,8 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             copyPartners();
         }
 
-        // 2. copy user permissions : without design privileges the user shouldn't be able to see the list of users.
-        if (command.isCopyUserPermissions() && legacyPermissionAdapter.isDesignAllowed(sourceDb, user)) {
+        // 2. copy user permissions
+        if (command.isCopyUserPermissions() && PermissionOracle.canManageUsers(sourceDbMeta)) {
             copyUserPermissions();
         }
 
@@ -117,7 +124,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         copyForms();
 
         // 4. Map old folder ids to new folder ids on permission model
-        if (command.isCopyUserPermissions() && legacyPermissionAdapter.isDesignAllowed(sourceDb, user)) {
+        if (command.isCopyUserPermissions() && PermissionOracle.canManageUsers(sourceDbMeta)) {
             mapFolderPermissions();
         }
         

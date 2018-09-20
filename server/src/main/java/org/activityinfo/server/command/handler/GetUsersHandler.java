@@ -72,7 +72,7 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
     @Override
     public CommandResult execute(GetUsers cmd, User currentUser) {
         UserDatabaseMeta dbMeta = provider.getDatabaseMetadata(CuidAdapter.databaseId(cmd.getDatabaseId()), currentUser.getId());
-        Permission manageUsers = PermissionOracle.manageUsers(dbMeta);
+        Permission manageUsers = PermissionOracle.manageUsers(dbMeta.getDatabaseId(), dbMeta);
 
         if (manageUsers.isForbidden()) {
             throw new IllegalAccessCommandException(String.format(

@@ -88,14 +88,6 @@ public class LegacyPermissionAdapter {
         return createForm.isPermitted() && editForm.isPermitted() && deleteForm.isPermitted();
     }
 
-    public boolean isViewAllowed(int database, int user) {
-        ResourceId databaseId = CuidAdapter.databaseId(database);
-        UserDatabaseMeta db = provider.getDatabaseMetadata(databaseId,user);
-        PermissionQuery query = new PermissionQuery(user, database, Operation.VIEW, databaseId);
-        Permission view = PermissionOracle.query(query, db);
-        return view.isPermitted();
-    }
-
     // Need to determine whether user can manage all users and has design permissions
     public boolean isManagePartnersAllowed(Database database, User user) {
         if (!isDesignAllowed(database.getId(), user.getId())) {
@@ -106,10 +98,6 @@ public class LegacyPermissionAdapter {
         PermissionQuery query = new PermissionQuery(user.getId(), database.getId(), Operation.MANAGE_USERS, databaseId);
         Permission manageUsers = PermissionOracle.query(query, db);
         return manageUsers.isPermitted() && !manageUsers.isFiltered();
-    }
-
-    public boolean isViewAllowed(Database database, User user) {
-        return isViewAllowed(database.getId(), user.getId());
     }
 
     public boolean isDesignAllowed(Database database, User user) {
