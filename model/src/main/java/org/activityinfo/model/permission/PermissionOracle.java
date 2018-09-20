@@ -162,7 +162,7 @@ public class PermissionOracle {
         return manageUsers(db).isPermitted();
     }
 
-    public static Permission viewUsers(UserDatabaseMeta db) {
+    public static Permission view(UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
                 CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
                 Operation.VIEW,
@@ -170,8 +170,8 @@ public class PermissionOracle {
         return query(query, db);
     }
 
-    public static boolean canViewUsers(UserDatabaseMeta db) {
-        return viewUsers(db).isPermitted();
+    public static boolean canView(UserDatabaseMeta db) {
+        return view(db).isPermitted();
     }
 
 }
