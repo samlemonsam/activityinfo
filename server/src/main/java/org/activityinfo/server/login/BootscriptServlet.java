@@ -24,6 +24,7 @@ public class BootscriptServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         resp.setHeader("Cache-Control", "no-cache");
+
         try(InputStream in = getServletContext().getResourceAsStream(req.getRequestURI())) {
             ByteStreams.copy(in, resp.getOutputStream());
         }

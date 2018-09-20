@@ -18,44 +18,39 @@
  */
 package org.activityinfo.server.login;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import org.realityforge.gwt.appcache.server.AbstractManifestServlet;
+import org.realityforge.gwt.appcache.server.BindingProperty;
 import org.realityforge.gwt.appcache.server.propertyprovider.PropertyProvider;
 import org.realityforge.gwt.appcache.server.propertyprovider.UserAgentPropertyProvider;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.persistence.EntityManager;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Logger;
 
 /**
- * Overrides the behavior of the default rebar-appcache servlet to do custom
+ * Overrides the behavior of the default gwt-appcache do custom
  * locale selection based on the authenticated user's profile.
  *
- * @author alex
  */
-@Singleton
 public class ManifestServlet extends AbstractManifestServlet {
+
+    private static final Logger LOGGER = Logger.getLogger(ManifestServlet.class.getName());
+
     private static final long serialVersionUID = 5078231093739821294L;
 
-    @Inject
-    public ManifestServlet(Provider<EntityManager> entityManager) {
+    public ManifestServlet() {
         super();
         addPropertyProvider(new UserAgentPropertyProvider());
-        addPropertyProvider(new LocaleProvider(entityManager));
+        addPropertyProvider(new LocaleProvider());
     }
 
     private class LocaleProvider implements PropertyProvider {
-
-        private final Provider<EntityManager> entityManager;
-
-        public LocaleProvider(Provider<EntityManager> entityManager) {
-            this.entityManager = entityManager;
-        }
 
         @Nonnull
         @Override
@@ -74,4 +69,20 @@ public class ManifestServlet extends AbstractManifestServlet {
         }
     }
 
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        LOGGER.info("Serving manfiest...");
+        super.doGet(request, response);
+    }
+
+    @Override
+    protected boolean handleUnmatchedRequest(HttpServletRequest request, HttpServletResponse response,
+                                             String moduleName, String baseUrl,
+                                             List<BindingProperty> computedBindings) throws ServletException, IOException {
+        LOGGER.severe(String.format("Failed to match permutation: moduleName = %s, bindings = %s",
+                moduleName,
+                computedBindings));
+
+        return false;
+    }
 }

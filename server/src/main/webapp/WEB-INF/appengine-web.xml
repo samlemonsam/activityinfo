@@ -33,6 +33,8 @@
     <include path="/ActivityInfo/**.css" expiration="365d"/>
     <include path="/ActivityInfo/**.swf" expiration="365d"/>
     <include path="/ActivityInfo/**.cache.html" expiration="365d"/>
+    <include path="/ActivityInfo/**.html"/>
+
 
     <!-- The new module still has a few resources pulled in by GXT 4
          that are not strongly named, but unlikely to change -->
