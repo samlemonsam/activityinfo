@@ -11,7 +11,11 @@ import org.activityinfo.model.formula.Formulas;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 
+import java.util.logging.Logger;
+
 public class PermissionOracle {
+
+    private static final Logger LOGGER = Logger.getLogger(PermissionOracle.class.getName());
 
     public static Permission query(PermissionQuery query, UserDatabaseMeta db) {
         if (db.isOwner()) {
@@ -144,7 +148,16 @@ public class PermissionOracle {
         return resourceId.getDomain() == CuidAdapter.DATABASE_DOMAIN;
     }
 
-    ////////////////////////////////////////////////// TASK METHODS //////////////////////////////////////////////////
+    private static String illegalAccess(Operation operation, ResourceId databaseId, ResourceId resourceId, int user) {
+        return "ILLEGAL ACCESS "
+                + "[ USER:" + user
+                + "; DATABASE: " + databaseId
+                + "; RESOURCE: " + resourceId
+                + "; OPERATION: " + operation.name()
+                + "]";
+    }
+
+    /////////////////////////////////////////////////// TASK METHODS ///////////////////////////////////////////////////
 
     public static boolean canDeleteDatabase(UserDatabaseMeta db) {
         return db.isOwner();
@@ -177,5 +190,34 @@ public class PermissionOracle {
     public static boolean canView(ResourceId resourceId, UserDatabaseMeta db) {
         return view(resourceId,db).isPermitted();
     }
+
+    public static Permission editResource(ResourceId resourceId, UserDatabaseMeta db) {
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
+                Operation.EDIT_FORM,
+                resourceId);
+        return query(query, db);
+    }
+
+    public static boolean canEditResource(ResourceId resourceId, UserDatabaseMeta db) {
+        return editResource(resourceId,db).isPermitted();
+    }
+
+    ////////////////////////////////////////////////// ASSERT METHODS //////////////////////////////////////////////////
+
+    public static void assertView(ResourceId resourceId, UserDatabaseMeta db) {
+        if (!canView(resourceId, db)) {
+            LOGGER.severe(illegalAccess(Operation.VIEW, db.getDatabaseId(), resourceId, db.getUserId()));
+            throw new PermissionException();
+        }
+    }
+
+    public static void assertEditResource(ResourceId resourceId, UserDatabaseMeta db) {
+        if (!canEditResource(resourceId, db)) {
+            LOGGER.severe(illegalAccess(Operation.EDIT_FORM, db.getDatabaseId(), resourceId, db.getUserId()));
+            throw new PermissionException();
+        }
+    }
+
 
 }
