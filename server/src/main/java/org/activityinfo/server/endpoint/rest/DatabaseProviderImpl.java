@@ -54,6 +54,11 @@ public class DatabaseProviderImpl implements DatabaseProvider {
         }
     }
 
+    @Override
+    public UserDatabaseMeta getDatabaseMetadata(int databaseId, int userId) {
+        return getDatabaseMetadata(CuidAdapter.databaseId(databaseId), userId);
+    }
+
     private UserDatabaseMeta queryGeoDb(int userId) {
         return new UserDatabaseMeta.Builder()
                 .setDatabaseId(GEODB_ID)

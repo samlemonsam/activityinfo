@@ -29,4 +29,6 @@ public interface DatabaseProvider {
 
   UserDatabaseMeta getDatabaseMetadata(ResourceId databaseId, int userId);
 
+  UserDatabaseMeta getDatabaseMetadata(int databaseId, int userId);
+
 }
