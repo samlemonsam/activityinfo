@@ -27,12 +27,14 @@ import org.activityinfo.json.JsonMappingException;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
 import org.activityinfo.store.hrd.Hrd;
 import org.activityinfo.store.hrd.entity.AnalysisEntity;
 import org.activityinfo.store.hrd.entity.AnalysisSnapshotEntity;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -42,11 +44,11 @@ import static org.activityinfo.json.Json.parse;
 
 public class AnalysesResource {
 
-    private final LegacyPermissionAdapter legacyPermissionAdapter;
+    private final DatabaseProvider databaseProvider;
     private final Provider<AuthenticatedUser> userProvider;
 
-    public AnalysesResource(LegacyPermissionAdapter legacyPermissionAdapter, Provider<AuthenticatedUser> userProvider) {
-        this.legacyPermissionAdapter = legacyPermissionAdapter;
+    public AnalysesResource(DatabaseProvider databaseProvider, Provider<AuthenticatedUser> userProvider) {
+        this.databaseProvider = databaseProvider;
         this.userProvider = userProvider;
     }
 
@@ -83,7 +85,7 @@ public class AnalysesResource {
 
         final AnalysisUpdate update = Json.fromJson(AnalysisUpdate.class, Json.parse(jsonString));
 
-        assertAuthorized(update);
+        assertUpdateAuthorized(update);
 
         // TODO: verify json
         Hrd.ofy().transact(new Runnable() {
@@ -125,16 +127,17 @@ public class AnalysesResource {
 
     private boolean isVisible(AnalysisEntity entity) {
         ResourceId databaseId = ResourceId.valueOf(entity.getParentId());
-        return legacyPermissionAdapter.isViewAllowed(databaseId, userProvider.get());
+        UserDatabaseMeta database = databaseProvider.getDatabaseMetadata(databaseId, userProvider.get().getId());
+        return PermissionOracle.canView(database);
     }
 
-    private void assertAuthorized(AnalysisUpdate update) {
+    private void assertUpdateAuthorized(AnalysisUpdate update) {
         ResourceId databaseId = ResourceId.valueOf(update.getParentId());
         if(databaseId.getDomain() != CuidAdapter.DATABASE_DOMAIN) {
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("No such folder: " + databaseId).build());
         }
-
-        legacyPermissionAdapter.assertDesignPrivileges(CuidAdapter.getLegacyIdFromCuid(databaseId), userProvider.get());
+        UserDatabaseMeta database = databaseProvider.getDatabaseMetadata(databaseId, userProvider.get().getId());
+        PermissionOracle.assertEditResource(databaseId, database);
     }
 
 

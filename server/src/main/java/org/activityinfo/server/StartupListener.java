@@ -26,6 +26,7 @@ import org.activityinfo.server.attachment.AttachmentModule;
 import org.activityinfo.server.authentication.AuthenticationModule;
 import org.activityinfo.server.blob.GcsBlobFieldStorageServiceModule;
 import org.activityinfo.server.csp.ContentSecurityModule;
+import org.activityinfo.server.database.DatabaseModule;
 import org.activityinfo.server.database.ServerDatabaseModule;
 import org.activityinfo.server.database.hibernate.HibernateModule;
 import org.activityinfo.server.digest.DigestModule;
@@ -95,7 +96,8 @@ public class StartupListener extends GuiceServletContextListener {
                 new RestApiModule(),
                 new OdkModule(),
                 new GcsBlobFieldStorageServiceModule(),
-                new ApprovalModule());
+                new ApprovalModule(),
+                new DatabaseModule());
     }
 
 }

@@ -42,6 +42,7 @@ import org.activityinfo.server.mail.MailSender;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.query.server.InvalidUpdateException;
 import org.activityinfo.store.query.server.Updater;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.codehaus.jackson.map.annotate.JsonView;
 
@@ -61,8 +62,8 @@ public class RootResource {
     private Provider<FormStorageProvider> catalog;
     private Provider<AuthenticatedUser> userProvider;
     private ServerSideAuthProvider authProvider;
-    private LegacyPermissionAdapter legacyPermissionAdapter;
     private MailSender mailSender;
+    private DatabaseProvider databaseProvider;
 
     private ApiBackend backend;
     
@@ -73,9 +74,9 @@ public class RootResource {
                         DeploymentConfiguration config,
                         Provider<AuthenticatedUser> userProvider,
                         ServerSideAuthProvider authProvider,
-                        LegacyPermissionAdapter legacyPermissionAdapter,
                         ApiBackend backend,
-                        MailSender mailSender) {
+                        MailSender mailSender,
+                        DatabaseProvider databaseProvider) {
         super();
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
@@ -83,10 +84,9 @@ public class RootResource {
         this.config = config;
         this.userProvider = userProvider;
         this.authProvider = authProvider;
-        this.legacyPermissionAdapter = legacyPermissionAdapter;
         this.backend = backend;
         this.mailSender = mailSender;
-
+        this.databaseProvider = databaseProvider;
     }
 
     @Path("/adminEntity/{id}")
@@ -222,7 +222,7 @@ public class RootResource {
 
     @Path("/analysis")
     public AnalysesResource getAnalysis() {
-        return new AnalysesResource(legacyPermissionAdapter, userProvider);
+        return new AnalysesResource(databaseProvider, userProvider);
     }
 
     @Path("/accounts")
