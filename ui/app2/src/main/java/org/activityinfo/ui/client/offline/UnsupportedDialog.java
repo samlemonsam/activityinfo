@@ -23,6 +23,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import org.activityinfo.i18n.shared.I18N;
@@ -45,13 +46,14 @@ public class UnsupportedDialog {
         SafeUri downloadUri = UriUtils.fromSafeConstant("https://www.google.com/chrome/browser/desktop/?hl=" +
                 LocaleInfo.getCurrentLocale().getLocaleName());
 
+        SafeHtml title = SafeHtmlUtils.fromString(I18N.CONSTANTS.offlineNotSupportedTitle());
         SafeHtml message = template.message(
                 I18N.CONSTANTS.offlineNotSupported(), 
                 downloadUri, 
                 I18N.CONSTANTS.downloadGoogleChrome());
 
 
-        MessageBox.alert(I18N.CONSTANTS.offlineNotSupportedTitle(), message.asString(), null);
+        MessageBox.alert(title, message, null);
 
     }
     
