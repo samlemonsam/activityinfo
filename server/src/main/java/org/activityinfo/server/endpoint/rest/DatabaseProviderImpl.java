@@ -77,6 +77,7 @@ public class DatabaseProviderImpl implements DatabaseProvider {
         if (database.getOwner().getId() == userId) {
             meta.setOwner(true);
             meta.setVersion(Long.toString(database.getVersion()));
+            meta.setPendingTransfer(database.hasPendingTransfer());
         } else {
             Optional<UserPermission> userPermission = getUserPermission(entityManager.get(), database, userId);
             if(userPermission.isPresent()) {
