@@ -111,10 +111,6 @@ public class LegacyPermissionAdapter {
         }
     }
 
-    public void assertDesignPrivileges(ResourceId databaseId, int user) {
-        assertDesignPrivileges(CuidAdapter.getLegacyIdFromCuid(databaseId), user);
-    }
-
     public void assertDesignPrivileges(Database database, User user) {
         assertDesignPrivileges(database.getId(), user.getId());
     }
@@ -140,10 +136,6 @@ public class LegacyPermissionAdapter {
 
     public void assertDesignPrivileges(LockedPeriod lockedPeriod, User user) {
         assertDesignPrivileges(lockedPeriod.getDatabase(), user);
-    }
-
-    public void assertDesignPrivileges(FormClass formClass, User user) {
-        assertDesignPrivileges(formClass.getDatabaseId(), user.getId());
     }
 
     public void assertDesignPrivileges(Target target, User user) {
@@ -350,17 +342,6 @@ public class LegacyPermissionAdapter {
 
     public void assertDesignPrivileges(FormClass formClass, AuthenticatedUser user) {
         assertDesignPrivileges(CuidAdapter.getLegacyIdFromCuid(formClass.getDatabaseId()), user.getUserId());
-    }
-
-    public void assertDesignPrivileges(int database, AuthenticatedUser user) {
-        assertDesignPrivileges(database, user.getUserId());
-    }
-
-    public boolean isViewAllowed(ResourceId databaseId, AuthenticatedUser user) {
-        if(databaseId.getDomain() != DATABASE_DOMAIN) {
-            return false;
-        }
-        return isViewAllowed(databaseId, user);
     }
 
 }
