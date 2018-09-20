@@ -63,6 +63,8 @@
     <include path="/App/*.nocache.js" />
     <include path="/App/permutations.xml" />
     <include path="/App/*.appcache"/>
+
+    <include path="/commit.id"/>
   </resource-files>
 
   <inbound-services>
