@@ -46,7 +46,7 @@
     <inherits name="org.activityinfo.ui.codemirror.CodeMirror"/>
 
 
-    <!-- Specify the paths for translatable code -->
+    <!-- Specify the paths for translatable  code -->
     <source path='client'/>
     <source path='shared'/>
 
