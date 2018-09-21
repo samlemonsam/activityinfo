@@ -51,7 +51,7 @@
     color: rgb(192, 192, 192);
     font-weight: 900;
     font-size: 15px;
-    background: url("/ActivityInfo/gxt231/images/default/shared/large-loading.gif") no-repeat;
+    background: url("/Classic/gxt231/images/default/shared/large-loading.gif") no-repeat;
     padding-left: 50px;
     padding-top: 5px;
     padding-bottom: 8px;
@@ -64,13 +64,13 @@
 }
 
 .mapped {
-    background-image: url(ActivityInfo/image/mapped.gif);
+    background-image: url(Classic/image/mapped.gif);
     width: 10px;
     height: 16px;
 }
 
 .unmapped {
-    background-image: url(ActivityInfo/image/unmapped.gif);
+    background-image: url(Classic/image/unmapped.gif);
     width: 10px;
     height: 16px;
 }
@@ -175,12 +175,12 @@
 }
 
 .gallery dd.over {
-    background: #F5FDE3 url(ActivityInfo/image/gallery-over.gif) no-repeat scroll 0 0;
+    background: #F5FDE3 url(Classic/image/gallery-over.gif) no-repeat scroll 0 0;
 }
 
 .gallery .loading-indicator {
     font-size: 11px;
-    background: url('/ActivityInfo/gxt231/images/default/shared/large-loading.gif') no-repeat left;
+    background: url('/Classic/gxt231/images/default/shared/large-loading.gif') no-repeat left;
     padding-left: 20px;
     margin: 10px;
 }
