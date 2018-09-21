@@ -86,5 +86,6 @@
 
   <!-- configure fallback rules used by the client when offline -->
   <extend-configuration-property name="appcache_fallback_files" value="/login /app/offline"/>
+  <extend-configuration-property name="appcache_fallback_files" value=". /app/offline"/>
 
 </module>

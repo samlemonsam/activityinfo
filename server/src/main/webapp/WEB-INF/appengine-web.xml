@@ -27,22 +27,22 @@
          strongly named, either by the GWT compiler or by including
          the GXT version in the path to its resources -->
 
-    <include path="/ActivityInfo/**.gif" expiration="365d"/>
-    <include path="/ActivityInfo/**.png" expiration="365d"/>
-    <include path="/ActivityInfo/**.cache.js" expiration="365d"/>
-    <include path="/ActivityInfo/**.css" expiration="365d"/>
-    <include path="/ActivityInfo/**.swf" expiration="365d"/>
-    <include path="/ActivityInfo/**.cache.html" expiration="365d"/>
-    <include path="/ActivityInfo/**.html"/>
+    <include path="/Classic/**.gif" expiration="365d"/>
+    <include path="/Classic/**.png" expiration="365d"/>
+    <include path="/Classic/**.cache.js" expiration="365d"/>
+    <include path="/Classic/**.css" expiration="365d"/>
+    <include path="/Classic/**.swf" expiration="365d"/>
+    <include path="/Classic/**.cache.html" expiration="365d"/>
+    <include path="/Classic/**.html"/>
 
 
     <!-- The new module still has a few resources pulled in by GXT 4
          that are not strongly named, but unlikely to change -->
 
-    <include path="/App/**.cache.js" expiration="365d"/>
-    <include path="/App/**.gif"/>
-    <include path="/App/**.css"/>
-    <include path="/App/**.html"/>
+    <include path="/App3/**.cache.js" expiration="365d"/>
+    <include path="/App3/**.gif"/>
+    <include path="/App3/**.css"/>
+    <include path="/App3/**.html"/>
 
     <include path="/static/**.png" expiration="365d"/>
 
@@ -54,15 +54,15 @@
        via javax.servlet.ServletContext.getResourceAsStream() -->
 
   <resource-files>
-    <include path="/ActivityInfo/*.gwt.rpc" />
+    <include path="/Classic/*.gwt.rpc" />
 
-    <include path="/ActivityInfo/*.nocache.js" />
-    <include path="/ActivityInfo/permutations.xml" />
-    <include path="/ActivityInfo/*.appcache" />
+    <include path="/Classic/*.nocache.js" />
+    <include path="/Classic/permutations.xml" />
+    <include path="/Classic/*.appcache" />
 
-    <include path="/App/*.nocache.js" />
-    <include path="/App/permutations.xml" />
-    <include path="/App/*.appcache"/>
+    <include path="/App3/*.nocache.js" />
+    <include path="/App3/permutations.xml" />
+    <include path="/App3/*.appcache"/>
 
     <include path="/commit.id"/>
   </resource-files>

@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<module rename-to="ActivityInfo">
+<module rename-to="Classic">
 
   <inherits name='org.activityinfo.ui.ActivityInfoCore'/>
   <inherits name="com.bedatadriven.rebar.style.Style"/>

@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<module rename-to="App">
+<module rename-to="App3">
 
     <inherits name='org.activityinfo.ui.App'/>
 
@@ -32,5 +32,6 @@
     <set-property name="gxt.user.agent" value="safari5,chrome,ie9,ie10,ie11,gecko1_9"/>
 
     <collapse-property name="user.agent" values="ie9,ie10" />
+    <collapse-property name="user.agent" values="safari,gecko1_8" />
 
 </module>

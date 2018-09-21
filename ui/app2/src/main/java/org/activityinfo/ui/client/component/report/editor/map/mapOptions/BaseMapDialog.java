@@ -163,7 +163,7 @@ public class BaseMapDialog extends Dialog {
         BaseModelData thumb = new BaseModelData();
         thumb.set("id", baseMap.getId());
         thumb.set("name", name);
-        thumb.set("path", GWT.getModuleBaseURL() + "basemaps/" + baseMap.getId() + ".png");
+        thumb.set("path", GWT.getModuleBaseForStaticFiles() + "basemaps/" + baseMap.getId() + ".png");
 
         return thumb;
     }
