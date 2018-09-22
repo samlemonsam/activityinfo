@@ -26,12 +26,8 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
-import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
-import org.activityinfo.ui.client.dispatch.ResourceLocator;
-import org.activityinfo.ui.client.dispatch.state.StateProvider;
 import org.activityinfo.ui.client.page.*;
-import org.activityinfo.ui.client.page.common.GalleryPage;
 import org.activityinfo.ui.client.page.config.design.DbEditor;
 import org.activityinfo.ui.client.page.config.link.IndicatorLinkPage;
 import org.activityinfo.ui.client.page.config.link.IndicatorLinkPlace;
@@ -40,36 +36,38 @@ import java.util.Map;
 
 public class ConfigLoader implements PageLoader {
 
-    private final EventBus eventBus;
     private final Dispatcher dispatch;
     private Map<PageId, Provider<? extends Page>> pageProviders = Maps.newHashMap();
     private NavigationHandler navigationHandler;
-    private StateProvider stateMgr;
-    private ResourceLocator resourceLocator;
 
     @Inject
-    public ConfigLoader(EventBus eventBus,
-                        Dispatcher dispatcher,
+    public ConfigLoader(Dispatcher dispatcher,
+                        Provider<ConfigFrameSet> frameSet,
+                        Provider<DbConfigPresenter> databaseConfigPage,
+                        Provider<DbListPage> databaseListPage,
+                        Provider<DbUserEditor> userPage,
+                        Provider<DbPartnerEditor> partnerPage,
+                        Provider<DbProjectEditor> projectPage,
+                        Provider<LockedPeriodsPresenter> lockPage,
+                        Provider<DbEditor> designPage,
+                        Provider<DbTargetEditor> targetPage,
+                        Provider<IndicatorLinkPage> linkPage,
                         NavigationHandler navigationHandler,
-                        StateProvider stateMgr,
-                        PageStateSerializer placeSerializer,
-                        ResourceLocator resourceLocator) {
-        this.eventBus = eventBus;
+                        PageStateSerializer placeSerializer) {
+
         this.dispatch = dispatcher;
         this.navigationHandler = navigationHandler;
-        this.stateMgr = stateMgr;
-        this.resourceLocator = resourceLocator;
 
-        register(ConfigFrameSet.PAGE_ID);
-        register(DbConfigPresenter.PAGE_ID);
-        register(DbListPresenter.PAGE_ID);
-        register(DbUserEditor.PAGE_ID);
-        register(DbPartnerEditor.PAGE_ID);
-        register(DbProjectEditor.PAGE_ID);
-        register(LockedPeriodsPresenter.PAGE_ID);
-        register(DbEditor.PAGE_ID);
-        register(DbTargetEditor.PAGE_ID);
-        register(IndicatorLinkPage.PAGE_ID);
+        register(ConfigFrameSet.PAGE_ID, frameSet);
+        register(DbConfigPresenter.PAGE_ID, databaseConfigPage);
+        register(DbListPresenter.PAGE_ID, databaseListPage);
+        register(DbUserEditor.PAGE_ID, userPage);
+        register(DbPartnerEditor.PAGE_ID, partnerPage);
+        register(DbProjectEditor.PAGE_ID, projectPage);
+        register(LockedPeriodsPresenter.PAGE_ID, lockPage);
+        register(DbEditor.PAGE_ID, designPage);
+        register(DbTargetEditor.PAGE_ID, targetPage);
+        register(IndicatorLinkPage.PAGE_ID, linkPage);
 
         placeSerializer.registerStatelessPlace(DbListPresenter.PAGE_ID, new DbListPageState());
         placeSerializer.registerParser(DbConfigPresenter.PAGE_ID, new DbPageState.Parser(DbConfigPresenter.PAGE_ID));
@@ -83,8 +81,10 @@ public class ConfigLoader implements PageLoader {
         placeSerializer.registerStatelessPlace(IndicatorLinkPage.PAGE_ID, new IndicatorLinkPlace());
     }
 
-    private void register(PageId pageId) {
+    private void register(PageId pageId, Provider<? extends Page> provider) {
+
         navigationHandler.registerPageLoader(pageId, this);
+        pageProviders.put(pageId, provider);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class ConfigLoader implements PageLoader {
             @Override
             public void onSuccess() {
 
-                final Page page = createPage(pageId);
+                final Page page = pageProviders.get(pageId).get();
 
                 if (page == null) {
                     callback.onFailure(new Exception("ConfigLoader didn't know how to handle " + place.toString()));
@@ -125,40 +125,5 @@ public class ConfigLoader implements PageLoader {
             }
         });
 
-    }
-
-    private Page createPage(PageId pageId) {
-        if(pageId.equals(ConfigFrameSet.PAGE_ID)) {
-            return new ConfigFrameSet(eventBus, dispatch);
-
-        } else if(pageId.equals(DbConfigPresenter.PAGE_ID)) {
-            return new DbConfigPresenter(new GalleryPage(eventBus), dispatch);
-
-        } else if(pageId.equals(DbListPresenter.PAGE_ID)) {
-            return new DbListPage(eventBus, dispatch, stateMgr);
-
-        } else if(pageId.equals(DbUserEditor.PAGE_ID)) {
-            return new DbUserEditor(eventBus, dispatch, stateMgr);
-
-        } else if(pageId.equals(DbPartnerEditor.PAGE_ID)) {
-            return new DbPartnerEditor(eventBus, dispatch);
-
-        } else if(pageId.equals(DbProjectEditor.PAGE_ID)) {
-            return new DbProjectEditor(eventBus, dispatch, stateMgr, new DbProjectGrid());
-
-        } else if(pageId.equals(DbEditor.PAGE_ID)) {
-            return new DbEditor(eventBus, dispatch, resourceLocator, stateMgr);
-
-        } else if(pageId.equals(DbTargetEditor.PAGE_ID)) {
-            return new DbTargetEditor(eventBus, dispatch, stateMgr, new DbTargetGrid());
-
-        } else if(pageId.equals(LockedPeriodsPresenter.PAGE_ID)) {
-            return new LockedPeriodsPresenter(dispatch, eventBus, new LockedPeriodGrid());
-
-        } else if(pageId.equals(IndicatorLinkPage.PAGE_ID)) {
-            return new IndicatorLinkPage(dispatch);
-        } else {
-            return null;
-        }
     }
 }

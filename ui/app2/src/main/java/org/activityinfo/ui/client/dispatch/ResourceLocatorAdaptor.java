@@ -21,7 +21,10 @@ package org.activityinfo.ui.client.dispatch;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.gwt.core.shared.GWT;
-import org.activityinfo.api.client.*;
+import org.activityinfo.api.client.ActivityInfoClientAsync;
+import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
+import org.activityinfo.api.client.FormRecordUpdateBuilder;
+import org.activityinfo.api.client.NewFormRecordBuilder;
 import org.activityinfo.json.Json;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
@@ -42,7 +45,8 @@ import java.util.Map;
 /**
  * Exposes a legacy {@code Dispatcher} implementation as new {@code ResourceLocator}
  */
-public class ResourceLocatorAdaptor implements ResourceLocator {
+public class
+ResourceLocatorAdaptor implements ResourceLocator {
 
     private ActivityInfoClientAsync client;
 

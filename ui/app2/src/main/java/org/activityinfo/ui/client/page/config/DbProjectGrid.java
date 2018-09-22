@@ -26,6 +26,7 @@ import com.extjs.gxt.ui.client.widget.grid.Grid;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.shared.model.ProjectDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.ui.client.page.common.dialog.FormDialogCallback;
@@ -41,11 +42,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DbProjectGrid extends AbstractGridView<ProjectDTO, DbProjectEditor> implements DbProjectEditor.View {
+    private final UiConstants messages;
+    private final IconImageBundle icons;
 
     private Grid<ProjectDTO> grid;
 
     @Inject
-    public DbProjectGrid() {
+    public DbProjectGrid(UiConstants messages, IconImageBundle icons) {
+        this.messages = messages;
+        this.icons = icons;
     }
 
     @Override
@@ -63,17 +68,17 @@ public class DbProjectGrid extends AbstractGridView<ProjectDTO, DbProjectEditor>
     protected ColumnModel createColumnModel() {
         List<ColumnConfig> columns = new ArrayList<>();
 
-        columns.add(new ColumnConfig("name", I18N.CONSTANTS.name(), 150));
-        columns.add(new ColumnConfig("description", I18N.CONSTANTS.description(), 300));
+        columns.add(new ColumnConfig("name", messages.name(), 150));
+        columns.add(new ColumnConfig("description", messages.description(), 300));
 
         return new ColumnModel(columns);
     }
 
     @Override
     protected void initToolBar() {
-        toolBar.addButton(UIActions.ADD, I18N.CONSTANTS.addProject(), IconImageBundle.ICONS.add());
-        toolBar.addButton(UIActions.EDIT, I18N.CONSTANTS.edit(), IconImageBundle.ICONS.edit());
-        toolBar.addButton(UIActions.DELETE, I18N.CONSTANTS.delete(), IconImageBundle.ICONS.delete());
+        toolBar.addButton(UIActions.ADD, I18N.CONSTANTS.addProject(), icons.add());
+        toolBar.addButton(UIActions.EDIT, messages.edit(), icons.edit());
+        toolBar.addButton(UIActions.DELETE, messages.delete(), icons.delete());
     }
 
     @Override
@@ -91,7 +96,7 @@ public class DbProjectGrid extends AbstractGridView<ProjectDTO, DbProjectEditor>
         FormDialogImpl<ProjectForm> dlg = new FormDialogImpl<>(form);
         dlg.setWidth(450);
         dlg.setHeight(300);
-        dlg.setHeadingText(I18N.CONSTANTS.createProject());
+        dlg.setHeadingText(messages.createProject());
 
         dlg.show(callback);
 

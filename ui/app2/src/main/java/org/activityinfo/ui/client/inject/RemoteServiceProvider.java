@@ -35,7 +35,8 @@ public class RemoteServiceProvider implements Provider<RemoteCommandServiceAsync
     public RemoteCommandServiceAsync get() {
         RemoteCommandServiceAsync remoteService = GWT.create(RemoteCommandService.class);
         ServiceDefTarget endpoint = (ServiceDefTarget) remoteService;
-        endpoint.setServiceEntryPoint("/ActivityInfo/cmd");
+        String moduleRelativeURL = GWT.getModuleBaseURL() + "cmd";
+        endpoint.setServiceEntryPoint(moduleRelativeURL);
         return remoteService;
     }
 }

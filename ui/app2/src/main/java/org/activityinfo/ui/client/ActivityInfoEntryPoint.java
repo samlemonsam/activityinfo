@@ -107,6 +107,7 @@ public class ActivityInfoEntryPoint implements EntryPoint {
 
             AppCacheMonitor.start();
 
+            new BillingSupervisor().run();
         }
 
         Log.info("Application: everyone plugged, firing Init event");

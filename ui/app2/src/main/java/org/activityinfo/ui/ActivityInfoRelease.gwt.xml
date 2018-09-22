@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<module rename-to="Classic">
+<module rename-to="ActivityInfo">
 
   <inherits name="org.activityinfo.ui.ActivityInfo"/>
 
@@ -26,6 +26,5 @@
 
   <entry-point class="org.activityinfo.ui.client.ActivityInfoEntryPoint"/>
 
-  <collapse-property name="user.agent" values="ie8,ie9,ie10" />
-
+  <add-linker name="std"/>
 </module>

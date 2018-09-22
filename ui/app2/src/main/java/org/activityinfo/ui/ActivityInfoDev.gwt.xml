@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 -->
-<module rename-to="Classic">
+<module rename-to="ActivityInfo">
 
     <inherits name="org.activityinfo.ui.ActivityInfo"/>
 
@@ -26,6 +26,8 @@
     <set-property name="locale" value="en,fr"/>
 
     <entry-point class="org.activityinfo.ui.client.ActivityInfoEntryPoint"/>
+
+    <add-linker name="std"/>
 
     <set-property name="gwt.logging.enabled" value="FALSE"/>
 

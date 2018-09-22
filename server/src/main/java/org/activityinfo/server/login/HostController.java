@@ -68,30 +68,43 @@ public class HostController {
             return Response.seeOther(uri.getAbsolutePathBuilder().replacePath(ENDPOINT).build()).build();
         }
 
-        // Load the normal production application, based on the user's preferred
-        // locale or the one explicitly provided
-        if(Strings.isNullOrEmpty(locale)) {
-            locale = authProvider.get().getUserLocale();
-        }
-
         String appUri = uri.getAbsolutePathBuilder().replaceQuery("").build().toString();
 
         HostPageModel model = new HostPageModel(appUri);
 
+
         User authenticatedUser = entityManager.get().find(User.class, authProvider.get().getUserId());
         model.setFeatureFlags(authenticatedUser.getFeatures());
         model.setNewUI("3".equals(ui) || "3dev".equals(ui));
-        model.setLocale(locale);
 
-        String module;
-        if(model.isNewUI()) {
-            module = "App3";
+        if("3dev".equals(ui)) {
+            model.setBootstrapScript("/App/App.nocache.js");
+
+        } else if("dev".equals(ui)) {
+            // Running in development mode
+            // Use the default bootstrap script
+            model.setBootstrapScript("/ActivityInfo/ActivityInfo.nocache.js");
+        
+        } else if("true".equalsIgnoreCase(logging)) {
+            // Load a special logging version of the Application
+            model.setBootstrapScript("/ActivityInfoLogging/ActivityInfoLogging.nocache.js");
+            
         } else {
-            module = "Classic";
+            // Load the normal production application, based on the user's preferred 
+            // locale or the one explicitly provided
+            if(Strings.isNullOrEmpty(locale)) {
+                locale = authProvider.get().getUserLocale();
+            }
+            String module;
+            if(model.isNewUI()) {
+                module = "App";
+            } else {
+                module = "ActivityInfo";
+            }
+            model.setBootstrapScript(String.format("/%s/%s.js", module, locale));
+            model.setAppCacheManifest(String.format("/%s/%s.appcache", module, locale));
         }
-        model.setBootstrapScript(String.format("/%s/%s.nocache.js", module, module));
-        model.setAppCacheManifest(String.format("/%s.appcache?locale=%s", module, locale));
-
+        
         return Response.ok(model.asViewable())
                        .type(MediaType.TEXT_HTML)
                        .cacheControl(CacheControl.valueOf("no-cache"))

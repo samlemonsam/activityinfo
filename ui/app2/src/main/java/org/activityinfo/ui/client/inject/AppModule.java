@@ -37,7 +37,7 @@ import org.activityinfo.ui.client.dispatch.remote.cache.CacheManager;
 import org.activityinfo.ui.client.dispatch.remote.cache.CachingDispatcher;
 import org.activityinfo.ui.client.dispatch.state.GxtStateProvider;
 import org.activityinfo.ui.client.dispatch.state.StateProvider;
-import org.activityinfo.ui.client.offline.OfflineController;
+import org.activityinfo.ui.client.local.LocalController;
 import org.activityinfo.ui.client.page.Frame;
 import org.activityinfo.ui.client.page.PageStateSerializer;
 import org.activityinfo.ui.client.page.app.AppFrameSet;
@@ -62,8 +62,8 @@ public class AppModule extends AbstractGinModule {
     }
 
     @Provides
-    public Dispatcher provideDispatcher(CacheManager proxyManager, OfflineController controller) {
-        return new CachingDispatcher(proxyManager, new MergingDispatcher(controller.getDispatcher(), Scheduler.get()));
+    public Dispatcher provideDispatcher(CacheManager proxyManager, LocalController controller) {
+        return new CachingDispatcher(proxyManager, new MergingDispatcher(controller, Scheduler.get()));
     }
 
     @Provides @Singleton

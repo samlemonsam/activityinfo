@@ -18,8 +18,8 @@
  */
 package org.activityinfo.ui.client.component.importDialog;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -33,6 +33,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.promise.Promise;
 import org.activityinfo.promise.PromisesExecutionMonitor;
 import org.activityinfo.ui.client.ActivityInfoEntryPoint;
 import org.activityinfo.ui.client.component.importDialog.mapping.ColumnMappingPage;
@@ -275,31 +276,11 @@ public class ImportPresenter {
         return eventBus;
     }
 
-    public static void show(ResourceId formId, final ResourceLocator resourceLocator, Mode mode, ImportCallback callback) {
-        resourceLocator.getFormTree(formId).then(new AsyncCallback<FormTree>() {
+    public static Promise<ImportPresenter> showPresenter(ResourceId formId, final ResourceLocator resourceLocator) {
+        return resourceLocator.getFormTree(formId).then(new Function<FormTree, ImportPresenter>() {
             @Override
-            public void onFailure(Throwable caught) {
-                callback.onFailure(caught);
-            }
-
-            @Override
-            public void onSuccess(FormTree formTree) {
-                com.google.gwt.core.client.GWT.runAsync(new RunAsyncCallback() {
-                    @Override
-                    public void onFailure(Throwable reason) {
-                        callback.onFailure(reason);
-                    }
-
-                    @Override
-                    public void onSuccess() {
-                        callback.onLoaded();
-                        ImportPresenter presenter = new ImportPresenter(resourceLocator, formTree);
-                        presenter.show(mode);
-                        presenter.getEventBus().addHandler(ImportResultEvent.TYPE, event -> {
-                            callback.onComplete();
-                        });
-                    }
-                });
+            public ImportPresenter apply(FormTree input) {
+                return new ImportPresenter(resourceLocator, input);
             }
         });
     }
@@ -313,22 +294,14 @@ public class ImportPresenter {
             return;
         }
 
-        ImportCallback callback = new ImportCallback() {
-            @Override
-            public void onLoaded() {
-                ActivityInfoEntryPoint.hideLoadingIndicator();
-            }
-
-            @Override
-            public void onFailure(Throwable reason) {
-            }
-
-            @Override
-            public void onComplete() {
-            }
-        };
-
         ResourceId formId = ResourceId.valueOf(parts[1]);
-        show(formId, resourceLocator, Mode.STANDALONE, callback);
+        showPresenter(formId, resourceLocator).then(new Function<ImportPresenter, Void>() {
+            @Override
+            public Void apply(ImportPresenter presenter) {
+                ActivityInfoEntryPoint.hideLoadingIndicator();
+                presenter.show(Mode.STANDALONE);
+                return null;
+            }
+        });
     }
 }

@@ -37,11 +37,13 @@ import org.activityinfo.ui.client.ClientContext;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.SessionUtil;
 import org.activityinfo.ui.client.inject.ClientSideAuthProvider;
-import org.activityinfo.ui.client.offline.OfflineController;
-import org.activityinfo.ui.client.offline.OfflineStateChangeEvent;
-import org.activityinfo.ui.client.offline.OfflineStateChangeEvent.State;
-import org.activityinfo.ui.client.offline.sync.SyncCompleteEvent;
-import org.activityinfo.ui.client.offline.sync.SyncStatusEvent;
+import org.activityinfo.ui.client.local.LocalController;
+import org.activityinfo.ui.client.local.LocalStateChangeEvent;
+import org.activityinfo.ui.client.local.LocalStateChangeEvent.State;
+import org.activityinfo.ui.client.local.UnsupportedDialog;
+import org.activityinfo.ui.client.local.capability.LocalCapabilityProfile;
+import org.activityinfo.ui.client.local.sync.SyncCompleteEvent;
+import org.activityinfo.ui.client.local.sync.SyncStatusEvent;
 import org.activityinfo.ui.client.page.NavigationEvent;
 import org.activityinfo.ui.client.page.NavigationHandler;
 
@@ -87,11 +89,13 @@ public class SettingsPopup extends PopupPanel {
 
     private EventBus eventBus;
 
-    private OfflineStateChangeEvent.State state = State.CHECKING;
+    private LocalStateChangeEvent.State state = State.CHECKING;
 
-    private OfflineController offlineController;
+    private LocalController offlineController;
 
-    public SettingsPopup(EventBus eventBus, OfflineController offlineController) {
+    private LocalCapabilityProfile offlineCapabilityProfile = GWT.create(LocalCapabilityProfile.class);
+
+    public SettingsPopup(EventBus eventBus, LocalController offlineController) {
         this.eventBus = eventBus;
         this.offlineController = offlineController;
 
@@ -124,10 +128,10 @@ public class SettingsPopup extends PopupPanel {
             }
 
         });
-        eventBus.addListener(OfflineStateChangeEvent.TYPE, new Listener<OfflineStateChangeEvent>() {
+        eventBus.addListener(LocalStateChangeEvent.TYPE, new Listener<LocalStateChangeEvent>() {
 
             @Override
-            public void handleEvent(OfflineStateChangeEvent be) {
+            public void handleEvent(LocalStateChangeEvent be) {
                 onOfflineStatusChange(be.getState());
             }
         });
@@ -201,7 +205,11 @@ public class SettingsPopup extends PopupPanel {
     public void onOfflineInstallClicked(ClickEvent e) {
         switch (state) {
             case UNINSTALLED:
-                offlineController.install();
+                if (offlineCapabilityProfile.isOfflineModeSupported()) {
+                    offlineController.install();
+                } else {
+                    UnsupportedDialog.show();
+                }
                 break;
         }
     }

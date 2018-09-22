@@ -24,20 +24,15 @@
   <inherits name="net.lightoze.gwt.i18n.GwtI18nServer"/>
 
   <source path="shared"/>
-  <super-source path="emul"/>
 
-  <!-- Define the locales for which we have translations -->
-  <extend-property name="locale" values="en,fr,es,ar,nl,fa,vi,tr,ru,el"/>
+    <!-- Define the locales for which we have translations -->
+    <extend-property name="locale" values="en,fr,es,ar,nl,fa,vi,tr,ru,el"/>
 
-  <!-- work-around to eliminate "default locale" permutations -->
-  <!-- http://www.google.com/url?sa=D&q=http://code.google.com/p/google-web-toolkit/issues/detail%3Fid%3D5769%23c1 -->
+    <!-- work-around to eliminate "default locale" permutations -->
+    <!-- http://www.google.com/url?sa=D&q=http://code.google.com/p/google-web-toolkit/issues/detail%3Fid%3D5769%23c1 -->
 
-  <set-property-fallback name="locale" value="en"/>
+    <set-property-fallback name="locale" value="en"/>
 
-  <set-property name="locale" value="en,fr,es,ar,nl,fa,vi,tr,ru,el"/>
-
-  <!-- Reduce the number of per-locale builds -->
-  <collapse-property name="locale" values="nl,el,es,vi" />
-  <collapse-property name="locale" values="ar,fa,ru" />
+    <set-property name="locale" value="en,fr,es,ar,nl,fa,vi,tr,ru,el"/>
 
 </module>

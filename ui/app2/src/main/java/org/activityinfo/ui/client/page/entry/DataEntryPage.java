@@ -44,11 +44,12 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.ClientContext;
 import org.activityinfo.ui.client.EventBus;
-import org.activityinfo.ui.client.component.importDialog.ImportCallback;
 import org.activityinfo.ui.client.component.importDialog.ImportPresenter;
+import org.activityinfo.ui.client.component.importDialog.ImportResultEvent;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
+import org.activityinfo.ui.client.dispatch.callback.SuccessCallback;
 import org.activityinfo.ui.client.dispatch.monitor.MaskingAsyncMonitor;
 import org.activityinfo.ui.client.page.*;
 import org.activityinfo.ui.client.page.common.dialog.SaveChangesCallback;
@@ -575,23 +576,17 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     protected void doImport() {
         final int activityId = currentPlace.getFilter().getRestrictedCategory(DimensionType.Activity);
-        ImportCallback callback = new ImportCallback() {
-            @Override
-            public void onLoaded() {
-            }
-
-            @Override
-            public void onFailure(Throwable reason) {
-            }
-
-            @Override
-            public void onComplete() {
-                gridPanel.refresh();
-                filterPane.getSet().applyBaseFilter(currentPlace.getFilter());
-            }
-        };
-        ImportPresenter.show(CuidAdapter.activityFormClass(activityId), resourceLocator,
-                ImportPresenter.Mode.MODAL, callback);
+        ImportPresenter.showPresenter(CuidAdapter.activityFormClass(activityId), resourceLocator)
+                       .then(new SuccessCallback<ImportPresenter>() {
+                           @Override
+                           public void onSuccess(ImportPresenter result) {
+                               result.show(ImportPresenter.Mode.MODAL);
+                               result.getEventBus().addHandler(ImportResultEvent.TYPE, event -> {
+                                   gridPanel.refresh();
+                                   filterPane.getSet().applyBaseFilter(currentPlace.getFilter());
+                               });
+                           }
+                       });
     }
 
     private void delete() {

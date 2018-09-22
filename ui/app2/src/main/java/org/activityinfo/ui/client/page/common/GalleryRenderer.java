@@ -62,7 +62,7 @@ public class GalleryRenderer<T extends ModelData> implements SafeHtmlRenderer<Li
         html.appendHtmlConstant("<dl>");
 
         for (T model : models) {
-            SafeUri iconPath = UriUtils.fromTrustedString(GWT.getModuleBaseForStaticFiles() + this.iconPath + model.get("path"));
+            SafeUri iconPath = UriUtils.fromTrustedString(GWT.getModuleBaseURL() + this.iconPath + model.get("path"));
             String name = model.get("name");
             String description = model.get("description");
 

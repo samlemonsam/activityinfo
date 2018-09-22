@@ -31,7 +31,6 @@
     <meta name="description" content="ActivityInfo"/>
     <meta name="application-url" content="${appUrl}"/>
     <meta http-equiv="X-UA-Compatible" content="IE=10">
-    <meta name="gwt:property" content="locale=${locale}">
     <link rel="icon" href="/about/assets/images/logo-activityinfo.png">
 
     <#if newUI>
@@ -108,7 +107,7 @@
 <div id="loading">
     <div id="loading-box">
         <div class="loading-indicator">
-            <img src="/Classic/gxt231/images/default/shared/large-loading.gif" alt=""/>
+            <img src="/ActivityInfo/gxt231/images/default/shared/large-loading.gif" alt=""/>
         ${domain.title} ${buildProperties.version}<br/>
             <span id="loading-msg">${label.loading}</span>
 

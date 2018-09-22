@@ -28,7 +28,7 @@ import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.CommandCache;
 import org.activityinfo.ui.client.dispatch.DispatchEventSource;
 import org.activityinfo.ui.client.dispatch.DispatchListener;
-import org.activityinfo.ui.client.offline.sync.SyncCompleteEvent;
+import org.activityinfo.ui.client.local.sync.SyncCompleteEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -18,6 +18,8 @@
  */
 package org.activityinfo.ui.client.page.entry;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -40,11 +42,19 @@ public class DataEntryLoader implements PageLoader {
 
     @Override
     public void load(final PageId pageId, final PageState pageState, final AsyncCallback<Page> callback) {
+        GWT.runAsync(new RunAsyncCallback() {
+            @Override
+            public void onSuccess() {
+                DataEntryPage dataEntryPage = dataEntryPageProvider.get();
+                dataEntryPage.navigate(pageState);
+                callback.onSuccess(dataEntryPage);
+            }
 
-        DataEntryPage dataEntryPage = dataEntryPageProvider.get();
-        dataEntryPage.navigate(pageState);
-        callback.onSuccess(dataEntryPage);
-
+            @Override
+            public void onFailure(Throwable throwable) {
+                callback.onFailure(throwable);
+            }
+        });
     }
 
 }

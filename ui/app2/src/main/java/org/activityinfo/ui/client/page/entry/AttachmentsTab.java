@@ -114,7 +114,7 @@ public class AttachmentsTab extends TabItem implements AttachmentsPresenter.View
             @Override
             public void handleEvent(ListViewEvent<SiteAttachmentDTO> event) {
                 event.getModel().getBlobId();
-                Window.Location.assign("/ActivityInfo/attachment?blobId=" + event.getModel().getBlobId());
+                Window.Location.assign(GWT.getModuleBaseURL() + "attachment?blobId=" + event.getModel().getBlobId());
             }
         });
         panel.add(attachmentList);
@@ -196,7 +196,7 @@ public class AttachmentsTab extends TabItem implements AttachmentsPresenter.View
         @Override
         public void render(List<SiteAttachmentDTO> attachments, SafeHtmlBuilder html) {
 
-            SafeUri iconUrl = UriUtils.fromTrustedString(GWT.getModuleBaseForStaticFiles() + "/image/attach.png");
+            SafeUri iconUrl = UriUtils.fromTrustedString(GWT.getModuleBaseURL() + "/image/attach.png");
 
             html.appendHtmlConstant("<dl>");
             for (SiteAttachmentDTO attachment : attachments) {

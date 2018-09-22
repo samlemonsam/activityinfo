@@ -17,56 +17,19 @@
 
   <runtime>java8</runtime>
 
-  <!-- The following files will be served as static files from
-       OUTSIDE the application server -->
-
   <static-files>
     <include path="/robots.txt" expiration="1d"/>
-
-    <!-- All resources that are part of the classic interface are
-         strongly named, either by the GWT compiler or by including
-         the GXT version in the path to its resources -->
-
-    <include path="/Classic/**.gif" expiration="365d"/>
-    <include path="/Classic/**.png" expiration="365d"/>
-    <include path="/Classic/**.cache.js" expiration="365d"/>
-    <include path="/Classic/**.css" expiration="365d"/>
-    <include path="/Classic/**.swf" expiration="365d"/>
-    <include path="/Classic/**.cache.html" expiration="365d"/>
-    <include path="/Classic/**.html"/>
-
-
-    <!-- The new module still has a few resources pulled in by GXT 4
-         that are not strongly named, but unlikely to change -->
-
-    <include path="/App3/**.cache.js" expiration="365d"/>
-    <include path="/App3/**.gif"/>
-    <include path="/App3/**.css"/>
-    <include path="/App3/**.html"/>
-
+    <include path="/ActivityInfo/**.gif" expiration="365d"/>
+    <include path="/ActivityInfo/**.png" expiration="365d"/>
+    <include path="/ActivityInfo/**.js" expiration="365d"/>
+    <include path="/ActivityInfo/**.css" expiration="365d"/>
+    <include path="/ActivityInfo/**.swf" expiration="365d"/>
+    <include path="/ActivityInfo/**.cache.html" expiration="365d"/>
+    <include path="/**.nocache.html" expiration="0s"/>
     <include path="/static/**.png" expiration="365d"/>
-
     <include path="/error.html"/>
   </static-files>
-
-  <!-- The following files are included in the deployment to the
-       application server and are accessible by servlets and other code
-       via javax.servlet.ServletContext.getResourceAsStream() -->
-
-  <resource-files>
-    <include path="/Classic/*.gwt.rpc" />
-
-    <include path="/Classic/*.nocache.js" />
-    <include path="/Classic/permutations.xml" />
-    <include path="/Classic/*.appcache" />
-
-    <include path="/App3/*.nocache.js" />
-    <include path="/App3/permutations.xml" />
-    <include path="/App3/*.appcache"/>
-
-    <include path="/commit.id"/>
-  </resource-files>
-
+ 
   <inbound-services>
     <service>warmup</service>
   </inbound-services>
