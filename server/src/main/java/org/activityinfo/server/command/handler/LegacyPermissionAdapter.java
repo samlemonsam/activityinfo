@@ -88,18 +88,6 @@ public class LegacyPermissionAdapter {
         return createForm.isPermitted() && editForm.isPermitted() && deleteForm.isPermitted();
     }
 
-    // Need to determine whether user can manage all users and has design permissions
-    public boolean isManagePartnersAllowed(Database database, User user) {
-        if (!isDesignAllowed(database.getId(), user.getId())) {
-            return false;
-        }
-        ResourceId databaseId = CuidAdapter.databaseId(database.getId());
-        UserDatabaseMeta db = provider.getDatabaseMetadata(databaseId, user.getId());
-        PermissionQuery query = new PermissionQuery(user.getId(), database.getId(), Operation.MANAGE_USERS, databaseId);
-        Permission manageUsers = PermissionOracle.query(query, db);
-        return manageUsers.isPermitted() && !manageUsers.isFiltered();
-    }
-
     public boolean isDesignAllowed(Database database, User user) {
         return isDesignAllowed(database.getId(), user.getId());
     }
@@ -140,16 +128,6 @@ public class LegacyPermissionAdapter {
 
     public void assertDesignPrivileges(Target target, User user) {
         assertDesignPrivileges(target.getDatabase(), user);
-    }
-
-    public void assertManagePartnerAllowed(Database database, User user) {
-        if (!isManagePartnersAllowed(database, user)) {
-            LOGGER.severe(String.format(
-                    "User %d does not have design or manageAllUsers privileges on database %d",
-                    user.getId(),
-                    database.getId()));
-            throw new IllegalAccessCommandException();
-        }
     }
 
     /**
