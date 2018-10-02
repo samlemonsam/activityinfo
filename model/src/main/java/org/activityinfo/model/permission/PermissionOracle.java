@@ -147,15 +147,6 @@ public class PermissionOracle {
         return resourceId.getDomain() == CuidAdapter.DATABASE_DOMAIN;
     }
 
-    private static String illegalAccess(Operation operation, ResourceId databaseId, ResourceId resourceId, int user) {
-        return "ILLEGAL ACCESS "
-                + "[ USER:" + user
-                + "; DATABASE: " + databaseId
-                + "; RESOURCE: " + resourceId
-                + "; OPERATION: " + operation.name()
-                + "]";
-    }
-
     /////////////////////////////////////////////////// UTIL METHODS ///////////////////////////////////////////////////
 
     public static boolean filterContainsPartner(String filter, ResourceId partnerFormId, ResourceId partnerId) {
@@ -188,6 +179,20 @@ public class PermissionOracle {
         }
 
         return true;
+    }
+
+    private static void logAndThrowException(Operation operation, ResourceId databaseId, ResourceId resourceId, int user) {
+        LOGGER.severe(illegalAccess(operation, databaseId, resourceId, user));
+        throw new PermissionException();
+    }
+
+    private static String illegalAccess(Operation operation, ResourceId databaseId, ResourceId resourceId, int user) {
+        return "ILLEGAL ACCESS "
+                + "[ USER:" + user
+                + "; DATABASE: " + databaseId
+                + "; RESOURCE: " + resourceId
+                + "; OPERATION: " + operation.name()
+                + "]";
     }
 
     /////////////////////////////////////////////////// TASK METHODS ///////////////////////////////////////////////////
@@ -240,29 +245,28 @@ public class PermissionOracle {
 
     public static void assertView(ResourceId resourceId, UserDatabaseMeta db) {
         if (!canView(resourceId, db)) {
-            LOGGER.severe(illegalAccess(Operation.VIEW, db.getDatabaseId(), resourceId, db.getUserId()));
-            throw new PermissionException();
+            logAndThrowException(Operation.VIEW, db.getDatabaseId(), resourceId, db.getUserId());
         }
     }
 
     public static void assertEditResource(ResourceId resourceId, UserDatabaseMeta db) {
         if (!canEditResource(resourceId, db)) {
-            LOGGER.severe(illegalAccess(Operation.EDIT_FORM, db.getDatabaseId(), resourceId, db.getUserId()));
-            throw new PermissionException();
+            logAndThrowException(Operation.EDIT_FORM, db.getDatabaseId(), resourceId, db.getUserId());
         }
     }
 
     public static void assertManagePartnerAllowed(ResourceId partnerId, UserDatabaseMeta db) {
         Permission managePartner = manageUsers(db.getDatabaseId(), db);
-        if (managePartner.isPermitted()) {
+        if (managePartner.isForbidden()) {
+            logAndThrowException(Operation.MANAGE_USERS, db.getDatabaseId(), partnerId, db.getUserId());
+        }
+        if (!managePartner.isFiltered()) {
             return;
         }
         int databaseId = CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId());
-        if (filterContainsPartner(managePartner.getFilter(), CuidAdapter.partnerFormId(databaseId), partnerId)) {
-            return;
+        if (!filterContainsPartner(managePartner.getFilter(), CuidAdapter.partnerFormId(databaseId), partnerId)) {
+            logAndThrowException(Operation.MANAGE_USERS, db.getDatabaseId(), partnerId, db.getUserId());
         }
-        LOGGER.severe(illegalAccess(Operation.MANAGE_USERS, db.getDatabaseId(), partnerId, db.getUserId()));
-        throw new PermissionException();
     }
 
 }
