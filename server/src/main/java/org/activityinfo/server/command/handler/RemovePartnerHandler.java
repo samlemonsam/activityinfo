@@ -54,7 +54,7 @@ public class RemovePartnerHandler implements CommandHandler<RemovePartner> {
         Database db = em.getReference(Database.class, cmd.getDatabaseId());
         UserDatabaseMeta dbMeta = provider.getDatabaseMetadata(cmd.getDatabaseId(), user.getId());
 
-        PermissionOracle.assertManagePartnerAllowed(CuidAdapter.partnerRecordId(cmd.getPartnerId()), dbMeta);
+        PermissionOracle.assertManagePartnerAllowed(dbMeta.getDatabaseId(), CuidAdapter.partnerRecordId(cmd.getPartnerId()), dbMeta);
 
         // check to see if there are already sites associated with this partner
         int siteCount = ((Number) em.createQuery("select count(s) " +

@@ -23,9 +23,13 @@ import org.activityinfo.legacy.shared.command.UpdatePartner;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.command.result.DuplicateCreateResult;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -42,10 +46,12 @@ public class UpdatePartnerHandler implements CommandHandler<UpdatePartner> {
     private static final Logger LOGGER = Logger.getLogger(UpdatePartnerHandler.class.getName());
 
     private final EntityManager em;
+    private final DatabaseProvider provider;
 
     @Inject
-    public UpdatePartnerHandler(EntityManager em) {
+    public UpdatePartnerHandler(EntityManager em, DatabaseProvider provider) {
         this.em = em;
+        this.provider = provider;
     }
 
     @Override
@@ -53,12 +59,14 @@ public class UpdatePartnerHandler implements CommandHandler<UpdatePartner> {
     public CommandResult execute(UpdatePartner cmd, User user) {
 
         Database db = em.find(Database.class, cmd.getDatabaseId());
-        LegacyPermissionAdapter.using(em).assertManagePartnerAllowed(db, user);
+        UserDatabaseMeta dbMeta = provider.getDatabaseMetadata(cmd.getDatabaseId(), user.getId());
 
         // Does this partner already exist?
         if (cmd.getPartner().hasId()) {
+            PermissionOracle.assertManagePartnerAllowed(dbMeta.getDatabaseId(), CuidAdapter.partnerRecordId(cmd.getPartner().getId()), dbMeta);
             return updatePartner(db, cmd);
         } else {
+            PermissionOracle.assertManagePartnersAllowed(dbMeta.getDatabaseId(), dbMeta);
             return addNewPartner(cmd, db);
         }
     }
