@@ -179,7 +179,7 @@ public class LegacyPermissionAdapter {
         if (edit.isPermitted() && !edit.isFiltered()) {
             return true;
         } else if (edit.isPermitted()){
-            return filterContainsPartner(edit.getFilter(),
+            return PermissionOracle.filterContainsPartner(edit.getFilter(),
                     CuidAdapter.partnerFormId(database.getId()),
                     CuidAdapter.partnerRecordId(partner.getId()));
         } else {
@@ -215,44 +215,12 @@ public class LegacyPermissionAdapter {
             return true;
         } else if (view.isPermitted()) {
             // without AllowViewAll, edit permission is contingent on the site's partner
-            return filterContainsPartner(view.getFilter(),
+            return PermissionOracle.filterContainsPartner(view.getFilter(),
                     CuidAdapter.partnerFormId(database.getId()),
                     CuidAdapter.partnerRecordId(site.getPartner().getId()));
         } else {
             return false;
         }
-    }
-
-    private boolean filterContainsPartner(String filter, ResourceId partnerFormId, ResourceId partnerId) {
-        FormulaNode filterFormula = FormulaParser.parse(filter);
-
-        if (!(filterFormula instanceof FunctionCallNode)) {
-            return false;
-        }
-        if (!(((FunctionCallNode) filterFormula).getFunction() instanceof EqualFunction)) {
-            return false;
-        }
-        if (((FunctionCallNode) filterFormula).getArgumentCount() != 2) {
-            return false;
-        }
-
-        FunctionCallNode equalFunctionCall = (FunctionCallNode) filterFormula;
-
-        if (!(equalFunctionCall.getArgument(0 ) instanceof SymbolNode) && !(equalFunctionCall.getArgument(1) instanceof SymbolNode)) {
-            return false;
-        }
-
-        SymbolNode partnerFormNode = (SymbolNode) equalFunctionCall.getArgument(0);
-        SymbolNode partnerFieldNode = (SymbolNode) equalFunctionCall.getArgument(1);
-
-        if (!partnerFormNode.asResourceId().equals(partnerFormId)) {
-            return false;
-        }
-        if (!partnerFieldNode.asResourceId().equals(partnerId)) {
-            return false;
-        }
-
-        return true;
     }
 
     public static int partnerFromFilter(String filter) {

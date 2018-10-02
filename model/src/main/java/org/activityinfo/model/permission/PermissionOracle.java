@@ -5,9 +5,8 @@ import com.google.common.collect.Lists;
 import org.activityinfo.model.database.Operation;
 import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.database.UserDatabaseMeta;
-import org.activityinfo.model.formula.FormulaNode;
-import org.activityinfo.model.formula.FormulaParser;
-import org.activityinfo.model.formula.Formulas;
+import org.activityinfo.model.formula.*;
+import org.activityinfo.model.formula.functions.EqualFunction;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -157,6 +156,40 @@ public class PermissionOracle {
                 + "]";
     }
 
+    /////////////////////////////////////////////////// UTIL METHODS ///////////////////////////////////////////////////
+
+    public static boolean filterContainsPartner(String filter, ResourceId partnerFormId, ResourceId partnerId) {
+        FormulaNode filterFormula = FormulaParser.parse(filter);
+
+        if (!(filterFormula instanceof FunctionCallNode)) {
+            return false;
+        }
+        if (!(((FunctionCallNode) filterFormula).getFunction() instanceof EqualFunction)) {
+            return false;
+        }
+        if (((FunctionCallNode) filterFormula).getArgumentCount() != 2) {
+            return false;
+        }
+
+        FunctionCallNode equalFunctionCall = (FunctionCallNode) filterFormula;
+
+        if (!(equalFunctionCall.getArgument(0 ) instanceof SymbolNode) && !(equalFunctionCall.getArgument(1) instanceof SymbolNode)) {
+            return false;
+        }
+
+        SymbolNode partnerFormNode = (SymbolNode) equalFunctionCall.getArgument(0);
+        SymbolNode partnerFieldNode = (SymbolNode) equalFunctionCall.getArgument(1);
+
+        if (!partnerFormNode.asResourceId().equals(partnerFormId)) {
+            return false;
+        }
+        if (!partnerFieldNode.asResourceId().equals(partnerId)) {
+            return false;
+        }
+
+        return true;
+    }
+
     /////////////////////////////////////////////////// TASK METHODS ///////////////////////////////////////////////////
 
     public static boolean canDeleteDatabase(UserDatabaseMeta db) {
@@ -219,5 +252,17 @@ public class PermissionOracle {
         }
     }
 
+    public static void assertManagePartnerAllowed(ResourceId partnerId, UserDatabaseMeta db) {
+        Permission managePartner = manageUsers(db.getDatabaseId(), db);
+        if (managePartner.isPermitted()) {
+            return;
+        }
+        int databaseId = CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId());
+        if (filterContainsPartner(managePartner.getFilter(), CuidAdapter.partnerFormId(databaseId), partnerId)) {
+            return;
+        }
+        LOGGER.severe(illegalAccess(Operation.MANAGE_USERS, db.getDatabaseId(), partnerId, db.getUserId()));
+        throw new PermissionException();
+    }
 
 }
