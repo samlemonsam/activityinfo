@@ -23,9 +23,13 @@ import org.activityinfo.legacy.shared.command.RemovePartner;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.RemoveFailedResult;
 import org.activityinfo.legacy.shared.command.result.RemoveResult;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -37,18 +41,20 @@ import java.util.Date;
 public class RemovePartnerHandler implements CommandHandler<RemovePartner> {
 
     private EntityManager em;
+    private DatabaseProvider provider;
 
     @Inject
-    public RemovePartnerHandler(EntityManager em) {
+    public RemovePartnerHandler(EntityManager em, DatabaseProvider provider) {
         this.em = em;
+        this.provider = provider;
     }
 
     @Override
     public CommandResult execute(RemovePartner cmd, User user) {
-
-        // verify the current user has access to this site
         Database db = em.getReference(Database.class, cmd.getDatabaseId());
-        LegacyPermissionAdapter.using(em).isManagePartnersAllowed(db, user);
+        UserDatabaseMeta dbMeta = provider.getDatabaseMetadata(cmd.getDatabaseId(), user.getId());
+
+        PermissionOracle.assertManagePartnerAllowed(CuidAdapter.partnerRecordId(cmd.getPartnerId()), dbMeta);
 
         // check to see if there are already sites associated with this partner
         int siteCount = ((Number) em.createQuery("select count(s) " +
