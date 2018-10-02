@@ -102,7 +102,7 @@ public class DatabaseProviderImpl implements DatabaseProvider {
     }
 
 
-    public static Optional<UserPermission> getUserPermission(EntityManager entityManager, Database database, int userId) {
+    private static Optional<UserPermission> getUserPermission(EntityManager entityManager, Database database, int userId) {
         List<UserPermission> permissions = entityManager
                 .createQuery(
                         "select u from UserPermission u where u.user.id = :userId and u.database = :db",
