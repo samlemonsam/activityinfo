@@ -19,6 +19,7 @@
 package org.activityinfo.server.command.handler;
 
 import com.google.inject.Inject;
+import com.google.inject.util.Providers;
 import org.activityinfo.legacy.shared.command.UpdatePartner;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
@@ -29,6 +30,7 @@ import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
@@ -47,6 +49,11 @@ public class UpdatePartnerHandler implements CommandHandler<UpdatePartner> {
 
     private final EntityManager em;
     private final DatabaseProvider provider;
+
+    public UpdatePartnerHandler(EntityManager em) {
+        this.em = em;
+        this.provider = new DatabaseProviderImpl(Providers.of(em));
+    }
 
     @Inject
     public UpdatePartnerHandler(EntityManager em, DatabaseProvider provider) {
