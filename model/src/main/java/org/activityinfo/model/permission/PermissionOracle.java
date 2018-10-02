@@ -213,6 +213,10 @@ public class PermissionOracle {
         return manageUsers(db.getDatabaseId(),db).isPermitted();
     }
 
+    public static boolean canManageUsers(ResourceId resourceId, UserDatabaseMeta db) {
+        return manageUsers(resourceId,db).isPermitted();
+    }
+
     public static Permission view(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
                 CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
@@ -255,8 +259,8 @@ public class PermissionOracle {
         }
     }
 
-    public static void assertManagePartnerAllowed(ResourceId partnerId, UserDatabaseMeta db) {
-        Permission managePartner = manageUsers(db.getDatabaseId(), db);
+    public static void assertManagePartnerAllowed(ResourceId resourceId, ResourceId partnerId, UserDatabaseMeta db) {
+        Permission managePartner = manageUsers(resourceId, db);
         if (managePartner.isForbidden()) {
             logAndThrowException(Operation.MANAGE_USERS, db.getDatabaseId(), partnerId, db.getUserId());
         }
@@ -266,6 +270,12 @@ public class PermissionOracle {
         int databaseId = CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId());
         if (!filterContainsPartner(managePartner.getFilter(), CuidAdapter.partnerFormId(databaseId), partnerId)) {
             logAndThrowException(Operation.MANAGE_USERS, db.getDatabaseId(), partnerId, db.getUserId());
+        }
+    }
+
+    public static void assertManagePartnersAllowed(ResourceId resourceId, UserDatabaseMeta db) {
+        if (!canManageUsers(resourceId, db)) {
+            logAndThrowException(Operation.MANAGE_USERS, db.getDatabaseId(), resourceId, db.getUserId());
         }
     }
 
