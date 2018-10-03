@@ -19,8 +19,12 @@
 package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.googlecode.objectify.VoidWork;
 import com.vividsolutions.jts.geom.Geometry;
+import org.activityinfo.json.Json;
+import org.activityinfo.model.database.GrantModel;
+import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formula.ConstantNode;
 import org.activityinfo.model.formula.FormulaNode;
@@ -91,47 +95,65 @@ public class SiteFormStorage implements VersionedFormStorage, FormStorageV2 {
 
     @Override
     public FormPermissions getPermissions(int userId) {
-        if(activity.getOwnerUserId() == userId) {
-           return FormPermissions.owner();
-        } else {
+        if (activity.getOwnerUserId() == userId) {
+            return FormPermissions.owner();
+        }
+        UserPermission databasePermission = permissionsCache.getPermission(userId, activity.getDatabaseId());
+        if (!activity.inFolder() && Strings.isNullOrEmpty(databasePermission.getModel())) {
+            // Form is in root database and user has root access
+            return buildPermissions(databasePermission);
+        }
+        if (activity.inFolder() && Strings.isNullOrEmpty(databasePermission.getModel())) {
+            // Form is in folder and user has root database access
+            return buildPermissions(databasePermission);
+        }
+        // Form is in folder and user has specific folder access
+        UserPermissionModel model = UserPermissionModel.fromJson(Json.parse(databasePermission.getModel()));
+        ResourceId folderId = CuidAdapter.folderId(activity.getFolderId());
+        for (GrantModel grant : model.getGrants()) {
+            if (grant.getResourceId().equals(folderId)) {
+                // Rights granted - continue to build normal permissions
+                return buildPermissions(databasePermission);
+            }
+        }
+        // User does not have access to form's folder - deny
+        return FormPermissions.none();
+    }
 
-            UserPermission databasePermission = permissionsCache.getPermission(userId, activity.getDatabaseId());
+    private FormPermissions buildPermissions(UserPermission databasePermission) {
+        FormPermissions.Builder permissions = FormPermissions.builder();
 
-            FormPermissions.Builder permissions = FormPermissions.builder();
-
-            FormulaNode partnerFilter = Formulas.equals(
-                    new SymbolNode(
+        FormulaNode partnerFilter = Formulas.equals(
+                new SymbolNode(
                         CuidAdapter.partnerField(activity.getId())),
-                    new ConstantNode(
+                new ConstantNode(
                         CuidAdapter.partnerRecordId(databasePermission.getPartnerId()).asString()));
 
 
-            if(databasePermission.isViewAll()) {
-                permissions.allowView();
+        if(databasePermission.isViewAll()) {
+            permissions.allowView();
 
-            } else if(databasePermission.isView()) {
-                permissions.allowFilteredView(partnerFilter.asExpression());
-            }
-
-            if(databasePermission.isEditAll()) {
-                permissions.allowEdit();
-
-            } else if(databasePermission.isEdit()) {
-                permissions.allowFilteredEdit(partnerFilter.asExpression());
-            }
-
-            if(databasePermission.isDesign()) {
-                permissions.allowSchemaUpdate();
-            }
-
-            // published property of activity overrides user permissions
-            if(activity.isPublished()) {
-                permissions.allowUnfilteredView();
-            }
-
-            return permissions.build();
-
+        } else if(databasePermission.isView()) {
+            permissions.allowFilteredView(partnerFilter.asExpression());
         }
+
+        if(databasePermission.isEditAll()) {
+            permissions.allowEdit();
+
+        } else if(databasePermission.isEdit()) {
+            permissions.allowFilteredEdit(partnerFilter.asExpression());
+        }
+
+        if(databasePermission.isDesign()) {
+            permissions.allowSchemaUpdate();
+        }
+
+        // published property of activity overrides user permissions
+        if(activity.isPublished()) {
+            permissions.allowUnfilteredView();
+        }
+
+        return permissions.build();
     }
 
     @Override
