@@ -98,7 +98,7 @@ public class LookupKeySet {
 
         ReferenceType referenceType = (ReferenceType) referenceField.getType();
         for (ResourceId referenceFormId : referenceType.getRange()) {
-            if (formTree.getFormMetadata(referenceFormId).isDeleted() || !formTree.getFormMetadata(referenceFormId).isVisible()) {
+            if (!formTree.getFormMetadata(referenceFormId).isAccessible()) {
                 continue;
             }
             leafKeyMap.put(referenceFormId, addLevels(formTree.getFormClass(referenceFormId)));
