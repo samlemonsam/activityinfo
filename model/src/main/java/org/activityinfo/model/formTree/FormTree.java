@@ -448,7 +448,11 @@ public class FormTree implements FormClassProvider, FormMetadataProvider {
     }
 
     public Optional<FormClass> getFormClassIfPresent(ResourceId formId) {
-        return Optional.fromNullable(getFormMetadata(formId).getSchema());
+        if (!getFormMetadata(formId).isVisible() || getFormMetadata(formId).isDeleted()) {
+            return Optional.absent();
+        } else {
+            return Optional.fromNullable(getFormMetadata(formId).getSchema());
+        }
     }
 
     public Node getNodeByPath(FieldPath path) {
