@@ -1917,4 +1917,8 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("User limit exceeded")
     String usersExceeded();
+
+    @DefaultStringValue("Referenced Form(s) not accessible by current User")
+    String refFormsNotAccessible();
+
 }

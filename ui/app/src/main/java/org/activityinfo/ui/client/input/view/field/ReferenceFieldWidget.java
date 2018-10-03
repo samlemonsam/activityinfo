@@ -19,14 +19,19 @@
 package org.activityinfo.ui.client.input.view.field;
 
 import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.store.query.shared.FormSource;
@@ -68,7 +73,10 @@ public class ReferenceFieldWidget implements FieldWidget {
             levelWidgets.add(widget);
         }
 
-        if(levelWidgets.size() == 1) {
+        if (levelWidgets.size() == 0) {
+            // If we have a reference field with _no_ levels, then the form is inaccessible
+            widget = inaccessible(field);
+        } else if(levelWidgets.size() == 1) {
             // If we have a single lookup key, then just show a single combobox
             widget = levelWidgets.get(0).getComboBox();
 
@@ -84,6 +92,23 @@ public class ReferenceFieldWidget implements FieldWidget {
         for (LevelWidget levelWidget : levelWidgets) {
             levelWidget.addBlurHandler(event -> fieldUpdater.touch());
         }
+    }
+
+    private Widget inaccessible(FormField field) {
+        SafeHtmlBuilder inaccessibleForms = new SafeHtmlBuilder();
+        ReferenceType referenceType = (ReferenceType) field.getType();
+        inaccessibleForms.appendHtmlConstant("<span style='color:red'>");
+        inaccessibleForms.appendHtmlConstant("<b>");
+        inaccessibleForms.appendEscaped(I18N.CONSTANTS.refFormsNotAccessible());
+        inaccessibleForms.appendEscaped(":");
+        inaccessibleForms.appendHtmlConstant("</b>");
+        for (ResourceId referenceFormId : referenceType.getRange()) {
+            inaccessibleForms.appendHtmlConstant("<br>");
+            inaccessibleForms.appendEscaped(referenceFormId.asString());
+        }
+        inaccessibleForms.appendHtmlConstant("</span>");
+        HTML inaccessibleMesage = new HTML(inaccessibleForms.toSafeHtml());
+        return inaccessibleMesage;
     }
 
     private void onSelection(SelectionEvent<String> event) {
