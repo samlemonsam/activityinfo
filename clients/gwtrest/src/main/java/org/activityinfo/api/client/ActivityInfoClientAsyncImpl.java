@@ -416,7 +416,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
                     }
                 } else {
                     LOGGER.log(Level.SEVERE, "Request to " + url + " failed with status " + response.getStatusCode() + ": " + response.getStatusText());
-                    result.reject(new ApiException(response.getStatusCode()));
+                    result.reject(new ApiException(response.getStatusCode(), response.getText()));
                 }
             }
 

@@ -27,6 +27,7 @@ import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
+import org.activityinfo.api.client.ApiException;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.CreateEntity;
 import org.activityinfo.legacy.shared.command.Delete;
@@ -35,7 +36,6 @@ import org.activityinfo.legacy.shared.command.UpdateEntity;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
-import org.activityinfo.legacy.shared.model.UserPermissionDTO;
 import org.activityinfo.model.account.AccountStatus;
 import org.activityinfo.ui.client.AppEvents;
 import org.activityinfo.ui.client.ClientContext;
@@ -257,14 +257,25 @@ public class DbListPresenter implements ActionListener {
         dialog.show(new FormDialogCallback() {
             @Override
             public void onValidated() {
-                UserPermissionDTO user = form.getUser();
-                client.requestDatabaseTransfer(user.getEmail(), selection.getId()).then(result -> {
-                    clearLocalCache();
-                    loader.load();
-                    dialog.hide();
-                    MessageBox.alert(I18N.CONSTANTS.transferDatabaseLabel(),
-                            I18N.MESSAGES.transferDatabase(user.getName()), null);
-                    return null;
+                String userEmail = form.getUser();
+                client.requestDatabaseTransfer(userEmail, selection.getId()).then(new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        if(caught instanceof ApiException && ((ApiException) caught).getStatusCode() == 400) {
+                            MessageBox.alert(I18N.CONSTANTS.error(), caught.getMessage(), null);
+                        } else {
+                            MessageBox.alert(I18N.CONSTANTS.serverError(), I18N.CONSTANTS.errorOnServer(), null);
+                        }
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        clearLocalCache();
+                        loader.load();
+                        dialog.hide();
+                        MessageBox.alert(I18N.CONSTANTS.transferDatabaseLabel(),
+                                I18N.MESSAGES.transferDatabase(userEmail), null);
+                    }
                 });
             }
         });

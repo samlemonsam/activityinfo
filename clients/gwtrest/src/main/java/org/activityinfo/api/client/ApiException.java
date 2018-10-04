@@ -22,12 +22,20 @@ package org.activityinfo.api.client;
  * Exception thrown by the server
  */
 public class ApiException extends RuntimeException {
-    
+
+    private final int statusCode;
+
     public ApiException(int statusCode) {
         super(Integer.toString(statusCode));
+        this.statusCode = statusCode;
     }
 
-    public ApiException(Throwable cause) {
-        super(cause);
+    public ApiException(int statusCode, String message) {
+        super(message);
+        this.statusCode = statusCode;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
     }
 }

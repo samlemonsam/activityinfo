@@ -49,6 +49,14 @@ public class UsageResource {
     }
 
     @GET
+    @Path("accounts")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getAccounts(@QueryParam("accessKey") String requestKey) {
+        assertAuthorized(requestKey);
+        return executeQuery("SELECT * from billingaccount");
+    }
+
+    @GET
     @Path("databases")
     @Produces(MediaType.APPLICATION_JSON)
     public String getDatabases(@QueryParam("accessKey") String requestKey) {
