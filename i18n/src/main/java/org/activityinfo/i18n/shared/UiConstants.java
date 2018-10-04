@@ -1867,8 +1867,8 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Transfer Database")
     String transferDatabaseLabel();
 
-    @DefaultStringValue("New Owner")
-    String newDatabaseOwner();
+    @DefaultStringValue("Email of new owner")
+    String newDatabaseOwnerEmail();
 
     @DefaultStringValue("Database Transfer Failed")
     String transferFailed();

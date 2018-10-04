@@ -86,8 +86,8 @@ public class DatabaseTransferForm extends FormPanel {
 
         userField = new UserComboBox();
         userField.setName("user");
-        userField.setFieldLabel(constants.newDatabaseOwner());
-        userField.setDisplayField("name");
+        userField.setFieldLabel(constants.newDatabaseOwnerEmail());
+        userField.setDisplayField("email");
         userField.setAllowBlank(false);
         userField.setStore(store);
         userField.setForceSelection(false);
