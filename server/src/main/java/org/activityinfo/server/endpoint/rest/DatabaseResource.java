@@ -20,7 +20,6 @@ package org.activityinfo.server.endpoint.rest;
 
 import com.google.inject.Provider;
 import com.sun.jersey.api.core.InjectParam;
-import org.activityinfo.analysis.pivot.LongFormatTableBuilder;
 import org.activityinfo.io.xform.XFormReader;
 import org.activityinfo.io.xform.form.XForm;
 import org.activityinfo.json.JsonParser;
@@ -30,15 +29,12 @@ import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.model.*;
-import org.activityinfo.model.analysis.pivot.PivotModel;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.database.transfer.RequestTransfer;
 import org.activityinfo.model.database.transfer.TransferAuthorized;
 import org.activityinfo.model.database.transfer.TransferDecision;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.authentication.AuthTokenProvider;
 import org.activityinfo.server.authentication.SecureTokenGenerator;
 import org.activityinfo.server.command.DispatcherSync;
@@ -48,7 +44,6 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
 import org.activityinfo.server.mail.*;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
-import org.activityinfo.store.spi.BatchingFormTreeBuilder;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.codehaus.jackson.map.annotate.JsonView;
 
@@ -60,8 +55,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Optional;
 
 public class DatabaseResource {
 
@@ -211,7 +207,7 @@ public class DatabaseResource {
             return Response.status(Response.Status.CONFLICT).entity("There is a pending transfer on this database").build();
         }
         if (!proposedOwner.isPresent()) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Proposed owner does not exist").build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("The email '" + request.getProposedOwnerEmail() + "' is not registered on ActivityInfo.org.").build();
         }
         if (currentOwner.equals(proposedOwner.get())) {
             return Response.status(Response.Status.BAD_REQUEST).entity("User already owns database.").build();
