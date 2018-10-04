@@ -57,6 +57,22 @@ public class UsageResource {
     }
 
     @GET
+    @Path("technicalContacts")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getTechnicalContacts(@QueryParam("accessKey") String requestKey) {
+        assertAuthorized(requestKey);
+        return executeQuery("SELECT userid, email, name, billingAccountId from userlogin where billingaccountid is not null");
+    }
+
+    @GET
+    @Path("freeTrials")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getFreeTrials(@QueryParam("accessKey") String requestKey) {
+        assertAuthorized(requestKey);
+        return executeQuery("SELECT userid, email, name, dateCreated, bounced, trialEndDate from userlogin where billingaccountid is null");
+    }
+
+    @GET
     @Path("databases")
     @Produces(MediaType.APPLICATION_JSON)
     public String getDatabases(@QueryParam("accessKey") String requestKey) {
@@ -141,6 +157,7 @@ public class UsageResource {
                                     case Types.NUMERIC:
                                     case Types.FLOAT:
                                     case Types.DOUBLE:
+                                    case Types.DECIMAL:
                                         jsonWriter.value(rs.getDouble(i+1));
                                         break;
                                     case Types.VARCHAR:
@@ -155,6 +172,7 @@ public class UsageResource {
                                     case Types.BOOLEAN:
                                         jsonWriter.value(rs.getBoolean(i+1));
                                         break;
+                                    case Types.DATE:
                                     case Types.TIME:
                                     case Types.TIMESTAMP:
                                         Date date = rs.getDate(i + 1);
@@ -165,7 +183,7 @@ public class UsageResource {
                                         }
                                         break;
                                     default:
-                                        throw new RuntimeException("Invalid type: " + i);
+                                        throw new RuntimeException("Invalid type: " + types[i]);
                                 }
                             }
                             jsonWriter.endObject();
