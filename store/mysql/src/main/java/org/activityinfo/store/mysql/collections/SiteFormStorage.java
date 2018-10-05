@@ -116,6 +116,11 @@ public class SiteFormStorage implements VersionedFormStorage, FormStorageV2 {
                 return buildPermissions(databasePermission);
             }
         }
+        // Form is published
+        if(activity.isPublished()) {
+            return FormPermissions.readonly();
+        }
+
         // User does not have access to form's folder - deny
         return FormPermissions.none();
     }
@@ -130,7 +135,10 @@ public class SiteFormStorage implements VersionedFormStorage, FormStorageV2 {
                         CuidAdapter.partnerRecordId(databasePermission.getPartnerId()).asString()));
 
 
-        if(databasePermission.isViewAll()) {
+        if(activity.isPublished()) {
+            permissions.allowView();
+
+        } else if(databasePermission.isViewAll()) {
             permissions.allowView();
 
         } else if(databasePermission.isView()) {
@@ -146,11 +154,6 @@ public class SiteFormStorage implements VersionedFormStorage, FormStorageV2 {
 
         if(databasePermission.isDesign()) {
             permissions.allowSchemaUpdate();
-        }
-
-        // published property of activity overrides user permissions
-        if(activity.isPublished()) {
-            permissions.allowUnfilteredView();
         }
 
         return permissions.build();
