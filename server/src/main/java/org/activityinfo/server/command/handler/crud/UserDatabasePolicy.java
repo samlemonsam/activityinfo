@@ -24,6 +24,7 @@ import org.activityinfo.legacy.shared.command.result.BillingException;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.model.account.AccountStatus;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.command.handler.PermissionOracle;
 import org.activityinfo.server.command.handler.UpdatePartnerHandler;
 import org.activityinfo.server.database.hibernate.dao.CountryDAO;
@@ -32,6 +33,7 @@ import org.activityinfo.server.database.hibernate.entity.Country;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
+import org.activityinfo.store.query.UsageTracker;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -61,6 +63,8 @@ public class UserDatabasePolicy implements EntityPolicy<Database> {
         database.setOwner(user);
 
         applyProperties(database, properties);
+
+        UsageTracker.track(user.getId(), "create_database", CuidAdapter.databaseId(database.getId()));
 
         databaseDAO.persist(database);
 

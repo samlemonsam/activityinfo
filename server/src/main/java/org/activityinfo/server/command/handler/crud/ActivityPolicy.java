@@ -29,6 +29,7 @@ import org.activityinfo.server.command.handler.json.JsonHelper;
 import org.activityinfo.server.database.hibernate.dao.ActivityDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.store.query.UsageTracker;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -70,6 +71,8 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
 
         activityDAO.persist(activity);
 
+        UsageTracker.track(user.getId(), "create_activity", database.getResourceId());
+
         return activity.getId();
     }
 
@@ -85,6 +88,9 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         PermissionOracle.using(em).assertDesignPrivileges(activity.getDatabase(), user);
        
         activity.incrementSchemaVersion();
+
+        UsageTracker.track(user.getId(), "update_activity", activity.getDatabase().getResourceId(), activity.getResourceId());
+
 
         applyProperties(activity, changes);
     }

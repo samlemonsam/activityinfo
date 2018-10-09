@@ -32,6 +32,7 @@ import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.store.query.UsageTracker;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -274,4 +275,7 @@ public class BaseEntityHandler {
         return em;
     }
 
+    protected void trackUpdate(Activity activity) {
+        UsageTracker.track(user.getId(), "update_activity", activity.getDatabase().getResourceId(), activity.getResourceId());
+    }
 }

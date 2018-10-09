@@ -34,6 +34,7 @@ import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.server.login.model.SignUpConfirmationInvalidPageModel;
 import org.activityinfo.server.login.model.SignUpConfirmationPageModel;
 import org.activityinfo.server.util.MailingListClient;
+import org.activityinfo.store.query.UsageTracker;
 
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
@@ -86,6 +87,9 @@ public class SignUpConfirmationController {
     public Viewable getPage(@Context UriInfo uri) throws Exception {
         try {
             User user = userDAO.get().findUserByChangePasswordKey(uri.getRequestUri().getQuery());
+
+            UsageTracker.track(user.getId(), "signup_confirm_start");
+
             return new SignUpConfirmationPageModel(user.getChangePasswordKey()).asViewable();
         } catch (NoResultException e) {
             return new SignUpConfirmationInvalidPageModel().asViewable();
@@ -113,12 +117,16 @@ public class SignUpConfirmationController {
 
             billingAccountOracle.startFreeTrial(user);
 
+            UsageTracker.track(user.getId(), "signup_confirm_finish");
+            UsageTracker.track(user.getId(), "login");
+
             // add user to default database
             addUserToDefaultDatabase(user);
 
             entityManager.getTransaction().commit();
 
             mailingList.subscribe(user, false, newsletter);
+
 
             // go to the home page
             return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/app").build())

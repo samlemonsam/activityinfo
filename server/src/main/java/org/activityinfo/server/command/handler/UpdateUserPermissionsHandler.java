@@ -38,6 +38,7 @@ import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.server.mail.InvitationMessage;
 import org.activityinfo.server.mail.MailSender;
 import org.activityinfo.server.mail.Message;
+import org.activityinfo.store.query.UsageTracker;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -123,13 +124,18 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
             perm = new UserPermission(database, user);
             doUpdate(perm, dto, isOwner, executingUserPermission);
             permDAO.persist(perm);
+
+            UsageTracker.track(executingUser.getId(), "invite_user", database.getResourceId());
+
         } else {
             // If the user is intending to add a new user, verify that this user doesn't already exist
             if(cmd.isNewUser() && perm.isAllowView()) {
                 throw new UserExistsException();
             }
             doUpdate(perm, dto, isOwner, executingUserPermission);
+            UsageTracker.track(executingUser.getId(), "update_permissions", database.getResourceId());
         }
+
 
         return null;
     }

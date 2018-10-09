@@ -27,6 +27,7 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.model.ConfirmInvitePageModel;
 import org.activityinfo.server.login.model.InvalidInvitePageModel;
 import org.activityinfo.server.util.MailingListClient;
+import org.activityinfo.store.query.UsageTracker;
 
 import javax.inject.Provider;
 import javax.persistence.EntityNotFoundException;
@@ -60,6 +61,9 @@ public class ConfirmInviteController {
     public Viewable getPage(@Context UriInfo uri) throws Exception {
         try {
             User user = userDAO.get().findUserByChangePasswordKey(uri.getRequestUri().getQuery());
+
+            UsageTracker.track(user.getId(), "invite_confirm_start");
+
             return new ConfirmInvitePageModel(user).asViewable();
 
         } catch (NoResultException e) {
@@ -85,6 +89,9 @@ public class ConfirmInviteController {
             user.setEmailNotification(true);
 
             mailingList.subscribe(user, true, newsletter);
+
+            UsageTracker.track(user.getId(), "invite_confirm_finish");
+            UsageTracker.track(user.getId(), "login");
 
             return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/app").build())
                            .cookie(authTokenProvider.createNewAuthCookies(user))

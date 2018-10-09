@@ -18,6 +18,8 @@
  */
 package org.activityinfo.server.database.hibernate.entity;
 
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
@@ -76,6 +78,11 @@ public class Database implements java.io.Serializable, Deleteable {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    @Transient
+    public ResourceId getResourceId() {
+        return CuidAdapter.databaseId(getId());
     }
 
     /**

@@ -31,6 +31,7 @@ import org.activityinfo.server.command.handler.crud.LocationTypePolicy;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.command.handler.crud.UserDatabasePolicy;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.store.query.UsageTracker;
 
 import javax.persistence.EntityManager;
 import javax.persistence.QueryTimeoutException;
@@ -114,6 +115,8 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
 
         entityManager().persist(folder);
 
+        UsageTracker.track(user.getId(), "create_folder", database.getResourceId());
+
         return new CreateResult(folder.getId());
     }
 
@@ -132,6 +135,7 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         activity.incrementSchemaVersion();
         activity.getDatabase().setLastSchemaUpdate(new Date());
 
+        trackUpdate(activity);
 
         return new CreateResult(group.getId());
     }
@@ -154,6 +158,8 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
 
         activity.incrementSchemaVersion();
         activity.getDatabase().setLastSchemaUpdate(new Date());
+
+        trackUpdate(activity);
 
         return new CreateResult(attribute.getId());
     }
@@ -180,6 +186,8 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         
         activity.incrementSchemaVersion();
         activity.getDatabase().setLastSchemaUpdate(new Date());
+
+        trackUpdate(activity);
 
         return new CreateResult(indicator.getId());
     }
@@ -217,4 +225,6 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         }
     
     }
+
+
 }

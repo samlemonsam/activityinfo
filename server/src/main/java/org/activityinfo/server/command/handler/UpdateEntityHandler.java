@@ -149,6 +149,8 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
         permissionsOracle.assertDesignPrivileges(indicator.getActivity(), user);
 
         updateIndicatorProperties(indicator, changes);
+
+        trackUpdate(indicator.getActivity());
     }
 
     private void updateLockedPeriod(User user, UpdateEntity cmd, Map<String, Object> changes) {
@@ -157,6 +159,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
         permissionsOracle.assertDesignPrivileges(lockedPeriod, user);
 
         updateLockedPeriodProperties(lockedPeriod, changes);
+
     }
 
     private void updateAttribute(User user, UpdateEntity cmd, Map<String, Object> changes) {
@@ -169,6 +172,8 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
         Activity activity = ag.getActivities().iterator().next(); // Assume only one activity for the attr group
         activity.incrementSchemaVersion();
         activity.getDatabase().setLastSchemaUpdate(new Date());
+
+        trackUpdate(activity);
     }
 
     private void updateAttributeGroup(User user, UpdateEntity cmd, Map<String, Object> changes) {
@@ -181,6 +186,8 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
         Activity activity = group.getActivities().iterator().next(); // Assume only one activity for the attr group
         activity.incrementSchemaVersion();
         activity.getDatabase().setLastSchemaUpdate(new Date());
+
+        trackUpdate(activity);
     }
 
     private void updateTarget(User user, UpdateEntity cmd, Map<String, Object> changes) {
