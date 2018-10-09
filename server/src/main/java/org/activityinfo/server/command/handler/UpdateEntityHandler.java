@@ -150,7 +150,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
 
         updateIndicatorProperties(indicator, changes);
 
-        trackUpdate(indicator.getActivity());
+        trackUpdate(user, indicator.getActivity());
     }
 
     private void updateLockedPeriod(User user, UpdateEntity cmd, Map<String, Object> changes) {
@@ -173,7 +173,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
         activity.incrementSchemaVersion();
         activity.getDatabase().setLastSchemaUpdate(new Date());
 
-        trackUpdate(activity);
+        trackUpdate(user, activity);
     }
 
     private void updateAttributeGroup(User user, UpdateEntity cmd, Map<String, Object> changes) {
@@ -187,7 +187,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
         activity.incrementSchemaVersion();
         activity.getDatabase().setLastSchemaUpdate(new Date());
 
-        trackUpdate(activity);
+        trackUpdate(user, activity);
     }
 
     private void updateTarget(User user, UpdateEntity cmd, Map<String, Object> changes) {

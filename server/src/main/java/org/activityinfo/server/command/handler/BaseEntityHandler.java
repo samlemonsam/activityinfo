@@ -275,7 +275,7 @@ public class BaseEntityHandler {
         return em;
     }
 
-    protected void trackUpdate(Activity activity) {
+    protected void trackUpdate(User user, Activity activity) {
         UsageTracker.track(user.getId(), "update_activity", activity.getDatabase().getResourceId(), activity.getResourceId());
     }
 }
