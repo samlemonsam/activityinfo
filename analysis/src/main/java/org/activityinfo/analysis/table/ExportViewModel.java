@@ -9,10 +9,12 @@ public class ExportViewModel {
     public static final String XLS_EXPORT = "XLS";
 
     private TableModel tableModel;
+    private Integer columnLength;
     private boolean columnLimitExceeded;
 
-    public ExportViewModel(TableModel tableModel, boolean columnLimitExceeded) {
+    public ExportViewModel(TableModel tableModel, Integer columnLength, boolean columnLimitExceeded) {
         this.tableModel = tableModel;
+        this.columnLength = columnLength;
         this.columnLimitExceeded = columnLimitExceeded;
     }
 
@@ -42,7 +44,7 @@ public class ExportViewModel {
 
     public String getErrorMessage() {
         if (columnLimitExceeded) {
-            return I18N.CONSTANTS.columnLimit();
+            return I18N.MESSAGES.columnLimit(columnLength, XLS_COLUMN_LIMIT, XLS_EXPORT);
         }
         return "";
     }

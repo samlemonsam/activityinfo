@@ -1855,9 +1855,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Current Filter")
     String currentFilter();
 
-    @DefaultStringValue("Current column length {0} exceeds Column Export Limitation of {1} for Export Type {2}")
-    String columnLimit();
-
     @DefaultStringValue("To request change of email address or account deletion, please contact support@activityinfo.org.")
     String requestDeleteChangeEmail();
 

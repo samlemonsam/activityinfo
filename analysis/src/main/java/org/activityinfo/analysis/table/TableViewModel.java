@@ -263,8 +263,10 @@ public class TableViewModel implements TableUpdater {
             }
             return model.build();
         });
-        Observable<Boolean> colLimitExceed = computeEffectiveTableModel(exportTableModel).transform(ExportViewModel::columnLimitExceeded);
-        return Observable.transform(exportTableModel, colLimitExceed, ExportViewModel::new);
+        Observable<EffectiveTableModel> effectiveTableModel = computeEffectiveTableModel(exportTableModel);
+        Observable<Integer> colLength = effectiveTableModel.transform(ExportViewModel::exportedColumnSize);
+        Observable<Boolean> colLimitExceed = effectiveTableModel.transform(ExportViewModel::columnLimitExceeded);
+        return Observable.transform(exportTableModel, colLength, colLimitExceed, ExportViewModel::new);
     }
 
     private String parentFormula(ParsedFormula formula) {

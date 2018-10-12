@@ -283,7 +283,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Distinct count of {0}")
     String countDistinctMeasure(String formLabel);
 
-    @DefaultMessage("Current column length {0} exceeds Column Export Limitation of {1} for Export Type {2}")
+    @DefaultMessage("Current column length {0} exceeds Column Export Limitation of {1} for Export Type {2}. Please reduce the number of selected columns for export to within these limits.")
     String columnLimit(int colLength, int colLimit, String exportType);
 
     @DefaultMessage("Your Database Transfer request has been sent to User {0}. You will receive an email informing you of the Users decision to accept or reject ownership of your Database.")
