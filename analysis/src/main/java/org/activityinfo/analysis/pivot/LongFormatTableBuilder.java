@@ -1,6 +1,5 @@
 package org.activityinfo.analysis.pivot;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.*;
 import org.activityinfo.model.analysis.pivot.*;
 import org.activityinfo.model.form.FormClass;
