@@ -65,14 +65,14 @@ public class ExportSitesTask extends HttpServlet {
         if(Strings.isNullOrEmpty(locale)) {
             locale = Locale.ENGLISH.toLanguageTag();
         }
-        
+
         // authenticate this task
         authProvider.set(new AuthenticatedUser("",
                 Integer.parseInt(req.getParameter("userId")),
                 req.getParameter("userEmail")));
 
         ThreadLocalLocaleProvider.pushLocale(Locale.forLanguageTag(locale));
-        
+
         try {
             // create the workbook
             Filter filter = FilterUrlSerializer.fromQueryParameter(req.getParameter("filter"));
@@ -84,6 +84,8 @@ public class ExportSitesTask extends HttpServlet {
             try (OutputStream out = storage.openOutputStream()) {
                 export.getBook().write(out);
             }
+        } catch (Exception e) {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } finally {
             ThreadLocalLocaleProvider.popLocale();
         }
