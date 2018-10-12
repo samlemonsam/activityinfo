@@ -4,7 +4,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import org.activityinfo.analysis.pivot.viewModel.*;
 import org.activityinfo.model.analysis.pivot.Axis;
+import org.activityinfo.model.resource.ResourceId;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
@@ -21,28 +23,38 @@ public class PivotTableWriter implements AutoCloseable {
     public static final String DOUBLE_QUOTE = "\"";
     public static final String LINE_ENDING = "\r\n";
 
+    private static final String FOLDER_COL = "Folder";
     private static final String VALUE_COL = "Value";
 
     private final Writer writer;
 
-    List<Integer> rowDims = Lists.newArrayList();
-    List<Integer> colDims = Lists.newArrayList();
+    private List<Integer> rowDims = Lists.newArrayList();
+    private List<Integer> colDims = Lists.newArrayList();
+    private Integer formIdDimension;
 
     public PivotTableWriter(Writer writer) throws IOException {
         this.writer = writer;
         writerByteOrderMark();
     }
 
-    public void write(AnalysisResult pivotTable) throws IOException {
+    public void write(AnalysisResult pivotTable, @Nullable Map<ResourceId,String> folderMapping) throws IOException {
         constructDimensionIndexMapping(pivotTable.getDimensionSet());
         writeRowDimensionHeaders(pivotTable.getDimensionSet());
-        writeColDimensionHeaders(pivotTable.getDimensionSet());
-        writePoints(pivotTable);
+        writeColDimensionHeaders(pivotTable.getDimensionSet(), folderMapping);
+        writePoints(pivotTable, folderMapping);
     }
 
     private void constructDimensionIndexMapping(DimensionSet dimensionSet) {
         rowDims = extractDimensionIndex(dimensionSet, Axis.ROW);
         colDims = extractDimensionIndex(dimensionSet, Axis.COLUMN);
+        formIdDimension = extractFormIdDimensionIndex(dimensionSet);
+    }
+
+    private Integer extractFormIdDimensionIndex(DimensionSet dimensionSet) {
+        return dimensionSet.getList().stream()
+                .filter(dimension -> dimension.getLabel().equals("FormId"))
+                .map(dimensionSet::getIndex)
+                .findFirst().orElse(null);
     }
 
     private List<Integer> extractDimensionIndex(DimensionSet dimensionSet, Axis axis) {
@@ -56,9 +68,17 @@ public class PivotTableWriter implements AutoCloseable {
         rowDims.forEach(rowDim -> writeDelimited(dimensionSet.getDimension(rowDim).getLabel()));
     }
 
-    private void writeColDimensionHeaders(DimensionSet dimensionSet) {
+    private void writeColDimensionHeaders(DimensionSet dimensionSet, Map<ResourceId, String> folderMapping) {
+        if (folderMapping != null) {
+            writeFolderColumnHeader();
+        }
         colDims.forEach(colDim -> writeDelimited(dimensionSet.getDimension(colDim).getLabel()));
         writeValueColumnHeader();
+    }
+
+    private void writeFolderColumnHeader() {
+        write(FOLDER_COL, false);
+        write(DELIMITER, true);
     }
 
     private void writeValueColumnHeader() {
@@ -66,9 +86,19 @@ public class PivotTableWriter implements AutoCloseable {
         write(LINE_ENDING, true);
     }
 
-    private void writePoints(AnalysisResult pivotTable) {
-        pivotTable.getPoints().forEach(this::writePoint);
+    private void writePoints(AnalysisResult pivotTable, Map<ResourceId, String> folderMapping) {
+        pivotTable.getPoints().forEach(point -> {
+            if (folderMapping != null) {
+                writeFolder(point, folderMapping);
+            }
+            writePoint(point);
+        });
         write(LINE_ENDING, true);
+    }
+
+    private void writeFolder(Point point, Map<ResourceId, String> folderMapping) {
+        ResourceId formIdPoint = ResourceId.valueOf(point.getCategory(formIdDimension));
+        writeDelimited(folderMapping.getOrDefault(formIdPoint, ""));
     }
 
     private void writePoint(Point point) {

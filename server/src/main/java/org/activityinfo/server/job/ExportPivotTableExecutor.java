@@ -37,7 +37,7 @@ public class ExportPivotTableExecutor implements JobExecutor<ExportPivotTableJob
         GeneratedResource export = storageProvider.create(CSV_UTF8_MIME, fileName());
 
         try (PivotTableWriter writer = new PivotTableWriter(new OutputStreamWriter(export.openOutputStream(), "UTF-8"))) {
-            writer.write(pivotTable);
+            writer.write(pivotTable, descriptor.isIncludeFolderLabels() ? descriptor.getFolderMapping() : null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

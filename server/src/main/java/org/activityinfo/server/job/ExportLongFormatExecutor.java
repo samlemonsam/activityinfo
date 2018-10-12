@@ -2,12 +2,16 @@ package org.activityinfo.server.job;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.activityinfo.analysis.pivot.LongFormatTableBuilder;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.model.analysis.pivot.*;
+import org.activityinfo.model.database.Resource;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
@@ -18,21 +22,25 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.server.command.DispatcherSync;
+import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.server.generated.StorageProvider;
 import org.activityinfo.store.query.shared.FormSource;
-import org.activityinfo.store.spi.FormStorageProvider;
+import org.activityinfo.store.spi.DatabaseProvider;
 
+import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob, ExportResult> {
 
-    private final FormStorageProvider formStorageProvider;
-    private final StorageProvider storageProvider;
+    private final AuthenticatedUser authenticatedUser;
     private final DispatcherSync dispatcher;
     private final FormSource formSource;
+    private final DatabaseProvider databaseProvider;
+    private final ExportPivotTableExecutor pivotTableExporter;
 
     private static Predicate<ActivityDTO> activity() {
         return activity -> activity.getClassicView() && (activity.getReportingFrequency() == ActivityFormDTO.REPORT_ONCE);
@@ -55,20 +63,23 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
     }
 
     @Inject
-    public ExportLongFormatExecutor(FormStorageProvider formStorageProvider,
+    public ExportLongFormatExecutor(AuthenticatedUser authenticatedUser,
                                     StorageProvider storageProvider,
                                     DispatcherSync dispatcher,
-                                    FormSource formSource) {
-        this.formStorageProvider = formStorageProvider;
-        this.storageProvider = storageProvider;
+                                    FormSource formSource,
+                                    Provider<EntityManager> entityManager) {
+        this.authenticatedUser = authenticatedUser;
         this.dispatcher = dispatcher;
         this.formSource = formSource;
+        this.databaseProvider = new DatabaseProviderImpl(entityManager);
+        this.pivotTableExporter = new ExportPivotTableExecutor(storageProvider, formSource);
     }
 
     @Override
     public ExportResult execute(ExportLongFormatJob descriptor) throws IOException {
         int databaseId = descriptor.getDatabaseId();
         UserDatabaseDTO database = dispatcher.execute(new GetSchema()).getDatabaseById(databaseId);
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(CuidAdapter.databaseId(databaseId), authenticatedUser.getUserId());
 
         if (database == null) {
             throw new IllegalStateException("Database " + databaseId + " could not be found");
@@ -76,9 +87,30 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
 
         List<FormTree> formScope = getFormScope(database);
         PivotModel longFormatModel = LongFormatTableBuilder.build(formScope);
-        ExportPivotTableExecutor pivotTableExport = new ExportPivotTableExecutor(storageProvider, formSource);
-        ExportPivotTableJob exportJob = new ExportPivotTableJob(longFormatModel);
-        return pivotTableExport.execute(exportJob);
+        Map<ResourceId,String> folderMapping = mapFormsToFolderLabels(databaseMeta, formScope);
+        ExportPivotTableJob exportJob = new ExportPivotTableJob(longFormatModel, true, folderMapping);
+        return pivotTableExporter.execute(exportJob);
+    }
+
+    private Map<ResourceId,String> mapFormsToFolderLabels(UserDatabaseMeta databaseMeta, List<FormTree> formScope) {
+        return formScope.stream()
+                .map(FormTree::getRootFormClass)
+                .map(FormClass::getId)
+                .map(databaseMeta::getResource)
+                .collect(Collectors.toMap(
+                        Resource::getId,
+                        resource -> getParentLabel(databaseMeta, resource)));
+    }
+
+    private String getParentLabel(UserDatabaseMeta databaseMeta, Resource child) {
+        if (child.getParentId().getDomain() == CuidAdapter.DATABASE_DOMAIN) {
+            return "";
+        }
+        Resource parent = databaseMeta.getResource(child.getParentId());
+        if (parent == null) {
+            return "";
+        }
+        return parent.getLabel();
     }
 
     private List<FormTree> getFormScope(UserDatabaseDTO database) {
