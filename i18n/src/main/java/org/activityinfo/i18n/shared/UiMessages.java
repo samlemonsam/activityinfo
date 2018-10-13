@@ -20,7 +20,6 @@ package org.activityinfo.i18n.shared;
 
 import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.safehtml.shared.SafeHtml;
-
 import java.util.Date;
 
 /**
@@ -278,12 +277,12 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("{0} pending changes")
     @AlternateMessage({ "one", "One pending change" })
-    String pendingChanges(@PluralCount  int count);
+    String pendingChanges(@PluralCount int count);
 
     @DefaultMessage("Distinct count of {0}")
     String countDistinctMeasure(String formLabel);
 
-    @DefaultMessage("Current column length {0} exceeds Column Export Limitation of {1} for Export Type {2}. Please reduce the number of selected columns for export to within these limits.")
+    @DefaultMessage("Current column length {0} exceeds Column Export Limitation of {1} for Export Type {2}")
     String columnLimit(int colLength, int colLimit, String exportType);
 
     @DefaultMessage("Your Database Transfer request has been sent to User {0}. You will receive an email informing you of the Users decision to accept or reject ownership of your Database.")
@@ -303,5 +302,4 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("Do you want to delete Target: ''{0}'' from your Database?")
     String requestConfirmationToDeleteTarget(String targetName);
-
 }
