@@ -96,10 +96,19 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
         return formScope.stream()
                 .map(FormTree::getRootFormClass)
                 .map(FormClass::getId)
+                .map(ExportLongFormatExecutor::monthlyToParentFormId)
                 .map(databaseMeta::getResource)
                 .collect(Collectors.toMap(
                         Resource::getId,
                         resource -> getParentLabel(databaseMeta, resource)));
+    }
+
+    private static ResourceId monthlyToParentFormId(ResourceId resourceId) {
+        if (resourceId.getDomain() != CuidAdapter.MONTHLY_REPORT_FORM_CLASS) {
+            return resourceId;
+        }
+        int monthlyActivityId = CuidAdapter.getLegacyIdFromCuid(resourceId);
+        return CuidAdapter.activityFormClass(monthlyActivityId);
     }
 
     private String getParentLabel(UserDatabaseMeta databaseMeta, Resource child) {
