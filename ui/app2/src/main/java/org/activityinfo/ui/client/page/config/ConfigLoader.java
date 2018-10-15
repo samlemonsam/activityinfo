@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
+import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.page.*;
 import org.activityinfo.ui.client.page.config.design.DbEditor;
@@ -113,8 +114,13 @@ public class ConfigLoader implements PageLoader {
                         @Override
                         public void onSuccess(SchemaDTO result) {
                             DbPageState dbPlace = (DbPageState) place;
-                            ((DbPage) page).go(result.getDatabaseById(dbPlace.getDatabaseId()));
-                            callback.onSuccess(page);
+                            UserDatabaseDTO database = result.getDatabaseById(dbPlace.getDatabaseId());
+                            if(database.isSuspended()) {
+                                callback.onSuccess(new DbErrorPage(database));
+                            } else {
+                                ((DbPage) page).go(database);
+                                callback.onSuccess(page);
+                            }
                         }
 
                     });

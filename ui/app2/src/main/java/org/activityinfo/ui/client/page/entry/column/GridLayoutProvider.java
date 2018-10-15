@@ -33,19 +33,18 @@ import org.activityinfo.ui.client.page.entry.grouping.GroupingModel;
 import org.activityinfo.ui.client.page.entry.grouping.NullGroupingModel;
 import org.activityinfo.ui.client.page.entry.grouping.TimeGroupingModel;
 
-public class DefaultColumnModelProvider implements ColumnModelProvider {
+public class GridLayoutProvider {
 
     private final Dispatcher dispatcher;
 
-    public DefaultColumnModelProvider(Dispatcher dispatcher) {
+    public GridLayoutProvider(Dispatcher dispatcher) {
         super();
         this.dispatcher = dispatcher;
     }
 
-    @Override
-    public void fetchColumnModels(final Filter filter,
-                                  final GroupingModel grouping,
-                                  final AsyncCallback<ColumnModel> callback) {
+    public void fetch(final Filter filter,
+                      final GroupingModel grouping,
+                      final AsyncCallback<GridLayout> callback) {
 
         if (filter.isDimensionRestrictedToSingleCategory(DimensionType.Activity)) {
             final int activityId = filter.getRestrictedCategory(DimensionType.Activity);
@@ -82,17 +81,26 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
 
                 @Override
                 public void onSuccess(SchemaDTO result) {
-
-                    if (filter.isDimensionRestrictedToSingleCategory(DimensionType.Database)) {
-
-                        UserDatabaseDTO singleDatabase = result.getDatabaseById(filter.getRestrictedCategory(DimensionType.Database));
-                        callback.onSuccess(forSingleDatabase(grouping, singleDatabase));
-
-                    } else {
-                        callback.onSuccess(forMultipleDatabases(grouping, result));
-                    }
+                    int databaseId = filter.getRestrictedCategory(DimensionType.Database);
+                    UserDatabaseDTO singleDatabase = result.getDatabaseById(filter.getRestrictedCategory(DimensionType.Database));
+                    callback.onSuccess(forSingleDatabase(grouping, singleDatabase));
                 }
             });
+        }
+    }
+
+    private GridLayout forSingleActivity(GroupingModel grouping, UserDatabaseDTO database, ActivityFormDTO activity) {
+
+        String heading = activity.getDatabaseName() + " - " + activity.getName();
+
+        if(database.isSuspended()) {
+            return GridLayout.suspended(heading, database.getAmOwner());
+
+        } else if(activity.getClassicView()) {
+            return GridLayout.classic(heading, activity, columnsForSingleActivity(grouping, database, activity));
+
+        } else {
+            return GridLayout.redirect(heading, activity.getResourceId());
         }
     }
 
@@ -100,7 +108,7 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
      * Builds a grid model for a single classic activity
      *
      */
-    private ColumnModel forSingleActivity(GroupingModel grouping, UserDatabaseDTO database, ActivityFormDTO activity) {
+    private ColumnModel columnsForSingleActivity(GroupingModel grouping, UserDatabaseDTO database, ActivityFormDTO activity) {
         if (grouping == NullGroupingModel.INSTANCE) {
             return new ColumnModelBuilder().addMapColumn()
                                            .addDeletedLocationWarning()
@@ -136,7 +144,15 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
         }
     }
 
-    private ColumnModel forSingleDatabase(GroupingModel grouping, UserDatabaseDTO database) {
+    private GridLayout forSingleDatabase(GroupingModel grouping, UserDatabaseDTO database) {
+        if(database.isSuspended()) {
+            return GridLayout.suspended(database.getName(), database.getAmOwner());
+        } else {
+            return GridLayout.classic(database.getName(), columnsForSingleDatabase(grouping, database));
+        }
+    }
+
+    private ColumnModel columnsForSingleDatabase(GroupingModel grouping, UserDatabaseDTO database) {
         if (grouping == NullGroupingModel.INSTANCE) {
             return new ColumnModelBuilder().addMapColumn()
                                            .addDeletedLocationWarning()
@@ -172,27 +188,4 @@ public class DefaultColumnModelProvider implements ColumnModelProvider {
             throw new IllegalArgumentException(grouping.toString());
         }
     }
-
-    private ColumnModel forMultipleDatabases(GroupingModel grouping, SchemaDTO schema) {
-        if (grouping == NullGroupingModel.INSTANCE) {
-            return new ColumnModelBuilder().addMapColumn()
-                                           .addDeletedLocationWarning()
-                                           .addDatabaseColumn(schema)
-                                           .addActivityColumn(schema)
-                                           .addLocationColumn()
-                                           .addPartnerColumn()
-                                           .build();
-
-        } else if (grouping instanceof AdminGroupingModel) {
-
-            return new ColumnModelBuilder().addTreeNameColumn().addPartnerColumn().build();
-
-        } else if (grouping instanceof TimeGroupingModel) {
-
-            return new ColumnModelBuilder().addTreeNameColumn().addPartnerColumn().addLocationColumn().build();
-        } else {
-            throw new IllegalArgumentException(grouping.toString());
-        }
-    }
-
 }

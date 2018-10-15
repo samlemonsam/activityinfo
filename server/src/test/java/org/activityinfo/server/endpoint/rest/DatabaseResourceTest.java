@@ -31,10 +31,9 @@ import org.junit.runner.RunWith;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
 import java.net.URISyntaxException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(InjectionSupport.class)
 @Modules(MailSenderStubModule.class)
@@ -67,13 +66,16 @@ public class DatabaseResourceTest extends CommandTestCase {
     @Inject
     private AuthTokenProvider authTokenProvider;
 
+    @Inject
+    private BillingAccountOracle billingOracle;
+
     private UriInfo uri;
 
     @Before
     public void setUp() throws URISyntaxException {
         resource = new DatabaseResource(formStorageProvider,
                 dispatcher,
-                new DatabaseProviderImpl(Providers.of(em)),
+                new DatabaseProviderImpl(Providers.of(em), billingOracle),
                 Providers.of(em),
                 mailSender,
                 databaseId);

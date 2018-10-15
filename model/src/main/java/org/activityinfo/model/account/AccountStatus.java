@@ -177,6 +177,11 @@ public class AccountStatus implements JsonSerializable {
         return secondsUntilExpiration(new Date()) < 0;
     }
 
+    public boolean isSuspended() {
+        // For now, we are not suspending paid accountss
+        return isTrial() && isExpired();
+    }
+
     public boolean isNewDatabaseAllowed() {
         return !isExpired();
     }

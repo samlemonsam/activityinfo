@@ -62,9 +62,14 @@ public class FormTreeBuilder {
             return tree;
         }
 
+
         if(!root.isVisible()) {
             tree.setRootState(FormTree.State.FORBIDDEN);
             return tree;
+        }
+
+        if(root.isSuspended()) {
+            tree.setRootState(FormTree.State.SUSPENDED);
         }
 
         FormClass rootSchema = root.getSchema();

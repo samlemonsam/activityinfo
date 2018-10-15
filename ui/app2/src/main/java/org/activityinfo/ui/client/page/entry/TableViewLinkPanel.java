@@ -10,15 +10,15 @@ import com.extjs.gxt.ui.client.widget.Text;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.layout.CenterLayout;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.App3;
 
 public class TableViewLinkPanel implements SiteGridPanelView {
 
     private ContentPanel panel;
 
-    TableViewLinkPanel(final ActivityFormDTO dto) {
+    TableViewLinkPanel(final ResourceId formId) {
         this.panel = new ContentPanel();
         panel.setHeaderVisible(false);
         panel.setLayout(new CenterLayout());
@@ -30,7 +30,7 @@ public class TableViewLinkPanel implements SiteGridPanelView {
         navigate.addSelectionListener(new SelectionListener<ButtonEvent>() {
             @Override
             public void componentSelected(ButtonEvent buttonEvent) {
-                App3.openNewTable(dto.getFormId());
+                App3.openNewTable(formId);
             }
         });
         panel.addButton(navigate);

@@ -37,10 +37,12 @@ public class DatabaseProviderImpl implements DatabaseProvider {
 
     public static final ResourceId GEODB_ID = ResourceId.valueOf("geodb");
     private Provider<EntityManager> entityManager;
+    private final BillingAccountOracle billingOracle;
 
     @Inject
-    public DatabaseProviderImpl(Provider<EntityManager> entityManager) {
+    public DatabaseProviderImpl(Provider<EntityManager> entityManager, BillingAccountOracle billingOracle) {
         this.entityManager = entityManager;
+        this.billingOracle = billingOracle;
     }
 
 
@@ -63,13 +65,14 @@ public class DatabaseProviderImpl implements DatabaseProvider {
                 .build();
     }
 
-    private UserDatabaseMeta queryMySQLDatabase(ResourceId databaseId, int userId) {
+    private UserDatabaseMeta queryMySQLDatabase(ResourceId databaseResourceId, int userId) {
         UserDatabaseMeta.Builder meta = new UserDatabaseMeta.Builder()
-                .setDatabaseId(databaseId)
+                .setDatabaseId(databaseResourceId)
                 .setUserId(userId);
 
 
-        Database database = entityManager.get().find(Database.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
+        int databaseId = CuidAdapter.getLegacyIdFromCuid(databaseResourceId);
+        Database database = entityManager.get().find(Database.class, databaseId);
         if(database != null) {
 
             if (database.getOwner().getId() == userId) {
@@ -88,6 +91,7 @@ public class DatabaseProviderImpl implements DatabaseProvider {
                 meta.addLocks(queryLocks(database));
                 meta.addResources(queryFolders(database));
                 meta.addResources(queryForms(database));
+                meta.setSuspended(billingOracle.isDatabaseSuspended(databaseId));
             }
         }
         return meta.build();

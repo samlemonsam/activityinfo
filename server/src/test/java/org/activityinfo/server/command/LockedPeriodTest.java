@@ -21,6 +21,7 @@ package org.activityinfo.server.command;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.inject.Inject;
 import com.google.inject.util.Providers;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.CreateLockedPeriod;
@@ -35,6 +36,7 @@ import org.activityinfo.model.database.RecordLock;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.database.OnDataSet;
+import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -50,6 +52,11 @@ import static org.junit.Assert.assertTrue;
 @OnDataSet("/dbunit/sites-simple1.db.xml")
 @RunWith(InjectionSupport.class)
 public class LockedPeriodTest extends CommandTestCase {
+
+
+    @Inject
+    private BillingAccountOracle billingOracle;
+
 
     @Test
     public void createTest() throws CommandException {
@@ -100,7 +107,7 @@ public class LockedPeriodTest extends CommandTestCase {
         assertTrue(locks.isActivityLocked(1, new LocalDate(2011, 1,1)));
 
         // Verify that the new code works too...
-        DatabaseProviderImpl provider = new DatabaseProviderImpl(Providers.of(em));
+        DatabaseProviderImpl provider = new DatabaseProviderImpl(Providers.of(em), billingOracle);
         UserDatabaseMeta metadata = provider.getDatabaseMetadata(CuidAdapter.databaseId(1), 1);
 
         ArrayList<RecordLock> folderLocks = Lists.newArrayList(metadata.getEffectiveLocks(CuidAdapter.folderId(1)));

@@ -58,7 +58,7 @@ import org.activityinfo.ui.client.page.common.toolbar.ActionListener;
 import org.activityinfo.ui.client.page.common.toolbar.ActionToolBar;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
 import org.activityinfo.ui.client.page.config.design.ExportJobTask;
-import org.activityinfo.ui.client.page.entry.column.DefaultColumnModelProvider;
+import org.activityinfo.ui.client.page.entry.column.GridLayout;
 import org.activityinfo.ui.client.page.entry.form.PrintDataEntryForm;
 import org.activityinfo.ui.client.page.entry.form.SiteDialogLauncher;
 import org.activityinfo.ui.client.page.entry.grouping.GroupingComboBox;
@@ -138,7 +138,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
     }
 
     private void addCenter() {
-        gridPanel = new SiteGridPanel(dispatcher, new DefaultColumnModelProvider(dispatcher));
+        gridPanel = new SiteGridPanel(dispatcher);
         gridPanel.setTopComponent(createToolBar());
 
         LayoutContainer center = new LayoutContainer();
@@ -366,63 +366,36 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
     private void doNavigate() {
         Filter filter = currentPlace.getFilter();
 
-        gridPanel.load(currentPlace.getGrouping(), filter);
-        groupingComboBox.setFilter(filter);
-        filterPane.getSet().applyBaseFilter(filter);
-        tabPanel.enable();
+        // Disable while loading
+        toolBar.disable();
+        tabPanel.disable();
 
-        // currently the print form only does one activity
-        Set<Integer> activities = filter.getRestrictions(DimensionType.Activity);
-        toolBar.enable();
-        toolBar.setActionEnabled(UIActions.PRINT, activities.size() == 1);
-        toolBar.setActionEnabled(UIActions.IMPORT, activities.size() == 1);
-
-        // adding is also only enabled for one activity, but we have to
-        // lookup to see whether it possible for this activity
+        // Enable some buttons based on navigation
+        toolBar.setActionEnabled(UIActions.PRINT, currentPlace.isSingleActivity());
+        toolBar.setActionEnabled(UIActions.IMPORT, false);
         toolBar.setActionEnabled(UIActions.ADD, false);
 
-        if (activities.size() == 1) {
-            maybeShowTableViewLinkPanel(activities.iterator().next());
-        } 
-        onNoSelection();
-    }
+        final DataEntryPlace place = currentPlace;
 
-    private void maybeShowTableViewLinkPanel(final Integer activityId) {
-        dispatcher.execute(new GetActivityForm(activityId), new AsyncCallback<ActivityFormDTO>() {
-
+        gridPanel.load(place.getGrouping(), filter, new AsyncCallback<GridLayout>() {
             @Override
-            public void onFailure(Throwable throwable) {
-                // sigh, ignore.
-                // will try again when the user navigates
+            public void onFailure(Throwable caught) {
             }
 
             @Override
-            public void onSuccess(ActivityFormDTO form) {
-                if (showTableView(form)) {
-                    toolBar.disable();
-                    // SiteGridPanel holds TableViewLinkPanel
-                    tabPanel.disable();
-                } else {
-                    enableToolbarButtons(form);
-                    tabPanel.enable();
+            public void onSuccess(GridLayout layout) {
+                if (place.equals(currentPlace)) {
+                    if(layout.isVisibleClassic()) {
+                        toolBar.enable();
+                        tabPanel.enable();
+                        if(layout.isSingleClassicActivity()) {
+                            enableToolbarButtons(layout.getActivity());
+                        }
+                    }
                 }
             }
         });
-    }
-
-    private boolean showTableView(ActivityFormDTO form) {
-        // make sure we haven't navigated away by the time the request comes back
-        Optional<Integer> currentActivityId = getCurrentActivityId();
-        if(!currentActivityId.isPresent() || !Objects.equals(currentActivityId.get(), form.getId())) {
-            return false;
-        }
-        if(form.getReportingFrequency() != ActivityFormDTO.REPORT_ONCE) {
-            return false;
-        }
-        if(form.getClassicView()) {
-            return false;
-        }
-        return true;
+        onNoSelection();
     }
 
     private void enableToolbarButtons(ActivityFormDTO activity) {
@@ -430,6 +403,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         boolean isAllowed = activity.isEditAllowed();
         toolBar.setActionEnabled(UIActions.ADD, isAllowed);
         toolBar.setActionEnabled(UIActions.IMPORT, isAllowed);
+        toolBar.setActionEnabled(UIActions.PRINT, true);
     }
 
     private void updateEditedSelection(final SiteDTO site) {

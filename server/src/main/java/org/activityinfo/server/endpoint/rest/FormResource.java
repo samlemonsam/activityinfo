@@ -133,6 +133,7 @@ public class FormResource {
                     .setSchema(schema)
                     .setLocks(locks)
                     .setVersion(storage.get().cacheVersion())
+                    .setSuspended(databaseMetadata.isSuspended())
                     .build();
         }
     }

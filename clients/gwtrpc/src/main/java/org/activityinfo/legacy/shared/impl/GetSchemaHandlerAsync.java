@@ -40,7 +40,7 @@ import org.activityinfo.promise.Promise;
 
 import java.util.*;
 
-public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDTO> {
+public class GetSchemaHandlerAsync implements CommandHandlerAsync<GetSchema, SchemaDTO> {
 
     @Override
     public void execute(GetSchema command, ExecutionContext context, AsyncCallback<SchemaDTO> callback) {

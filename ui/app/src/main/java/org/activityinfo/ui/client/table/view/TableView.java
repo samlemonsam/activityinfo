@@ -161,7 +161,7 @@ public class TableView implements IsWidget, HasTitle {
     }
 
     private void showErrorState(FormTree.State rootFormState) {
-        errorWidget = new ForbiddenWidget();
+        errorWidget = new ForbiddenWidget(rootFormState);
 
         panel.setWidget(errorWidget);
         panel.forceLayout();
@@ -215,6 +215,8 @@ public class TableView implements IsWidget, HasTitle {
                     return I18N.CONSTANTS.deletedForm();
                 case FORBIDDEN:
                     return I18N.CONSTANTS.forbiddenForm();
+                case SUSPENDED:
+                    return I18N.CONSTANTS.trialAccountExpired();
             }
             return I18N.CONSTANTS.notFound();
         });

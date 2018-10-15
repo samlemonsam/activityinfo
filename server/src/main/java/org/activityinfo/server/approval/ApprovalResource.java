@@ -8,6 +8,7 @@ import org.activityinfo.server.authentication.AuthTokenProvider;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.server.endpoint.rest.DatabaseResource;
 import org.activityinfo.server.mail.MailSender;
@@ -15,7 +16,9 @@ import org.activityinfo.store.spi.FormStorageProvider;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -34,18 +37,20 @@ public class ApprovalResource {
     private Provider<FormStorageProvider> catalog;
     private MailSender mailSender;
     private AuthTokenProvider authTokenProvider;
+    private BillingAccountOracle billingOracle;
 
     @Inject
     public ApprovalResource(Provider<EntityManager> entityManager,
                             DispatcherSync dispatcher,
                             Provider<FormStorageProvider> catalog,
                             MailSender mailSender,
-                            AuthTokenProvider authTokenProvider) {
+                            AuthTokenProvider authTokenProvider, BillingAccountOracle billingOracle) {
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
         this.catalog = catalog;
         this.mailSender = mailSender;
         this.authTokenProvider = authTokenProvider;
+        this.billingOracle = billingOracle;
     }
 
     @GET
@@ -69,7 +74,7 @@ public class ApprovalResource {
 
         DatabaseResource resource = new DatabaseResource(catalog,
                 dispatcher,
-                new DatabaseProviderImpl(entityManager),
+                new DatabaseProviderImpl(entityManager, billingOracle),
                 entityManager,
                 mailSender,
                 database.getId());
@@ -95,7 +100,7 @@ public class ApprovalResource {
 
         DatabaseResource resource = new DatabaseResource(catalog,
                 dispatcher,
-                new DatabaseProviderImpl(entityManager),
+                new DatabaseProviderImpl(entityManager, billingOracle),
                 entityManager,
                 mailSender,
                 database.getId());

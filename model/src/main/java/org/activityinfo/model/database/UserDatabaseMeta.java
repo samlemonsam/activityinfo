@@ -38,6 +38,7 @@ public class UserDatabaseMeta {
     private boolean visible;
     private boolean owner;
     private String version;
+    private boolean suspended;
 
     private final Map<ResourceId, Resource> resources = new HashMap<>();
     private final Multimap<ResourceId, GrantModel> grants = HashMultimap.create();
@@ -61,6 +62,10 @@ public class UserDatabaseMeta {
 
     public boolean isOwner() {
         return owner;
+    }
+
+    public boolean isSuspended() {
+        return suspended;
     }
 
     public Collection<Resource> getResources() {
@@ -108,6 +113,7 @@ public class UserDatabaseMeta {
         object.put("resources", Json.toJsonArray(resources.values()));
         object.put("locks", Json.toJsonArray(locks.values()));
         object.put("grants", Json.toJsonArray(grants.values()));
+        object.put("suspended", suspended);
         return object;
     }
 
@@ -119,6 +125,7 @@ public class UserDatabaseMeta {
         meta.label = object.getString("label");
         meta.visible = object.getBoolean("visible");
         meta.owner = object.getBoolean("owner");
+        meta.suspended = object.getBoolean("suspended");
 
         JsonValue resourceArray = object.get("resources");
         for (int i = 0; i < resourceArray.length(); i++) {
@@ -175,6 +182,11 @@ public class UserDatabaseMeta {
         public Builder setOwner(boolean owner) {
             meta.owner = owner;
             meta.visible = true;
+            return this;
+        }
+
+        public Builder setSuspended(boolean suspended) {
+            meta.suspended = suspended;
             return this;
         }
 

@@ -1,5 +1,8 @@
 package org.activityinfo.server.endpoint.rest;
 
+import com.google.appengine.api.memcache.Expiration;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -15,12 +18,18 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Singleton
 public class BillingAccountOracle {
 
+    private final Logger LOGGER = Logger.getLogger(BillingAccountOracle.class.getName());
+
     private final Provider<EntityManager> entityManager;
 
+    private final MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
 
     @Inject
     public BillingAccountOracle(Provider<EntityManager> entityManager) {
@@ -174,5 +183,42 @@ public class BillingAccountOracle {
         ZonedDateTime endTime = now.plusDays( 30 );
         user.setTrialEndDate(Date.from(endTime.toInstant()));
     }
+
+    private String memcacheDatabaseKey(int databaseId) {
+        return "db-suspended-" + databaseId;
+    }
+
+    public boolean isDatabaseSuspended(int databaseId) {
+
+        // Check memcache to see if this database is *not* suspended
+        try {
+            boolean notSuspended = memcache.contains(memcacheDatabaseKey(databaseId));
+            if (notSuspended) {
+                return false;
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING,"Memcache fetch failed", e);
+        }
+
+        AccountStatus status = getStatusForDatabase(databaseId);
+        if(status.isSuspended()) {
+            LOGGER.severe("Access to suspended database " + databaseId);
+
+            return true;
+        }
+
+        // Otherwise cache this database so we don't have to check for
+        // a few more hours.
+        try {
+            memcache.put(memcacheDatabaseKey(databaseId), true,
+                    Expiration.byDeltaSeconds((int) TimeUnit.HOURS.toSeconds(3)));
+
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING,"Memcache store failed", e);
+        }
+
+        return false;
+    }
+
 
 }

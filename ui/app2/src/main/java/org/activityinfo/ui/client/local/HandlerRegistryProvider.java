@@ -30,7 +30,7 @@ public class HandlerRegistryProvider implements Provider<HandlerRegistry> {
     private final HandlerRegistry registry;
 
     @Inject
-    public HandlerRegistryProvider(GetSchemaHandler schemaHandler,
+    public HandlerRegistryProvider(GetSchemaHandlerAsync schemaHandler,
                                    OldGetSitesHandler sitesHandler,
                                    GetMonthlyReportsHandlerAsync getMonthlyReportsHandler,
                                    GetAdminEntitiesHandler adminHandler,

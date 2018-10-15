@@ -65,7 +65,8 @@ public class RootResource {
     private MailSender mailSender;
 
     private ApiBackend backend;
-    
+    private final BillingAccountOracle billingOracle;
+
     @Inject
     public RootResource(Provider<EntityManager> entityManager,
                         Provider<FormStorageProvider> catalog,
@@ -75,7 +76,8 @@ public class RootResource {
                         ServerSideAuthProvider authProvider,
                         PermissionOracle permissionOracle,
                         ApiBackend backend,
-                        MailSender mailSender) {
+                        MailSender mailSender,
+                        BillingAccountOracle billingOracle) {
         super();
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
@@ -86,7 +88,7 @@ public class RootResource {
         this.permissionOracle = permissionOracle;
         this.backend = backend;
         this.mailSender = mailSender;
-
+        this.billingOracle = billingOracle;
     }
 
     @Path("/adminEntity/{id}")
@@ -144,7 +146,7 @@ public class RootResource {
     public DatabaseResource getDatabaseSchema(@PathParam("id") int id) {
         return new DatabaseResource(catalog,
                 dispatcher,
-                new DatabaseProviderImpl(entityManager),
+                new DatabaseProviderImpl(entityManager, billingOracle),
                 entityManager,
                 mailSender,
                 id);

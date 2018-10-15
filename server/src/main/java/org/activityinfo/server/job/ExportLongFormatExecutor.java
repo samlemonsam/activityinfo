@@ -9,7 +9,7 @@ import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
-import org.activityinfo.model.analysis.pivot.*;
+import org.activityinfo.model.analysis.pivot.PivotModel;
 import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
@@ -22,6 +22,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.server.command.DispatcherSync;
+import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.server.generated.StorageProvider;
 import org.activityinfo.store.query.shared.FormSource;
@@ -67,11 +68,12 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
                                     StorageProvider storageProvider,
                                     DispatcherSync dispatcher,
                                     FormSource formSource,
-                                    Provider<EntityManager> entityManager) {
+                                    Provider<EntityManager> entityManager,
+                                    BillingAccountOracle billingAccountOracle) {
         this.authenticatedUser = authenticatedUser;
         this.dispatcher = dispatcher;
         this.formSource = formSource;
-        this.databaseProvider = new DatabaseProviderImpl(entityManager);
+        this.databaseProvider = new DatabaseProviderImpl(entityManager, billingAccountOracle);
         this.pivotTableExporter = new ExportPivotTableExecutor(storageProvider, formSource);
     }
 

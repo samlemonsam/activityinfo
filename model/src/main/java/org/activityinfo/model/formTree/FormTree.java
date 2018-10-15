@@ -50,7 +50,8 @@ public class FormTree implements FormClassProvider, FormMetadataProvider {
     public enum State {
         VALID,
         DELETED,
-        FORBIDDEN
+        FORBIDDEN,
+        SUSPENDED
     }
 
     public class Node {
