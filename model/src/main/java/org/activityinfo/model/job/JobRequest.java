@@ -72,6 +72,8 @@ public class JobRequest {
                 return ExportPivotTableJob.fromJson(descriptor);
             case ExportLongFormatJob.TYPE:
                 return ExportLongFormatJob.fromJson(descriptor);
+            case ExportSitesJob.TYPE:
+                return ExportSitesJob.fromJson(descriptor);
         }
         throw new IllegalArgumentException(type);
     }
