@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import org.activityinfo.analysis.pivot.viewModel.*;
 import org.activityinfo.model.analysis.pivot.Axis;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 
 import javax.annotation.Nullable;
@@ -39,8 +40,8 @@ public class PivotTableWriter implements AutoCloseable {
 
     public void write(AnalysisResult pivotTable, @Nullable Map<ResourceId,String> folderMapping) throws IOException {
         constructDimensionIndexMapping(pivotTable.getDimensionSet());
-        writeRowDimensionHeaders(pivotTable.getDimensionSet());
-        writeColDimensionHeaders(pivotTable.getDimensionSet(), folderMapping);
+        writeRowDimensionHeaders(pivotTable.getDimensionSet(), folderMapping);
+        writeColDimensionHeaders(pivotTable.getDimensionSet());
         writePoints(pivotTable, folderMapping);
     }
 
@@ -64,14 +65,14 @@ public class PivotTableWriter implements AutoCloseable {
                 .collect(Collectors.toList());
     }
 
-    private void writeRowDimensionHeaders(DimensionSet dimensionSet) {
-        rowDims.forEach(rowDim -> writeDelimited(dimensionSet.getDimension(rowDim).getLabel()));
-    }
-
-    private void writeColDimensionHeaders(DimensionSet dimensionSet, Map<ResourceId, String> folderMapping) {
+    private void writeRowDimensionHeaders(DimensionSet dimensionSet, Map<ResourceId, String> folderMapping) {
         if (folderMapping != null) {
             writeFolderColumnHeader();
         }
+        rowDims.forEach(rowDim -> writeDelimited(dimensionSet.getDimension(rowDim).getLabel()));
+    }
+
+    private void writeColDimensionHeaders(DimensionSet dimensionSet) {
         colDims.forEach(colDim -> writeDelimited(dimensionSet.getDimension(colDim).getLabel()));
         writeValueColumnHeader();
     }
@@ -98,6 +99,10 @@ public class PivotTableWriter implements AutoCloseable {
 
     private void writeFolder(Point point, Map<ResourceId, String> folderMapping) {
         ResourceId formIdPoint = ResourceId.valueOf(point.getCategory(formIdDimension));
+        if (formIdPoint.getDomain() == CuidAdapter.MONTHLY_REPORT_FORM_CLASS) {
+            int monthlyActivityId = CuidAdapter.getLegacyIdFromCuid(formIdPoint);
+            formIdPoint = CuidAdapter.activityFormClass(monthlyActivityId);
+        }
         writeDelimited(folderMapping.getOrDefault(formIdPoint, ""));
     }
 
