@@ -40,6 +40,7 @@ import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.job.ExportLongFormatJob;
+import org.activityinfo.model.job.ExportSitesJob;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.ClientContext;
@@ -65,7 +66,6 @@ import org.activityinfo.ui.client.page.entry.grouping.GroupingComboBox;
 import org.activityinfo.ui.client.page.entry.place.DataEntryPlace;
 import org.activityinfo.ui.client.page.entry.sitehistory.SiteHistoryTab;
 import org.activityinfo.ui.client.page.report.ExportDialog;
-import org.activityinfo.ui.client.page.report.ExportSitesTask;
 import org.activityinfo.ui.client.page.report.ExportTypeDialog;
 import org.activityinfo.ui.client.page.resource.ResourcePage;
 import org.activityinfo.ui.client.page.resource.ResourcePlace;
@@ -484,7 +484,8 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     private void exportSites(Filter filter) {
         ExportDialog dialog = new ExportDialog();
-        dialog.start(new ExportSitesTask(dispatcher, filter));
+        ExportSitesJob job = new ExportSitesJob(FilterUrlSerializer.toUrlFragment(filter));
+        dialog.start(new ExportJobTask(client, job));
     }
 
     private void editSite(SiteDTO site) {
