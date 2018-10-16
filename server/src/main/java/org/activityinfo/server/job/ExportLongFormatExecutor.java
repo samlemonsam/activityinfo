@@ -32,6 +32,7 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -97,9 +98,11 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
     private Map<ResourceId,String> mapFormsToFolderLabels(UserDatabaseMeta databaseMeta, List<FormTree> formScope) {
         return formScope.stream()
                 .map(FormTree::getRootFormClass)
+                .filter(form -> !form.isSubForm())
                 .map(FormClass::getId)
                 .map(ExportLongFormatExecutor::monthlyToParentFormId)
                 .map(databaseMeta::getResource)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toMap(
                         Resource::getId,
                         resource -> getParentLabel(databaseMeta, resource)));
