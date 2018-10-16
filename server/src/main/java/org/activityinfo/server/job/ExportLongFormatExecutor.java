@@ -96,7 +96,7 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
     }
 
     private Map<ResourceId,String> mapFormsToFolderLabels(UserDatabaseMeta databaseMeta, List<FormTree> formScope) {
-        return formScope.stream()
+        Map<ResourceId,String> formFolderLabelMap = formScope.stream()
                 .map(FormTree::getRootFormClass)
                 .filter(form -> !form.isSubForm())
                 .map(FormClass::getId)
@@ -106,6 +106,17 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
                 .collect(Collectors.toMap(
                         Resource::getId,
                         resource -> getParentLabel(databaseMeta, resource)));
+        Map<ResourceId,String> subFormFolderLabelMap = formScope.stream()
+                .map(FormTree::getRootFormClass)
+                .filter(FormClass::isSubForm)
+                .filter(subForm -> subForm.getParentFormId().isPresent())
+                .filter(subForm -> formFolderLabelMap.containsKey(subForm.getParentFormId().get()))
+                .collect(Collectors.toMap(
+                        FormClass::getId,
+                        subForm -> formFolderLabelMap.get(subForm.getParentFormId().get())
+                ));
+        formFolderLabelMap.putAll(subFormFolderLabelMap);
+        return formFolderLabelMap;
     }
 
     private static ResourceId monthlyToParentFormId(ResourceId resourceId) {
