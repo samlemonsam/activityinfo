@@ -1873,7 +1873,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Cannot Find User")
     String noUser();
 
-    @DefaultStringValue("There is a currently pending transfer for this Database. Do you wish to cancel?")
+    @DefaultStringValue("There is a currently pending transfer for this Database. Do you wish to cancel the pending transfer?")
     String pendingTransfer();
 
     @DefaultStringValue("Cancel Transfer")
@@ -1888,7 +1888,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Wide Format")
     String wideFormat();
 
-    @DefaultStringValue("Each Activity is exported as a separate worksheet. <br> <br> All Fields appear as columns, with each Record in  a separate row. <br> <br> NOTE: Only Activities will be exported via this method.")
+    @DefaultStringValue("Each Activity is exported as a separate worksheet. <br> <br> All Fields appear as columns, with each Record in a separate row. <br> <br> NOTE: Only Activities will be exported via this method.")
     String wideFormatDescription();
 
     @DefaultStringValue("Long Format")
@@ -1918,7 +1918,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Your trial account has expired.")
     String trialAccountExpired();
 
-    @DefaultStringValue("Unfortunately your free trial with ActivityInfo has ended. Your data is safe, but you no longer have access to it. Contact us to set up billing and restore access.")
+    @DefaultStringValue("Unfortunately your trial period with ActivityInfo has ended. Your data is safe, but you no longer have access to it. Contact us to set up billing and to restore access.")
     String trialAccountExpiredMessage();
 
     @DefaultStringValue("Your access to this database has expired")
