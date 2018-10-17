@@ -1927,4 +1927,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("The data in this database remains safe, but access is currently restricted. Please contact the database owner for more information.")
     String accessExpiredMessage();
 
+    @DefaultStringValue("Contact us")
+    String contactUs();
 }
