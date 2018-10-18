@@ -26,6 +26,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -89,5 +90,11 @@ public class EnumTypeEditor extends TypeEditor<EnumType> {
 
     private void updatePresentation(EnumType.Presentation presentation) {
         updateType(currentType().withPresentation(presentation));
+    }
+
+    protected void showPresentationOptions(FormField formField) {
+        automaticPresentation.setEnabled(formField.isRequired());
+        checkboxPresentation.setEnabled(formField.isRequired());
+        dropdownPresentation.setEnabled(formField.isRequired());
     }
 }

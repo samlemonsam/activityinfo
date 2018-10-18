@@ -172,6 +172,7 @@ public class FieldEditor implements IsWidget {
         textTypeEditor.show(fieldWidgetContainer);
         serialNumberTypeEditor.show(fieldWidgetContainer);
         enumTypeEditor.show(fieldWidgetContainer);
+        enumTypeEditor.showPresentationOptions(formField);
     }
 
     private boolean isElligbleToBeKey(FormField formField) {
@@ -258,6 +259,7 @@ public class FieldEditor implements IsWidget {
     @UiHandler("required")
     void onRequiredChange(ValueChangeEvent<Boolean> event) {
         formField.setRequired(event.getValue());
+        enumTypeEditor.showPresentationOptions(formField);
         fireUpdate();
     }
 
