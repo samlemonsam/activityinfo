@@ -20,8 +20,13 @@ package org.activityinfo.server.endpoint.rest.usage;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.gson.stream.JsonWriter;
+import org.activityinfo.json.Json;
+import org.activityinfo.json.JsonValue;
 import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.DeploymentEnvironment;
+import org.activityinfo.server.database.hibernate.entity.Database;
+import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.database.hibernate.entity.UserPermission;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.jdbc.AbstractReturningWork;
 
@@ -34,6 +39,7 @@ import java.io.StringWriter;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 /**
  * Provides general usage statistics need for running the server.
@@ -100,12 +106,87 @@ public class UsageResource {
                 "WHERE AllowView=1 ");
     }
 
+    @GET
+    @Path("profile")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String queryProfile(@QueryParam("accessKey") String requestKey, @QueryParam("user") String userQuery) {
+        assertAuthorized(requestKey);
+
+
+        User user;
+        if(userQuery.matches("[0-9]+")) {
+            user = entityManager.get().find(User.class, Integer.parseInt(userQuery));
+        } else {
+            user = entityManager.get().createQuery("SELECT u FROM User u WHERE u.email = :email", User.class)
+                    .setParameter("email", userQuery)
+                    .getSingleResult();
+        }
+
+        JsonValue profile = Json.createObject();
+        profile.put("name", user.getName());
+        profile.put("email", user.getEmail());
+        profile.put("invited", user.getInvitedBy() != null);
+        profile.put("dateCreated", user.getDateCreated().toString());
+
+        if(user.getBillingAccount() != null) {
+            JsonValue billingAccount = Json.createObject();
+            billingAccount.put("name", user.getBillingAccount().getName());
+            billingAccount.put("userLimit", user.getBillingAccount().getUserLimit());
+            billingAccount.put("endTime", user.getBillingAccount().getEndTime().toString());
+            profile.put("billingAccount", billingAccount);
+
+        } else if(user.getTrialEndDate() != null) {
+            profile.put("trialEndDate", user.getTrialEndDate().toString());
+        }
+
+        JsonValue databaseArray = Json.createArray();
+
+        List<Database> ownedDatabases = entityManager.get().createQuery("select d from Database d where d.owner = :user and d.dateDeleted is null", Database.class)
+                .setParameter("user", user)
+                .getResultList();
+
+        for (Database ownedDatabase : ownedDatabases) {
+            JsonValue database = Json.createObject();
+            database.put("role", "owns");
+            database.put("name", ownedDatabase.getName());
+            database.put("country", ownedDatabase.getCountry().getName());
+            databaseArray.add(database);
+        }
+
+        List<UserPermission> permissions = entityManager.get().createQuery(
+                "select p from UserPermission p inner join fetch p.database d where p.user = :user and p.allowView = 1",
+                UserPermission.class)
+                .setParameter("user", user)
+                .getResultList();
+
+        for (UserPermission permission : permissions) {
+            if(!permission.getDatabase().isDeleted()) {
+                JsonValue database = Json.createObject();
+                database.put("name", permission.getDatabase().getName());
+                database.put("country", permission.getDatabase().getCountry().getName());
+                if (permission.isAllowDesign()) {
+                    database.put("role", "designer");
+                } else if (permission.isAllowEdit()) {
+                    database.put("role", "editor");
+                } else {
+                    database.put("role", "viewer");
+                }
+                databaseArray.add(database);
+            }
+        }
+
+        profile.put("databases", databaseArray);
+
+        return profile.toJson();
+
+    }
+
     private void assertAuthorized(@QueryParam("accessKey") String requestKey) {
-        
+
         if(DeploymentEnvironment.isAppEngineDevelopment()) {
             return;
         }
-        
+
         if(Strings.isNullOrEmpty(accessKey)) {
             throw new WebApplicationException(Response.status(Response.Status.SERVICE_UNAVAILABLE).build());
         }
