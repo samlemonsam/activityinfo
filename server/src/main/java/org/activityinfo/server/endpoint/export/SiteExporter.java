@@ -51,6 +51,9 @@ public class SiteExporter {
 
     private static final Logger LOGGER = Logger.getLogger(SiteExporter.class.getName());
 
+    private static final String FILE_TYPE = "XLS";
+    private static final int COLUMN_LIMIT = 256;
+    private static final int BUILT_IN_COLUMNS = 10;
 
     private static final short FONT_SIZE = 8;
     private static final short TITLE_FONT_SIZE = 12;
@@ -160,10 +163,43 @@ public class SiteExporter {
         HSSFSheet sheet = book.createSheet(sheetNames.name(activity.getName()));
         sheet.createFreezePane(4, 2);
 
-        // initConditionalFormatting(sheet);
+        if (totalColLength(activity) > COLUMN_LIMIT) {
+            throw new ColumnSizeException(activity.getName(), totalColLength(activity), COLUMN_LIMIT, FILE_TYPE);
+        }
         createHeaders(activity, sheet);
         createDataRows(activity, filter, sheet);
 
+    }
+
+    private int totalColLength(ActivityFormDTO activity) {
+        return BUILT_IN_COLUMNS
+                + totalIndicatorCols(activity.groupIndicators())
+                + totalAttributeCols(activity.getAttributeGroups())
+                + totalAdminLevelCols(activity.getAdminLevels());
+    }
+
+    private int totalAdminLevelCols(List<AdminLevelDTO> adminLevels) {
+        return adminLevels.size() * 2;
+    }
+
+    private int totalAttributeCols(List<AttributeGroupDTO> attributeGroups) {
+        int multiSelection = attributeGroups.stream()
+                .filter(AttributeGroupDTO::isMultipleAllowed)
+                .map(AttributeGroupDTO::getAttributes)
+                .mapToInt(List::size)
+                .sum();
+        int singleSelection = attributeGroups.stream()
+                .filter(group -> !group.isMultipleAllowed())
+                .mapToInt(group -> 1)
+                .sum();
+        return multiSelection + singleSelection;
+    }
+
+    private int totalIndicatorCols(List<IndicatorGroup> indicatorGroups) {
+        return indicatorGroups.stream()
+                .map(IndicatorGroup::getIndicators)
+                .mapToInt(List::size)
+                .sum();
     }
 
 

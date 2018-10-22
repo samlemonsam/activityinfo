@@ -23,6 +23,7 @@ import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 import com.googlecode.objectify.annotation.Unindex;
 import org.activityinfo.json.JsonParser;
+import org.activityinfo.model.error.ApiError;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobRequest;
 import org.activityinfo.model.job.JobResult;
@@ -69,6 +70,9 @@ public class JobEntity {
 
     @Unindex
     private String result;
+
+    @Unindex
+    private String error;
 
     public JobEntity() {
     }
@@ -160,5 +164,20 @@ public class JobEntity {
         }
         JobDescriptor descriptor = parseDescriptor();
         return descriptor.parseResult(new JsonParser().parse(getResult()));
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    public ApiError parseError() {
+        if(error == null) {
+            return null;
+        }
+        return ApiError.fromJson(new JsonParser().parse(getError()));
     }
 }

@@ -21,8 +21,6 @@ package org.activityinfo.ui.client.page.report;
 import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.core.El;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
-import com.extjs.gxt.ui.client.event.Listener;
-import com.extjs.gxt.ui.client.event.MessageBoxEvent;
 import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.widget.Dialog;
@@ -37,6 +35,9 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.json.JsonParser;
+import org.activityinfo.model.error.ApiError;
+import org.activityinfo.model.error.ApiException;
 
 public class ExportDialog extends Dialog {
 
@@ -114,7 +115,7 @@ public class ExportDialog extends Dialog {
                     schedulePoll(poller, new AsyncCallback<String>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            showError();
+                            handleError(caught);
                         }
 
                         @Override
@@ -127,6 +128,19 @@ public class ExportDialog extends Dialog {
         });
     }
 
+    private void handleError(Throwable caught) {
+        if (caught instanceof ApiException) {
+            ApiException apiException = (ApiException) caught;
+            showJobError(apiException.getApiError());
+        } else {
+            showError();
+        }
+    }
+
+    private void showJobError(String apiError) {
+        ApiError error = ApiError.fromJson(new JsonParser().parse(apiError));
+        showError(error.hasMessage() ? error.getMessage() : I18N.CONSTANTS.serverError());
+    }
 
     private void showStartProgress() {
         show();
@@ -134,14 +148,12 @@ public class ExportDialog extends Dialog {
         bar.auto();
     }
 
-    private void showError() {
-        MessageBox.alert(I18N.CONSTANTS.export(), I18N.CONSTANTS.serverError(), new Listener<MessageBoxEvent>() {
+    private void showError(String message) {
+        MessageBox.alert(I18N.CONSTANTS.export(), message, be -> ExportDialog.this.hide());
+    }
 
-            @Override
-            public void handleEvent(MessageBoxEvent be) {
-                ExportDialog.this.hide();
-            }
-        });
+    private void showError() {
+        MessageBox.alert(I18N.CONSTANTS.export(), I18N.CONSTANTS.serverError(), be -> ExportDialog.this.hide());
     }
 
     private void initiateDownload(String url) {

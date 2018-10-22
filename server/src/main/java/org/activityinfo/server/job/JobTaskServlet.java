@@ -24,7 +24,9 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.googlecode.objectify.VoidWork;
 import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
+import org.activityinfo.model.error.ApiError;
 import org.activityinfo.model.job.JobDescriptor;
+import org.activityinfo.model.error.ApiException;
 import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobState;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
@@ -143,9 +145,18 @@ public class JobTaskServlet extends HttpServlet {
                     return;
                 }
                 updatedEntity.setState(JobState.FAILED);
+                updatedEntity.setError(determineError(e));
                 JobStore.ofy().save().entity(updatedEntity).now();
             }
         });
+    }
+
+    private static String determineError(Exception e) {
+        if (e instanceof ApiException) {
+            ApiException apiException = (ApiException) e;
+            return apiException.getApiError();
+        }
+        return ApiError.serverError().toJson().toJson();
     }
 
 }

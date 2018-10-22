@@ -21,6 +21,7 @@ package org.activityinfo.ui.client.store.http;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
+import org.activityinfo.model.error.ApiError;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobState;
@@ -44,7 +45,7 @@ public class ObservableJob<T extends JobDescriptor<R>, R extends JobResult> exte
             @Override
             public void onFailure(Throwable caught) {
                 // Failed to start the job - we're done.
-                currentStatus = new JobStatus<T, R>(null, descriptor, JobState.FAILED, null);
+                currentStatus = new JobStatus<T, R>(null, descriptor, JobState.FAILED, null, ApiError.serverError());
             }
 
             @Override

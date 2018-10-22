@@ -21,10 +21,8 @@ package org.activityinfo.ui.client.page.config.design;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
-import org.activityinfo.model.job.ExportResult;
-import org.activityinfo.model.job.JobDescriptor;
-import org.activityinfo.model.job.JobState;
-import org.activityinfo.model.job.JobStatus;
+import org.activityinfo.model.error.ApiException;
+import org.activityinfo.model.job.*;
 import org.activityinfo.ui.client.page.report.ExportDialog;
 
 public class ExportJobTask implements ExportDialog.AsyncTask {
@@ -69,7 +67,8 @@ public class ExportJobTask implements ExportDialog.AsyncTask {
                                     ExportResult exportResult = (ExportResult) result.getResult();
                                     pollCallback.onDownloadReady(exportResult.getDownloadUrl());
                                 } else if (result.getState() == JobState.FAILED) {
-                                    pollCallback.onFailure(new RuntimeException());
+                                    String error = result.getError() != null ? result.getError().toJson().toJson() : "";
+                                    pollCallback.onFailure(new ApiException(error));
                                 } else if (result.getState() == JobState.STARTED) {
                                     pollCallback.onProgress(0);
                                 }

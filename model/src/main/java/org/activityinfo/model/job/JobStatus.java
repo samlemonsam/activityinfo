@@ -19,6 +19,7 @@
 package org.activityinfo.model.job;
 
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.error.ApiError;
 
 import static org.activityinfo.json.Json.createObject;
 
@@ -31,12 +32,14 @@ public class JobStatus<T extends JobDescriptor<R>, R extends JobResult> {
     private T descriptor;
     private JobState state;
     private R result;
+    private ApiError error;
 
-    public JobStatus(String id, T descriptor, JobState state, R jobResult) {
+    public JobStatus(String id, T descriptor, JobState state, R jobResult, ApiError error) {
         this.id = id;
         this.descriptor = descriptor;
         this.state = state;
         this.result = jobResult;
+        this.error = error;
     }
 
     public String getId() {
@@ -55,6 +58,10 @@ public class JobStatus<T extends JobDescriptor<R>, R extends JobResult> {
         return state;
     }
 
+    public ApiError getError() {
+        return error;
+    }
+
     public JsonValue toJsonObject() {
         JsonValue object = createObject();
         object.put("id", id);
@@ -63,6 +70,9 @@ public class JobStatus<T extends JobDescriptor<R>, R extends JobResult> {
         object.put("state", state.name().toLowerCase());
         if(result != null) {
             object.put("result", result.toJson());
+        }
+        if(error != null) {
+            object.put("error", error.toJson());
         }
         return object;
     }
@@ -76,8 +86,11 @@ public class JobStatus<T extends JobDescriptor<R>, R extends JobResult> {
         if(object.hasKey("result")) {
             result = descriptor.parseResult(object.get("result"));
         }
-
-        return new JobStatus(id, descriptor, state, result);
+        ApiError error = null;
+        if(object.hasKey("error")) {
+            error = ApiError.fromJson(object.get("error"));
+        }
+        return new JobStatus(id, descriptor, state, result, error);
     }
 
 }

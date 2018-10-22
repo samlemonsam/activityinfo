@@ -2,13 +2,19 @@ package org.activityinfo.server.job;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.io.xls.XlsTableWriter;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.FilterUrlSerializer;
+import org.activityinfo.model.error.ApiError;
+import org.activityinfo.model.error.ApiErrorCode;
+import org.activityinfo.model.error.ApiErrorType;
 import org.activityinfo.model.job.ExportResult;
 import org.activityinfo.model.job.ExportSitesJob;
+import org.activityinfo.model.error.ApiException;
 import org.activityinfo.server.command.DispatcherSync;
+import org.activityinfo.server.endpoint.export.ColumnSizeException;
 import org.activityinfo.server.endpoint.export.SiteExporter;
 import org.activityinfo.server.endpoint.export.TaskContext;
 import org.activityinfo.server.generated.GeneratedResource;
@@ -48,12 +54,15 @@ public class ExportSitesExecutor implements JobExecutor<ExportSitesJob, ExportRe
                 + "} for user " + authUser.get().getUserId()
                 + " to export resource " + export.getId());
 
-        TaskContext context = new TaskContext(dispatcher.get(), storageProvider, export.getId());
-        SiteExporter exporter = new SiteExporter(context).buildExcelWorkbook(filter);
-
         // Save to Export storage
         try (OutputStream out = export.openOutputStream()) {
+            TaskContext context = new TaskContext(dispatcher.get(), storageProvider, export.getId());
+            SiteExporter exporter = new SiteExporter(context).buildExcelWorkbook(filter);
             exporter.getBook().write(out);
+        } catch (ColumnSizeException e) {
+            ApiError error = new ApiError(ApiErrorType.VALIDATION_ERROR, ApiErrorCode.EXPORT_COLUMN_LIMIT_REACHED);
+            error.setMessage(I18N.MESSAGES.activityColumnLimitExceeded(e.getFormLabel(), e.getColLimit()));
+            throw new ApiException(error.toJson().toJson());
         }
 
         return new ExportResult(export.getDownloadUri());

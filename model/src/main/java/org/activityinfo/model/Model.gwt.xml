@@ -43,4 +43,5 @@
   <source path="resource"/>
   <source path="type"/>
   <source path="util"/>
+  <source path="error"/>
 </module>

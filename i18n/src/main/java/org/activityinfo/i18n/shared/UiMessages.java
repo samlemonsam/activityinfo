@@ -302,4 +302,8 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("Do you want to delete Target: ''{0}'' from your Database?")
     String requestConfirmationToDeleteTarget(String targetName);
+
+    @DefaultMessage("Activity ''{0}'' has too many Attributes/Indicators defined and exceeds the export file column limit ({1}). Please deselect this Activity from the export, or use an alternative export method.")
+    String activityColumnLimitExceeded(String activity, int colLimit);
+
 }
