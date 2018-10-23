@@ -388,6 +388,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
                     if(layout.isVisibleClassic()) {
                         toolBar.enable();
                         tabPanel.enable();
+                        filterPane.getSet().applyBaseFilter(currentPlace.getFilter());
                         if(layout.isSingleClassicActivity()) {
                             enableToolbarButtons(layout.getActivity());
                         }

@@ -126,8 +126,6 @@ public class PartnerFilterPanel extends ContentPanel implements FilterPanel {
         final Filter filter = new Filter(rawFilter);
         filter.clearRestrictions(DimensionType.Partner);
 
-        // force to refresh on site crud
-//        if (baseFilter == null || !baseFilter.equals(filter)) {
         service.execute(new GetPartnersDimension(filter), new AsyncCallback<PartnerResult>() {
 
             @Override
@@ -151,7 +149,6 @@ public class PartnerFilterPanel extends ContentPanel implements FilterPanel {
                 baseFilter = filter;
             }
         });
-//        }
     }
 
     protected void clearFilter() {
