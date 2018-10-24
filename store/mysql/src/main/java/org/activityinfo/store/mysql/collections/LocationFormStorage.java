@@ -125,7 +125,7 @@ public class LocationFormStorage implements FormStorage {
         FormField adminField = new FormField(adminFieldId);
         adminField.setLabel(I18N.CONSTANTS.adminEntities());
         adminField.setCode("admin");
-        adminField.setKey(true);
+        //adminField.setKey(true);
         adminField.setType(new ReferenceType()
                 .setCardinality(Cardinality.MULTIPLE)
                 .setRange(country.getAdminLevelFormClassIds()));

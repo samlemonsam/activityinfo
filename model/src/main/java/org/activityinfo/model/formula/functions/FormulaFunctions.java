@@ -89,6 +89,8 @@ public final class FormulaFunctions {
             register(AddDateFunction.INSTANCE);
 
             register(CoalesceFunction.INSTANCE);
+
+            register(ConcatenateFunction.INSTANCE);
         }
         
         public FormulaFunction get(String name) {
