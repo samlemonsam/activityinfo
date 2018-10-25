@@ -91,6 +91,9 @@ public final class FormulaFunctions {
             register(CoalesceFunction.INSTANCE);
 
             register(ConcatenateFunction.INSTANCE);
+            register(LeftFunction.INSTANCE);
+            register(RightFunction.INSTANCE);
+            register(MidFunction.INSTANCE);
         }
         
         public FormulaFunction get(String name) {
