@@ -24,6 +24,8 @@ import org.activityinfo.analysis.table.ExportViewModel;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.io.xls.XlsTableWriter;
 import org.activityinfo.model.analysis.TableModel;
+import org.activityinfo.model.analysis.table.ExportFormat;
+import org.activityinfo.model.analysis.table.UnsupportedExportFormatException;
 import org.activityinfo.model.job.ExportFormJob;
 import org.activityinfo.model.job.ExportResult;
 import org.activityinfo.model.query.ColumnSet;
@@ -50,17 +52,29 @@ public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResu
     public ExportResult execute(ExportFormJob descriptor) throws IOException {
 
         TableModel tableModel = descriptor.getTableModel();
-
-        GeneratedResource export = storageProvider.create(XlsTableWriter.EXCEL_MIME_TYPE, "Export.xls");
+        ExportFormat format = descriptor.getFormat();
 
         TableViewModel viewModel = new TableViewModel(formSource, tableModel);
-
         EffectiveTableModel effectiveTableModel = viewModel.getEffectiveTable().waitFor();
-        ColumnSet columnSet = effectiveTableModel.getColumnSet().waitFor();
 
-        if (ExportViewModel.columnLimitExceeded(effectiveTableModel)) {
-            throw new IOException("Current column length " + ExportViewModel.exportedColumnSize(effectiveTableModel) + " exceeds XLS Column Limitation of " + ExportViewModel.XLS_COLUMN_LIMIT);
+        if (ExportViewModel.columnLimitExceeded(effectiveTableModel, descriptor.getFormat())) {
+            throw new IOException("Current column length " + ExportViewModel.exportedColumnSize(effectiveTableModel)
+                    + " exceeds " + format.name() + " Column Limitation of " + format.getColumnLimit());
         }
+
+        switch (format) {
+            case CSV:
+                return csvExport(effectiveTableModel);
+            case XLS:
+                return xlsExport(effectiveTableModel);
+            default:
+                throw new UnsupportedExportFormatException(format.name());
+        }
+    }
+
+    private ExportResult xlsExport(EffectiveTableModel effectiveTableModel) throws IOException {
+        ColumnSet columnSet = effectiveTableModel.getColumnSet().waitFor();
+        GeneratedResource export = storageProvider.create(XlsTableWriter.EXCEL_MIME_TYPE, "Export.xls");
 
         XlsTableWriter writer = new XlsTableWriter();
         writer.addSheet(effectiveTableModel, columnSet);
@@ -71,4 +85,19 @@ public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResu
 
         return new ExportResult(export.getDownloadUri());
     }
+
+    private ExportResult csvExport(EffectiveTableModel effectiveTableModel) throws IOException {
+        ColumnSet columnSet = effectiveTableModel.getColumnSet().waitFor();
+        GeneratedResource export = storageProvider.create(XlsTableWriter.EXCEL_MIME_TYPE, "Export.xls");
+
+        XlsTableWriter writer = new XlsTableWriter();
+        writer.addSheet(effectiveTableModel, columnSet);
+
+        try(OutputStream out = export.openOutputStream()) {
+            writer.write(out);
+        }
+
+        return new ExportResult(export.getDownloadUri());
+    }
+
 }
