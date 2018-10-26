@@ -2,18 +2,18 @@ package org.activityinfo.analysis.table;
 
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.analysis.TableModel;
+import org.activityinfo.model.analysis.table.ExportFormat;
 
 public class ExportViewModel {
 
-    public static final int XLS_COLUMN_LIMIT = 256;
-    public static final String XLS_EXPORT = "XLS";
-
     private TableModel tableModel;
+    private ExportFormat format;
     private Integer columnLength;
     private boolean columnLimitExceeded;
 
-    public ExportViewModel(TableModel tableModel, Integer columnLength, boolean columnLimitExceeded) {
+    public ExportViewModel(TableModel tableModel, ExportFormat format, Integer columnLength, boolean columnLimitExceeded) {
         this.tableModel = tableModel;
+        this.format = format;
         this.columnLength = columnLength;
         this.columnLimitExceeded = columnLimitExceeded;
     }
@@ -30,8 +30,11 @@ public class ExportViewModel {
         return !columnLimitExceeded;
     }
 
-    public static boolean columnLimitExceeded(EffectiveTableModel effectiveTableModel) {
-        return exportedColumnSize(effectiveTableModel) > XLS_COLUMN_LIMIT;
+    public static boolean columnLimitExceeded(EffectiveTableModel effectiveTableModel, ExportFormat format) {
+        if (format.hasColumnLimit()) {
+            return exportedColumnSize(effectiveTableModel) > format.getColumnLimit();
+        }
+        return false;
     }
 
     public static int exportedColumnSize(EffectiveTableModel effectiveTableModel) {
@@ -44,7 +47,7 @@ public class ExportViewModel {
 
     public String getErrorMessage() {
         if (columnLimitExceeded) {
-            return I18N.MESSAGES.columnLimit(columnLength, XLS_COLUMN_LIMIT, XLS_EXPORT);
+            return I18N.MESSAGES.columnLimit(columnLength, format.getColumnLimit(), format.name());
         }
         return "";
     }

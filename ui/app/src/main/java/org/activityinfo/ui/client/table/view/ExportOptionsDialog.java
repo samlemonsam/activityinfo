@@ -28,13 +28,12 @@ import com.sencha.gxt.widget.core.client.Dialog;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
-import com.sencha.gxt.widget.core.client.form.ComboBox;
-import com.sencha.gxt.widget.core.client.form.FieldLabel;
-import com.sencha.gxt.widget.core.client.form.Radio;
+import com.sencha.gxt.widget.core.client.form.*;
 import org.activityinfo.analysis.table.ExportScope;
 import org.activityinfo.analysis.table.ExportViewModel;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.analysis.table.ExportFormat;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.job.ExportFormJob;
@@ -45,6 +44,10 @@ import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.SubscriptionSet;
 import org.activityinfo.ui.client.store.FormStore;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Provides user with export options.
@@ -78,12 +81,16 @@ public class ExportOptionsDialog {
 
     private final ListStore<Form> formListStore;
     private final ComboBox<Form> formCombo;
+
+    private final StringComboBox exportFormatCombo;
+
     private final Label errorMessage;
 
     private final Dialog dialog;
 
     private final Observable<FormTree> formTree;
     private final Observable<ExportViewModel> exportViewModel;
+    private final Observable<ExportFormat> exportFormat;
     private final SubscriptionSet subscriptions = new SubscriptionSet();
 
 
@@ -99,6 +106,15 @@ public class ExportOptionsDialog {
         formCombo.setForceSelection(true);
         formCombo.setAllowBlank(false);
         formCombo.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
+
+        // Drop down to allow selection of the export format
+        exportFormatCombo = new StringComboBox();
+        exportFormatCombo.add(exportFormats());
+        exportFormatCombo.setEditable(false);
+        exportFormatCombo.setForceSelection(true);
+        exportFormatCombo.setAllowBlank(false);
+        exportFormatCombo.setValue(defaultFormat());
+        exportFormatCombo.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
 
         // Choose between selected columns and all column
         Radio allColumnsRadio = new Radio();
@@ -139,6 +155,8 @@ public class ExportOptionsDialog {
 
         container.add(new FieldLabel(formCombo, I18N.CONSTANTS.form()),
                 new VerticalLayoutContainer.VerticalLayoutData(1, -1, fieldMargins));
+        container.add(new FieldLabel(exportFormatCombo, I18N.CONSTANTS.exportFormat()),
+                new VerticalLayoutContainer.VerticalLayoutData(1,-1,fieldMargins));
         container.add(new FieldLabel(columnsPanel, I18N.CONSTANTS.columns()),
                 new VerticalLayoutContainer.VerticalLayoutData(-1, -1, fieldMargins));
         container.add(new FieldLabel(filterPanel, I18N.CONSTANTS.filter()),
@@ -159,9 +177,20 @@ public class ExportOptionsDialog {
         Observable<ResourceId> selectedForm = GxtObservables.of(formCombo).transform(form -> form.formId);
         Observable<ExportScope> columnScope = GxtObservables.of(selectedColumnsRadio).transform(checked -> checked ? ExportScope.SELECTED : ExportScope.ALL);
         Observable<ExportScope> rowScope = GxtObservables.of(currentFilterRadio).transform(checked -> checked ? ExportScope.SELECTED : ExportScope.ALL);
+        exportFormat = GxtObservables.of(exportFormatCombo).transform(ExportFormat::valueOf);
 
         this.formTree = viewModel.getFormTree();
-        this.exportViewModel = viewModel.computeExportModel(selectedForm, columnScope, rowScope);
+        this.exportViewModel = viewModel.computeExportModel(selectedForm, columnScope, rowScope, exportFormat);
+    }
+
+    private String defaultFormat() {
+        return ExportFormat.CSV.name();
+    }
+
+    private List<String> exportFormats() {
+        return Arrays.stream(ExportFormat.values())
+                .map(ExportFormat::name)
+                .collect(Collectors.toList());
     }
 
 
@@ -213,7 +242,7 @@ public class ExportOptionsDialog {
     }
 
     private void onOk(SelectEvent event) {
-        ExportFormJob exportFormJob = new ExportFormJob(exportViewModel.get().getTableModel());
+        ExportFormJob exportFormJob = new ExportFormJob(exportViewModel.get().getTableModel(), exportFormat.get());
         dialog.hide();
 
         Observable<JobStatus<ExportFormJob, ExportResult>> jobStatus = formStore.startJob(exportFormJob);

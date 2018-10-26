@@ -22,6 +22,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import org.activityinfo.analysis.ParsedFormula;
 import org.activityinfo.model.analysis.*;
+import org.activityinfo.model.analysis.table.ExportFormat;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.formula.CompoundExpr;
@@ -206,13 +207,14 @@ public class TableViewModel implements TableUpdater {
     public Observable<ExportViewModel> computeExportModel(
             Observable<ResourceId> selectedForm,
             Observable<ExportScope> columnScope) {
-        return computeExportModel(selectedForm, columnScope, Observable.just(ExportScope.ALL));
+        return computeExportModel(selectedForm, columnScope, Observable.just(ExportScope.ALL), Observable.just(ExportFormat.CSV));
     }
 
     public Observable<ExportViewModel> computeExportModel(
             Observable<ResourceId> selectedForm,
             Observable<ExportScope> columnScope,
-            Observable<ExportScope> rowScope) {
+            Observable<ExportScope> rowScope,
+            Observable<ExportFormat> format) {
 
         Observable<EffectiveTableModel> parentFormModel = getEffectiveTable();
         Observable<Optional<EffectiveTableModel>> subFormModel = selectedForm.join(formId -> {
@@ -265,8 +267,8 @@ public class TableViewModel implements TableUpdater {
         });
         Observable<EffectiveTableModel> effectiveTableModel = computeEffectiveTableModel(exportTableModel);
         Observable<Integer> colLength = effectiveTableModel.transform(ExportViewModel::exportedColumnSize);
-        Observable<Boolean> colLimitExceed = effectiveTableModel.transform(ExportViewModel::columnLimitExceeded);
-        return Observable.transform(exportTableModel, colLength, colLimitExceed, ExportViewModel::new);
+        Observable<Boolean> colLimitExceed = Observable.transform(effectiveTableModel, format, ExportViewModel::columnLimitExceeded);
+        return Observable.transform(exportTableModel, format, colLength, colLimitExceed, ExportViewModel::new);
     }
 
     private String parentFormula(ParsedFormula formula) {
