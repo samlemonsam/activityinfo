@@ -19,7 +19,7 @@
 
 -->
 <#include "../page/Scaffolding.ftl">
-<@scaffolding title="${name}" leaflet=true>
+<@scaffolding title="${name}">
 
     <@content>
     <div class="row">
