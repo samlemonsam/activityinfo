@@ -32,6 +32,7 @@ import org.activityinfo.json.JsonValue;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableModel;
+import org.activityinfo.model.analysis.table.ExportFormat;
 import org.activityinfo.model.job.ExportFormJob;
 import org.activityinfo.model.job.JobRequest;
 import org.activityinfo.model.job.JobState;
@@ -85,7 +86,7 @@ public class JobResourceTest {
 
                 TableModel tableModel = ImmutableTableModel.builder().formId(ResourceId.valueOf("FORM1")).build();
 
-                ExportFormJob exportForm = new ExportFormJob(tableModel);
+                ExportFormJob exportForm = new ExportFormJob(tableModel, ExportFormat.XLS);
                 JobRequest request = new JobRequest(exportForm, "en");
 
 
