@@ -35,7 +35,11 @@ public class CsvTableWriter implements AutoCloseable {
     }
 
     private void writeHeaders(List<CsvColumn> csvColumns) throws IOException {
-        writer.writeLine(csvColumns.stream().map(CsvColumn::getHeading).collect(Collectors.toList()));
+        String[] headings = new String[csvColumns.size()];
+        for (int i=0; i<headings.length; i++) {
+            headings[i] = csvColumns.get(i).getHeading();
+        }
+        writer.writeLine(headings);
     }
 
     private void writeData(int numRows, List<CsvColumn> csvColumns) throws IOException {
@@ -44,13 +48,12 @@ public class CsvTableWriter implements AutoCloseable {
         }
     }
 
-    private void writeDataLine(final int i, List<CsvColumn> csvColumns) throws IOException {
-        writer.writeLine(csvColumns.stream().map(c -> {
-            if (c.isMissing(i)) {
-                return null;
-            }
-            return c.getValue(i);
-        }).collect(Collectors.toList()));
+    private void writeDataLine(final int row, List<CsvColumn> csvColumns) throws IOException {
+        Object[] line = new Object[csvColumns.size()];
+        for (int col=0; col<line.length; col++) {
+            line[col] = csvColumns.get(col).getValue(row);
+        }
+        writer.writeLine(line);
     }
 
     public CsvWriter getWriter() {
