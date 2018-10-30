@@ -31,7 +31,8 @@ public class CsvWriter implements AutoCloseable {
 
     public static final String DELIMITER = ",";
     public static final String DOUBLE_QUOTE = "\"";
-    public static final String LINE_ENDING = "\r\n";
+    public static final String CARRIAGE_RETURN = "\r";
+    public static final String LINE_ENDING = "\n";
 
     public static final String ESCAPED_DOUBLE_QUOTE = "\"\"";
 
