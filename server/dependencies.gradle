@@ -21,6 +21,7 @@ dependencies {
     compile project(':io:xform')
     compile project(':io:match')
     compile project(':io:xlsform')
+    compile project(':io:csv')
     compile project(':analysis')
 
     compile project(':store:mysql')

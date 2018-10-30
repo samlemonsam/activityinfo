@@ -18,6 +18,7 @@
  */
 package org.activityinfo.server.endpoint.rest;
 
+import org.activityinfo.io.csv.CsvWriter;
 import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;

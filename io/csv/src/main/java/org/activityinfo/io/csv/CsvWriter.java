@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.activityinfo.server.endpoint.rest;
+package org.activityinfo.io.csv;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -33,12 +33,12 @@ public class CsvWriter implements AutoCloseable {
 
     public CsvWriter() throws IOException {
         this.writer = new StringWriter();
-        writer.append(BYTEORDER_MARK);
+        writeByteOrderMark();
     }
 
     public CsvWriter(Writer writer) throws IOException {
         this.writer = writer;
-        this.writer.append(BYTEORDER_MARK);
+        writeByteOrderMark();
     }
     
     private void writeByteOrderMark() throws IOException {
