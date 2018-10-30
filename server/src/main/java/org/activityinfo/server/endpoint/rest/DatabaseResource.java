@@ -44,6 +44,7 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
 import org.activityinfo.server.mail.*;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
+import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.codehaus.jackson.map.annotate.JsonView;
 
@@ -223,6 +224,8 @@ public class DatabaseResource {
         }
         commitTransaction();
 
+        UsageTracker.track(currentOwner.getId(), "db_transfer_request", database.getResourceId());
+
         return Response.ok().entity("Request for transfer of database " + database.getName() + " has been sent.").build();
     }
 
@@ -265,6 +268,8 @@ public class DatabaseResource {
             throw new RuntimeException(e);
         }
         commitTransaction();
+
+        UsageTracker.track(newOwner.getId(), "db_transfer_complete", database.getResourceId());
 
         return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/app").fragment("db/" + databaseId).build())
                 .cookie(authTokenProvider.createNewAuthCookies(newOwner))
@@ -402,6 +407,8 @@ public class DatabaseResource {
             throw new RuntimeException(e);
         }
         commitTransaction();
+
+        UsageTracker.track(executingUser.getId(), "db_transfer_cancel", database.getResourceId());
 
         return Response.ok().entity("Database transfer cancelled").build();
     }

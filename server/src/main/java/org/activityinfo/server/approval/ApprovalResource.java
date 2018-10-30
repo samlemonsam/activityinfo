@@ -12,6 +12,7 @@ import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.server.endpoint.rest.DatabaseResource;
 import org.activityinfo.server.mail.MailSender;
+import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.spi.FormStorageProvider;
 
 import javax.persistence.EntityManager;
@@ -72,6 +73,8 @@ public class ApprovalResource {
 
         TransferAuthorized transfer = new TransferAuthorized(currentOwner.getId(), proposedOwner.getId(), database.getId(), token);
 
+        UsageTracker.track(proposedOwner.getId(), "db_transfer_accept", database.getResourceId());
+
         DatabaseResource resource = new DatabaseResource(catalog,
                 dispatcher,
                 new DatabaseProviderImpl(entityManager, billingOracle),
@@ -97,6 +100,8 @@ public class ApprovalResource {
         }
 
         User proposedOwner = database.getTransferUser();
+
+        UsageTracker.track(proposedOwner.getId(), "db_transfer_reject", database.getResourceId());
 
         DatabaseResource resource = new DatabaseResource(catalog,
                 dispatcher,
