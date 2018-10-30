@@ -22,6 +22,7 @@ import com.google.inject.Inject;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.ExportViewModel;
 import org.activityinfo.analysis.table.TableViewModel;
+import org.activityinfo.io.csv.CsvTableWriter;
 import org.activityinfo.io.xls.XlsTableWriter;
 import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.analysis.table.ExportFormat;
@@ -35,6 +36,9 @@ import org.activityinfo.store.query.shared.FormSource;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResult> {
 
@@ -74,7 +78,8 @@ public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResu
 
     private ExportResult xlsExport(EffectiveTableModel effectiveTableModel) throws IOException {
         ColumnSet columnSet = effectiveTableModel.getColumnSet().waitFor();
-        GeneratedResource export = storageProvider.create(XlsTableWriter.EXCEL_MIME_TYPE, "Export.xls");
+        String fileName = fileName(effectiveTableModel.getFormLabel(), ".xls");
+        GeneratedResource export = storageProvider.create(XlsTableWriter.EXCEL_MIME_TYPE, fileName);
 
         XlsTableWriter writer = new XlsTableWriter();
         writer.addSheet(effectiveTableModel, columnSet);
@@ -88,16 +93,19 @@ public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResu
 
     private ExportResult csvExport(EffectiveTableModel effectiveTableModel) throws IOException {
         ColumnSet columnSet = effectiveTableModel.getColumnSet().waitFor();
-        GeneratedResource export = storageProvider.create(XlsTableWriter.EXCEL_MIME_TYPE, "Export.xls");
+        String fileName = fileName(effectiveTableModel.getFormLabel(), ".csv");
+        GeneratedResource export = storageProvider.create(CsvTableWriter.CSV_MIME_TYPE, fileName);
 
-        XlsTableWriter writer = new XlsTableWriter();
-        writer.addSheet(effectiveTableModel, columnSet);
-
-        try(OutputStream out = export.openOutputStream()) {
-            writer.write(out);
+        try(CsvTableWriter writer = new CsvTableWriter(new OutputStreamWriter(export.openOutputStream(), "UTF-8"))) {
+            writer.writeTable(effectiveTableModel, columnSet);
         }
 
         return new ExportResult(export.getDownloadUri());
+    }
+
+    private String fileName(String formName, String fileExtension) {
+        String date = new SimpleDateFormat("YYYY-MM-dd_HHmmss").format(new Date());
+        return ("ActivityInfo_Export_" + formName + "_" + date + fileExtension).replace(" ", "_");
     }
 
 }
