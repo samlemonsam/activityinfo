@@ -26,6 +26,7 @@ import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableColumn;
 import org.activityinfo.model.analysis.TableModel;
+import org.activityinfo.model.analysis.table.ExportFormat;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formula.CompoundExpr;
 import org.activityinfo.model.formula.SymbolNode;
@@ -268,7 +269,8 @@ public class TableViewModelTest {
                 viewModel.computeExportModel(
                         Observable.just(ReferralSubForm.FORM_ID),
                         Observable.just(ExportScope.SELECTED),
-                        Observable.just(ExportScope.SELECTED))
+                        Observable.just(ExportScope.SELECTED),
+                        Observable.just(ExportFormat.XLS))
                         .transform(ExportViewModel::getTableModel));
 
         System.out.println(Json.stringify(exportModel.assertLoaded().toJson(), 2));
