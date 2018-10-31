@@ -115,6 +115,7 @@ public class ExportOptionsDialog {
         exportFormatCombo.setAllowBlank(false);
         exportFormatCombo.setValue(defaultFormat());
         exportFormatCombo.setTriggerAction(ComboBoxCell.TriggerAction.ALL);
+        exportFormatCombo.addSelectionHandler(select -> exportFormatCombo.finishEditing());
 
         // Choose between selected columns and all column
         Radio allColumnsRadio = new Radio();
