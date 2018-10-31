@@ -66,7 +66,7 @@ import org.activityinfo.ui.client.page.entry.grouping.GroupingComboBox;
 import org.activityinfo.ui.client.page.entry.place.DataEntryPlace;
 import org.activityinfo.ui.client.page.entry.sitehistory.SiteHistoryTab;
 import org.activityinfo.ui.client.page.report.ExportDialog;
-import org.activityinfo.ui.client.page.report.ExportTypeDialog;
+import org.activityinfo.ui.client.page.report.DatabaseExportTypeDialog;
 import org.activityinfo.ui.client.page.resource.ResourcePage;
 import org.activityinfo.ui.client.page.resource.ResourcePlace;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
@@ -462,11 +462,11 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     private void onExport(Filter filter) {
         if (filter.isDimensionRestrictedToSingleCategory(DimensionType.Database)) {
-            ExportTypeDialog dialog = new ExportTypeDialog();
+            DatabaseExportTypeDialog dialog = new DatabaseExportTypeDialog();
             dialog.setCallback(selection -> {
-                if (ExportTypeDialog.LONG_FORMAT.equals(selection)) {
+                if (DatabaseExportTypeDialog.LONG_FORMAT.equals(selection)) {
                     exportLongFormat(filter);
-                } else if (ExportTypeDialog.WIDE_FORMAT.equals(selection)) {
+                } else if (DatabaseExportTypeDialog.WIDE_FORMAT.equals(selection)) {
                     exportSites(filter);
                 }
                 return null;
