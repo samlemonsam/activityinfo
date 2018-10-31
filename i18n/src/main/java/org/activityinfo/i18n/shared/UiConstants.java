@@ -1933,4 +1933,16 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Export Format")
     String exportFormat();
 
+    @DefaultStringValue("Classic Structure")
+    String classicExportStructure();
+
+    @DefaultStringValue("Traditional Activity export. Choose this option for standard Sites export. <br> <br> Exports to an Excel XLS file. <br> <br> NOTE: Due to XLS limitations, there is a export limit of 256 columns.")
+    String classicExportStructureDescription();
+
+    @DefaultStringValue("Form Structure")
+    String formExportStructure();
+
+    @DefaultStringValue("Export Activity as a Form. Choose this option if Activity is greater than 256 columns. <br> <br> Exports to a CSV file. <br> <br> No column export limit.")
+    String formExportStructureDescription();
+
 }
