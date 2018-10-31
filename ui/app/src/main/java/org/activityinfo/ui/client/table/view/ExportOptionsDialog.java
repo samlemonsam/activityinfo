@@ -167,7 +167,7 @@ public class ExportOptionsDialog {
         dialog = new Dialog();
         dialog.setHeading(I18N.CONSTANTS.export());
         dialog.setPredefinedButtons(Dialog.PredefinedButton.OK, Dialog.PredefinedButton.CANCEL);
-        dialog.setPixelSize(500, 300);
+        dialog.setPixelSize(500, 325);
         dialog.setModal(true);
         dialog.setWidget(container);
         dialog.getButton(Dialog.PredefinedButton.OK).addSelectHandler(this::onOk);
