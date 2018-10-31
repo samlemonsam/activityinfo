@@ -45,6 +45,8 @@ public class ExecutorFactory {
             return injector.getInstance(ExportLongFormatExecutor.class);
         } else if (type.equals(ExportSitesJob.TYPE)) {
             return injector.getInstance(ExportSitesExecutor.class);
+        } else if (type.equals(ExportActivityFormJob.TYPE)) {
+            return injector.getInstance(ExportActivityFormExecutor.class);
         }
         throw new IllegalArgumentException("No such type " + type);
     }
