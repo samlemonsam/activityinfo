@@ -46,7 +46,7 @@ public class ExportViewModel {
     }
 
     public String getErrorMessage() {
-        if (columnLimitExceeded) {
+        if (columnLimitExceeded && format.hasColumnLimit()) {
             return I18N.MESSAGES.columnLimit(columnLength, format.getColumnLimit(), format.name());
         }
         return "";
