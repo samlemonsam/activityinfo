@@ -17,8 +17,7 @@ public enum ExportFormat {
         return columnLimit != null;
     }
 
-    public Integer getColumnLimit() {
-        assert hasColumnLimit();
+    public @Nullable Integer getColumnLimit() {
         return columnLimit;
     }
 
