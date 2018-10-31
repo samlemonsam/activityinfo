@@ -39,6 +39,7 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.job.ExportActivityFormJob;
 import org.activityinfo.model.job.ExportLongFormatJob;
 import org.activityinfo.model.job.ExportSitesJob;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -65,6 +66,7 @@ import org.activityinfo.ui.client.page.entry.form.SiteDialogLauncher;
 import org.activityinfo.ui.client.page.entry.grouping.GroupingComboBox;
 import org.activityinfo.ui.client.page.entry.place.DataEntryPlace;
 import org.activityinfo.ui.client.page.entry.sitehistory.SiteHistoryTab;
+import org.activityinfo.ui.client.page.report.ActivityExportTypeDialog;
 import org.activityinfo.ui.client.page.report.ExportDialog;
 import org.activityinfo.ui.client.page.report.DatabaseExportTypeDialog;
 import org.activityinfo.ui.client.page.resource.ResourcePage;
@@ -462,19 +464,36 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     private void onExport(Filter filter) {
         if (filter.isDimensionRestrictedToSingleCategory(DimensionType.Database)) {
-            DatabaseExportTypeDialog dialog = new DatabaseExportTypeDialog();
-            dialog.setCallback(selection -> {
-                if (DatabaseExportTypeDialog.LONG_FORMAT.equals(selection)) {
-                    exportLongFormat(filter);
-                } else if (DatabaseExportTypeDialog.WIDE_FORMAT.equals(selection)) {
-                    exportSites(filter);
-                }
-                return null;
-            });
-            dialog.show();
+            databaseExportDialog(filter);
         } else {
-            exportSites(filter);
+            activityExportDialog(filter);
         }
+    }
+
+    private void databaseExportDialog(Filter filter) {
+        DatabaseExportTypeDialog dialog = new DatabaseExportTypeDialog();
+        dialog.setCallback(selection -> {
+            if (DatabaseExportTypeDialog.LONG_FORMAT.equals(selection)) {
+                exportLongFormat(filter);
+            } else if (DatabaseExportTypeDialog.WIDE_FORMAT.equals(selection)) {
+                exportSites(filter);
+            }
+            return null;
+        });
+        dialog.show();
+    }
+
+    private void activityExportDialog(Filter filter) {
+        ActivityExportTypeDialog dialog = new ActivityExportTypeDialog();
+        dialog.setCallback(selection -> {
+            if (ActivityExportTypeDialog.FORM_STRUCTURE.equals(selection)) {
+                exportSitesAsForm(filter);
+            } else if (ActivityExportTypeDialog.CLASSIC_STRUCTURE.equals(selection)) {
+                exportSites(filter);
+            }
+            return null;
+        });
+        dialog.show();
     }
 
     private void exportLongFormat(Filter filter) {
@@ -486,6 +505,12 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
     private void exportSites(Filter filter) {
         ExportDialog dialog = new ExportDialog();
         ExportSitesJob job = new ExportSitesJob(FilterUrlSerializer.toUrlFragment(filter));
+        dialog.start(new ExportJobTask(client, job));
+    }
+
+    private void exportSitesAsForm(Filter filter) {
+        ExportDialog dialog = new ExportDialog();
+        ExportActivityFormJob job = new ExportActivityFormJob(FilterUrlSerializer.toUrlFragment(filter));
         dialog.start(new ExportJobTask(client, job));
     }
 
