@@ -12,18 +12,17 @@ import org.activityinfo.model.analysis.ImmutableTableColumn;
 import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.analysis.table.ExportFormat;
+import org.activityinfo.model.formTree.ColumnNode;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.job.ExportActivityFormJob;
 import org.activityinfo.model.job.ExportFormJob;
 import org.activityinfo.model.job.ExportResult;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.command.handler.AttributeFilterMap;
 import org.activityinfo.server.command.handler.QueryFilterBuilder;
-import org.activityinfo.server.endpoint.rest.DefaultQueryBuilder;
 import org.activityinfo.server.generated.StorageProvider;
 import org.activityinfo.store.query.shared.FormSource;
 
@@ -60,7 +59,7 @@ public class ExportActivityFormExecutor implements JobExecutor<ExportActivityFor
         Filter filter = FilterUrlSerializer.fromUrlFragment(descriptor.getFilter());
         ResourceId activityFormId = fetchFormId(filter);
         FormTree formTree = formSource.getFormTree(activityFormId).waitFor();
-        List<ColumnModel> columns = computeColumns(formTree);
+        List<ImmutableTableColumn> columns = computeColumns(formTree);
         FormulaNode queryFilter = computeQueryFilter(filter, formTree);
         TableModel tableModel = computeTableModel(activityFormId, columns, queryFilter);
 
@@ -68,27 +67,26 @@ public class ExportActivityFormExecutor implements JobExecutor<ExportActivityFor
         return formExporter.execute(job);
     }
 
-    private List<ColumnModel> computeColumns(FormTree formTree) {
-        DefaultQueryBuilder queryModelBuilder = new DefaultQueryBuilder(formTree);
-        return queryModelBuilder.build().getColumns();
+    private List<ImmutableTableColumn> computeColumns(FormTree formTree) {
+        return formTree.getColumnNodes().stream()
+                .map(ExportActivityFormExecutor::convertToTableColumn)
+                .collect(Collectors.toList());
     }
 
-    private TableModel computeTableModel(ResourceId activityFormId, List<ColumnModel> columns, FormulaNode queryFilter) {
+    private TableModel computeTableModel(ResourceId activityFormId, List<ImmutableTableColumn> columns, FormulaNode queryFilter) {
         ImmutableTableModel.Builder tableModelBuilder = ImmutableTableModel.builder();
         tableModelBuilder.formId(activityFormId);
-        tableModelBuilder.columns(columns.stream()
-                .map(ExportActivityFormExecutor::convertToTableColumn)
-                .collect(Collectors.toList()));
+        tableModelBuilder.columns(columns);
         if (queryFilter != null) {
             tableModelBuilder.filter(queryFilter.asExpression());
         }
         return tableModelBuilder.build();
     }
 
-    private static ImmutableTableColumn convertToTableColumn(ColumnModel columnModel) {
+    private static ImmutableTableColumn convertToTableColumn(ColumnNode column) {
         return ImmutableTableColumn.builder()
-                .formula(columnModel.getFormulaAsString())
-                .label(columnModel.getId())
+                .label(column.getHeader())
+                .formula(column.getExpr().asExpression())
                 .build();
     }
 
