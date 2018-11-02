@@ -13,7 +13,8 @@ import java.util.Date;
 
 public class BillingSupervisor {
 
-    public static final String SNOOZE_KEY_PREFIX = "accountSnooze";
+    public static final String BILLING_SNOOZE_KEY_PREFIX = "accountSnooze";
+    public static final String PAYMENT_SNOOZE_KEY_PREFIX = "paymentSnooze";
 
     private final ActivityInfoClientAsync client = new ActivityInfoClientAsyncImpl();
 
@@ -31,8 +32,12 @@ public class BillingSupervisor {
 
     private void maybeShowStatus(AccountStatus status) {
         Date now = new Date();
-        if(status.shouldWarn(now) && !isSnoozed(status)) {
+        if(status.shouldWarn(now) && !isSnoozed(status, BILLING_SNOOZE_KEY_PREFIX)) {
             BillingWarning warning = new BillingWarning(status);
+            RootPanel.get().add(warning);
+        }
+        if(status.shouldNudgeForPayment(now) && !isSnoozed(status, PAYMENT_SNOOZE_KEY_PREFIX)) {
+            PaymentWarning warning = new PaymentWarning(status);
             RootPanel.get().add(warning);
         }
     }
@@ -42,21 +47,26 @@ public class BillingSupervisor {
      * will appear again starting *on* this date.
      * @param snoozeDate
      */
-    static void snooze(AccountStatus status) {
-        LocalDate snoozeDate = status.snoozeDate(new Date());
+    static void snooze(AccountStatus status, String snoozePrefix) {
+        LocalDate snoozeDate;
+        if (PAYMENT_SNOOZE_KEY_PREFIX.equals(snoozePrefix)) {
+            snoozeDate = status.paymentSnoozeDate(new Date());
+        } else {
+            snoozeDate = status.snoozeDate(new Date());
+        }
         Storage storage = Storage.getLocalStorageIfSupported();
         if(storage != null) {
-            storage.setItem(SNOOZE_KEY_PREFIX + status.getUserAccountId(), snoozeDate.toString());
+            storage.setItem(snoozePrefix + status.getUserAccountId(), snoozeDate.toString());
         }
     }
 
-    static boolean isSnoozed(AccountStatus status) {
+    static boolean isSnoozed(AccountStatus status, String snoozePrefix) {
         try {
             Storage storage = Storage.getLocalStorageIfSupported();
             if(storage == null) {
                 return false;
             }
-            String accountSnooze = storage.getItem(SNOOZE_KEY_PREFIX + status.getUserAccountId());
+            String accountSnooze = storage.getItem(snoozePrefix + status.getUserAccountId());
             if(accountSnooze == null) {
                 return false;
             }

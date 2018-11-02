@@ -58,6 +58,56 @@ public class AccountStatusTest {
     }
 
     @Test
+    public void paymentDue() {
+
+        AccountStatus status = new AccountStatus.Builder()
+                .setDatabaseCount(215)
+                .setExpectedPaymentDate(new LocalDate(2018, 12, 31))
+                .setTrial(false)
+                .setLegacy(false)
+                .build();
+
+        // No warning for first two weeks
+        assertFalse(status.shouldNudgeForPayment(new LocalDate(2018, 12, 1).atMidnightInMyTimezone()));
+        assertFalse(status.shouldNudgeForPayment(new LocalDate(2018, 12, 2).atMidnightInMyTimezone()));
+        assertFalse(status.shouldNudgeForPayment(new LocalDate(2018, 12, 14).atMidnightInMyTimezone()));
+
+        // With two weeks to go, issue the first warning
+        assertTrue(status.shouldNudgeForPayment(new LocalDate(2018, 12, 17).atMidnightInMyTimezone()));
+        assertTrue(status.shouldNudgeForPayment(new LocalDate(2018, 12, 20).atMidnightInMyTimezone()));
+        assertTrue(status.shouldNudgeForPayment(new LocalDate(2018, 12, 30).atMidnightInMyTimezone()));
+    }
+
+    @Test
+    public void testPaymentOverdue() {
+        AccountStatus status = new AccountStatus.Builder()
+                .setDatabaseCount(215)
+                .setExpirationTime(new LocalDate(2018, 11, 16))
+                .setExpectedPaymentDate(new LocalDate(2018, 11, 16))
+                .setTrial(false)
+                .setLegacy(false)
+                .build();
+
+        Date now = new LocalDate(2018, 11, 2).atMidnightInMyTimezone();
+        assertTrue(status.shouldNudgeForPayment(now));
+        // Today is friday with 2 weeks till payment (no more warning)
+        // Should be snoozed until 1 week before
+        assertThat(status.paymentSnoozeDate(now), equalTo(new LocalDate(2018, 11, 9)));
+
+        now = new LocalDate(2018, 11, 9).atMidnightInMyTimezone();
+        assertTrue(status.shouldNudgeForPayment(now));
+        // Today is friday with 1 week till payment (no more warning)
+        // Should be snoozed until 3 days before
+        assertThat(status.paymentSnoozeDate(now), equalTo(new LocalDate(2018, 11, 13)));
+
+        now = new LocalDate(2018, 11, 14).atMidnightInMyTimezone();
+        assertTrue(status.shouldNudgeForPayment(now));
+        // Today is wednesday with 2 days till payment
+        // Should be snoozed until tomorrow
+        assertThat(status.paymentSnoozeDate(now), equalTo(new LocalDate(2018, 11, 15)));
+    }
+
+    @Test
     public void expireString() {
 
         AccountStatus status = new AccountStatus.Builder()
@@ -93,8 +143,31 @@ public class AccountStatusTest {
         assertThat(expiringIn(status, 2019, 1, 4), equalTo("expiring in 12 days"));
     }
 
+    @Test
+    public void paymentExpectedString() {
+        AccountStatus status = new AccountStatus.Builder()
+                .setExpectedPaymentDate(new LocalDate(2018, 1, 31))
+                .build();
+
+        assertThat(paymentExpectedIn(status, 2018, 1, 10), equalTo("due in 3 week(s)"));
+        assertThat(paymentExpectedIn(status, 2018, 1, 17), equalTo("due in 2 week(s)"));
+        assertThat(paymentExpectedIn(status, 2018, 1, 24), equalTo("due in 1 week(s)"));
+        assertThat(paymentExpectedIn(status, 2018, 1, 25), equalTo("due in 6 days"));
+        assertThat(paymentExpectedIn(status, 2018, 1, 26), equalTo("due in 5 days"));
+        assertThat(paymentExpectedIn(status, 2018, 1, 27), equalTo("due in 4 days"));
+        assertThat(paymentExpectedIn(status, 2018, 1, 28), equalTo("due in 3 days"));
+        assertThat(paymentExpectedIn(status, 2018, 1, 29), equalTo("due in 48 hours"));
+        assertThat(paymentExpectedIn(status, 2018, 1, 30), equalTo("due in 24 hours"));
+        assertThat(paymentExpectedIn(status, 2018, 1, 31), equalTo("overdue"));
+        assertThat(paymentExpectedIn(status, 2018, 2, 1), equalTo("overdue"));
+    }
+
     private String expiringIn(AccountStatus status, int year, int month, int day) {
         return status.expiringIn(new LocalDate(year, month, day).atMidnightInMyTimezone());
+    }
+
+    private String paymentExpectedIn(AccountStatus status, int year, int month, int day) {
+        return status.paymentExpectedIn(new LocalDate(year, month, day).atMidnightInMyTimezone());
     }
 
     @Test
