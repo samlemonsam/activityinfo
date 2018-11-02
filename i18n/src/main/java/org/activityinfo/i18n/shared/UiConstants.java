@@ -1915,7 +1915,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Referenced Form(s) not accessible by current User")
     String refFormsNotAccessible();
 
-    @DefaultStringValue("Your trial account has expired.")
+    @DefaultStringValue("Your Trial Subscription has expired.")
     String trialAccountExpired();
 
     @DefaultStringValue("Unfortunately your trial period with ActivityInfo has ended. Your data is safe, but you no longer have access to it. Contact us to set up billing and to restore access.")
