@@ -120,7 +120,6 @@ public class BillingAccountOracle {
                         userAccount.getDateCreated().before(new Date(1536624000000L)))
                 .setDatabaseCount(databaseCount.intValue())
                 .setExpirationTime(trialEndDate)
-                .setExpectedPaymentDate(userAccount.getBillingAccount().getExpectedPaymentDate())
                 .build();
 
     }
