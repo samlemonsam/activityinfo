@@ -1915,7 +1915,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Referenced Form(s) not accessible by current User")
     String refFormsNotAccessible();
 
-    @DefaultStringValue("Your Trial Subscription has expired.")
+    @DefaultStringValue("Your trial account has expired.")
     String trialAccountExpired();
 
     @DefaultStringValue("Unfortunately your trial period with ActivityInfo has ended. Your data is safe, but you no longer have access to it. Contact us to set up billing and to restore access.")
@@ -1944,5 +1944,4 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Export Activity as a Form. Choose this option if Activity is greater than 256 columns. <br> <br> Exports to a CSV file. <br> <br> No column export limit.")
     String formExportStructureDescription();
-
 }
