@@ -25,6 +25,7 @@ import com.google.common.collect.Maps;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formula.*;
+import org.activityinfo.model.formula.diagnostic.AmbiguousSymbolException;
 import org.activityinfo.model.formula.diagnostic.FormulaException;
 import org.activityinfo.model.formula.functions.BoundingBoxFunction;
 import org.activityinfo.model.formula.functions.CoalesceFunction;
@@ -299,7 +300,10 @@ public class QueryEvaluator {
                 Collection<NodeMatch> nodes = resolver.resolveSymbol(symbolNode);
                 LOGGER.finer(symbolNode + " matched to " + nodes);
                 return addColumn(nodes);
-
+            } catch (AmbiguousSymbolException e) {
+                // Ambiguous symbols should result in an empty column, not full failure
+                LOGGER.log(Level.WARNING, e.getMessage(), e);
+                return batch.addEmptyColumn(filterLevel, rootFormClass);
             } finally {
                 evaluationStack.pop();
             }
