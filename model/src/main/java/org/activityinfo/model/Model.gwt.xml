@@ -39,6 +39,7 @@
   <source path="formTree"/>
   <source path="job"/>
   <source path="legacy"/>
+  <source path="permission"/>
   <source path="query"/>
   <source path="resource"/>
   <source path="type"/>
