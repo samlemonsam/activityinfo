@@ -41,6 +41,7 @@ import org.activityinfo.legacy.shared.util.Collector;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.type.time.Month;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
+import org.activityinfo.server.database.DatabaseModule;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.TestSqliteDatabase;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
@@ -76,6 +77,7 @@ import static org.junit.Assert.assertTrue;
 @Modules({
         TestHibernateModule.class,
         GwtRpcModule.class,
+        DatabaseModule.class
 })
 public class SyncIntegrationTest extends LocalHandlerTestCase {
     @Inject
