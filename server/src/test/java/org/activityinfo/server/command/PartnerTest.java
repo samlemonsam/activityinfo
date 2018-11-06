@@ -19,6 +19,7 @@
 package org.activityinfo.server.command;
 
 import org.activityinfo.fixtures.InjectionSupport;
+import org.activityinfo.fixtures.Modules;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.command.UpdatePartner;
 import org.activityinfo.legacy.shared.command.result.CreateResult;

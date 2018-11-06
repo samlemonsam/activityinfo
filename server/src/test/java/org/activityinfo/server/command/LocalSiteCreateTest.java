@@ -27,6 +27,7 @@ import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.server.database.DatabaseModule;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
 import org.junit.Assert;
@@ -42,6 +43,7 @@ import static org.junit.Assert.assertThat;
 @Modules({
         TestHibernateModule.class,
         GwtRpcModule.class,
+        DatabaseModule.class
 })
 public class LocalSiteCreateTest extends LocalHandlerTestCase {
 

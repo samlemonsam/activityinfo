@@ -31,6 +31,7 @@ import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.type.geo.Extents;
+import org.activityinfo.server.database.DatabaseModule;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
 import org.activityinfo.server.mail.MailSenderStubModule;
@@ -53,6 +54,7 @@ import static org.junit.Assert.assertThat;
         MailSenderStubModule.class,
         TestHibernateModule.class,
         GwtRpcModule.class,
+        DatabaseModule.class
 })
 @OnDataSet("/dbunit/sites-simple1.db.xml")
 public class LocalSchemaChangeTest extends LocalHandlerTestCase {
