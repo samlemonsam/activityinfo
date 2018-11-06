@@ -22,26 +22,34 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.Delete;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DeleteHandler implements CommandHandler<Delete> {
 
+    private static final Logger LOGGER = Logger.getLogger(DeleteHandler.class.getName());
+
     private EntityManager em;
-    private LegacyPermissionAdapter legacyPermissionAdapter;
+    private DatabaseProvider provider;
 
     @Inject
-    public DeleteHandler(EntityManager em, LegacyPermissionAdapter legacyPermissionAdapter) {
+    public DeleteHandler(EntityManager em, DatabaseProvider databaseProvider) {
         this.em = em;
-        this.legacyPermissionAdapter = legacyPermissionAdapter;
+        this.provider = databaseProvider;
     }
 
     @Override
     public CommandResult execute(Delete cmd, User user) {
-
-        
         Class<? extends Deleteable> entityClass = entityClassForEntityName(cmd.getEntityName());
         Deleteable entity = em.find(entityClass, cmd.getId());
         
@@ -51,7 +59,7 @@ public class DeleteHandler implements CommandHandler<Delete> {
         }
 
         // Ensure that the user is authorized to perform deletion
-        legacyPermissionAdapter.assertDeletionAuthorized(entity, user);
+        assertDeletionAuthorized(entity, user);
 
         // Mark the entity as deleted
         entity.delete();
@@ -63,6 +71,106 @@ public class DeleteHandler implements CommandHandler<Delete> {
         return null;
     }
 
+    private void assertDeletionAuthorized(Deleteable entity, User user) {
+        if(entity instanceof Database) {
+            assertDatabaseDeletionAuthorized(((Database) entity), user);
+
+        } else if(entity instanceof Site) {
+            assertEditAllowed(((Site) entity), user);
+
+        } else if(entity instanceof Activity) {
+            assertDesignPrivileges(((Activity) entity).getDatabase().getId(), user.getId());
+
+        } else if(entity instanceof Indicator) {
+            assertDesignPrivileges(((Indicator) entity).getActivity().getDatabase().getId(), user.getId());
+
+        } else if(entity instanceof AttributeGroup) {
+            assertEditAllowed(((AttributeGroup) entity), user);
+
+        } else if(entity instanceof Attribute) {
+            assertEditAllowed(((Attribute) entity).getGroup(), user);
+
+        } else if(entity instanceof Project) {
+            assertDesignPrivileges(((Project) entity).getDatabase().getId(), user.getId());
+
+        } else if(entity instanceof LockedPeriod) {
+            assertDesignPrivileges(((LockedPeriod) entity).getParentDatabase().getId(), user.getId());
+
+        } else if(entity instanceof Target) {
+            assertDesignPrivileges(((Target) entity).getDatabase().getId(), user.getId());
+
+        } else if(entity instanceof TargetValue) {
+            assertDesignPrivileges(((TargetValue) entity).getTarget().getDatabase().getId(), user.getId());
+
+        } else if(entity instanceof LocationType) {
+            assertDesignPrivileges(((LocationType) entity).getDatabase().getId(), user.getId());
+
+        } else if(entity instanceof Folder) {
+            assertDesignPrivileges(((Folder) entity).getDatabase().getId(), user.getId());
+
+        } else {
+            LOGGER.log(Level.SEVERE, String.format("Unable to determine permissions for deleting entity of type %s",
+                    entity.getClass().getName()));
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private void assertDatabaseDeletionAuthorized(Database entity, User user) {
+        ResourceId databaseId = CuidAdapter.databaseId(entity.getId());
+        UserDatabaseMeta databaseMeta = provider.getDatabaseMetadata(databaseId, user.getId());
+
+        if (!PermissionOracle.canDeleteDatabase(databaseMeta)) {
+            LOGGER.severe(String.format("User %d is not authorized to delete " +
+                    "database %d: it is owned by user %d", user.getId(), entity.getId(), entity.getOwner().getId()));
+            throw new IllegalAccessCommandException();
+        }
+    }
+
+    public void assertEditAllowed(Site site, User user) {
+        ResourceId databaseId = CuidAdapter.databaseId(site.getActivity().getDatabase().getId());
+        UserDatabaseMeta databaseMeta = provider.getDatabaseMetadata(databaseId, user.getId());
+        ResourceId activityId = site.getActivity().getFormId();
+        int partnerId = site.getPartner().getId();
+
+        if (!PermissionOracle.canEditSite(activityId, partnerId, databaseMeta)) {
+            LOGGER.severe(String.format("User %d does not have permission to edit" +
+                    " site %d", user.getId(), site.getId()));
+            throw new IllegalAccessCommandException();
+        }
+    }
+
+    public void assertEditAllowed(AttributeGroup group, User user) {
+        if (group.getActivities().isEmpty()) {
+            LOGGER.severe(String.format("Unable to check authorization to delete attribute group %d" +
+                    ": there are no associated activities.", group.getName()));
+            throw new IllegalAccessCommandException();
+        }
+        for (Activity activity : group.getActivities()) {
+            assertEditAllowed(activity, user);
+        }
+    }
+
+    public void assertEditAllowed(Activity activity, User user) {
+        ResourceId databaseId = CuidAdapter.databaseId(activity.getDatabase().getId());
+        UserDatabaseMeta databaseMeta = provider.getDatabaseMetadata(databaseId, user.getId());
+        ResourceId activityId = activity.getFormId();
+
+        if (!PermissionOracle.canEditResource(activityId, databaseMeta)) {
+            LOGGER.severe(String.format("User %d does not have permission to edit" +
+                    " activity %d", user.getId(), activity.getId()));
+            throw new IllegalAccessCommandException();
+        }
+    }
+
+    public void assertDesignPrivileges(int database, int user) {
+        ResourceId databaseId = CuidAdapter.databaseId(database);
+        UserDatabaseMeta databaseMeta = provider.getDatabaseMetadata(databaseId, user);
+
+        if (!PermissionOracle.canDesign(databaseMeta)) {
+            LOGGER.severe(() -> String.format("User %d does not have design privileges on database %d", user, database));
+            throw new IllegalAccessCommandException();
+        }
+    }
 
     private Class<? extends Deleteable> entityClassForEntityName(String entityName) {
         switch (entityName) {

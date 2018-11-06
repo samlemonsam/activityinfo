@@ -14,6 +14,9 @@ import java.util.logging.Logger;
 
 public class PermissionOracle {
 
+    private PermissionOracle() {
+    }
+
     private static final Logger LOGGER = Logger.getLogger(PermissionOracle.class.getName());
 
     public static Permission query(PermissionQuery query, UserDatabaseMeta db) {
@@ -243,6 +246,65 @@ public class PermissionOracle {
 
     public static boolean canEditResource(ResourceId resourceId, UserDatabaseMeta db) {
         return editResource(resourceId,db).isPermitted();
+    }
+
+    public static boolean canEditSite(ResourceId activityId, int partnerId, UserDatabaseMeta db) {
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
+                Operation.EDIT_RECORD,
+                activityId);
+        Permission edit = PermissionOracle.query(query, db);
+
+        if (edit.isPermitted() && !edit.isFiltered()) {
+            return true;
+        } else if (edit.isPermitted()){
+            return PermissionOracle.filterContainsPartner(edit.getFilter(),
+                    CuidAdapter.partnerFormId(db.getLegacyDatabaseId()),
+                    CuidAdapter.partnerRecordId(partnerId));
+        } else {
+            return false;
+        }
+    }
+
+    public static boolean canCreateSite(ResourceId activityId, int partnerId, UserDatabaseMeta db) {
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
+                Operation.CREATE_RECORD,
+                activityId);
+        Permission create = PermissionOracle.query(query, db);
+
+        if (create.isPermitted() && !create.isFiltered()) {
+            return true;
+        } else if (create.isPermitted()){
+            return PermissionOracle.filterContainsPartner(create.getFilter(),
+                    CuidAdapter.partnerFormId(db.getLegacyDatabaseId()),
+                    CuidAdapter.partnerRecordId(partnerId));
+        } else {
+            return false;
+        }
+    }
+
+    public static boolean canDesign(UserDatabaseMeta db) {
+        // Legacy Design requires CREATE_FORM, EDIT_FORM and DELETE_FORM permissions on root database
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                db.getLegacyDatabaseId(),
+                Operation.CREATE_FORM,
+                db.getDatabaseId());
+        Permission createForm = PermissionOracle.query(query, db);
+
+        query = new PermissionQuery(db.getUserId(),
+                db.getLegacyDatabaseId(),
+                Operation.EDIT_FORM,
+                db.getDatabaseId());
+        Permission editForm = PermissionOracle.query(query, db);
+
+        query = new PermissionQuery(db.getUserId(),
+                db.getLegacyDatabaseId(),
+                Operation.DELETE_FORM,
+                db.getDatabaseId());
+        Permission deleteForm = PermissionOracle.query(query, db);
+
+        return createForm.isPermitted() && editForm.isPermitted() && deleteForm.isPermitted();
     }
 
     ////////////////////////////////////////////////// ASSERT METHODS //////////////////////////////////////////////////

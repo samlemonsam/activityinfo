@@ -27,7 +27,6 @@ import org.activityinfo.legacy.shared.model.Published;
 import org.activityinfo.model.database.*;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formula.*;
-import org.activityinfo.model.formula.functions.EqualFunction;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.Permission;
 import org.activityinfo.model.permission.PermissionOracle;
@@ -39,10 +38,7 @@ import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static org.activityinfo.model.legacy.CuidAdapter.DATABASE_DOMAIN;
 
 /**
  * Class to adapt legacy permission requests (e.g. isDesignAllowed) for {@link PermissionOracle}
@@ -165,14 +161,6 @@ public class LegacyPermissionAdapter {
         }
     }
 
-    public void assertEditSiteAllowed(User user, Activity activity, Partner partner) {
-        if(!isEditSiteAllowed(user, activity, partner)) {
-            LOGGER.severe(String.format("User %d does not have permission to edit" +
-                    " sites in activity %d and partner %d", user.getId(), activity.getId(), partner.getId()));
-            throw new IllegalAccessCommandException();
-        }
-    }
-
     /**
      * Returns true if the given user is allowed to edit the values of the
      * given site.
@@ -206,84 +194,6 @@ public class LegacyPermissionAdapter {
         FunctionCallNode equalFunctionCall = (FunctionCallNode) filterFormula;
         SymbolNode partnerFieldNode = (SymbolNode) equalFunctionCall.getArgument(1);
         return CuidAdapter.getLegacyIdFromCuid(partnerFieldNode.asResourceId());
-    }
-
-
-    public void assertDeletionAuthorized(Object entity, User user) {
-        if(entity instanceof Database) {
-            assertDatabaseDeletionAuthorized(((Database) entity), user);
-
-        } else if(entity instanceof Site) {
-            assertEditAllowed(((Site) entity), user);
-
-        } else if(entity instanceof Activity) {
-            assertDesignPrivileges(((Activity) entity).getDatabase(), user);
-
-        } else if(entity instanceof Indicator) {
-            assertDesignPrivileges(((Indicator) entity).getActivity().getDatabase(), user);
-
-        } else if(entity instanceof AttributeGroup) {
-            assertEditAllowed(((AttributeGroup) entity), user);
-
-        } else if(entity instanceof Attribute) {
-            assertEditAllowed(((Attribute) entity).getGroup(), user);
-
-        } else if(entity instanceof Project) {
-            assertDesignPrivileges(((Project) entity).getDatabase(), user);
-
-        } else if(entity instanceof LockedPeriod) {
-            assertDesignPrivileges(((LockedPeriod) entity).getParentDatabase(), user);
-
-        } else if(entity instanceof Target) {
-            assertDesignPrivileges(((Target) entity).getDatabase(), user);
-
-        } else if(entity instanceof TargetValue) {
-            assertDesignPrivileges(((TargetValue) entity).getTarget().getDatabase(), user);
-
-        } else if(entity instanceof LocationType) {
-            assertDesignPrivileges(((LocationType) entity).getDatabase(), user);
-
-        } else if(entity instanceof Folder) {
-            assertDesignPrivileges(((Folder) entity).getDatabase(), user);
-
-        } else {
-            LOGGER.log(Level.SEVERE, "Unable to determine permissions for deleting entity of type " +
-                    entity.getClass().getName());
-
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    public void assertDatabaseDeletionAuthorized(Database entity, User user) {
-        ResourceId databaseId = CuidAdapter.databaseId(entity.getId());
-        UserDatabaseMeta database = provider.getDatabaseMetadata(databaseId, user.getId());
-        if(!PermissionOracle.canDeleteDatabase(database)) {
-            LOGGER.severe(String.format("User %d is not authorized to delete " +
-                    "database %d: it is owned by user %d", user.getId(), entity.getId(), entity.getOwner().getId()));
-            throw new IllegalAccessCommandException();
-        }
-    }
-
-    public boolean isEditAllowed(AttributeGroup entity, User user) {
-        if(entity.getActivities().isEmpty()) {
-            LOGGER.severe(() -> "Unable to check authorization to delete attribute group " +
-                    entity.getName() + ": there are no associated activities.");
-            return false;
-        }
-
-        for(Activity activity : entity.getActivities()) {
-            if(!isDesignAllowed(activity.getDatabase().getId(), user.getId())) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public void assertEditAllowed(AttributeGroup group, User user) {
-        if(!isEditAllowed(group, user)) {
-            throw new IllegalAccessCommandException();
-        }
     }
 
     public void assertDesignPrivileges(FormClass formClass, AuthenticatedUser user) {

@@ -21,18 +21,23 @@ package org.activityinfo.server.command.handler;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.AttributeDTO;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.legacy.shared.util.JsonUtil;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormFieldType;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.attachment.AttachmentType;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.store.query.UsageTracker;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -51,16 +56,16 @@ public class SiteUpdate {
     private static final String LOCATION_ID = "locationId";
 
     private final EntityManager entityManager;
-    private final LegacyPermissionAdapter legacyPermissionAdapter;
+    private final DatabaseProvider provider;
     private final DispatcherSync dispatcher;
     
     
     private static final Logger LOGGER = Logger.getLogger(SiteUpdate.class.getName());
 
     @Inject
-    public SiteUpdate(EntityManager entityManager, LegacyPermissionAdapter legacyPermissionAdapter, DispatcherSync dispatcher) {
+    public SiteUpdate(EntityManager entityManager, DatabaseProvider provider, DispatcherSync dispatcher) {
         this.entityManager = entityManager;
-        this.legacyPermissionAdapter = legacyPermissionAdapter;
+        this.provider = provider;
         this.dispatcher = dispatcher;
     }
 
@@ -80,7 +85,7 @@ public class SiteUpdate {
         Activity activity = activityReference(propertyMap);
         Partner partner = partnerReference(propertyMap);
 
-        legacyPermissionAdapter.assertEditSiteAllowed(user, activity, partner);
+        assertCreateSiteAllowed(user, activity, partner);
         
         long newVersion = incrementVersion(activity);
         
@@ -105,7 +110,7 @@ public class SiteUpdate {
     }
 
     private void updateSite(User user, Site site, PropertyMap changes) {
-        legacyPermissionAdapter.assertEditAllowed(site, user);
+        assertEditSiteAllowed(site, user, site.getPartner());
         
         // Before do anything else, increment the activity version and flush
         // so that we establish essentially a lock on this region
@@ -115,7 +120,7 @@ public class SiteUpdate {
         
         if(changes.containsKey(PARTNER_ID)) {
             Partner newPartner = partnerReference(changes);
-            legacyPermissionAdapter.assertEditSiteAllowed(user, site.getActivity(), newPartner);
+            assertEditSiteAllowed(site, user, newPartner);
             site.setPartner(newPartner);
         }
 
@@ -129,6 +134,29 @@ public class SiteUpdate {
         validateProperties(site);
 
         persistHistory(site, false, user, changes);
+    }
+
+    public void assertEditSiteAllowed(Site site, User user, Partner partner) {
+        ResourceId databaseId = CuidAdapter.databaseId(site.getActivity().getDatabase().getId());
+        UserDatabaseMeta databaseMeta = provider.getDatabaseMetadata(databaseId, user.getId());
+        ResourceId activityId = site.getActivity().getFormId();
+
+        if (!PermissionOracle.canEditSite(activityId, partner.getId(), databaseMeta)) {
+            LOGGER.severe(String.format("User %d does not have permission to edit" +
+                    " site %d", user.getId(), site.getId()));
+            throw new IllegalAccessCommandException();
+        }
+    }
+
+    private void assertCreateSiteAllowed(User user, Activity activity, Partner partner) {
+        ResourceId databaseId = CuidAdapter.databaseId(activity.getDatabase().getId());
+        UserDatabaseMeta databaseMeta = provider.getDatabaseMetadata(databaseId, user.getId());
+
+        if (!PermissionOracle.canCreateSite(activity.getFormId(), partner.getId(), databaseMeta)) {
+            LOGGER.severe(String.format("User %d does not have permission to create" +
+                    " site on activity %d for partner %d", user.getId(), activity.getId(), partner.getId()));
+            throw new IllegalAccessCommandException();
+        }
     }
 
     private long incrementVersion(Activity activity) {
