@@ -53,6 +53,10 @@ public class UserDatabaseMeta implements JsonSerializable {
         return databaseId;
     }
 
+    public int getLegacyDatabaseId() {
+        return CuidAdapter.getLegacyIdFromCuid(databaseId);
+    }
+
     public int getUserId() {
         return userId;
     }
