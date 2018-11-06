@@ -28,10 +28,16 @@ import org.activityinfo.legacy.shared.model.AttributeGroupDTO;
 import org.activityinfo.legacy.shared.model.EntityDTO;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.model.LockedPeriodDTO;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -51,12 +57,11 @@ import static org.activityinfo.legacy.shared.util.StringUtil.truncate;
 public class BaseEntityHandler {
 
     protected final EntityManager em;
-    protected final LegacyPermissionAdapter permissionsOracle;
-
+    protected final DatabaseProvider databaseProvider;
 
     public BaseEntityHandler(EntityManager em) {
         this.em = em;
-        this.permissionsOracle = new LegacyPermissionAdapter(Providers.of(em));
+        this.databaseProvider = new DatabaseProviderImpl(Providers.of(em));
     }
 
     protected void updateIndicatorProperties(Indicator indicator, Map<String, Object> changeMap) {
@@ -264,9 +269,19 @@ public class BaseEntityHandler {
      * @throws IllegalAccessCommandException If the user does not have permission
      */
     protected void assertDesignPrivileges(User user, Database database) {
-
-        if (!permissionsOracle.isDesignAllowed(database, user)) {
+        ResourceId databaseId = CuidAdapter.databaseId(database.getId());
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, user.getId());
+        if (!PermissionOracle.canDesign(databaseMeta)) {
             throw new IllegalAccessCommandException();
+        }
+    }
+
+    public void assertDesignPrivileges(User user,AttributeGroup group) {
+        if (group.getActivities().isEmpty()) {
+            throw new IllegalAccessCommandException();
+        }
+        for (Activity activity : group.getActivities()) {
+            assertDesignPrivileges(user, activity.getDatabase());
         }
     }
 

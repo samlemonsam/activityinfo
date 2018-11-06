@@ -146,7 +146,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
                                  Map<String, Object> changes) {
         Indicator indicator = entityManager().find(Indicator.class, cmd.getId());
 
-        permissionsOracle.assertDesignPrivileges(indicator.getActivity(), user);
+        assertDesignPrivileges(user, indicator.getActivity().getDatabase());
 
         updateIndicatorProperties(indicator, changes);
     }
@@ -154,7 +154,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
     private void updateLockedPeriod(User user, UpdateEntity cmd, Map<String, Object> changes) {
         LockedPeriod lockedPeriod = entityManager().find(LockedPeriod.class, cmd.getId());
 
-        permissionsOracle.assertDesignPrivileges(lockedPeriod, user);
+        assertDesignPrivileges(user, lockedPeriod.getDatabase());
 
         updateLockedPeriodProperties(lockedPeriod, changes);
     }
@@ -162,7 +162,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
     private void updateAttribute(User user, UpdateEntity cmd, Map<String, Object> changes) {
         Attribute attribute = entityManager().find(Attribute.class, cmd.getId());
 
-        permissionsOracle.assertDesignPrivileges(attribute.getGroup(), user);
+        assertDesignPrivileges(user, attribute.getGroup());
 
         updateAttributeProperties(changes, attribute);
         AttributeGroup ag = entityManager().find(AttributeGroup.class, attribute.getGroup().getId());
@@ -174,7 +174,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
     private void updateAttributeGroup(User user, UpdateEntity cmd, Map<String, Object> changes) {
         AttributeGroup group = entityManager().find(AttributeGroup.class, cmd.getId());
 
-        permissionsOracle.assertDesignPrivileges(group, user);
+        assertDesignPrivileges(user, group);
 
         updateAttributeGroupProperties(group, changes);
 
@@ -186,7 +186,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
     private void updateTarget(User user, UpdateEntity cmd, Map<String, Object> changes) {
         Target target = entityManager().find(Target.class, cmd.getId());
 
-        permissionsOracle.assertDesignPrivileges(target, user);
+        assertDesignPrivileges(user, target.getDatabase());
 
         updateTargetProperties(target, changes);
 

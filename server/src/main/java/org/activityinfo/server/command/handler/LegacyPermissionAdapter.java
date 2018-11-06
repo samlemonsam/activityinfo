@@ -62,34 +62,10 @@ public class LegacyPermissionAdapter {
         return new LegacyPermissionAdapter(em);
     }
 
-    /**
-     * Returns true if the given user is allowed to modify the structure of the
-     * database.
-     */
-    public boolean isDesignAllowed(int database, int user) {
-        PermissionQuery query;
+    public void assertDesignPrivileges(int database, int user) {
         ResourceId databaseId = CuidAdapter.databaseId(database);
         UserDatabaseMeta db = provider.getDatabaseMetadata(databaseId, user);
-
-        // Legacy Design requires CREATE_FORM, EDIT_FORM and DELETE_FORM permissions on root database
-        query= new PermissionQuery(user, database, Operation.CREATE_FORM, databaseId);
-        Permission createForm = PermissionOracle.query(query, db);
-
-        query= new PermissionQuery(user, database, Operation.CREATE_FORM, databaseId);
-        Permission editForm = PermissionOracle.query(query, db);
-
-        query= new PermissionQuery(user, database, Operation.DELETE_FORM, databaseId);
-        Permission deleteForm = PermissionOracle.query(query, db);
-
-        return createForm.isPermitted() && editForm.isPermitted() && deleteForm.isPermitted();
-    }
-
-    public boolean isDesignAllowed(Database database, User user) {
-        return isDesignAllowed(database.getId(), user.getId());
-    }
-
-    public void assertDesignPrivileges(int database, int user) {
-        if (!isDesignAllowed(database, user)) {
+        if (!PermissionOracle.canDesign(db)) {
             LOGGER.severe(() -> String.format("User %d does not have design privileges on database %d", user, database));
             throw new IllegalAccessCommandException();
         }
