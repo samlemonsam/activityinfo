@@ -18,6 +18,7 @@
  */
 package org.activityinfo.server.job;
 
+import com.google.common.net.UrlEscapers;
 import com.google.inject.Inject;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.ExportViewModel;
@@ -104,8 +105,9 @@ public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResu
     }
 
     private String fileName(String formName, String fileExtension) {
-        String date = new SimpleDateFormat("YYYY-MM-dd_HHmmss").format(new Date());
-        return ("ActivityInfo_Export_" + formName + "_" + date + fileExtension).replace(" ", "_");
+        String date = new SimpleDateFormat("yyyy-MM-dd_HHmmss").format(new Date());
+        String unescaped = "ActivityInfo_Export_" + formName + "_" + date + fileExtension;
+        return UrlEscapers.urlPathSegmentEscaper().escape(unescaped);
     }
 
 }
