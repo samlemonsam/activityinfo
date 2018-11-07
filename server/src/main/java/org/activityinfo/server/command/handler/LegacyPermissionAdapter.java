@@ -97,34 +97,6 @@ public class LegacyPermissionAdapter {
         }
     }
 
-    /**
-     * Returns true if the given user is allowed to edit the values of the
-     * given site.
-     */
-    public boolean isViewAllowed(Site site, User user) {
-
-        if(site.getActivity().getPublished() == Published.ALL_ARE_PUBLISHED.getIndex()) {
-            return true;
-        }
-
-        Database database = site.getActivity().getDatabase();
-        ResourceId databaseId = CuidAdapter.databaseId(database.getId());
-        UserDatabaseMeta db = provider.getDatabaseMetadata(databaseId, user.getId());
-        PermissionQuery query = new PermissionQuery(user.getId(), database.getId(), Operation.VIEW, databaseId);
-        Permission view = PermissionOracle.query(query, db);
-
-        if (view.isPermitted() && !view.isFiltered()) {
-            return true;
-        } else if (view.isPermitted()) {
-            // without AllowViewAll, edit permission is contingent on the site's partner
-            return PermissionOracle.filterContainsPartner(view.getFilter(),
-                    CuidAdapter.partnerFormId(database.getId()),
-                    CuidAdapter.partnerRecordId(site.getPartner().getId()));
-        } else {
-            return false;
-        }
-    }
-
     public static int partnerFromFilter(String filter) {
         FormulaNode filterFormula = FormulaParser.parse(filter);
         FunctionCallNode equalFunctionCall = (FunctionCallNode) filterFormula;
