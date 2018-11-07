@@ -21,33 +21,31 @@ package org.activityinfo.server.entity.auth;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
-import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
-import org.activityinfo.server.database.hibernate.entity.Database;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.SchemaElement;
-import org.activityinfo.server.database.hibernate.entity.UserPermission;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 /**
  * Checks whether the requesting user is authorized to change the given entity.
  */
 public class DesignAuthorizationHandler implements AuthorizationHandler<SchemaElement> {
 
+    private final DatabaseProvider databaseProvider;
+
     @Inject
-    public DesignAuthorizationHandler(LegacyPermissionAdapter legacyPermissionAdapter) {
+    public DesignAuthorizationHandler(DatabaseProvider databaseProvider) {
+        this.databaseProvider = databaseProvider;
     }
 
     @Override
     public boolean isAuthorized(AuthenticatedUser requestingUser, SchemaElement entity) {
         Preconditions.checkNotNull(requestingUser, "requestingUser");
 
-        Database database = entity.findOwningDatabase();
-        if (database.getOwner().getId() == requestingUser.getId()) {
-            return true;
-        }
-        for (UserPermission permission : database.getUserPermissions()) {
-            if (permission.getUser().getId() == requestingUser.getId() && permission.isAllowDesign()) {
-                return true;
-            }
-        }
-        return false;
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+                CuidAdapter.databaseId(entity.findOwningDatabase().getId()),
+                requestingUser.getUserId());
+        return PermissionOracle.canDesign(databaseMeta);
     }
 }

@@ -33,7 +33,6 @@ import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
-import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
@@ -48,19 +47,16 @@ import java.util.List;
 
 public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
 
-    //private static final Logger LOGGER = Logger.getLogger(ResourceLocatorSyncImpl.class.getName());
-
     private Provider<FormStorageProvider> catalog;
     private Provider<AuthenticatedUser> authenticatedUser;
-    private LegacyPermissionAdapter legacyPermissionAdapter;
     private BlobAuthorizer blobAuthorizer;
 
     @Inject
-    public ResourceLocatorSyncImpl(Provider<FormStorageProvider> catalog, Provider<AuthenticatedUser> authenticatedUser,
-                                   LegacyPermissionAdapter legacyPermissionAdapter, BlobAuthorizer blobAuthorizer) {
+    public ResourceLocatorSyncImpl(Provider<FormStorageProvider> catalog,
+                                   Provider<AuthenticatedUser> authenticatedUser,
+                                   BlobAuthorizer blobAuthorizer) {
         this.catalog = catalog;
         this.authenticatedUser = authenticatedUser;
-        this.legacyPermissionAdapter = legacyPermissionAdapter;
         this.blobAuthorizer = blobAuthorizer;
     }
 
