@@ -67,6 +67,16 @@ public enum Operation {
     /**
      * Add, modify, or remove locks on records.
      */
-    LOCK_RECORDS
+    LOCK_RECORDS,
+
+    /**
+     * Import Records into a form.
+     */
+    IMPORT_RECORDS,
+
+    /**
+     * Export Records from a form, folder or database.
+     */
+    EXPORT_RECORDS
 
 }
