@@ -22,21 +22,29 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.AddTarget;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
+import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.TargetDTO;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+import java.util.logging.Logger;
 
 public class AddTargetHandler implements CommandHandler<AddTarget> {
 
+    private static final Logger LOGGER = Logger.getLogger(AddTargetHandler.class.getName());
+
     private final EntityManager em;
-    private final LegacyPermissionAdapter legacyPermissionAdapter;
+    private final DatabaseProvider databaseProvider;
 
     @Inject
-    public AddTargetHandler(EntityManager em, LegacyPermissionAdapter legacyPermissionAdapter) {
+    public AddTargetHandler(EntityManager em, DatabaseProvider databaseProvider) {
         this.em = em;
-        this.legacyPermissionAdapter = legacyPermissionAdapter;
+        this.databaseProvider = databaseProvider;
     }
 
     @Override
@@ -44,8 +52,11 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
 
         TargetDTO form = cmd.getTarget();
         Database db = em.find(Database.class, cmd.getDatabaseId());
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+                CuidAdapter.databaseId(db.getId()),
+                user.getId());
 
-        legacyPermissionAdapter.assertDesignPrivileges(db, user);
+        assertDesignPrivileges(databaseMeta);
         
         Partner partner = null;
         if (form.get("partnerId") != null) {
@@ -84,5 +95,14 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
         }
 
         return new CreateResult(target.getId());
+    }
+
+    private void assertDesignPrivileges(UserDatabaseMeta databaseMeta) {
+        if (!PermissionOracle.canDesign(databaseMeta)) {
+            LOGGER.severe(String.format("User %d does not have design privileges on database %d",
+                    databaseMeta.getUserId(),
+                    databaseMeta.getLegacyDatabaseId()));
+            throw new IllegalAccessCommandException();
+        }
     }
 }
