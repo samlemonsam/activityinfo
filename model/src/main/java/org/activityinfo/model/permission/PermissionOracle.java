@@ -236,6 +236,20 @@ public class PermissionOracle {
         return view(resourceId,db).isPermitted();
     }
 
+    public static boolean canViewSite(ResourceId activityId, int partnerId, UserDatabaseMeta db) {
+        Permission view = view(activityId, db);
+
+        if (view.isPermitted() && !view.isFiltered()) {
+            return true;
+        } else if (view.isPermitted()){
+            return PermissionOracle.filterContainsPartner(view.getFilter(),
+                    CuidAdapter.partnerFormId(db.getLegacyDatabaseId()),
+                    CuidAdapter.partnerRecordId(partnerId));
+        } else {
+            return false;
+        }
+    }
+
     public static Permission editResource(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
                 CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),

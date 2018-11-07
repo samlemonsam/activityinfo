@@ -25,9 +25,13 @@ import org.activityinfo.legacy.shared.command.result.MonthlyReportResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.IndicatorRowDTO;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.type.time.LocalDateInterval;
 import org.activityinfo.model.type.time.Month;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
@@ -44,12 +48,12 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
     private static final Logger LOGGER = Logger.getLogger(GetMonthlyReportsHandler.class.getName());
 
     private final EntityManager em;
-    private final LegacyPermissionAdapter legacyPermissionAdapter;
+    private final DatabaseProvider databaseProvider;
 
     @Inject
-    public GetMonthlyReportsHandler(EntityManager em, LegacyPermissionAdapter legacyPermissionAdapter) {
+    public GetMonthlyReportsHandler(EntityManager em, DatabaseProvider databaseProvider) {
         this.em = em;
-        this.legacyPermissionAdapter = legacyPermissionAdapter;
+        this.databaseProvider = databaseProvider;
     }
 
     @Override
@@ -63,7 +67,12 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
                 .setParameter("siteId", cmd.getSiteId())
                 .getSingleResult();
 
-        if(!legacyPermissionAdapter.isViewAllowed(site, user)) {
+        int databaseId = site.getActivity().getDatabase().getId();
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+                CuidAdapter.databaseId(databaseId),
+                user.getId());
+
+        if(!PermissionOracle.canViewSite(site.getActivity().getFormId(), site.getPartner().getId(), databaseMeta)) {
             LOGGER.severe(() -> "User " + user.getEmail() + " has no view privs on site " + site.getId() + "," +
                           "partner = " + site.getPartner().getName() + " " + site.getPartner().getId());
             throw new IllegalAccessCommandException();
