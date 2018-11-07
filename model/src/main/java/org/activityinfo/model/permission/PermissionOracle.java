@@ -17,8 +17,6 @@ public class PermissionOracle {
     private PermissionOracle() {
     }
 
-    private static final Logger LOGGER = Logger.getLogger(PermissionOracle.class.getName());
-
     public static Permission query(PermissionQuery query, UserDatabaseMeta db) {
         if (db.isOwner()) {
             return allowOwner(query.getOperation());
@@ -182,20 +180,6 @@ public class PermissionOracle {
         }
 
         return true;
-    }
-
-    private static void logAndThrowException(Operation operation, ResourceId databaseId, ResourceId resourceId, int user) {
-        LOGGER.severe(illegalAccess(operation, databaseId, resourceId, user));
-        throw new PermissionException();
-    }
-
-    private static String illegalAccess(Operation operation, ResourceId databaseId, ResourceId resourceId, int user) {
-        return "ILLEGAL ACCESS "
-                + "[ USER:" + user
-                + "; DATABASE: " + databaseId
-                + "; RESOURCE: " + resourceId
-                + "; OPERATION: " + operation.name()
-                + "]";
     }
 
     /////////////////////////////////////////////////// TASK METHODS ///////////////////////////////////////////////////
