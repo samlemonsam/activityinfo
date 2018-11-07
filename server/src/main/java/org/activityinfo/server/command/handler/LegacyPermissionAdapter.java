@@ -62,46 +62,6 @@ public class LegacyPermissionAdapter {
         return new LegacyPermissionAdapter(em);
     }
 
-    public void assertDesignPrivileges(int database, int user) {
-        ResourceId databaseId = CuidAdapter.databaseId(database);
-        UserDatabaseMeta db = provider.getDatabaseMetadata(databaseId, user);
-        if (!PermissionOracle.canDesign(db)) {
-            LOGGER.severe(() -> String.format("User %d does not have design privileges on database %d", user, database));
-            throw new IllegalAccessCommandException();
-        }
-    }
-
-    public void assertDesignPrivileges(Database database, User user) {
-        assertDesignPrivileges(database.getId(), user.getId());
-    }
-
-    public void assertDesignPrivileges(AttributeGroup group, User user) {
-        Set<Activity> activities = group.getActivities();
-        if(activities.isEmpty()) {
-            LOGGER.severe(() -> String.format("AttributeGroup %d is orphaned and cannot be edited.", group.getId()));
-            throw new IllegalAccessCommandException();
-        }
-
-        Activity activity = activities.iterator().next();
-        assertDesignPrivileges(activity, user);
-    }
-
-    public void assertDesignPrivileges(Activity activity, User user) {
-        assertDesignPrivileges(activity.getDatabase(), user);
-    }
-
-    public void assertDesignPrivileges(Folder folder, User user) {
-        assertDesignPrivileges(folder.getDatabase(), user);
-    }
-
-    public void assertDesignPrivileges(LockedPeriod lockedPeriod, User user) {
-        assertDesignPrivileges(lockedPeriod.getDatabase(), user);
-    }
-
-    public void assertDesignPrivileges(Target target, User user) {
-        assertDesignPrivileges(target.getDatabase(), user);
-    }
-
     /**
      * Returns true if the given user is allowed to edit the values of the
      * given site.
@@ -170,10 +130,6 @@ public class LegacyPermissionAdapter {
         FunctionCallNode equalFunctionCall = (FunctionCallNode) filterFormula;
         SymbolNode partnerFieldNode = (SymbolNode) equalFunctionCall.getArgument(1);
         return CuidAdapter.getLegacyIdFromCuid(partnerFieldNode.asResourceId());
-    }
-
-    public void assertDesignPrivileges(FormClass formClass, AuthenticatedUser user) {
-        assertDesignPrivileges(CuidAdapter.getLegacyIdFromCuid(formClass.getDatabaseId()), user.getUserId());
     }
 
 }
