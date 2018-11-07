@@ -21,8 +21,10 @@ package org.activityinfo.server.endpoint.rest;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
+import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.mysql.MySqlRecordHistoryBuilder;
@@ -33,12 +35,13 @@ import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.server.PermissionsEnforcer;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.FormSupervisor;
-import org.activityinfo.store.spi.BlobAuthorizer;
-import org.activityinfo.store.spi.FormCatalog;
-import org.activityinfo.store.spi.FormStorageProvider;
-import org.activityinfo.store.spi.RecordHistoryProvider;
+import org.activityinfo.store.spi.*;
+
+import java.util.logging.Logger;
 
 public class ActivityInfoApiBackend implements ApiBackend {
+
+    private static final Logger LOGGER = Logger.getLogger(ActivityInfoApiBackend.class.getName());
 
     private final Injector injector;
 
@@ -74,12 +77,26 @@ public class ActivityInfoApiBackend implements ApiBackend {
     @Override
     public void createNewForm(FormClass formClass) {
         // Check that we have the permission to create in this database
-        LegacyPermissionAdapter legacyPermissionAdapter = injector.getInstance(LegacyPermissionAdapter.class);
-        legacyPermissionAdapter.assertDesignPrivileges(formClass, getAuthenticatedUser());
+        DatabaseProvider databaseProvider = injector.getInstance(DatabaseProvider.class);
+        AuthenticatedUser authenticatedUser = getAuthenticatedUser();
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+                formClass.getDatabaseId(),
+                authenticatedUser.getUserId());
+
+        assertDesignPrivileges(databaseMeta);
 
         ((MySqlStorageProvider) getStorage()).createOrUpdateFormSchema(formClass);
 
         UsageTracker.track(getAuthenticatedUserId(), "create_form", formClass);
+    }
+
+    private void assertDesignPrivileges(UserDatabaseMeta databaseMeta) {
+        if (!PermissionOracle.canDesign(databaseMeta)) {
+            LOGGER.severe(String.format("User %d does not have design privileges on database %d",
+                    databaseMeta.getUserId(),
+                    databaseMeta.getLegacyDatabaseId()));
+            throw new IllegalAccessCommandException();
+        }
     }
 
     @Override
