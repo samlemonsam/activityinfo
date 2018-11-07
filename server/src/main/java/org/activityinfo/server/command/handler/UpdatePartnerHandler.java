@@ -24,8 +24,8 @@ import org.activityinfo.legacy.shared.command.UpdatePartner;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.command.result.DuplicateCreateResult;
+import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.model.database.UserDatabaseMeta;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
@@ -70,11 +70,25 @@ public class UpdatePartnerHandler implements CommandHandler<UpdatePartner> {
 
         // Does this partner already exist?
         if (cmd.getPartner().hasId()) {
-            PermissionOracle.assertManagePartnerAllowed(dbMeta.getDatabaseId(), CuidAdapter.partnerRecordId(cmd.getPartner().getId()), dbMeta);
+            assertManagePartnerAllowed(dbMeta, cmd.getPartner().getId());
             return updatePartner(db, cmd);
         } else {
-            PermissionOracle.assertManagePartnersAllowed(dbMeta.getDatabaseId(), dbMeta);
+            assertManageAllPartnersAllowed(dbMeta);
             return addNewPartner(cmd, db);
+        }
+    }
+
+    private void assertManagePartnerAllowed(UserDatabaseMeta dbMeta, int partnerId) {
+        if (!PermissionOracle.canManagePartner(dbMeta.getDatabaseId(), partnerId, dbMeta)) {
+            LOGGER.severe(String.format("User %d is not authorized to modify partner %d", dbMeta.getUserId(), partnerId));
+            throw new IllegalAccessCommandException();
+        }
+    }
+
+    private void assertManageAllPartnersAllowed(UserDatabaseMeta dbMeta) {
+        if (!PermissionOracle.canManageAllPartners(dbMeta.getDatabaseId(), dbMeta)) {
+            LOGGER.severe(String.format("User %d is not authorized to modify all partners", dbMeta.getUserId()));
+            throw new IllegalAccessCommandException();
         }
     }
 
