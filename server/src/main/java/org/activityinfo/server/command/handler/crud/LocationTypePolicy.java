@@ -20,16 +20,21 @@ package org.activityinfo.server.command.handler.crud;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
+import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
-import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.LocationType;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+import java.util.logging.Logger;
 
 import static org.activityinfo.legacy.shared.model.EntityDTO.DATABASE_ID_PROPERTY;
 import static org.activityinfo.legacy.shared.model.EntityDTO.NAME_PROPERTY;
@@ -37,19 +42,26 @@ import static org.activityinfo.legacy.shared.model.LocationTypeDTO.WORKFLOW_ID_P
 
 public class LocationTypePolicy implements EntityPolicy<Activity> {
 
+    private static final Logger LOGGER = Logger.getLogger(LocationTypePolicy.class.getName());
+
     private final EntityManager em;
+    private final DatabaseProvider databaseProvider;
 
     @Inject
-    public LocationTypePolicy(EntityManager em) {
+    public LocationTypePolicy(EntityManager em, DatabaseProvider databaseProvider) {
         this.em = em;
+        this.databaseProvider = databaseProvider;
     }
 
     @Override
     public Integer create(User user, PropertyMap properties) {
         int databaseId = properties.get(DATABASE_ID_PROPERTY);
         Database database = em.find(Database.class, databaseId);
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+                CuidAdapter.databaseId(databaseId),
+                user.getId());
 
-        LegacyPermissionAdapter.using(em).assertDesignPrivileges(database, user);
+        assertDesignPrivileges(databaseMeta);
 
         // create the entity
         LocationType locationType = new LocationType();
@@ -68,12 +80,25 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
     @Override
     public void update(User user, Object entityId, PropertyMap changes) {
         LocationType locationType = em.find(LocationType.class, entityId);
+        int databaseId = locationType.getDatabase().getId();
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+                CuidAdapter.databaseId(databaseId),
+                user.getId());
 
-        LegacyPermissionAdapter.using(em).assertDesignPrivileges(locationType.getDatabase(), user);
+        assertDesignPrivileges(databaseMeta);
 
         applyProperties(locationType, changes);
         
         locationType.incrementVersion();
+    }
+
+    private void assertDesignPrivileges(UserDatabaseMeta databaseMeta) {
+        if (!PermissionOracle.canDesign(databaseMeta)) {
+            LOGGER.severe(String.format("User %d does not have design privileges on database %d",
+                    databaseMeta.getUserId(),
+                    databaseMeta.getLegacyDatabaseId()));
+            throw new IllegalAccessCommandException();
+        }
     }
 
     private void applyProperties(LocationType locationType, PropertyMap changes) {
