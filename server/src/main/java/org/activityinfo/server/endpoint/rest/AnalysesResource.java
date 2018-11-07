@@ -25,6 +25,7 @@ import com.googlecode.objectify.Work;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonMappingException;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
+import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.database.UserDatabaseMeta;
@@ -137,7 +138,9 @@ public class AnalysesResource {
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("No such folder: " + databaseId).build());
         }
         UserDatabaseMeta database = databaseProvider.getDatabaseMetadata(databaseId, userProvider.get().getId());
-        PermissionOracle.assertEditResource(databaseId, database);
+        if (!PermissionOracle.canEditResource(databaseId, database)) {
+            throw new IllegalAccessCommandException("Not authorized to modify report");
+        }
     }
 
 
