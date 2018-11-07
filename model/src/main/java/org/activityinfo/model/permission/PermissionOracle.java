@@ -342,38 +342,4 @@ public class PermissionOracle {
         return !managePartner.isFiltered();
     }
 
-    ////////////////////////////////////////////////// ASSERT METHODS //////////////////////////////////////////////////
-
-    public static void assertView(ResourceId resourceId, UserDatabaseMeta db) {
-        if (!canView(resourceId, db)) {
-            logAndThrowException(Operation.VIEW, db.getDatabaseId(), resourceId, db.getUserId());
-        }
-    }
-
-    public static void assertEditResource(ResourceId resourceId, UserDatabaseMeta db) {
-        if (!canEditResource(resourceId, db)) {
-            logAndThrowException(Operation.EDIT_FORM, db.getDatabaseId(), resourceId, db.getUserId());
-        }
-    }
-
-    public static void assertManagePartnerAllowed(ResourceId resourceId, ResourceId partnerId, UserDatabaseMeta db) {
-        Permission managePartner = manageUsers(resourceId, db);
-        if (managePartner.isForbidden()) {
-            logAndThrowException(Operation.MANAGE_USERS, db.getDatabaseId(), partnerId, db.getUserId());
-        }
-        if (!managePartner.isFiltered()) {
-            return;
-        }
-        int databaseId = CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId());
-        if (!filterContainsPartner(managePartner.getFilter(), CuidAdapter.partnerFormId(databaseId), partnerId)) {
-            logAndThrowException(Operation.MANAGE_USERS, db.getDatabaseId(), partnerId, db.getUserId());
-        }
-    }
-
-    public static void assertManagePartnersAllowed(ResourceId resourceId, UserDatabaseMeta db) {
-        if (!canManageUsers(resourceId, db)) {
-            logAndThrowException(Operation.MANAGE_USERS, db.getDatabaseId(), resourceId, db.getUserId());
-        }
-    }
-
 }
