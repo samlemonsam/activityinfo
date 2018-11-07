@@ -21,27 +21,36 @@ package org.activityinfo.server.command.handler.crud;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.UpdatePartner;
 import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
-import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.command.handler.UpdatePartnerHandler;
 import org.activityinfo.server.database.hibernate.dao.CountryDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
 import org.activityinfo.server.database.hibernate.entity.Country;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+import java.util.logging.Logger;
 
 public class UserDatabasePolicy implements EntityPolicy<Database> {
+
+    private static final Logger LOGGER = Logger.getLogger(UserDatabasePolicy.class.getName());
 
     private final EntityManager em;
     private final UserDatabaseDAO databaseDAO;
     private final CountryDAO countryDAO;
+    private final DatabaseProvider databaseProvider;
 
     @Inject
-    public UserDatabasePolicy(EntityManager em, UserDatabaseDAO databaseDAO, CountryDAO countryDAO) {
+    public UserDatabasePolicy(EntityManager em, DatabaseProvider databaseProvider, UserDatabaseDAO databaseDAO, CountryDAO countryDAO) {
         this.em = em;
+        this.databaseProvider = databaseProvider;
         this.databaseDAO = databaseDAO;
         this.countryDAO = countryDAO;
     }
@@ -93,9 +102,22 @@ public class UserDatabasePolicy implements EntityPolicy<Database> {
     @Override
     public void update(User user, Object entityId, PropertyMap changes) {
         Database database = em.find(Database.class, entityId);
-        LegacyPermissionAdapter.using(em).assertDesignPrivileges(database, user);
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+                CuidAdapter.databaseId(database.getId()),
+                user.getId());
+        assertDesignPrivileges(databaseMeta);
         applyProperties(database, changes);
     }
+
+    private void assertDesignPrivileges(UserDatabaseMeta databaseMeta) {
+        if (!PermissionOracle.canDesign(databaseMeta)) {
+            LOGGER.severe(String.format("User %d does not have design privileges on database %d",
+                    databaseMeta.getUserId(),
+                    databaseMeta.getLegacyDatabaseId()));
+            throw new IllegalAccessCommandException();
+        }
+    }
+
 
     private void applyProperties(Database database, PropertyMap properties) {
 
