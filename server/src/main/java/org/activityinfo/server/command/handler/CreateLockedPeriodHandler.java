@@ -23,20 +23,29 @@ import org.activityinfo.legacy.shared.command.CreateLockedPeriod;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.LockedPeriodDTO;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+import java.util.logging.Logger;
 
 public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPeriod> {
+
+    private static final Logger LOGGER = Logger.getLogger(CreateLockedPeriodHandler.class.getName());
+
     private EntityManager em;
-    private LegacyPermissionAdapter legacyPermissionAdapter;
+    private DatabaseProvider databaseProvider;
 
     @Inject
-    public CreateLockedPeriodHandler(EntityManager em, LegacyPermissionAdapter legacyPermissionAdapter) {
+    public CreateLockedPeriodHandler(EntityManager em, DatabaseProvider databaseProvider) {
         this.em = em;
-        this.legacyPermissionAdapter = legacyPermissionAdapter;
+        this.databaseProvider = databaseProvider;
     }
 
     @Override
@@ -59,32 +68,36 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
             database = em.find(Database.class, cmd.getDatabaseId());
             lockedPeriod.setDatabase(database);
             databaseId = database.getId();
+            UserDatabaseMeta databaseMeta = getDatabaseMeta(databaseId, user.getId());
 
-            legacyPermissionAdapter.assertDesignPrivileges(database, user);
+            assertDesignPrivileges(databaseMeta);
 
         } else if (cmd.getProjectId() != 0) {
             project = em.find(Project.class, cmd.getProjectId());
             lockedPeriod.setProject(project);
             lockedPeriod.setDatabase(project.getDatabase());
             databaseId = project.getDatabase().getId();
+            UserDatabaseMeta databaseMeta = getDatabaseMeta(databaseId, user.getId());
 
-            legacyPermissionAdapter.assertDesignPrivileges(project.getDatabase(), user);
+            assertDesignPrivileges(databaseMeta);
 
         } else if (cmd.getActivityId() != 0) {
             activity = em.find(Activity.class, cmd.getActivityId());
             lockedPeriod.setActivity(activity);
             lockedPeriod.setDatabase(activity.getDatabase());
             databaseId = activity.getDatabase().getId();
+            UserDatabaseMeta databaseMeta = getDatabaseMeta(databaseId, user.getId());
 
-            legacyPermissionAdapter.assertDesignPrivileges(activity, user);
+            assertDesignPrivileges(databaseMeta);
 
         } else if (cmd.getFolderId() != 0) {
             folder = em.find(Folder.class, cmd.getFolderId());
             lockedPeriod.setFolder(folder);
             lockedPeriod.setDatabase(folder.getDatabase());
             databaseId = folder.getDatabase().getId();
+            UserDatabaseMeta databaseMeta = getDatabaseMeta(databaseId, user.getId());
 
-            legacyPermissionAdapter.assertDesignPrivileges(folder, user);
+            assertDesignPrivileges(databaseMeta);
 
         } else {
             throw new CommandException("One of the following must be provided: userDatabaseId, projectId, activityId, folderId");
@@ -98,6 +111,21 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
         em.persist(db);
 
         return new CreateResult(lockedPeriod.getId());
+    }
+
+    private UserDatabaseMeta getDatabaseMeta(int databaseId, int userId) {
+        return databaseProvider.getDatabaseMetadata(
+                CuidAdapter.databaseId(databaseId),
+                userId);
+    }
+
+    private void assertDesignPrivileges(UserDatabaseMeta databaseMeta) {
+        if (!PermissionOracle.canDesign(databaseMeta)) {
+            LOGGER.severe(String.format("User %d does not have design privileges on database %d",
+                    databaseMeta.getUserId(),
+                    databaseMeta.getLegacyDatabaseId()));
+            throw new IllegalAccessCommandException();
+        }
     }
 
 }
