@@ -23,8 +23,8 @@ import org.activityinfo.legacy.shared.command.RemovePartner;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.RemoveFailedResult;
 import org.activityinfo.legacy.shared.command.result.RemoveResult;
+import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.model.database.UserDatabaseMeta;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
@@ -33,12 +33,15 @@ import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+import java.util.logging.Logger;
 
 /**
  * @author Alex Bertram
  * @see org.activityinfo.legacy.shared.command.RemovePartner
  */
 public class RemovePartnerHandler implements CommandHandler<RemovePartner> {
+
+    private static final Logger LOGGER = Logger.getLogger(RemovePartnerHandler.class.getName());
 
     private EntityManager em;
     private DatabaseProvider provider;
@@ -54,7 +57,10 @@ public class RemovePartnerHandler implements CommandHandler<RemovePartner> {
         Database db = em.getReference(Database.class, cmd.getDatabaseId());
         UserDatabaseMeta dbMeta = provider.getDatabaseMetadata(cmd.getDatabaseId(), user.getId());
 
-        PermissionOracle.assertManagePartnerAllowed(dbMeta.getDatabaseId(), CuidAdapter.partnerRecordId(cmd.getPartnerId()), dbMeta);
+        if (!PermissionOracle.canManagePartner(dbMeta.getDatabaseId(), cmd.getPartnerId(), dbMeta)) {
+            LOGGER.severe(String.format("User %d is not authorized to remove partner %d", dbMeta.getUserId(), cmd.getPartnerId()));
+            throw new IllegalAccessCommandException();
+        }
 
         // check to see if there are already sites associated with this partner
         int siteCount = ((Number) em.createQuery("select count(s) " +
