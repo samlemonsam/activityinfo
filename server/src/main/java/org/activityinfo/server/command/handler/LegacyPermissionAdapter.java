@@ -58,10 +58,6 @@ public class LegacyPermissionAdapter {
         this(Providers.of(em));
     }
 
-    public static LegacyPermissionAdapter using(EntityManager em) {
-        return new LegacyPermissionAdapter(em);
-    }
-
     /**
      * Returns true if the given user is allowed to edit the values of the
      * given site.
