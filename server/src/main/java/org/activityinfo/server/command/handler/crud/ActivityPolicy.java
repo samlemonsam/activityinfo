@@ -22,30 +22,40 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import org.activityinfo.json.JsonParser;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.server.command.handler.LegacyPermissionAdapter;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.command.handler.json.JsonHelper;
 import org.activityinfo.server.database.hibernate.dao.ActivityDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static org.activityinfo.legacy.shared.model.ActivityDTO.*;
 import static org.activityinfo.legacy.shared.util.StringUtil.truncate;
 
 public class ActivityPolicy implements EntityPolicy<Activity> {
 
+    private static final Logger LOGGER = Logger.getLogger(ActivityPolicy.class.getName());
+
     private final EntityManager em;
+    private final DatabaseProvider databaseProvider;
     private final ActivityDAO activityDAO;
     private final UserDatabaseDAO databaseDAO;
 
     @Inject
-    public ActivityPolicy(EntityManager em, ActivityDAO activityDAO, UserDatabaseDAO databaseDAO) {
+    public ActivityPolicy(EntityManager em, DatabaseProvider databaseProvider, ActivityDAO activityDAO, UserDatabaseDAO databaseDAO) {
         this.em = em;
+        this.databaseProvider = databaseProvider;
         this.activityDAO = activityDAO;
         this.databaseDAO = databaseDAO;
     }
@@ -54,7 +64,9 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
     public Object create(User user, PropertyMap properties) {
 
         Database database = getDatabase(properties);
-        LegacyPermissionAdapter.using(em).assertDesignPrivileges(database, user);
+        UserDatabaseMeta databaseMeta = getDatabaseMeta(properties, user);
+
+        assertDesignPrivileges(databaseMeta);
 
         // create the entity
         Activity activity = new Activity();
@@ -73,6 +85,20 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         return activity.getId();
     }
 
+    private void assertDesignPrivileges(UserDatabaseMeta databaseMeta) {
+        if (!PermissionOracle.canDesign(databaseMeta)) {
+            LOGGER.severe(String.format("User %d does not have design privileges on database %d",
+                    databaseMeta.getUserId(),
+                    databaseMeta.getLegacyDatabaseId()));
+            throw new IllegalAccessCommandException();
+        }
+    }
+
+    private UserDatabaseMeta getDatabaseMeta(PropertyMap properties, User user) {
+        ResourceId databaseId = CuidAdapter.databaseId(properties.getRequiredInt("databaseId"));
+        return databaseProvider.getDatabaseMetadata(databaseId, user.getId());
+    }
+
     public Activity persist(Activity activity) {
         activityDAO.persist(activity);
         return activity;
@@ -81,8 +107,11 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
     @Override
     public void update(User user, Object entityId, PropertyMap changes) {
         Activity activity = em.find(Activity.class, entityId);
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+                CuidAdapter.databaseId(activity.getDatabase().getId()),
+                user.getId());
         
-        LegacyPermissionAdapter.using(em).assertDesignPrivileges(activity.getDatabase(), user);
+        assertDesignPrivileges(databaseMeta);
        
         activity.incrementSchemaVersion();
 
