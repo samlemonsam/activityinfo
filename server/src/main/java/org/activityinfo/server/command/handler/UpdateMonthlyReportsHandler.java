@@ -26,13 +26,16 @@ import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.exception.LockAcquisitionException;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.type.time.Month;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.server.event.sitehistory.ChangeType;
 import org.activityinfo.server.event.sitehistory.SiteHistoryProcessor;
 import org.activityinfo.store.query.UsageTracker;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Calendar;
@@ -56,16 +59,17 @@ public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthly
     private final EntityManager em;
     private final KeyGenerator keyGenerator;
     private final SiteHistoryProcessor siteHistoryProcessor;
-    private final LegacyPermissionAdapter legacyPermissionAdapter;
+    private final DatabaseProvider databaseProvider;
 
     @Inject
     public UpdateMonthlyReportsHandler(EntityManager em,
                                        KeyGenerator keyGenerator,
-                                       SiteHistoryProcessor siteHistoryProcessor) {
+                                       SiteHistoryProcessor siteHistoryProcessor,
+                                       DatabaseProvider databaseProvider) {
         this.em = em;
         this.keyGenerator = keyGenerator;
         this.siteHistoryProcessor = siteHistoryProcessor;
-        this.legacyPermissionAdapter = new LegacyPermissionAdapter(em);
+        this.databaseProvider = databaseProvider;
     }
 
     @Override
@@ -86,7 +90,11 @@ public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthly
                 throw new CommandException(cmd, "site " + cmd.getSiteId() + " not found for user " + user.getEmail());
             }
 
-            if (!legacyPermissionAdapter.isEditAllowed(site, user)) {
+            UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+                    CuidAdapter.databaseId(site.getActivity().getDatabase().getId()),
+                    user.getId());
+
+            if (!PermissionOracle.canEditSite(site.getActivity().getFormId(), site.getPartner().getId(), databaseMeta)) {
                 throw new IllegalAccessCommandException("Not authorized to modify sites");
             }
 
