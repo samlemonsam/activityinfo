@@ -321,6 +321,27 @@ public class PermissionOracle {
         return createForm.isPermitted() && editForm.isPermitted() && deleteForm.isPermitted();
     }
 
+    public static boolean canManagePartner(ResourceId resourceId, int partnerId, UserDatabaseMeta db) {
+        Permission managePartner = manageUsers(resourceId, db);
+        if (managePartner.isForbidden()) {
+            return false;
+        }
+        if (!managePartner.isFiltered()) {
+            return true;
+        }
+        return filterContainsPartner(managePartner.getFilter(),
+                CuidAdapter.partnerFormId(db.getLegacyDatabaseId()),
+                CuidAdapter.partnerRecordId(partnerId));
+    }
+
+    public static boolean canManageAllPartners(ResourceId resourceId, UserDatabaseMeta db) {
+        Permission managePartner = manageUsers(resourceId, db);
+        if (managePartner.isForbidden()) {
+            return false;
+        }
+        return !managePartner.isFiltered();
+    }
+
     ////////////////////////////////////////////////// ASSERT METHODS //////////////////////////////////////////////////
 
     public static void assertView(ResourceId resourceId, UserDatabaseMeta db) {
