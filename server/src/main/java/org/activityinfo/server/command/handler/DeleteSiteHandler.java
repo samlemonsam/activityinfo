@@ -22,9 +22,14 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.DeleteSite;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.Site;
 import org.activityinfo.server.database.hibernate.entity.SiteHistory;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.json.JSONObject;
 
 import javax.persistence.EntityManager;
@@ -34,21 +39,26 @@ import java.util.Date;
 public class DeleteSiteHandler implements CommandHandler<DeleteSite> {
     
     private final EntityManager entityManager;
-    private final LegacyPermissionAdapter legacyPermissionAdapter;
+    private final DatabaseProvider databaseProvider;
 
     @Inject
-    public DeleteSiteHandler(EntityManager entityManager, LegacyPermissionAdapter legacyPermissionAdapter) {
+    public DeleteSiteHandler(EntityManager entityManager, DatabaseProvider databaseProvider) {
         this.entityManager = entityManager;
-        this.legacyPermissionAdapter = legacyPermissionAdapter;
+        this.databaseProvider = databaseProvider;
     }
 
     @Override
     public VoidResult execute(DeleteSite cmd, User user) throws CommandException {
 
         Site site = entityManager.find(Site.class, cmd.getSiteId());
-        
-        legacyPermissionAdapter.assertEditAllowed(site, user);
-        
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+                CuidAdapter.databaseId(site.getActivity().getDatabase().getId()),
+                user.getId());
+
+        if (!PermissionOracle.canEditSite(site.getActivity().getFormId(), site.getPartner().getId(), databaseMeta)) {
+            throw new IllegalAccessCommandException("Not authorized to modify sites");
+        }
+
         site.setDateDeleted(new Date());
         site.setVersion(site.getActivity().incrementSiteVersion());
 
