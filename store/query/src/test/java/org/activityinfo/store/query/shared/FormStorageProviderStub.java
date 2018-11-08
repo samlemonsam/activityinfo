@@ -22,7 +22,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormPermissions;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;

@@ -18,7 +18,7 @@
  */
 package org.activityinfo.store.mysql.collections;
 
-import org.activityinfo.model.form.FormPermissions;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.SimpleTable;

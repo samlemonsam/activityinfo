@@ -24,6 +24,7 @@ import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.*;

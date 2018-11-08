@@ -32,7 +32,7 @@ import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
-import org.activityinfo.model.database.GrantModel;
+import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.form.*;

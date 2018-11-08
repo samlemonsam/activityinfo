@@ -16,12 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.activityinfo.model.database;
+package org.activityinfo.model.permission;
 
 import com.google.common.base.Optional;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.database.Resource;
+import org.activityinfo.model.database.ResourceType;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.HashMap;

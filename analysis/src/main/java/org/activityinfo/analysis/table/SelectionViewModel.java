@@ -19,7 +19,7 @@
 package org.activityinfo.analysis.table;
 
 import com.google.common.base.Optional;
-import org.activityinfo.model.database.Operation;
+import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormMetadata;

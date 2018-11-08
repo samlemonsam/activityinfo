@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.database.Operation;
 
 /**
  * <p>Response from a {@link PermissionQuery}. Specifies whether the operation requested is permitted.</p>

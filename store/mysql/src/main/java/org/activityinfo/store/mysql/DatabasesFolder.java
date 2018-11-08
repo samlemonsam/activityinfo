@@ -22,7 +22,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.json.Json;
-import org.activityinfo.model.database.GrantModel;
+import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.CatalogEntryType;

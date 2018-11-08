@@ -7,6 +7,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import junit.framework.TestCase;
 import org.activityinfo.indexedb.IDBFactoryImpl;
 import org.activityinfo.model.form.*;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;

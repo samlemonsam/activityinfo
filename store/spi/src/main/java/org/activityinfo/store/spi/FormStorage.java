@@ -21,7 +21,7 @@ package org.activityinfo.store.spi;
 import com.google.common.base.Optional;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormPermissions;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 

@@ -28,6 +28,7 @@ import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransaction;

@@ -36,7 +36,7 @@ import org.activityinfo.store.query.shared.FormScanCache;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.spi.FormStorageProvider;
-import org.activityinfo.model.form.FormPermissions;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
 
 /**

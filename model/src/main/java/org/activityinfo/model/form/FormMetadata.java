@@ -21,6 +21,7 @@ package org.activityinfo.model.form;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.database.RecordLockSet;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.Collections;

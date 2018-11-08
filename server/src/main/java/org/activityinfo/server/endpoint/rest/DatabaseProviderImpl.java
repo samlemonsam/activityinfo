@@ -22,6 +22,8 @@ import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.database.*;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.GrantModel;
+import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.store.spi.DatabaseProvider;

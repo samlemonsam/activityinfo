@@ -20,7 +20,7 @@ package org.activityinfo.store.query.server;
 
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormMetadata;
-import org.activityinfo.model.form.FormPermissions;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.formTree.FormMetadataProvider;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.shared.FormSupervisor;

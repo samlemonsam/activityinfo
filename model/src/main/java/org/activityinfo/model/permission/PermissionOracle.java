@@ -2,15 +2,12 @@ package org.activityinfo.model.permission;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import org.activityinfo.model.database.Operation;
 import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.formula.*;
 import org.activityinfo.model.formula.functions.EqualFunction;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-
-import java.util.logging.Logger;
 
 public class PermissionOracle {
 

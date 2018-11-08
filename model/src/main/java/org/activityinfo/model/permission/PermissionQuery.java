@@ -3,7 +3,6 @@ package org.activityinfo.model.permission;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.database.Operation;
 import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.resource.ResourceId;
 

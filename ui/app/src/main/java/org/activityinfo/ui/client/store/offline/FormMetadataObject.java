@@ -23,7 +23,7 @@ import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormMetadata;
-import org.activityinfo.model.form.FormPermissions;
+import org.activityinfo.model.permission.FormPermissions;
 
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
 public final class FormMetadataObject {

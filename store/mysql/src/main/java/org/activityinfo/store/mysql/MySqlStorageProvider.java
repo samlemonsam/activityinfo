@@ -26,7 +26,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Iterables;
 import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormPermissions;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.hrd.HrdStorageProvider;

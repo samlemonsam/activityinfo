@@ -22,7 +22,7 @@ import com.google.common.base.Optional;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.shared.FormSupervisor;
 import org.activityinfo.store.spi.FormStorageProvider;
-import org.activityinfo.model.form.FormPermissions;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
 
 import java.util.logging.Logger;

@@ -25,7 +25,7 @@ import org.activityinfo.model.database.ResourceType;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
-import org.activityinfo.model.form.FormPermissions;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.formTree.FormClassProviders;
 import org.activityinfo.model.formTree.FormMetadataProvider;
 import org.activityinfo.model.formTree.FormTree;

@@ -18,7 +18,7 @@
  */
 package org.activityinfo.store.mysql.collections;
 
-import org.activityinfo.model.form.FormPermissions;
+import org.activityinfo.model.permission.FormPermissions;
 
 /**
  * Provides permissions on a collection for a specific User

@@ -27,6 +27,7 @@ import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.Formulas;
 import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;

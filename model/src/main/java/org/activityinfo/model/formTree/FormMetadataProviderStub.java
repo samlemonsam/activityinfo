@@ -20,7 +20,7 @@ package org.activityinfo.model.formTree;
 
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormMetadata;
-import org.activityinfo.model.form.FormPermissions;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.HashMap;

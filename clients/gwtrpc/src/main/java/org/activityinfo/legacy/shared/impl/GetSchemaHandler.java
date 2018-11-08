@@ -31,7 +31,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.json.Json;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.*;
-import org.activityinfo.model.database.GrantModel;
+import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.geo.Extents;

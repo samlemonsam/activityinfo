@@ -16,13 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.activityinfo.model.form;
+package org.activityinfo.model.permission;
 
 import com.google.common.base.Strings;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.database.Operation;
 
 /**
  * Describes effective form-level permissions for a specific user. The principle permissions include:

@@ -19,7 +19,7 @@
 package org.activityinfo.store.query.server;
 
 import com.google.common.base.Strings;
-import org.activityinfo.model.database.Operation;
+import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.formula.ConstantNode;
@@ -27,6 +27,7 @@ import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.FormulaParser;
 import org.activityinfo.model.formula.diagnostic.FormulaException;
 import org.activityinfo.model.formula.eval.EvalContext;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 import org.activityinfo.store.query.shared.FormSupervisor;
