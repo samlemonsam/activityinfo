@@ -46,6 +46,10 @@ public class Permission implements JsonSerializable {
         this.permitted = permitted;
     }
 
+    public Optional<String> getOptionalFilter() {
+        return filter;
+    }
+
     public @Nullable String getFilter() {
         return filter.orNull();
     }
