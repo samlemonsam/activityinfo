@@ -219,6 +219,15 @@ public final class FormPermissions implements JsonSerializable {
             return this;
         }
 
+        public Builder forbidView() {
+            permissions.view = false;
+            return this;
+        }
+
+        public boolean isAllowedView() {
+            return permissions.view;
+        }
+
         public Builder allowSchemaUpdate() {
             permissions.updateSchema = true;
             return this;

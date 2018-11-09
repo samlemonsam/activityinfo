@@ -3,6 +3,7 @@ package org.activityinfo.model.permission;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.database.Resource;
+import org.activityinfo.model.database.ResourceType;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.formula.*;
 import org.activityinfo.model.formula.functions.EqualFunction;
@@ -145,6 +146,82 @@ public class PermissionOracle {
         return resourceId.getDomain() == CuidAdapter.DATABASE_DOMAIN;
     }
 
+    ///////////////////////////////////////////// FORM PERMISSION METHODS //////////////////////////////////////////////
+
+    public static FormPermissions formPermissions(ResourceId formId, UserDatabaseMeta db) {
+        if (!db.isVisible()) {
+            return FormPermissions.none();
+        }
+        if (!db.hasResource(formId)) {
+            return FormPermissions.none();
+        }
+        if (ResourceType.FORM != db.getResource(formId).getType()) {
+            return FormPermissions.none();
+        }
+        if (db.isOwner()) {
+            return FormPermissions.owner();
+        }
+        return computeFormPermissions(formId, db);
+    }
+
+    private static FormPermissions computeFormPermissions(ResourceId formId, UserDatabaseMeta db) {
+        FormPermissions.Builder permissionsBuilder = new FormPermissions.Builder();
+        computeViewFormPermissions(permissionsBuilder, formId, db);
+        if (!permissionsBuilder.isAllowedView()) {
+            return FormPermissions.none();
+        }
+        computeEditSchemaFormPermissions(permissionsBuilder, formId, db);
+        computeEditRecordFormPermissions(permissionsBuilder, formId, db);
+        return permissionsBuilder.build();
+    }
+
+    private static void computeViewFormPermissions(FormPermissions.Builder builder,
+                                                   ResourceId formId,
+                                                   UserDatabaseMeta db) {
+        Permission view = view(formId, db);
+        if (view.isForbidden()) {
+            builder.forbidView();
+            return;
+        }
+
+        if (view.isFiltered()) {
+            builder.allowFilteredView(view.getFilter());
+        } else {
+            builder.allowView();
+        }
+    }
+
+    private static void computeEditSchemaFormPermissions(FormPermissions.Builder builder,
+                                                         ResourceId formId,
+                                                         UserDatabaseMeta db) {
+        Permission editFormSchema = editResource(formId, db);
+        if (editFormSchema.isPermitted()) {
+            builder.allowSchemaUpdate();
+        }
+    }
+
+    private static void computeEditRecordFormPermissions(FormPermissions.Builder builder,
+                                                         ResourceId formId,
+                                                         UserDatabaseMeta db) {
+        // Legacy "Edit" permission requires CREATE_RECORD, EDIT_RECORD, DELETE_RECORD permissions on form
+        Permission createRecord = createRecord(formId, db);
+        Permission editRecord = editRecord(formId, db);
+        Permission deleteRecord = deleteRecord(formId, db);
+
+        if (createRecord.isForbidden() || editRecord.isForbidden() || deleteRecord.isForbidden()) {
+            return;
+        }
+
+        if (createRecord.isFiltered() || editRecord.isFiltered() || deleteRecord.isFiltered()) {
+            Optional<String> filter = and(
+                    and(createRecord.getOptionalFilter(), editRecord.getOptionalFilter()),
+                    deleteRecord.getOptionalFilter());
+            builder.allowFilteredEdit(filter.get());
+        } else {
+            builder.allowEdit();
+        }
+    }
+
     /////////////////////////////////////////////////// UTIL METHODS ///////////////////////////////////////////////////
 
     public static boolean filterContainsPartner(String filter, ResourceId partnerFormId, ResourceId partnerId) {
@@ -229,6 +306,30 @@ public class PermissionOracle {
         } else {
             return false;
         }
+    }
+
+    public static Permission createRecord(ResourceId formId, UserDatabaseMeta db) {
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                db.getLegacyDatabaseId(),
+                Operation.CREATE_RECORD,
+                formId);
+        return query(query, db);
+    }
+
+    public static Permission editRecord(ResourceId formId, UserDatabaseMeta db) {
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                db.getLegacyDatabaseId(),
+                Operation.EDIT_RECORD,
+                formId);
+        return query(query, db);
+    }
+
+    public static Permission deleteRecord(ResourceId formId, UserDatabaseMeta db) {
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                db.getLegacyDatabaseId(),
+                Operation.DELETE_RECORD,
+                formId);
+        return query(query, db);
     }
 
     public static Permission editResource(ResourceId resourceId, UserDatabaseMeta db) {
