@@ -44,6 +44,7 @@ import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.VersionedFormStorage;
+import org.activityinfo.store.testing.TestingDatabaseProvider;
 import org.activityinfo.store.testing.TestingStorageProvider;
 
 import java.util.List;
