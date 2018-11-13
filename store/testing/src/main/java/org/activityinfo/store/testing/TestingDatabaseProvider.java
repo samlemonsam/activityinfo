@@ -20,11 +20,13 @@ package org.activityinfo.store.testing;
 
 import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import java.util.*;
 
-public class TestingDatabaseProvider {
+public class TestingDatabaseProvider implements DatabaseProvider {
 
     private List<UserDatabaseMeta> databases = new ArrayList<>();
     private Map<ResourceId, UserDatabaseMeta> resourceMap = new HashMap<>();
@@ -44,4 +46,15 @@ public class TestingDatabaseProvider {
         return Optional.ofNullable(resourceMap.get(resourceId));
     }
 
+    @Override
+    public UserDatabaseMeta getDatabaseMetadata(ResourceId databaseId, int userId) {
+        Optional<UserDatabaseMeta> database = lookupDatabase(databaseId);
+        assert database.isPresent() : "Database was not added to test provider...";
+        return database.get();
+    }
+
+    @Override
+    public UserDatabaseMeta getDatabaseMetadata(int databaseId, int userId) {
+        return getDatabaseMetadata(CuidAdapter.databaseId(databaseId), userId);
+    }
 }
