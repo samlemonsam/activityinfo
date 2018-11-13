@@ -21,6 +21,9 @@ package org.activityinfo.store.testing;
 import com.google.common.base.Optional;
 import com.google.gwt.core.shared.GwtIncompatible;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.model.database.Resource;
+import org.activityinfo.model.database.ResourceType;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.formTree.FormTree;
@@ -37,6 +40,7 @@ import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,6 +55,7 @@ public class TestingStorageProvider implements FormStorageProvider, Transactiona
     private final LocaliteForm localiteForm;
     private Map<ResourceId, TestingFormStorage> formMap = new HashMap<>();
 
+    private TestingDatabaseProvider databaseProvider = new TestingDatabaseProvider();
 
     private SerialNumberProvider serialNumberProvider = new SerialNumberProvider() {
         @Override
@@ -155,9 +160,60 @@ public class TestingStorageProvider implements FormStorageProvider, Transactiona
             assert testForm.getFormClass().getLabel() != null : testForm.getFormId() + " is missing label";
 
             formMap.put(testForm.getFormId(), new TestingFormStorage(testForm));
+            addToDatabaseProvider(testForm);
         }
     }
 
+    private void addToDatabaseProvider(TestForm testForm) {
+        if (databaseProvider.lookupDatabase(testForm.getFormId()).isPresent()) {
+            return;
+        }
+        java.util.Optional<UserDatabaseMeta> db = databaseProvider.fetchDatabase(testForm.getFormClass().getDatabaseId());
+        if (db.isPresent()) {
+            addResourceToDb(testForm, db.get());
+        } else {
+            createDb(testForm);
+        }
+    }
+
+    private void createDb(TestForm testForm) {
+        UserDatabaseMeta.Builder dbBuilder = new UserDatabaseMeta.Builder()
+                .setDatabaseId(testForm.getFormClass().getDatabaseId())
+                .setLabel("Test Database")
+                .setOwner(true)
+                .setPendingTransfer(false)
+                .setUserId(1)
+                .setVersion("1");
+        Resource.Builder resourceBuilder = new Resource.Builder()
+                .setId(testForm.getFormId())
+                .setLabel(testForm.getFormClass().getLabel())
+                .setParentId(testForm.getFormClass().getDatabaseId())
+                .setType(ResourceType.FORM);
+        dbBuilder.addResource(resourceBuilder.build());
+        databaseProvider.add(dbBuilder.build());
+    }
+
+    private void addResourceToDb(TestForm testForm, UserDatabaseMeta databaseMeta) {
+        UserDatabaseMeta.Builder dbBuilder = new UserDatabaseMeta.Builder()
+                .setDatabaseId(databaseMeta.getDatabaseId())
+                .setLabel(databaseMeta.getLabel())
+                .setOwner(databaseMeta.isOwner())
+                .setPendingTransfer(databaseMeta.isPendingTransfer())
+                .setUserId(databaseMeta.getUserId())
+                .setVersion(databaseMeta.getVersion());
+        Resource.Builder resourceBuilder = new Resource.Builder()
+                .setId(testForm.getFormId())
+                .setLabel(testForm.getFormClass().getLabel())
+                .setParentId(testForm.getFormClass().getDatabaseId())
+                .setType(ResourceType.FORM);
+        dbBuilder.addResources(new ArrayList<>(databaseMeta.getResources()));
+        dbBuilder.addResource(resourceBuilder.build());
+        databaseProvider.add(dbBuilder.build());
+    }
+
+    public TestingDatabaseProvider getDatabaseProvider() {
+        return databaseProvider;
+    }
 
     @Override
     public FormClass getFormClass(ResourceId formId) {
