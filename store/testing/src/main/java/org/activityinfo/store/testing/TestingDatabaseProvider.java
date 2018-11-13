@@ -28,15 +28,14 @@ import java.util.*;
 
 public class TestingDatabaseProvider implements DatabaseProvider {
 
-    private List<UserDatabaseMeta> databases = new ArrayList<>();
+    private Map<ResourceId, UserDatabaseMeta> databaseMap = new HashMap<>();
     private Map<ResourceId, UserDatabaseMeta> resourceMap = new HashMap<>();
-
 
     public TestingDatabaseProvider() {
     }
 
     public void add(UserDatabaseMeta database) {
-        databases.add(database);
+        databaseMap.put(database.getDatabaseId(), database);
         for (Resource resource : database.getResources()) {
             resourceMap.put(resource.getId(), database);
         }
