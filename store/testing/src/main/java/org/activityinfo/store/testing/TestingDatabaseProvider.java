@@ -45,9 +45,13 @@ public class TestingDatabaseProvider implements DatabaseProvider {
         return Optional.ofNullable(resourceMap.get(resourceId));
     }
 
+    public Optional<UserDatabaseMeta> fetchDatabase(ResourceId databaseId) {
+        return Optional.ofNullable(databaseMap.get(databaseId));
+    }
+
     @Override
     public UserDatabaseMeta getDatabaseMetadata(ResourceId databaseId, int userId) {
-        Optional<UserDatabaseMeta> database = lookupDatabase(databaseId);
+        Optional<UserDatabaseMeta> database = fetchDatabase(databaseId);
         assert database.isPresent() : "Database was not added to test provider...";
         return database.get();
     }
