@@ -43,12 +43,14 @@ import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
+import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.store.hrd.HrdFormStorage;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.BlobAuthorizer;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.FormStorageProvider;
 
@@ -63,12 +65,14 @@ import static org.activityinfo.json.Json.createObject;
 public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
     private Provider<EntityManager> entityManager;
+    private DatabaseProvider databaseProvider;
     private BlobAuthorizer blobAuthorizer;
 
     @Inject
     public ActivityInfoClientAsyncStub(Provider<EntityManager> entityManager,
                                        BlobAuthorizer blobAuthorizer) {
         this.entityManager = entityManager;
+        this.databaseProvider = new DatabaseProviderImpl(entityManager);
         this.blobAuthorizer = blobAuthorizer;
     }
 
