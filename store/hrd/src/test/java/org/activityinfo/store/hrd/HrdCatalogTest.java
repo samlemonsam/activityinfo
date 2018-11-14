@@ -46,6 +46,7 @@ import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.query.shared.plan.QueryPlan;
 import org.activityinfo.store.query.shared.plan.QueryPlanBuilder;
 import org.activityinfo.store.spi.*;
+import org.activityinfo.store.testing.MockDatabaseProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -66,6 +67,8 @@ public class HrdCatalogTest {
     private final LocalServiceTestHelper helper =
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig()
                     .setDefaultHighRepJobPolicyUnappliedJobPercentage(100));
+
+    private final MockDatabaseProvider databaseProvider = new MockDatabaseProvider();
     
     private int userId = 1;
     private Closeable objectifyCloseable;
