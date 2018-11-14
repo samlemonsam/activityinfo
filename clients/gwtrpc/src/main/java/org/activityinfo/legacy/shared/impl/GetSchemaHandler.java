@@ -40,7 +40,7 @@ import org.activityinfo.promise.Promise;
 
 import java.util.*;
 
-public class GetSchemaHandlerAsync implements CommandHandlerAsync<GetSchema, SchemaDTO> {
+public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDTO> {
 
     @Override
     public void execute(GetSchema command, ExecutionContext context, AsyncCallback<SchemaDTO> callback) {
@@ -270,7 +270,6 @@ public class GetSchemaHandlerAsync implements CommandHandlerAsync<GetSchema, Sch
                 query.appendColumn("ba.name", "baName");
                 query.appendColumn("ba.endTime", "baEndDate");
                 query.appendColumn("o.trialEndDate", "trialEndDate");
-
             }
 
             // this is quite hackesh. we ultimately need to split up GetSchema()
@@ -291,6 +290,8 @@ public class GetSchemaHandlerAsync implements CommandHandlerAsync<GetSchema, Sch
                 @Override
                 public void onSuccess(SqlTransaction tx, SqlResultSet results) {
 
+                    LocalDate today = new LocalDate();
+
                     for (SqlResultSetRow row : results.getRows()) {
                         UserDatabaseDTO db = new UserDatabaseDTO();
                         db.setId(row.getInt("DatabaseId"));
@@ -304,11 +305,14 @@ public class GetSchemaHandlerAsync implements CommandHandlerAsync<GetSchema, Sch
                         if(context.isRemote()) {
                             if(row.isNull("baName")) {
                                 db.setBillingAccountName("Free Trial Account");
+                                LocalDate trialEndDate;
                                 if(!row.isNull("trialEndDate")) {
-                                    db.setAccountEndDate(new LocalDate(row.getDate("trialEndDate")).toString());
+                                    trialEndDate = new LocalDate(row.getDate("trialEndDate"));
                                 } else {
-                                    db.setAccountEndDate(new LocalDate(2999,1,1).toString());
+                                    trialEndDate = new LocalDate(2050,1,1);
                                 }
+                                db.setAccountEndDate(trialEndDate.toString());
+                                db.setSuspended(trialEndDate.before(today));
                             } else {
                                 db.setBillingAccountName(row.get("baName"));
                                 db.setAccountEndDate(new LocalDate(row.getDate("baEndDate")).toString());

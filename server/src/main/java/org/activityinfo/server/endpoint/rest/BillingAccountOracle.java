@@ -17,10 +17,11 @@ import javax.persistence.EntityManager;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @Singleton
 public class BillingAccountOracle {
@@ -30,6 +31,18 @@ public class BillingAccountOracle {
     private final Provider<EntityManager> entityManager;
 
     private final MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
+
+    /**
+     * The duration to cache the suspension status of suspended databases. We use a shorter cache time to ensure
+     * that if the customer extends the effect is more or less immediate.
+     */
+    private static final Expiration SUSPENDED_CACHE_EXPIRATION = Expiration.byDeltaSeconds((int) TimeUnit.MINUTES.toSeconds(10));
+
+    /**
+     * The duration to cache the suspension status of active databases.
+     */
+    private static final Expiration ACTIVE_CACHE_EXPIRATION = Expiration.byDeltaSeconds((int) TimeUnit.HOURS.toSeconds(12));
+
 
     @Inject
     public BillingAccountOracle(Provider<EntityManager> entityManager) {
@@ -185,41 +198,99 @@ public class BillingAccountOracle {
         user.setTrialEndDate(Date.from(endTime.toInstant()));
     }
 
-    private String memcacheDatabaseKey(int databaseId) {
-        return "db-suspended-" + databaseId;
-    }
 
     public boolean isDatabaseSuspended(int databaseId) {
+        return getSuspendedDatabases(Collections.singleton(databaseId)).contains(databaseId);
+    }
 
-        // Check memcache to see if this database is *not* suspended
+    private String memcacheDatabaseKey(int databaseId) {
+        return "db-suspended:" + databaseId;
+    }
+
+    /**
+     * Given a set of database ids, determine which ones, if any are suspended.
+     * @param databaseIds
+     * @return the set of ids of databases that are suspended
+     */
+    public Set<Integer> getSuspendedDatabases(Set<Integer> databaseIds) {
+
+        LOGGER.info("Checking suspension flag for " + databaseIds.size() + "...");
+
+        Map<String, Object> cachedStatus;
         try {
-            boolean notSuspended = memcache.contains(memcacheDatabaseKey(databaseId));
-            if (notSuspended) {
-                return false;
-            }
+            cachedStatus = memcache.getAll(databaseIds
+                    .stream()
+                    .map(this::memcacheDatabaseKey)
+                    .collect(Collectors.toList()));
+
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING,"Memcache fetch failed", e);
+            LOGGER.log(Level.SEVERE, "Failed to query memcache", e);
+            cachedStatus = Collections.emptyMap();
         }
 
-        AccountStatus status = getStatusForDatabase(databaseId);
-        if(status.isSuspended()) {
-            LOGGER.severe("Access to suspended database " + databaseId);
+        Set<Integer> suspendedSet = new HashSet<>();
 
-            return true;
+        Set<Integer> toQuery = new HashSet<>();
+
+        for (Integer databaseId : databaseIds) {
+            String databaseKey = memcacheDatabaseKey(databaseId);
+            if(cachedStatus.containsKey(databaseKey)) {
+                Boolean suspended = (Boolean) cachedStatus.get(databaseKey);
+                if(suspended) {
+                    suspendedSet.add(databaseId);
+                }
+            } else {
+                toQuery.add(databaseId);
+            }
         }
 
-        // Otherwise cache this database so we don't have to check for
-        // a few more hours.
+        if(!toQuery.isEmpty()) {
+            suspendedSet.addAll(querySuspendedDatabases(toQuery));
+        }
+
+        return suspendedSet;
+    }
+
+    private Set<Integer> querySuspendedDatabases(Set<Integer> databaseIds) {
+
+        LOGGER.info("Querying suspension flag for " + databaseIds.size() + "...");
+
+        List<Number> suspendedDatabaseList = entityManager.get().createNativeQuery(
+                "SELECT d.databaseId " +
+                        "FROM userdatabase d " +
+                        "LEFT JOIN userlogin u ON (d.OwnerUserId=u.userId) " +
+                        "WHERE d.databaseId IN :databases AND u.trialEndDate < NOW()")
+                .setParameter("databases", databaseIds)
+                .getResultList();
+
+        Set<Integer> suspendedSet = suspendedDatabaseList
+                .stream()
+                .map(n -> n.intValue())
+                .collect(Collectors.toSet());
+
+        Map<String, Object> toCacheActive = new HashMap<>();
+        Map<String, Object> toCacheSuspended = new HashMap<>();
+
+        for (Integer databaseId : databaseIds) {
+            boolean suspended = suspendedDatabaseList.contains(databaseId);
+            if(suspended) {
+                toCacheSuspended.put(memcacheDatabaseKey(databaseId), suspended);
+            } else {
+                toCacheActive.put(memcacheDatabaseKey(databaseId), suspended);
+            }
+        }
+
         try {
-            memcache.put(memcacheDatabaseKey(databaseId), true,
-                    Expiration.byDeltaSeconds((int) TimeUnit.HOURS.toSeconds(3)));
-
+            if(!toCacheActive.isEmpty()) {
+                memcache.putAll(toCacheActive, ACTIVE_CACHE_EXPIRATION);
+            }
+            if(!toCacheSuspended.isEmpty()) {
+                memcache.putAll(toCacheSuspended, SUSPENDED_CACHE_EXPIRATION);
+            }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING,"Memcache store failed", e);
         }
 
-        return false;
+        return suspendedSet;
     }
-
-
 }
