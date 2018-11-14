@@ -19,6 +19,8 @@
 package org.activityinfo.store.query.server;
 
 import com.google.common.base.Optional;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.shared.FormSupervisor;
 import org.activityinfo.store.spi.DatabaseProvider;
@@ -49,6 +51,8 @@ public class FormSupervisorAdapter implements FormSupervisor {
             LOGGER.severe("Form " + formId + " does not exist.");
             throw new IllegalStateException("Invalid form ID");
         }
-        return form.get().getPermissions(userId);
+        ResourceId databaseId = form.get().getFormClass().getDatabaseId();
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, userId);
+        return PermissionOracle.formPermissions(formId, databaseMeta);
     }
 }
