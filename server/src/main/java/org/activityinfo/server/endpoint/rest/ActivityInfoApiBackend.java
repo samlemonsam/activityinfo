@@ -117,7 +117,9 @@ public class ActivityInfoApiBackend implements ApiBackend {
 
     @Override
     public PermissionsEnforcer newPermissionsEnforcer() {
-        return new PermissionsEnforcer(injector.getInstance(FormStorageProvider.class), getAuthenticatedUser().getUserId());
+        return new PermissionsEnforcer(injector.getInstance(FormStorageProvider.class),
+                getDatabaseProvider(),
+                getAuthenticatedUser().getUserId());
     }
 
     @Override
