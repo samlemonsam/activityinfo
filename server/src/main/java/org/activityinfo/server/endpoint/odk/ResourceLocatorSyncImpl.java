@@ -38,6 +38,7 @@ import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.BlobAuthorizer;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.FormStorageProvider;
 
@@ -48,14 +49,17 @@ import java.util.List;
 public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
 
     private Provider<FormStorageProvider> catalog;
+    private DatabaseProvider databaseProvider;
     private Provider<AuthenticatedUser> authenticatedUser;
     private BlobAuthorizer blobAuthorizer;
 
     @Inject
     public ResourceLocatorSyncImpl(Provider<FormStorageProvider> catalog,
+                                   DatabaseProvider databaseProvider,
                                    Provider<AuthenticatedUser> authenticatedUser,
                                    BlobAuthorizer blobAuthorizer) {
         this.catalog = catalog;
+        this.databaseProvider = databaseProvider;
         this.authenticatedUser = authenticatedUser;
         this.blobAuthorizer = blobAuthorizer;
     }
