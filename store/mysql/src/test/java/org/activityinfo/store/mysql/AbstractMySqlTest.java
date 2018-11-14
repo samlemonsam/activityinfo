@@ -37,6 +37,7 @@ import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.shared.FormScanCache;
 import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.testing.MockDatabaseProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -47,24 +48,7 @@ public abstract class AbstractMySqlTest {
 
     public static final int ADVOCACY = 4000;
 
-    public final DatabaseProvider mockDatabaseProvider = new DatabaseProvider() {
-        @Override
-        public UserDatabaseMeta getDatabaseMetadata(ResourceId databaseId, int userId) {
-            return new UserDatabaseMeta.Builder()
-                    .setDatabaseId(databaseId)
-                    .setUserId(userId)
-                    .setLabel("Test Database")
-                    .setVersion("1")
-                    .setOwner(true)
-                    .setPendingTransfer(false)
-                    .build();
-        }
-
-        @Override
-        public UserDatabaseMeta getDatabaseMetadata(int databaseId, int userId) {
-            return getDatabaseMetadata(CuidAdapter.databaseId(databaseId), userId);
-        }
-    };
+    public final DatabaseProvider databaseProvider = new MockDatabaseProvider();
 
     private final LocalServiceTestHelper helper =
             new LocalServiceTestHelper(
