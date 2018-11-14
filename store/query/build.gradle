@@ -8,6 +8,8 @@ dependencies {
     compile libraries.jts
     compile libraries.fastutil
 
+    testCompile project(':store:testing')
+
 }
 
 // Copy sources needed by GWT
