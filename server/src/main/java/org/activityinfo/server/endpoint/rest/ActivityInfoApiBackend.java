@@ -65,6 +65,10 @@ public class ActivityInfoApiBackend implements ApiBackend {
         return new FormSupervisorAdapter(getStorage(), getAuthenticatedUserId());
     }
 
+    private DatabaseProvider getDatabaseProvider() {
+        return injector.getInstance(DatabaseProvider.class);
+    }
+
     @Override
     public int getAuthenticatedUserId() {
         return getAuthenticatedUser().getUserId();
