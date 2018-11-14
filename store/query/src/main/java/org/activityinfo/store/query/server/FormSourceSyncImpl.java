@@ -47,19 +47,20 @@ import org.activityinfo.store.spi.FormStorage;
 public class FormSourceSyncImpl implements FormSource {
 
     private FormStorageProvider formCatalog;
-    private int userId;
     private FormScanCache formScanCache;
+    private DatabaseProvider databaseProvider;
+    private int userId;
 
-    public FormSourceSyncImpl(FormStorageProvider formCatalog, FormScanCache cache, int userId) {
+    public FormSourceSyncImpl(FormStorageProvider formCatalog, FormScanCache cache, DatabaseProvider databaseProvider, int userId) {
         this.formCatalog = formCatalog;
-        this.userId = userId;
         this.formScanCache = cache;
+        this.databaseProvider = databaseProvider;
+        this.userId = userId;
     }
 
     public FormSourceSyncImpl(FormStorageProvider formCatalog, DatabaseProvider databaseProvider, int userId) {
-        this(formCatalog, new NullFormScanCache(), userId);
+        this(formCatalog, new NullFormScanCache(), databaseProvider, userId);
     }
-
 
     public FormMetadata getFormMetadata(ResourceId formId) {
         Optional<FormStorage> storage = formCatalog.getForm(formId);

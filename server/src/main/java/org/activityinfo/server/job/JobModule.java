@@ -36,7 +36,7 @@ public class JobModule extends RestApiModule {
 
     @Provides
     public FormSource provideFormSource(FormStorageProvider catalog, DatabaseProvider databaseProvider, AuthenticatedUser user) {
-        return new FormSourceSyncImpl(catalog, new AppEngineFormScanCache(), user.getUserId());
+        return new FormSourceSyncImpl(catalog, new AppEngineFormScanCache(), databaseProvider, user.getUserId());
     }
 
 }
