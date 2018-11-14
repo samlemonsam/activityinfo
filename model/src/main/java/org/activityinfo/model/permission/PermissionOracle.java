@@ -155,12 +155,14 @@ public class PermissionOracle {
             return filter2;
         } else if (!filter2.isPresent()) {
             return filter1;
-        } else {
-            FormulaNode filterFormula1 = FormulaParser.parse(filter1.get());
-            FormulaNode filterFormula2 = FormulaParser.parse(filter2.get());
-            FormulaNode and = Formulas.allTrue(Lists.newArrayList(filterFormula1, filterFormula2));
-            return Optional.of(and.asExpression());
         }
+        FormulaNode filterFormula1 = FormulaParser.parse(filter1.get());
+        FormulaNode filterFormula2 = FormulaParser.parse(filter2.get());
+        if (filterFormula1.equals(filterFormula2)) {
+            return filter1;
+        }
+        FormulaNode and = Formulas.allTrue(Lists.newArrayList(filterFormula1, filterFormula2));
+        return Optional.of(and.asExpression());
     }
 
     private static boolean isDatabase(ResourceId resourceId) {
