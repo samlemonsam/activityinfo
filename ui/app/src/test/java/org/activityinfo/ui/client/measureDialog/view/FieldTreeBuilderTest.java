@@ -40,7 +40,7 @@ public class FieldTreeBuilderTest {
     @Before
     public void setup() {
         this.storageProvider = new TestingStorageProvider();
-        this.databaseProvider = new TestingDatabaseProvider();
+        this.databaseProvider = storageProvider.getDatabaseProvider();
     }
 
     @Test

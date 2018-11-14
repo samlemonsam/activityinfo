@@ -53,7 +53,7 @@ public class XlsTableWriterTest {
         LocaleProxy.initialize();
 
         catalog = new TestingStorageProvider();
-        databaseProvider = new TestingDatabaseProvider();
+        databaseProvider = catalog.getDatabaseProvider();
         formSource = new FormSourceSyncImpl(catalog, 1);
     }
 
