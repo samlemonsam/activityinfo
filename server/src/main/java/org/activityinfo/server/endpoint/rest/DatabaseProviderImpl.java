@@ -21,6 +21,10 @@ package org.activityinfo.server.endpoint.rest;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.database.*;
+import org.activityinfo.model.formula.ConstantNode;
+import org.activityinfo.model.formula.FunctionCallNode;
+import org.activityinfo.model.formula.SymbolNode;
+import org.activityinfo.model.formula.functions.EqualFunction;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.permission.Operation;
@@ -224,8 +228,9 @@ public class DatabaseProviderImpl implements DatabaseProvider {
     }
 
     private String getPartnerFilter(UserPermission userPermission) {
-        return CuidAdapter.partnerFormId(userPermission.getDatabase().getId()).asString() + "==" +
-                CuidAdapter.partnerRecordId(userPermission.getPartner().getId()).asString();
+        SymbolNode partnerForm = new SymbolNode(CuidAdapter.partnerFormId(userPermission.getDatabase().getId()));
+        ConstantNode partnerRecord = new ConstantNode(CuidAdapter.partnerRecordId(userPermission.getPartner().getId()).asString());
+        return new FunctionCallNode(EqualFunction.INSTANCE, partnerForm, partnerRecord).asExpression();
     }
 
 }
