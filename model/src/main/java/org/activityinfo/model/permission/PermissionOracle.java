@@ -152,14 +152,14 @@ public class PermissionOracle {
         if (!db.isVisible()) {
             return FormPermissions.none();
         }
+        if (db.isOwner()) {
+            return FormPermissions.owner();
+        }
         if (!db.hasResource(formId)) {
             return FormPermissions.none();
         }
         if (ResourceType.FORM != db.getResource(formId).getType()) {
             return FormPermissions.none();
-        }
-        if (db.isOwner()) {
-            return FormPermissions.owner();
         }
         return computeFormPermissions(formId, db);
     }
