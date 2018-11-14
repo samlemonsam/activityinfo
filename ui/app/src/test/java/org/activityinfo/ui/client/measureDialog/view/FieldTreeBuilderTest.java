@@ -46,7 +46,7 @@ public class FieldTreeBuilderTest {
     @Test
     public void subForms() {
 
-        FormSource formStore = new FormSourceSyncImpl(storageProvider, userId);
+        FormSource formStore = new FormSourceSyncImpl(storageProvider, databaseProvider, userId);
         FormTree tree = formStore.getFormTree(ReferralSubForm.FORM_ID).waitFor();
 
         TreeStore<MeasureTreeNode> treeStore = new TreeStore<>(MeasureTreeNode::getId);

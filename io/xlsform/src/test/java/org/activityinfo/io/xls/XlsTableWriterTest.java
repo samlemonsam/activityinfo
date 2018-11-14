@@ -54,7 +54,7 @@ public class XlsTableWriterTest {
 
         catalog = new TestingStorageProvider();
         databaseProvider = catalog.getDatabaseProvider();
-        formSource = new FormSourceSyncImpl(catalog, 1);
+        formSource = new FormSourceSyncImpl(catalog, databaseProvider, 1);
     }
 
     @Test
