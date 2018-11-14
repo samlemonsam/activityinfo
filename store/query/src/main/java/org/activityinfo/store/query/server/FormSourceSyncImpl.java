@@ -20,12 +20,14 @@ package org.activityinfo.store.query.server;
 
 import com.google.common.base.Optional;
 import org.activityinfo.model.analysis.Analysis;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormMetadataProvider;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.RecordTree;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -67,7 +69,11 @@ public class FormSourceSyncImpl implements FormSource {
         if(!storage.isPresent()) {
             return FormMetadata.notFound(formId);
         }
-        FormPermissions permissions = storage.get().getPermissions(userId);
+
+        ResourceId databaseId = storage.get().getFormClass().getDatabaseId();
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, userId);
+        FormPermissions permissions = PermissionOracle.formPermissions(formId, databaseMeta);
+
         if(!permissions.isVisible()) {
             return FormMetadata.forbidden(formId);
         }
