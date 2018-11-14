@@ -175,7 +175,9 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
 
         this.command = command;
 
-        builder = new ColumnSetBuilder(catalog, new AppEngineFormScanCache(), new FormSupervisorAdapter(catalog, user.getId()));
+        builder = new ColumnSetBuilder(catalog,
+                new AppEngineFormScanCache(),
+                new FormSupervisorAdapter(catalog, databaseProvider, user.getId()));
         batchFormTreeBuilder = new BatchingFormTreeBuilder(catalog);
 
         batch = builder.createNewBatch();

@@ -62,7 +62,7 @@ public class ActivityInfoApiBackend implements ApiBackend {
 
     @Override
     public FormSupervisor getFormSupervisor() {
-        return new FormSupervisorAdapter(getStorage(), getAuthenticatedUserId());
+        return new FormSupervisorAdapter(getStorage(), getDatabaseProvider(), getAuthenticatedUserId());
     }
 
     private DatabaseProvider getDatabaseProvider() {

@@ -25,8 +25,6 @@ import com.google.common.io.Resources;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.util.Closeable;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.model.database.UserDatabaseMeta;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
@@ -131,7 +129,7 @@ public abstract class AbstractMySqlTest {
         ColumnSetBuilder builder = new ColumnSetBuilder(
                 catalog,
                 cache,
-                new FormSupervisorAdapter(catalog, userId));
+                new FormSupervisorAdapter(catalog, databaseProvider, userId));
 
         columnSet = builder.build(queryModel);
 

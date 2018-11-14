@@ -124,7 +124,7 @@ public class PivotAdapter {
         builder = new ColumnSetBuilder(
                 catalog,
                 new AppEngineFormScanCache(),
-                new FormSupervisorAdapter(catalog, userId));
+                new FormSupervisorAdapter(catalog, databaseProvider, userId));
 
 
         // Mapping from indicator id -> activityId

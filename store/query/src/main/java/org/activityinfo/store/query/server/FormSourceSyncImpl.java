@@ -109,7 +109,7 @@ public class FormSourceSyncImpl implements FormSource {
     @Override
     public Observable<ColumnSet> query(QueryModel queryModel) {
         ColumnSetBuilder builder = new ColumnSetBuilder(formCatalog, formScanCache,
-                new FormSupervisorAdapter(formCatalog, userId));
+                new FormSupervisorAdapter(formCatalog, databaseProvider, userId));
         return Observable.just(builder.build(queryModel));
     }
 

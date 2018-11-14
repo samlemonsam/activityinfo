@@ -45,7 +45,7 @@ public class PermissionsEnforcer {
     private final FormClassProvider formClassProvider;
 
     public PermissionsEnforcer(FormStorageProvider catalog, DatabaseProvider databaseProvider, int userId) {
-        this(new FormSupervisorAdapter(catalog, userId), catalog);
+        this(new FormSupervisorAdapter(catalog, databaseProvider, userId), catalog);
     }
 
     public PermissionsEnforcer(FormSupervisor supervisor, FormClassProvider formClassProvider) {

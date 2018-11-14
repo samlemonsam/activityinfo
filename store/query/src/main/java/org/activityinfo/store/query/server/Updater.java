@@ -70,6 +70,7 @@ public class Updater {
     private int userId;
     private BlobAuthorizer blobAuthorizer;
     private SerialNumberProvider serialNumberProvider;
+    private DatabaseProvider databaseProvider;
 
     private boolean enforcePermissions = true;
 
@@ -79,6 +80,7 @@ public class Updater {
                    SerialNumberProvider serialNumberProvider,
                    int userId) {
         this.catalog = catalog;
+        this.databaseProvider = databaseProvider;
         this.userId = userId;
         this.blobAuthorizer = blobAuthorizer;
         this.serialNumberProvider = serialNumberProvider;
@@ -415,7 +417,7 @@ public class Updater {
         // Check form-level permissions
         if(enforcePermissions) {
 
-            PermissionsEnforcer enforcer = new PermissionsEnforcer(new FormSupervisorAdapter(catalog, userId), catalog);
+            PermissionsEnforcer enforcer = new PermissionsEnforcer(new FormSupervisorAdapter(catalog, databaseProvider, userId), catalog);
 
             // Verify that the user has the right to modify the *existing* record
 

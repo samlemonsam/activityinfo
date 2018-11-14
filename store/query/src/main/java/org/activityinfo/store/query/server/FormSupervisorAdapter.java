@@ -21,6 +21,7 @@ package org.activityinfo.store.query.server;
 import com.google.common.base.Optional;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.shared.FormSupervisor;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
@@ -32,10 +33,12 @@ public class FormSupervisorAdapter implements FormSupervisor {
     private static final Logger LOGGER = Logger.getLogger(FormSupervisor.class.getName());
 
     private final FormStorageProvider catalog;
+    private final DatabaseProvider databaseProvider;
     private int userId;
 
-    public FormSupervisorAdapter(FormStorageProvider catalog, int userId) {
+    public FormSupervisorAdapter(FormStorageProvider catalog, DatabaseProvider databaseProvider, int userId) {
         this.catalog = catalog;
+        this.databaseProvider = databaseProvider;
         this.userId = userId;
     }
 
