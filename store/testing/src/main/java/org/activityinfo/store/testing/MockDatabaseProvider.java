@@ -1,4 +1,4 @@
-package org.activityinfo.store.query.server;
+package org.activityinfo.store.testing;
 
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
