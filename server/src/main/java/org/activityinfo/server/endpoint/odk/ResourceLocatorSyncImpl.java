@@ -117,8 +117,11 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
 
     @Override
     public void persist(FormInstance formInstance) {
-        Updater updater = new Updater(catalog.get(), authenticatedUser.get().getUserId(), blobAuthorizer,
-                new HrdSerialNumberProvider());
+        Updater updater = new Updater(catalog.get(),
+                databaseProvider,
+                blobAuthorizer,
+                new HrdSerialNumberProvider(),
+                authenticatedUser.get().getUserId());
         updater.execute(formInstance);
     }
 }

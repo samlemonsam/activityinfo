@@ -244,7 +244,7 @@ public class TestingStorageProvider implements FormStorageProvider, Transactiona
     }
 
     public void updateRecords(RecordTransaction transaction) {
-        Updater updater = new Updater(this, 1, new BlobAuthorizerStub(), serialNumberProvider);
+        Updater updater = new Updater(this, databaseProvider, new BlobAuthorizerStub(), serialNumberProvider, 1);
         updater.execute(transaction);
     }
 

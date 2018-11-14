@@ -73,9 +73,11 @@ public class Updater {
 
     private boolean enforcePermissions = true;
 
-    public Updater(FormStorageProvider catalog, int userId,
+    public Updater(FormStorageProvider catalog,
+                   DatabaseProvider databaseProvider,
                    BlobAuthorizer blobAuthorizer,
-                   SerialNumberProvider serialNumberProvider) {
+                   SerialNumberProvider serialNumberProvider,
+                   int userId) {
         this.catalog = catalog;
         this.userId = userId;
         this.blobAuthorizer = blobAuthorizer;

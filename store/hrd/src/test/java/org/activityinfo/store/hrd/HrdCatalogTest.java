@@ -233,8 +233,11 @@ public class HrdCatalogTest {
                 .setType(TextType.SIMPLE);
 
         HrdStorageProvider catalog = new HrdStorageProvider();
-        Updater updater = new Updater(catalog, userId, new BlobAuthorizerStub(),
-                new HrdSerialNumberProvider());
+        Updater updater = new Updater(catalog,
+                databaseProvider,
+                new BlobAuthorizerStub(),
+                new HrdSerialNumberProvider(),
+                userId);
 
         catalog.create(formClass);
         

@@ -105,9 +105,11 @@ public class ActivityInfoApiBackend implements ApiBackend {
 
     @Override
     public Updater newUpdater() {
-        return new Updater(getStorage(), getAuthenticatedUser().getUserId(),
+        return new Updater(getStorage(),
+                getDatabaseProvider(),
                 injector.getInstance(BlobAuthorizer.class),
-                new HrdSerialNumberProvider());
+                new HrdSerialNumberProvider(),
+                getAuthenticatedUser().getUserId());
     }
 
     @Override

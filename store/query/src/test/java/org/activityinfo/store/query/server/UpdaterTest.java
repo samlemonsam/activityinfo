@@ -53,7 +53,7 @@ public class UpdaterTest {
     public void setUp() {
         MockFormStorageProvider catalog = new MockFormStorageProvider();
         MockDatabaseProvider databaseProvider = new MockDatabaseProvider();
-        updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new SerialNumberProviderStub());
+        updater = new Updater(catalog, databaseProvider, new BlobAuthorizerStub(), new SerialNumberProviderStub(), userId);
     }
 
     @Test(expected = InvalidUpdateException.class)

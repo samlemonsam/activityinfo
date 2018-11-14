@@ -437,7 +437,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     }
 
     private Updater updater() {
-        return new Updater(catalog, userId, new BlobAuthorizerStub(), new HrdSerialNumberProvider());
+        return new Updater(catalog, databaseProvider, new BlobAuthorizerStub(), new HrdSerialNumberProvider(), userId);
     }
 
 
