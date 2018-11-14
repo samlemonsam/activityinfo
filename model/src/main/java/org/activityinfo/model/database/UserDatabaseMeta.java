@@ -43,6 +43,7 @@ public class UserDatabaseMeta implements JsonSerializable {
     private String label;
     private boolean visible;
     private boolean owner;
+    private boolean published = false;
     private boolean pendingTransfer;
     private String version;
 
@@ -72,6 +73,10 @@ public class UserDatabaseMeta implements JsonSerializable {
 
     public boolean isOwner() {
         return owner;
+    }
+
+    public boolean isPublished() {
+        return published;
     }
 
     public Collection<Resource> getResources() {
@@ -146,6 +151,9 @@ public class UserDatabaseMeta implements JsonSerializable {
         if (owner) {
             object.put("pendingTransfer", pendingTransfer);
         }
+        if (published) {
+            object.put("published", published);
+        }
         object.put("userId", userId);
         object.put("resources", Json.toJsonArray(resources.values()));
         object.put("locks", Json.toJsonArray(locks.values()));
@@ -163,6 +171,9 @@ public class UserDatabaseMeta implements JsonSerializable {
         meta.owner = object.getBoolean("owner");
         if (meta.owner) {
             meta.pendingTransfer = object.getBoolean("pendingTransfer");
+        }
+        if (object.hasKey("published")) {
+            meta.published = object.getBoolean("published");
         }
 
         JsonValue resourceArray = object.get("resources");
@@ -220,7 +231,11 @@ public class UserDatabaseMeta implements JsonSerializable {
 
         public Builder setOwner(boolean owner) {
             meta.owner = owner;
-            meta.visible = true;
+            return this;
+        }
+
+        public Builder setPublished(boolean published) {
+            meta.published = published;
             return this;
         }
 
@@ -262,7 +277,9 @@ public class UserDatabaseMeta implements JsonSerializable {
         }
 
         public boolean isVisible() {
-            return meta.owner || !meta.grants.isEmpty();
+            return meta.owner
+                    || meta.published
+                    || !meta.grants.isEmpty();
         }
 
         public Set<ResourceId> folderGrants() {

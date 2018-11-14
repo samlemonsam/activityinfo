@@ -39,6 +39,7 @@ public class DatabaseProviderImpl implements DatabaseProvider {
 
     private static final Logger LOGGER = Logger.getLogger(DatabaseProviderImpl.class.getName());
     public static final ResourceId GEODB_ID = ResourceId.valueOf("geodb");
+    private static final int GEODB_ADMIN_ID = 1;
 
     private Provider<EntityManager> entityManager;
 
@@ -66,8 +67,9 @@ public class DatabaseProviderImpl implements DatabaseProvider {
                 .setDatabaseId(GEODB_ID)
                 .setUserId(userId)
                 .setLabel("Geographic Database")
-                .setOwner(false)
+                .setOwner(userId == GEODB_ADMIN_ID)
                 .setVersion("1")
+                .setPublished(true)
                 .build();
     }
 
@@ -94,6 +96,7 @@ public class DatabaseProviderImpl implements DatabaseProvider {
         }
 
         if (meta.isVisible()) {
+            meta.setPublished(false);
             meta.setLabel(database.getName());
             meta.addLocks(queryLocks(database));
             meta.addResources(queryFolders(database, meta.folderGrants()));

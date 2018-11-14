@@ -19,6 +19,9 @@ public class PermissionOracle {
         if (db.isOwner()) {
             return allowOwner(query.getOperation());
         }
+        if (db.isPublished()) {
+            return allowViewOnly(query.getOperation());
+        }
         if (!db.isVisible()) {
             return deny(query.getOperation());
         }
@@ -34,6 +37,24 @@ public class PermissionOracle {
     private static Permission allowOwner(Operation operation) {
         return new Permission(operation, true, Optional.absent());
     }
+
+    /**
+     * Allow the owner of a database full permissions with no record filters
+     */
+    private static Permission allowViewOnly(Operation operation) {
+        if (operation != Operation.VIEW) {
+            return deny(operation);
+        }
+        return allow(operation);
+    }
+
+    /**
+     * Allow permission outright for the specified operation, with no filter
+     */
+    private static Permission allow(Operation operation) {
+        return new Permission(operation, true, Optional.absent());
+    }
+
 
     /**
      * Deny permission outright for the specified operation
@@ -154,6 +175,9 @@ public class PermissionOracle {
         }
         if (db.isOwner()) {
             return FormPermissions.owner();
+        }
+        if (db.isPublished()) {
+            return FormPermissions.readonly();
         }
         if (!db.hasResource(formId)) {
             return FormPermissions.none();
