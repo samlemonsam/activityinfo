@@ -25,6 +25,8 @@ import com.google.common.io.Resources;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.util.Closeable;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
@@ -34,6 +36,7 @@ import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.shared.FormScanCache;
 import org.activityinfo.store.query.shared.NullFormScanCache;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -44,6 +47,24 @@ public abstract class AbstractMySqlTest {
 
     public static final int ADVOCACY = 4000;
 
+    public final DatabaseProvider mockDatabaseProvider = new DatabaseProvider() {
+        @Override
+        public UserDatabaseMeta getDatabaseMetadata(ResourceId databaseId, int userId) {
+            return new UserDatabaseMeta.Builder()
+                    .setDatabaseId(databaseId)
+                    .setUserId(userId)
+                    .setLabel("Test Database")
+                    .setVersion("1")
+                    .setOwner(true)
+                    .setPendingTransfer(false)
+                    .build();
+        }
+
+        @Override
+        public UserDatabaseMeta getDatabaseMetadata(int databaseId, int userId) {
+            return getDatabaseMetadata(CuidAdapter.databaseId(databaseId), userId);
+        }
+    };
 
     private final LocalServiceTestHelper helper =
             new LocalServiceTestHelper(
