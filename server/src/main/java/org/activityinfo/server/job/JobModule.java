@@ -24,6 +24,7 @@ import org.activityinfo.server.endpoint.rest.RestApiModule;
 import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.query.server.FormSourceSyncImpl;
 import org.activityinfo.store.query.shared.FormSource;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 
 public class JobModule extends RestApiModule {
@@ -34,7 +35,7 @@ public class JobModule extends RestApiModule {
     }
 
     @Provides
-    public FormSource provideFormSource(FormStorageProvider catalog, AuthenticatedUser user) {
+    public FormSource provideFormSource(FormStorageProvider catalog, DatabaseProvider databaseProvider, AuthenticatedUser user) {
         return new FormSourceSyncImpl(catalog, new AppEngineFormScanCache(), user.getUserId());
     }
 
