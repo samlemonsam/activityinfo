@@ -259,7 +259,7 @@ public class BillingAccountOracle {
                 "SELECT d.databaseId " +
                         "FROM userdatabase d " +
                         "LEFT JOIN userlogin u ON (d.OwnerUserId=u.userId) " +
-                        "WHERE d.databaseId IN :databases AND u.trialEndDate < NOW()")
+                        "WHERE d.databaseId IN :databases AND u.billingAccountId IS NULL AND u.trialEndDate < NOW()")
                 .setParameter("databases", databaseIds)
                 .getResultList();
 
