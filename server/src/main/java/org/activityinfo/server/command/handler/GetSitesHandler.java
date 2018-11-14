@@ -62,6 +62,7 @@ import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.shared.FormScanBatch;
 import org.activityinfo.store.spi.BatchingFormTreeBuilder;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.Slot;
 
 import javax.inject.Provider;
@@ -80,6 +81,9 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
 
     @Inject
     private DispatcherSync dispatcher;
+
+    @Inject
+    private DatabaseProvider databaseProvider;
 
     private GetSites command;
 
