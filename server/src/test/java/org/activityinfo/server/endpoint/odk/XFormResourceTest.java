@@ -40,6 +40,7 @@ import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.store.spi.BlobAuthorizerStub;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.junit.After;
 import org.junit.Before;
@@ -98,6 +99,7 @@ public class XFormResourceTest extends CommandTestCase2 {
         Provider<AuthenticatedUser> authProvider = Providers.of(new AuthenticatedUser("", USER_ID, "jorden@bdd.com"));
         resourceLocator = new ResourceLocatorSyncImpl(
                 injector.getProvider(FormStorageProvider.class),
+                injector.getInstance(DatabaseProvider.class),
                 authProvider,
                 new BlobAuthorizerStub());
 
