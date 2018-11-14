@@ -51,6 +51,7 @@ public class UpdaterTest {
     @Before
     public void setUp() {
         MockFormStorageProvider catalog = new MockFormStorageProvider();
+        MockDatabaseProvider databaseProvider = new MockDatabaseProvider();
         updater = new Updater(catalog, userId, new BlobAuthorizerStub(), new SerialNumberProviderStub());
     }
 
