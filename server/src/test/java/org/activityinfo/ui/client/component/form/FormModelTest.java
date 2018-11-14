@@ -206,6 +206,7 @@ public class FormModelTest extends CommandTestCase2 {
         ResourceId masterFormId = CuidAdapter.activityFormClass(3);
         
         masterFormClass = new FormClass(masterFormId);
+        masterFormClass.setLabel("Master Form");
         masterFormClass.setDatabaseId(CuidAdapter.databaseId(1));
 
         FormField partnerField = new FormField(CuidAdapter.partnerField(3));
