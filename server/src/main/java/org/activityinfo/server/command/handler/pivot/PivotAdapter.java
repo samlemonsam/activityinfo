@@ -62,6 +62,7 @@ import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.shared.FormScanBatch;
 import org.activityinfo.store.spi.BatchingFormTreeBuilder;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.Slot;
 
@@ -79,6 +80,7 @@ public class PivotAdapter {
     public static final String SITE_ID_KEY = "__site_id";
 
     private final MySqlStorageProvider catalog;
+    private final DatabaseProvider databaseProvider;
     private final PivotSites command;
     private final Filter filter;
     private final int userId;
@@ -112,8 +114,9 @@ public class PivotAdapter {
 
 
 
-    public PivotAdapter(FormStorageProvider catalog, PivotSites command, int userId) throws InterruptedException, SQLException {
+    public PivotAdapter(FormStorageProvider catalog, DatabaseProvider databaseProvider, int userId, PivotSites command) throws InterruptedException, SQLException {
         this.catalog = (MySqlStorageProvider) catalog;
+        this.databaseProvider = databaseProvider;
         this.command = command;
         this.filter = command.getFilter();
         this.userId = userId;
