@@ -30,13 +30,10 @@ import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.FolderDTO;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
+import org.activityinfo.model.formula.*;
 import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.database.UserPermissionModel;
-import org.activityinfo.model.formula.FormulaNode;
-import org.activityinfo.model.formula.FormulaParser;
-import org.activityinfo.model.formula.FunctionCallNode;
-import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.Permission;
 import org.activityinfo.model.permission.PermissionOracle;
@@ -140,8 +137,8 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
     private int partnerFromFilter(String filter) {
         FormulaNode filterFormula = FormulaParser.parse(filter);
         FunctionCallNode equalFunctionCall = (FunctionCallNode) filterFormula;
-        SymbolNode partnerFieldNode = (SymbolNode) equalFunctionCall.getArgument(1);
-        return CuidAdapter.getLegacyIdFromCuid(partnerFieldNode.asResourceId());
+        ConstantNode partnerFieldNode = (ConstantNode) equalFunctionCall.getArgument(1);
+        return CuidAdapter.getLegacyIdFromCuid(partnerFieldNode.getValue().toString());
     }
 
     private List<FolderDTO> folderList(Map<ResourceId, Folder> folderMap, UserPermission perm) {
