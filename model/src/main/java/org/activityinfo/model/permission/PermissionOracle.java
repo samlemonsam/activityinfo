@@ -20,7 +20,7 @@ public class PermissionOracle {
             return allowOwner(query.getOperation());
         }
         if (db.isPublished()) {
-            return allowViewOnly(query.getOperation());
+            return allow(query.getOperation());
         }
         if (!db.isVisible()) {
             return deny(query.getOperation());
@@ -179,7 +179,7 @@ public class PermissionOracle {
             return FormPermissions.owner();
         }
         if (db.isPublished()) {
-            return FormPermissions.readonly();
+            return FormPermissions.readWrite();
         }
         if (!db.hasResource(formId)) {
             return FormPermissions.none();
