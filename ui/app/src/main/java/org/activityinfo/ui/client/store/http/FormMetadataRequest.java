@@ -23,17 +23,50 @@ import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 
+/**
+ * Requests a form's metadata, including its schema.
+ *
+ * <p>In nearly all cases, we will not only need an individual form, but all of its related forms. For this
+ * reason, we will prefetch the entire tree in anticipation of follow up requests. The {@link FormRequestPrecacher}
+ * is used to pre-populate the HttpStore's form cache.</p>
+ */
 public class FormMetadataRequest implements HttpRequest<FormMetadata> {
 
     private ResourceId formId;
+    private final FormRequestPrecacher precacher;
 
-    public FormMetadataRequest(ResourceId formId) {
+    private boolean initialRequest = true;
+
+    public FormMetadataRequest(ResourceId formId, FormRequestPrecacher precacher) {
         this.formId = formId;
+        this.precacher = precacher;
     }
 
     @Override
     public Promise<FormMetadata> execute(ActivityInfoClientAsync async) {
+        if(initialRequest) {
+            return prefetchTree(async);
+        }
         return async.getFormMetadata(formId.asString());
+    }
+
+    private Promise<FormMetadata> prefetchTree(ActivityInfoClientAsync async) {
+        initialRequest = false;
+        return async.getFormTreeList(formId).then(list -> {
+            FormMetadata root = null;
+            for (FormMetadata form : list) {
+                if(form.getId().equals(this.formId)) {
+                    root = form;
+                } else {
+                    precacher.precache(form);
+                }
+            }
+            if(root == null) {
+                return FormMetadata.notFound(formId);
+            } else {
+                return root;
+            }
+        });
     }
 
 

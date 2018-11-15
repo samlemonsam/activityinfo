@@ -31,9 +31,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activityinfo.io.xlsform.XlsFormBuilder;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
+import org.activityinfo.model.api.ClientVersions;
 import org.activityinfo.model.database.RecordLock;
-import org.activityinfo.model.database.RecordLockSet;
-import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
@@ -87,55 +86,13 @@ public class FormResource {
     @NoCache
     @Produces(JSON_CONTENT_TYPE)
     public FormMetadata getMetadataResponse(@InjectParam DatabaseProviderImpl databaseProvider,
+                                            @InjectParam BillingAccountOracle billingOracle,
                                             @InjectParam AuthenticatedUser user,
                                             @QueryParam("localVersion") Long localVersion) {
 
-        Optional<FormStorage> storage = backend.getStorage().getForm(formId);
-        if(!storage.isPresent()) {
-            return FormMetadata.notFound(formId);
-        }
+        BatchingFormTreeBuilder builder = backend.newBatchingTreeBuilder();
 
-        ResourceId databaseId = storage.get().getFormClass().getDatabaseId();
-
-        UserDatabaseMeta databaseMetadata;
-        try {
-            databaseMetadata = databaseProvider.getDatabaseMetadata(databaseId, user.getUserId());
-        } catch (Exception e) {
-            // We are initially using this just for locks,
-            // not actually permissions, so just log the warning for now.
-            LOGGER.log(Level.SEVERE, "Failed to retrieve metadata for database " + databaseId + " for user " + user.getUserId(), e);
-            databaseMetadata = new UserDatabaseMeta.Builder()
-                    .setDatabaseId(databaseId)
-                    .setLabel("")
-                    .setOwner(false)
-                    .build();
-        }
-
-        FormPermissions permissions = backend.getFormSupervisor().getFormPermissions(formId);
-        if(!permissions.isVisible()) {
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
-
-        } else {
-
-            // Workaround for sub form, which we don't yet have indexed to the
-            // database in which they live.
-            FormClass schema = storage.get().getFormClass();
-            RecordLockSet locks;
-            if(schema.isSubForm()) {
-                locks = databaseMetadata.getEffectiveLocks(schema.getParentFormId().get());
-            } else {
-                locks = databaseMetadata.getEffectiveLocks(formId);
-            }
-
-            return new FormMetadata.Builder()
-                    .setId(formId)
-                    .setPermissions(permissions)
-                    .setSchema(schema)
-                    .setLocks(locks)
-                    .setVersion(storage.get().cacheVersion())
-                    .setSuspended(databaseMetadata.isSuspended())
-                    .build();
-        }
+        return builder.queryFormMetadata(formId);
     }
 
     /**
@@ -412,8 +369,8 @@ public class FormResource {
     @NoCache
     @Produces(JSON_CONTENT_TYPE)
     @Path("tree")
-    public JsonValue getTree() {
-        return JsonFormTreeBuilder.toJson(fetchTree());
+    public JsonValue getTree(@HeaderParam(ClientVersions.CLIENT_VERSION_HEADER) int clientVersion) {
+        return JsonFormTreeBuilder.toJson(clientVersion, fetchTree());
     }
 
     @GET
@@ -433,7 +390,8 @@ public class FormResource {
     private FormTree fetchTree() {
         assertVisible(formId);
 
-        FormTreeBuilder builder = new FormTreeBuilder(backend.getStorage());
+        BatchingFormTreeBuilder builder = backend.newBatchingTreeBuilder();
+
         return builder.queryTree(formId);
     }
 

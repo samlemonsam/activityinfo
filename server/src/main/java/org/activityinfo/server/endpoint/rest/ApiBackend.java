@@ -48,6 +48,8 @@ public interface ApiBackend {
 
     PermissionsEnforcer newPermissionsEnforcer();
 
+    BatchingFormTreeBuilder newBatchingTreeBuilder();
+
     RecordHistoryProvider getRecordHistoryProvider();
 
 }

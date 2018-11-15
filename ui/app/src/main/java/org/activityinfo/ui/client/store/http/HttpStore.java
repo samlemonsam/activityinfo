@@ -43,10 +43,7 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.ObservableTree;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
-import org.activityinfo.ui.client.store.AnalysisChangeEvent;
-import org.activityinfo.ui.client.store.FormChange;
-import org.activityinfo.ui.client.store.FormChangeEvent;
-import org.activityinfo.ui.client.store.FormTreeLoader;
+import org.activityinfo.ui.client.store.*;
 import org.activityinfo.ui.client.store.tasks.NullWatcher;
 import org.activityinfo.ui.client.store.tasks.ObservableTask;
 import org.activityinfo.ui.client.store.tasks.Watcher;
@@ -67,6 +64,7 @@ public class HttpStore {
     private EventBus eventBus = new SimpleEventBus();
 
     private Observable<Boolean> online;
+    private ObservableCache<ResourceId, FormMetadata> formCache = new ObservableCache<>();
     private final HttpBus httpBus;
 
 
@@ -115,13 +113,22 @@ public class HttpStore {
     }
 
     public Observable<FormMetadata> getFormMetadata(ResourceId formId) {
+        return formCache.get(formId, () ->
+                get(new FormMetadataRequest(formId, this::precacheFormMetadata),
+                        newFormMetadataWatcher(formId)));
+    }
 
-        // We consider the version range request to be immutable, as old versions
-        // don't change, so refeching shouldn't be necessary
-        return get(new FormMetadataRequest(formId),
-            new FormChangeWatcher(eventBus, change -> {
-                return change.isFormChanged(formId);
-            }));
+    private FormChangeWatcher newFormMetadataWatcher(ResourceId formId) {
+        return new FormChangeWatcher(eventBus, change -> {
+            return change.isFormChanged(formId);
+        });
+    }
+
+    private void precacheFormMetadata(FormMetadata formMetadata) {
+        formCache.putIfAbsent(formMetadata.getId(),
+                new ObservableTask<>(
+                    new RequestTask<>(httpBus,
+                        new FormMetadataRequestPrefetched(formMetadata)), newFormMetadataWatcher(formMetadata.getId())));
     }
 
     public Observable<ColumnSet> query(QueryModel queryModel) {
@@ -129,6 +136,8 @@ public class HttpStore {
     }
 
     public Observable<FormSyncSet> getVersionRange(ResourceId formId, long localVersion, long version, Optional<String> cursor) {
+        // We consider the version range request to be immutable, as old versions
+        // don't change, so refeching shouldn't be necessary
         return get(new VersionRangeRequest(formId, localVersion, version, cursor));
     }
 

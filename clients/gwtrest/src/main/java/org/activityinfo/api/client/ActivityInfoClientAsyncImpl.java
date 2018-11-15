@@ -29,13 +29,13 @@ import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.account.AccountStatus;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
+import org.activityinfo.model.api.ClientVersions;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.database.transfer.RequestTransfer;
 import org.activityinfo.model.database.transfer.TransferDecision;
 import org.activityinfo.model.form.*;
-import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.formTree.FormTreeBuilder;
+import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobRequest;
 import org.activityinfo.model.job.JobResult;
@@ -48,9 +48,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -252,22 +250,14 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
     @Override
     public Promise<FormTree> getFormTree(final ResourceId formId) {
         return get(formUrl(formId) + "/tree", jsonElement -> {
-            JsonValue root = jsonElement;
-            JsonValue forms = root.get("forms");
-            final Map<ResourceId, FormClass> formMap = new HashMap<>();
-            for (Map.Entry<String, JsonValue> entry : forms.entrySet()) {
-                FormClass formClass = FormClass.fromJson(entry.getValue());
-                formMap.put(formClass.getId(), formClass);
-            }
-            FormTreeBuilder builder = new FormTreeBuilder(new FormClassProvider() {
-                @Override
-                public FormClass getFormClass(ResourceId formId1) {
-                    FormClass formClass = formMap.get(formId1);
-                    assert formClass != null;
-                    return formClass;
-                }
-            });
-            return builder.queryTree(formId);
+            return JsonFormTreeBuilder.fromJson(jsonElement);
+        });
+    }
+
+    @Override
+    public Promise<List<FormMetadata>> getFormTreeList(ResourceId formId) {
+        return get(formUrl(formId) + "/tree", jsonElement -> {
+            return JsonFormTreeBuilder.fromJsonAsList(jsonElement);
         });
     }
 
@@ -361,6 +351,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
     private <R> Promise<R> getRaw(final String url, final Function<Response, R> parser) {
         final Promise<R> result = new Promise<>();
         RequestBuilder requestBuilder = new RequestBuilder(RequestBuilder.GET, url);
+        requestBuilder.setHeader(ClientVersions.CLIENT_VERSION_HEADER, Integer.toString(ClientVersions.CLIENT_VERSION));
         requestBuilder.setCallback(new RequestCallback() {
             @Override
             public void onResponseReceived(Request request, Response response) {
@@ -404,6 +395,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
         final Promise<R> result = new Promise<>();
         RequestBuilder requestBuilder = new RequestBuilder(method, url);
         requestBuilder.setHeader("Content-Type", "application/json");
+        requestBuilder.setHeader(ClientVersions.CLIENT_VERSION_HEADER, Integer.toString(ClientVersions.CLIENT_VERSION));
         requestBuilder.setRequestData(jsonRequest);
         requestBuilder.setCallback(new RequestCallback() {
             @Override

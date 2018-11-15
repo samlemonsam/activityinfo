@@ -80,6 +80,13 @@ public abstract class Observable<T> {
     }
 
     /**
+     * @return true if there any observers subscribed to this Observable.
+     */
+    public final boolean isConnected() {
+        return !observers.isEmpty();
+    }
+
+    /**
      * Called when the first {@link org.activityinfo.observable.Observer} subscribes to notifications.
      *
      */

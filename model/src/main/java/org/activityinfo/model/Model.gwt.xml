@@ -30,6 +30,7 @@
 
   <super-source path="jre"/>
 
+  <source path="api"/>
   <source path="account"/>
   <source path="analysis"/>
   <source path="database"/>

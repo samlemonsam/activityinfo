@@ -53,6 +53,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.server.command.handler.AttributeFilterMap;
 import org.activityinfo.server.command.handler.QueryFilterBuilder;
 import org.activityinfo.server.command.handler.binding.dim.*;
+import org.activityinfo.server.endpoint.rest.BatchingFormTreeBuilder;
 import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
 import org.activityinfo.store.mysql.metadata.Activity;
@@ -61,7 +62,6 @@ import org.activityinfo.store.mysql.metadata.LinkedActivity;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.shared.FormScanBatch;
-import org.activityinfo.store.spi.BatchingFormTreeBuilder;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.Slot;
 
@@ -109,7 +109,7 @@ public class PivotAdapter {
     private final Stopwatch treeTime = Stopwatch.createUnstarted();
     private final Stopwatch queryTime = Stopwatch.createUnstarted();
     private final Stopwatch aggregateTime = Stopwatch.createUnstarted();
-
+    private final FormSupervisorAdapter supervisor;
 
 
     public PivotAdapter(FormStorageProvider catalog, PivotSites command, int userId) throws InterruptedException, SQLException {
@@ -118,10 +118,11 @@ public class PivotAdapter {
         this.filter = command.getFilter();
         this.userId = userId;
 
+        supervisor = new FormSupervisorAdapter(catalog, userId);
         builder = new ColumnSetBuilder(
                 catalog,
                 new AppEngineFormScanCache(),
-                new FormSupervisorAdapter(catalog, userId));
+                supervisor);
 
 
         // Mapping from indicator id -> activityId
@@ -180,7 +181,7 @@ public class PivotAdapter {
             }
         }
 
-        BatchingFormTreeBuilder formTreeBuilder = new BatchingFormTreeBuilder(catalog);
+        BatchingFormTreeBuilder formTreeBuilder = new BatchingFormTreeBuilder(catalog, supervisor, userId);
         Map<ResourceId, FormTree> trees = formTreeBuilder.queryTrees(formIds);
 
         treeTime.stop();
@@ -309,6 +310,10 @@ public class PivotAdapter {
         // Query the SOURCE form tree
         FormTree formTree = formTrees.get(linkedActivity.getLeafFormClassId());
         Preconditions.checkNotNull(formTree, "No form tree for form " + linkedActivity.getLeafFormClassId());
+
+        if(formTree.getRootState() != FormTree.State.VALID) {
+            return;
+        }
 
         QueryModel queryModel = new QueryModel(linkedActivity.getLeafFormClassId());
 

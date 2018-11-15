@@ -123,6 +123,11 @@ public interface ActivityInfoClientAsync {
     Promise<FormTree> getFormTree(ResourceId formId);
 
     /**
+     * Fetches the FormMetadata of the given formId, as well as all related forms.
+     */
+    Promise<List<FormMetadata>> getFormTreeList(ResourceId formId);
+
+    /**
      * Updates a Form's Schema
      *
      * Updates the form

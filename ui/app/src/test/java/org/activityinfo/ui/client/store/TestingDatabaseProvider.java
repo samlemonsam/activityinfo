@@ -35,6 +35,7 @@ public class TestingDatabaseProvider {
 
     public void add(UserDatabaseMeta database) {
         databases.add(database);
+        resourceMap.put(database.getDatabaseId(), database);
         for (Resource resource : database.getResources()) {
             resourceMap.put(resource.getId(), database);
         }

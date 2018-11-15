@@ -19,16 +19,18 @@
 package org.activityinfo.ui.client.store;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.FormRecordUpdateBuilder;
 import org.activityinfo.api.client.NewFormRecordBuilder;
 import org.activityinfo.model.account.AccountStatus;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
-import org.activityinfo.model.database.RecordLockSet;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.*;
+import org.activityinfo.model.formTree.FormMetadataProvider;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.job.JobDescriptor;
 import org.activityinfo.model.job.JobResult;
 import org.activityinfo.model.job.JobStatus;
@@ -73,7 +75,9 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
 
     @Override
     public Promise<UserDatabaseMeta> getDatabase(ResourceId databaseId) {
-        return Promise.rejected(new UnsupportedOperationException());
+        return Promise.resolved(databaseProvider
+                .lookupDatabase(databaseId)
+                .orElse(new UserDatabaseMeta.Builder().setDatabaseId(databaseId).build()));
     }
 
     @Override
@@ -160,30 +164,48 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
             return offlineResult();
         }
 
-        return getFormMetadata(ResourceId.valueOf(formId));
+        return Promise.resolved(getFormMetadata(ResourceId.valueOf(formId)));
     }
 
-    private Promise<FormMetadata> getFormMetadata(ResourceId formId) {
+    private FormMetadata getFormMetadata(ResourceId formId) {
         Optional<FormStorage> form = storageProvider.getForm(formId);
         if(!form.isPresent()) {
-            return Promise.resolved(FormMetadata.notFound(formId));
+            return FormMetadata.notFound(formId);
         } else {
-
             java.util.Optional<UserDatabaseMeta> database = databaseProvider.lookupDatabase(formId);
-
-            return Promise.resolved(new FormMetadata.Builder()
-            .setId(formId)
-            .setSchema(form.get().getFormClass())
-            .setPermissions(FormPermissions.readWrite())
-            .setVersion(form.get().cacheVersion())
-            .setLocks(database.map(d -> d.getEffectiveLocks(formId)).orElse(RecordLockSet.EMPTY))
-            .build());
+            return new FormMetadata.Builder()
+                .setId(formId)
+                .setSchema(form.get().getFormClass())
+                .setPermissions(FormPermissions.readWrite())
+                .setVersion(form.get().cacheVersion())
+                .build();
         }
     }
 
     @Override
     public Promise<FormTree> getFormTree(ResourceId formId) {
-        return Promise.rejected(new UnsupportedOperationException());
+        if(!connected) {
+            return offlineResult();
+        }
+        return Promise.resolved(queryFormTree(formId));
+    }
+
+    @Override
+    public Promise<List<FormMetadata>> getFormTreeList(ResourceId formId) {
+        if(!connected) {
+            return offlineResult();
+        }
+        return Promise.resolved(Lists.newArrayList(queryFormTree(formId).getForms()));
+    }
+
+    private FormTree queryFormTree(ResourceId formId) {
+        FormTreeBuilder formTreeBuilder = new FormTreeBuilder(new FormMetadataProvider() {
+            @Override
+            public FormMetadata getFormMetadata(ResourceId formId) {
+                return AsyncClientStub.this.getFormMetadata(formId);
+            }
+        });
+        return formTreeBuilder.queryTree(formId);
     }
 
     @Override

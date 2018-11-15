@@ -8,6 +8,8 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.account.AccountStatus;
+import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
@@ -292,5 +294,15 @@ public class BillingAccountOracle {
         }
 
         return suspendedSet;
+    }
+
+    public Set<ResourceId> getSuspendedDatabasesById(Set<ResourceId> databaseIds) {
+
+        Set<Integer> integerIds = querySuspendedDatabases(databaseIds
+                .stream()
+                .map(id -> CuidAdapter.getLegacyIdFromCuid(id))
+                .collect(Collectors.toSet()));
+
+        return integerIds.stream().map(id -> CuidAdapter.databaseId(id)).collect(Collectors.toSet());
     }
 }

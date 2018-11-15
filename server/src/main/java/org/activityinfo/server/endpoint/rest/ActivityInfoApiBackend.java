@@ -100,6 +100,14 @@ public class ActivityInfoApiBackend implements ApiBackend {
     }
 
     @Override
+    public BatchingFormTreeBuilder newBatchingTreeBuilder() {
+
+        return new BatchingFormTreeBuilder(getStorage(), getFormSupervisor(),
+                com.google.common.base.Optional.of(injector.getInstance(BillingAccountOracle.class)),
+                getAuthenticatedUserId());
+    }
+
+    @Override
     public RecordHistoryProvider getRecordHistoryProvider() {
         return new MySqlRecordHistoryBuilder((MySqlStorageProvider) getStorage());
     }
