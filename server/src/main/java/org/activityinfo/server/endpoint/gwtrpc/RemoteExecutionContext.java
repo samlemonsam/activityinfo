@@ -160,6 +160,9 @@ public class RemoteExecutionContext implements ExecutionContext {
                 throw new RuntimeException("Commit failed", e);
             }
 
+            LOGGER.info("Transaction committed");
+
+
             return result;
 
         } finally {
