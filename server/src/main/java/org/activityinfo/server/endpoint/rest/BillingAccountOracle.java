@@ -218,6 +218,10 @@ public class BillingAccountOracle {
 
         LOGGER.info("Checking suspension flag for " + databaseIds.size() + "...");
 
+        if(databaseIds.isEmpty()) {
+            return Collections.emptySet();
+        }
+
         Map<String, Object> cachedStatus;
         try {
             cachedStatus = memcache.getAll(databaseIds
@@ -256,6 +260,10 @@ public class BillingAccountOracle {
     private Set<Integer> querySuspendedDatabases(Set<Integer> databaseIds) {
 
         LOGGER.info("Querying suspension flag for " + databaseIds.size() + "...");
+
+        if(databaseIds.isEmpty()) {
+            return Collections.emptySet();
+        }
 
         List<Number> suspendedDatabaseList = entityManager.get().createNativeQuery(
                 "SELECT d.databaseId " +
