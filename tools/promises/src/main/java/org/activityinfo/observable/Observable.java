@@ -40,7 +40,9 @@ import java.util.List;
  *            the type of the items emitted by the Observable
  */
 public abstract class Observable<T> {
-    
+
+    private boolean connecting = false;
+
     private final List<Observer<T>> observers = new ArrayList<>();
 
     /**
@@ -61,12 +63,20 @@ public abstract class Observable<T> {
     public abstract T get();
 
     public final Subscription subscribe(final Observer<T> observer) {
-        if(observers.isEmpty()) {
-            onConnect();
+
+        if(!connecting && observers.isEmpty()) {
+            try {
+                connecting = true;
+                onConnect();
+            } finally {
+                connecting = false;
+            }
         }
-        observer.onChange(this);
-        
+
         observers.add(observer);
+
+        observer.onChange(this);
+
         return new Subscription() {
             @Override
             public void unsubscribe() {
