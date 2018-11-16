@@ -300,6 +300,7 @@ public class BillingAccountOracle {
 
         Set<Integer> integerIds = querySuspendedDatabases(databaseIds
                 .stream()
+                .filter(id -> id.getDomain() == CuidAdapter.DATABASE_DOMAIN)
                 .map(id -> CuidAdapter.getLegacyIdFromCuid(id))
                 .collect(Collectors.toSet()));
 

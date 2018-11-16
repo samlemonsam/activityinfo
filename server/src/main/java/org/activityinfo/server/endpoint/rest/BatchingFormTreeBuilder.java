@@ -49,6 +49,7 @@ public class BatchingFormTreeBuilder {
 
     private final Map<ResourceId, FormClass> formCache = new HashMap<>();
     private final Set<ResourceId> databaseIds = new HashSet<>();
+    private final Set<ResourceId> suspendedDatabaseIds = new HashSet<>();
 
     public BatchingFormTreeBuilder(FormStorageProvider catalog,
                                    FormSupervisor formSupervisor,
@@ -112,31 +113,38 @@ public class BatchingFormTreeBuilder {
         }
 
         // Check for suspended databases
-        Set<ResourceId> suspendedDatabases = billingAccountOracle
-                .transform(oracle -> oracle.getSuspendedDatabasesById(databaseIds))
-                .or(Collections.emptySet());
+        checkSuspendedDatabases();
 
         // Now assemble trees
         Map<ResourceId, FormTree> treeMap = new HashMap<>();
         FormTreeBuilder builder = new FormTreeBuilder(new FormMetadataProvider() {
             @Override
             public FormMetadata getFormMetadata(ResourceId formId) {
-                FormClass form = formCache.get(formId);
-                if(form == null) {
-                    return FormMetadata.notFound(formId);
-                } else {
-                    return buildMetadata(form, suspendedDatabases);
-                }
+                return formMetadata(formId);
             }
         });
 
         for (ResourceId rootFormId : rootFormIds) {
             treeMap.put(rootFormId, builder.queryTree(rootFormId));
         }
-
         return treeMap;
     }
 
+
+    private void checkSuspendedDatabases() {
+        suspendedDatabaseIds.addAll(billingAccountOracle
+                    .transform(oracle -> oracle.getSuspendedDatabasesById(databaseIds))
+                    .or(Collections.emptySet()));
+    }
+
+    private FormMetadata formMetadata(ResourceId formId) {
+        FormClass form = formCache.get(formId);
+        if(form == null) {
+            return FormMetadata.notFound(formId);
+        } else {
+            return buildMetadata(form);
+        }
+    }
 
     private List<FormClass> fetchFormClasses(Iterable<ResourceId> formIds) {
 
@@ -164,11 +172,12 @@ public class BatchingFormTreeBuilder {
 
 
     public FormMetadata queryFormMetadata(ResourceId formId) {
-
-        return null;
+        fetchFormClasses(Collections.singleton(formId));
+        checkSuspendedDatabases();
+        return formMetadata(formId);
     }
 
-    private FormMetadata buildMetadata(FormClass formClass, Set<ResourceId> suspendedDatabases) {
+    private FormMetadata buildMetadata(FormClass formClass) {
 
         FormPermissions permissions = formSupervisor.getFormPermissions(formClass.getId());
         if(!permissions.isVisible()) {
@@ -183,7 +192,7 @@ public class BatchingFormTreeBuilder {
                     .setPermissions(permissions)
                     .setSchema(formClass)
                     .setVersion(storage.transform(s -> s.cacheVersion()).or(0L))
-                    .setSuspended(suspendedDatabases.contains(formClass.getDatabaseId()))
+                    .setSuspended(suspendedDatabaseIds.contains(formClass.getDatabaseId()))
                     .build();
         }
     }
