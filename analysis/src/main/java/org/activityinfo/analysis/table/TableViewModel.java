@@ -21,7 +21,10 @@ package org.activityinfo.analysis.table;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import org.activityinfo.analysis.ParsedFormula;
-import org.activityinfo.model.analysis.*;
+import org.activityinfo.model.analysis.ImmutableTableColumn;
+import org.activityinfo.model.analysis.ImmutableTableModel;
+import org.activityinfo.model.analysis.TableColumn;
+import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.analysis.table.ExportFormat;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
@@ -132,7 +135,7 @@ public class TableViewModel implements TableUpdater {
 
             effectiveSubTable = formTree
                     .transform(tree -> tree.subTree(subFormId))
-                    .transform(subTree -> new EffectiveTableModel(formStore, subTree, subModel, Optional.of(getSelectedRecordRef())));
+                    .transform(subTree -> new EffectiveTableModel(formStore, subTree, subModel, Optional.of(selectedRecordRef)));
 
             effectiveSubTables.put(subFormId, effectiveSubTable);
         }

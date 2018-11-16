@@ -30,6 +30,7 @@ import org.activityinfo.analysis.table.SimpleColumnFormat;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.observable.Observable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -112,6 +113,24 @@ class ColumnSetProxy extends RpcProxy<PagingLoadConfig, PagingLoadResult<Integer
         pendingRequest = request;
     }
 
+    /**
+     * Pushes a changed ColumnSet through to this proxy.
+     * @return true if this ColumnSet fulfills an outstanding request, or if there is still a pending request. false
+     * if a load() call is required.
+     */
+    public boolean push(Observable<ColumnSet> columnSet) {
+        if(columnSet.isLoaded()) {
+            return push(columnSet.get());
+        } else {
+            this.columnSet = null;
+            return pendingRequest != null;
+        }
+    }
+
+    /**
+     * @param columnSet a loaded ColumnSet
+     * @return true if this ColumnSet fulfills an outstanding load request.
+     */
     public boolean push(ColumnSet columnSet) {
         this.columnSet = columnSet;
 

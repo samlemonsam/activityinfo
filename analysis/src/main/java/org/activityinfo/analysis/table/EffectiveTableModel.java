@@ -43,7 +43,6 @@ import org.activityinfo.model.type.time.FortnightType;
 import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.model.type.time.MonthType;
 import org.activityinfo.observable.Observable;
-import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.store.query.shared.FormSource;
 
 import java.util.ArrayList;
@@ -74,7 +73,6 @@ public class EffectiveTableModel {
         this.formTree = formTree;
         this.tableModel = tableModel;
         this.selectedParentRef = selectedParentRef;
-        this.columnSet = new StatefulValue<>();
         this.columns = new ArrayList<>();
 
         if(formTree.getRootState() == FormTree.State.VALID) {
