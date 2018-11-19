@@ -197,6 +197,17 @@ public class NodeMatcher {
         for (FormTree.Node field : fields) {
             if(path.matches(field)) {
                 matches.add(NodeMatch.forField(field, currentAggregation()));
+            } else if (field.getType() instanceof ReferenceType) {
+                // If this is a reference node, check if the any referenced forms match
+                for (ResourceId referencedFormId : ((ReferenceType) field.getType()).getRange()) {
+                    Optional<FormClass> refFormClass = tree.getFormClassIfPresent(referencedFormId);
+                    if (!refFormClass.isPresent()) {
+                        continue;
+                    }
+                    if (path.matches(refFormClass.get())) {
+                        matches.add(NodeMatch.forId(ColumnModel.RECORD_ID_SYMBOL, refFormClass.get()));
+                    }
+                }
             } else if(field.getType() instanceof GeoPointType) {
                 String symbol = path.head().toLowerCase();
                 if(symbol.equals("latitude") || symbol.equals("longitude")) {
