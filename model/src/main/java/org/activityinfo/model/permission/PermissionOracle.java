@@ -25,7 +25,10 @@ public class PermissionOracle {
         if (!db.isVisible()) {
             return deny(query.getOperation());
         }
-        if (!isDatabase(query.getResourceId()) && !db.hasResource(query.getResourceId())) {
+        if (!isDatabase(query.getResourceId())
+                && !isPartnerForm(query.getResourceId())
+                && !isProjectForm(query.getResourceId())
+                && !db.hasResource(query.getResourceId())) {
             return deny(query.getOperation());
         }
         return determinePermission(query.getOperation(), query.getResourceId(), db);
@@ -89,8 +92,45 @@ public class PermissionOracle {
     private static boolean operationPermitted(Operation operation, ResourceId resourceId, UserDatabaseMeta db) {
         if (isDatabase(resourceId)) {
             return db.getDatabaseId().equals(resourceId) && db.getGrant(resourceId).hasOperation(operation);
+        } else if (isPartnerForm(resourceId)) {
+            return allowedPartnerOperation(operation, db);
+        } else if (isProjectForm(resourceId)) {
+            return allowedProjectOperation(operation, db);
         } else {
             return db.hasResource(resourceId) && granted(operation, db.getResource(resourceId), db);
+        }
+    }
+
+    private static boolean allowedPartnerOperation(Operation operation, UserDatabaseMeta db) {
+        GrantModel databaseGrant = db.getGrant(db.getDatabaseId());
+        switch(operation) {
+            case MANAGE_USERS:
+            case VIEW:
+                return databaseGrant.hasOperation(operation);
+            case CREATE_RECORD:
+            case EDIT_RECORD:
+            case DELETE_RECORD:
+            case IMPORT_RECORDS:
+            case EXPORT_RECORDS:
+                return databaseGrant.hasOperation(Operation.MANAGE_USERS) && databaseGrant.hasOperation(operation);
+            default:
+                return false;
+        }
+    }
+
+    private static boolean allowedProjectOperation(Operation operation, UserDatabaseMeta db) {
+        GrantModel databaseGrant = db.getGrant(db.getDatabaseId());
+        switch(operation) {
+            case VIEW:
+                return databaseGrant.hasOperation(operation);
+            case CREATE_RECORD:
+            case EDIT_RECORD:
+            case DELETE_RECORD:
+            case IMPORT_RECORDS:
+            case EXPORT_RECORDS:
+                return canDesign(db);
+            default:
+                return false;
         }
     }
 
@@ -115,6 +155,10 @@ public class PermissionOracle {
     private static Optional<String> operationFilter(Operation operation, ResourceId resourceId, UserDatabaseMeta db) {
         if (isDatabase(resourceId)) {
             return getFilter(operation, resourceId, db);
+        } else if (isPartnerForm(resourceId)) {
+            return getFilter(Operation.MANAGE_USERS, db.getDatabaseId(), db);
+        } else if (isProjectForm(resourceId)) {
+            return Optional.absent();
         } else {
             return collectFilters(operation, db.getResource(resourceId), db);
         }
@@ -169,6 +213,14 @@ public class PermissionOracle {
         return resourceId.getDomain() == CuidAdapter.DATABASE_DOMAIN;
     }
 
+    private static boolean isPartnerForm(ResourceId resourceId) {
+        return resourceId.getDomain() == CuidAdapter.PARTNER_FORM_CLASS_DOMAIN;
+    }
+
+    private static boolean isProjectForm(ResourceId resourceId) {
+        return resourceId.getDomain() == CuidAdapter.PROJECT_CLASS_DOMAIN;
+    }
+
     ///////////////////////////////////////////// FORM PERMISSION METHODS //////////////////////////////////////////////
 
     public static FormPermissions formPermissions(ResourceId formId, UserDatabaseMeta db) {
@@ -180,6 +232,9 @@ public class PermissionOracle {
         }
         if (db.isPublished()) {
             return FormPermissions.readWrite();
+        }
+        if (isPartnerForm(formId) || isProjectForm(formId)) {
+            return computeFormPermissions(formId, db);
         }
         if (!db.hasResource(formId)) {
             return FormPermissions.none();
@@ -265,17 +320,20 @@ public class PermissionOracle {
 
         FunctionCallNode equalFunctionCall = (FunctionCallNode) filterFormula;
 
-        if (!(equalFunctionCall.getArgument(0 ) instanceof SymbolNode) && !(equalFunctionCall.getArgument(1) instanceof SymbolNode)) {
+        if (!(equalFunctionCall.getArgument(0 ) instanceof SymbolNode)) {
+            return false;
+        }
+        if (!(equalFunctionCall.getArgument(1) instanceof ConstantNode)) {
             return false;
         }
 
         SymbolNode partnerFormNode = (SymbolNode) equalFunctionCall.getArgument(0);
-        SymbolNode partnerFieldNode = (SymbolNode) equalFunctionCall.getArgument(1);
+        ConstantNode partnerFieldNode = (ConstantNode) equalFunctionCall.getArgument(1);
 
         if (!partnerFormNode.asResourceId().equals(partnerFormId)) {
             return false;
         }
-        if (!partnerFieldNode.asResourceId().equals(partnerId)) {
+        if (!partnerFieldNode.asExpression().equals(partnerId.asString())) {
             return false;
         }
 
