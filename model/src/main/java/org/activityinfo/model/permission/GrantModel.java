@@ -131,23 +131,26 @@ public class GrantModel implements JsonSerializable {
         /**
          * Adds a permitted {@link Operation} to this grant.
          */
-        public void addOperation(Operation operation) {
+        public Builder addOperation(Operation operation) {
             model.operations.put(operation, Optional.absent());
+            return this;
         }
 
         /**
          * Adds a permitted {@link Operation} and filter to this grant.
          */
-        public void addOperation(Operation operation, String recordFilter) {
+        public Builder addOperation(Operation operation, String recordFilter) {
             model.operations.put(operation, Optional.of(recordFilter));
+            return this;
         }
 
         /**
          * Adds a filter to the specified operation on this grant. This filter is applied to the records
          * within the {@link Resource} this grant applies to when performing the specified operation.
          */
-        public void addFilter(Operation operation, String recordFilter) {
+        public Builder addFilter(Operation operation, String recordFilter) {
             model.operations.put(operation, Optional.of(recordFilter));
+            return this;
         }
 
         public GrantModel build() {
