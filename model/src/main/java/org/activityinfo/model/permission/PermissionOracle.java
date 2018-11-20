@@ -308,6 +308,9 @@ public class PermissionOracle {
     public static boolean filterContainsPartner(String filter, ResourceId partnerFormId, ResourceId partnerId) {
         FormulaNode filterFormula = FormulaParser.parse(filter);
 
+        SymbolNode expectedPartnerForm = new SymbolNode(partnerFormId);
+        ConstantNode expectedPartnerRecord = new ConstantNode(partnerId.asString());
+
         if (!(filterFormula instanceof FunctionCallNode)) {
             return false;
         }
@@ -330,10 +333,10 @@ public class PermissionOracle {
         SymbolNode partnerFormNode = (SymbolNode) equalFunctionCall.getArgument(0);
         ConstantNode partnerFieldNode = (ConstantNode) equalFunctionCall.getArgument(1);
 
-        if (!partnerFormNode.asResourceId().equals(partnerFormId)) {
+        if (!partnerFormNode.equals(expectedPartnerForm)) {
             return false;
         }
-        if (!partnerFieldNode.asExpression().equals(partnerId.asString())) {
+        if (!partnerFieldNode.equals(expectedPartnerRecord)) {
             return false;
         }
 
