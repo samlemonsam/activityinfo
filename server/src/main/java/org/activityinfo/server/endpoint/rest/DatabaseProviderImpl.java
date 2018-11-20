@@ -35,13 +35,16 @@ import org.activityinfo.store.spi.DatabaseProvider;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DatabaseProviderImpl implements DatabaseProvider {
 
     private static final Logger LOGGER = Logger.getLogger(DatabaseProviderImpl.class.getName());
+
     public static final ResourceId GEODB_ID = ResourceId.valueOf("geodb");
 
     private Provider<EntityManager> entityManager;
@@ -77,59 +80,54 @@ public class DatabaseProviderImpl implements DatabaseProvider {
     }
 
     private UserDatabaseMeta queryMySQLDatabase(ResourceId databaseId, int userId) {
-        UserDatabaseMeta.Builder meta = new UserDatabaseMeta.Builder()
-                .setDatabaseId(databaseId)
-                .setUserId(userId);
-
-        Database database = entityManager.get().find(Database.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
+        UserDatabaseMeta.Builder meta = metaBuilder(databaseId, userId);
+        Database database = queryDatabase(databaseId);
         if (database == null) {
             return meta.build();
         }
-
+        meta.setLabel(database.getName());
+        meta.setPublished(false);
+        meta.addResources(fetchResources(database));
+        meta.addLocks(fetchLocks(database));
         if (database.getOwner().getId() == userId) {
-            meta.setOwner(true);
-            meta.setVersion(Long.toString(database.getVersion()));
-            meta.setPendingTransfer(database.hasPendingTransfer());
+            ownerPermissions(database, meta);
         } else {
-            Optional<UserPermission> userPermission = getUserPermission(entityManager.get(), database, userId);
-            if(userPermission.isPresent()) {
-                meta.addGrants(buildGrants(userPermission.get()));
-                meta.setVersion(database.getVersion() + UserDatabaseMeta.VERSION_SEP + userPermission.get().getVersion());
-            }
+            userPermissions(database, userId, meta);
         }
-
-        if (meta.isVisible()) {
-            meta.setPublished(false);
-            meta.setLabel(database.getName());
-            meta.addLocks(queryLocks(database));
-            meta.addResources(queryFolders(database, meta.folderGrants()));
-            meta.addResources(queryForms(database, meta.folderGrants(), meta.formGrants()));
-        }
-
         return meta.build();
     }
-
-
-    private static Optional<UserPermission> getUserPermission(EntityManager entityManager, Database database, int userId) {
-        List<UserPermission> permissions = entityManager
-                .createQuery(
-                        "select u from UserPermission u where u.user.id = :userId and u.database = :db",
-                        UserPermission.class)
-                .setParameter("userId", userId)
-                .setParameter("db", database)
-                .getResultList();
-
-
-        if (permissions.isEmpty()) {
-            // return a permission with nothing enabled
-            return Optional.empty();
-
-        } else {
-            return Optional.of(permissions.get(0));
-        }
+    private UserDatabaseMeta.Builder metaBuilder(ResourceId databaseId, int userId) {
+        return new UserDatabaseMeta.Builder()
+                .setDatabaseId(databaseId)
+                .setUserId(userId);
     }
 
-    public List<RecordLock> queryLocks(Database database) {
+    private Database queryDatabase(ResourceId databaseId) {
+        return entityManager.get().find(Database.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
+    }
+
+    private List<Resource> fetchResources(Database database) {
+        Stream<Resource> formResources = fetchForms(database);
+        Stream<Resource> folderResources = fetchFolders(database);
+        return Stream.concat(formResources, folderResources).collect(Collectors.toList());
+    }
+
+    private Stream<Resource> fetchForms(Database database) {
+        return database.getActivities().stream()
+                .filter(a -> !a.isDeleted())
+                .map(Activity::asResource);
+    }
+
+    private Stream<Resource> fetchFolders(Database database) {
+        return entityManager.get()
+                .createQuery("select f from Folder f where f.database = :database", Folder.class)
+                .setParameter("database", database)
+                .getResultList()
+                .stream()
+                .map(Folder::asResource);
+    }
+
+    public List<RecordLock> fetchLocks(Database database) {
         return entityManager.get()
                 .createQuery("select k from LockedPeriod k where k.database = :database", LockedPeriod.class)
                 .setParameter("database", database)
@@ -140,63 +138,71 @@ public class DatabaseProviderImpl implements DatabaseProvider {
                 .collect(Collectors.toList());
     }
 
-    public List<Resource> queryFolders(Database database, Set<ResourceId> folderGrants) {
-        return entityManager.get()
-                .createQuery("select f from Folder f where f.database = :database", Folder.class)
-                .setParameter("database", database)
-                .getResultList()
-                .stream()
-                .filter(folder -> folderGrants.isEmpty() || folderGrants.contains(CuidAdapter.folderId(folder.getId())))
-                .map(Folder::asResource)
-                .collect(Collectors.toList());
+    private void ownerPermissions(Database database, UserDatabaseMeta.Builder meta) {
+        meta.setOwner(true);
+        meta.setVersion(Long.toString(database.getVersion()));
+        meta.setPendingTransfer(database.hasPendingTransfer());
     }
 
-    private List<Resource> queryForms(Database database, Set<ResourceId> folderGrants, Set<ResourceId> formGrants) {
-        return database.getActivities()
-                .stream()
-                .filter(a -> !a.isDeleted())
-                .filter(a -> folderGrants.isEmpty() || folderGrants.contains(a.getParentResourceId()) || formGrants.contains(a.getFormId()))
-                .map(Activity::asResource)
-                .collect(Collectors.toList());
-    }
-
-    private List<GrantModel> buildGrants(UserPermission userPermission) {
-        if(!userPermission.isAllowView()) {
-            return Collections.emptyList();
+    private void userPermissions(Database database, int userId, UserDatabaseMeta.Builder meta) {
+        Optional<UserPermission> userPermission = fetchUserPermission(database, userId);
+        if (userPermission.isPresent()) {
+            meta.addGrants(fetchGrants(CuidAdapter.databaseId(database.getId()), userPermission.get()));
+            meta.setVersion(database.getVersion() + UserDatabaseMeta.VERSION_SEP + userPermission.get().getVersion());
+        } else {
+            meta.setVersion(Long.toString(database.getVersion()));
         }
+    }
 
+    private Optional<UserPermission> fetchUserPermission(Database database, int userId) {
+        try {
+            return Optional.of(queryUserPermission(database, userId));
+        } catch (NoResultException noPermission) {
+            return Optional.empty();
+        }
+    }
+
+    private UserPermission queryUserPermission(Database database, int userId) {
+        return entityManager.get()
+                .createQuery("select u from UserPermission u where u.user.id = :userId and u.database = :db",
+                        UserPermission.class)
+                .setParameter("userId", userId)
+                .setParameter("db", database)
+                .getSingleResult();
+    }
+
+    private List<GrantModel> fetchGrants(ResourceId databaseId, UserPermission userPermission) {
         List<GrantModel> grants = new ArrayList<>();
-        GrantModel.Builder databaseGrant = new GrantModel.Builder();
-        databaseGrant.setResourceId(CuidAdapter.databaseId(userPermission.getDatabase().getId()));
-        setOperations(databaseGrant, userPermission);
-        grants.add(databaseGrant.build());
-
+        if(!userPermission.isAllowView()) {
+            return grants;
+        }
+        grants.add(buildDatabaseGrant(databaseId, userPermission));
         if (userPermission.getModel() == null) {
             return grants;
         }
-
         JsonValue modelObject = Json.parse(userPermission.getModel());
+        grants.addAll(buildGrantsFromModel(modelObject));
+        return grants;
+    }
 
+    private GrantModel buildDatabaseGrant(ResourceId databaseId, UserPermission userPermission) {
+        GrantModel.Builder databaseGrant = new GrantModel.Builder();
+        databaseGrant.setResourceId(databaseId);
+        setOperations(databaseGrant, userPermission);
+        return databaseGrant.build();
+    }
+
+    private List<GrantModel> buildGrantsFromModel(JsonValue modelObject) {
         if (!modelObject.hasKey("grants")) {
             LOGGER.severe(() -> "Could not parse permissions model: " + modelObject);
             throw new UnsupportedOperationException("Unsupported model");
         }
-
-        modelObject.get("grants").values().forEach(grant -> {
-            GrantModel.Builder resourceGrant = new GrantModel.Builder();
-            setResourceOperations(resourceGrant, grant, userPermission);
-            grants.add(resourceGrant.build());
-        });
-        return grants;
-    }
-
-    private void setResourceOperations(GrantModel.Builder model, JsonValue resourceGrant, UserPermission userPermission) {
-        if (!resourceGrant.hasKey("operations") || resourceGrant.get("operations").length() == 0) {
-            // If we have an undefined set of operations, then set "common" operations
-            setOperations(model, userPermission);
-        } else {
-            resourceGrant.get("operations").values().forEach(operation -> model.addOperation(Operation.valueOf(operation.asString())));
+        List<GrantModel> grants = new ArrayList<>();
+        for (JsonValue grant : modelObject.get("grants").values()) {
+            GrantModel grantModel = GrantModel.fromJson(grant);
+            grants.add(grantModel);
         }
+        return grants;
     }
 
     private void setOperations(GrantModel.Builder grantModel, UserPermission userPermission) {

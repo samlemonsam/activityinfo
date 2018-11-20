@@ -276,10 +276,24 @@ public class UserDatabaseMeta implements JsonSerializable {
             return this;
         }
 
-        public boolean isVisible() {
+        private boolean isVisible() {
             return meta.owner
                     || meta.published
-                    || !meta.grants.isEmpty();
+                    || !meta.grants.isEmpty()
+                    || hasPublicResources();
+        }
+
+        private boolean hasPublicResources() {
+            for (Resource resource : meta.resources.values()) {
+                if (resource.isPublic()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void removePrivateResources() {
+            meta.resources.values().removeIf(resource -> !resource.isPublic());
         }
 
         public Set<ResourceId> folderGrants() {
@@ -298,6 +312,14 @@ public class UserDatabaseMeta implements JsonSerializable {
 
         public UserDatabaseMeta build() {
             meta.visible = isVisible();
+            if (!meta.visible) {
+                meta.resources.clear();
+                meta.grants.clear();
+                meta.locks.clear();
+            }
+            if (meta.visible && meta.grants.isEmpty()) {
+                removePrivateResources();
+            }
             return meta;
         }
     }
