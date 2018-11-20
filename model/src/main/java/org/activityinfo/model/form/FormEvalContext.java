@@ -18,8 +18,10 @@
  */
 package org.activityinfo.model.form;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.formula.eval.*;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ErrorValue;
 import org.activityinfo.model.type.FieldType;
@@ -54,6 +56,13 @@ public class FormEvalContext implements EvalContext {
             fieldMap.put(field.getId().asString(), source);
         }
 
+        // Need to add an additional symbol to map to the Partner Form in the Database
+        Optional<FormElement> partnerField = findPartnerField(formClass);
+        if (partnerField.isPresent()) {
+            FormField partnerFormField = (FormField) partnerField.get();
+            symbolMap.put(partnerFormId(formClass), createValueSource(partnerFormField));
+        }
+
         // TODO: cleanup hack: enum values need to be treated as constants, not symbols!
 
         for (FormField field : formClass.getFields()) {
@@ -65,6 +74,14 @@ public class FormEvalContext implements EvalContext {
         }
     }
 
+    private Optional<FormElement> findPartnerField(FormClass formClass) {
+        ResourceId partnerFieldId = CuidAdapter.field(formClass.getId(), CuidAdapter.PARTNER_FIELD);
+        return formClass.getElement(partnerFieldId);
+    }
+
+    private String partnerFormId(FormClass formClass) {
+        return CuidAdapter.partnerFormId(CuidAdapter.getLegacyIdFromCuid(formClass.getDatabaseId())).asString();
+    }
 
     public FormEvalContext(FormClass formClass, FormInstance instance) {
         this(formClass);
