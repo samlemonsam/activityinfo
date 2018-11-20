@@ -198,16 +198,8 @@ public class NodeMatcher {
             if(path.matches(field)) {
                 matches.add(NodeMatch.forField(field, currentAggregation()));
             } else if (field.getType() instanceof ReferenceType) {
-                // If this is a reference node, check if the any referenced forms match
-                for (ResourceId referencedFormId : ((ReferenceType) field.getType()).getRange()) {
-                    Optional<FormClass> refFormClass = tree.getFormClassIfPresent(referencedFormId);
-                    if (!refFormClass.isPresent()) {
-                        continue;
-                    }
-                    if (path.matches(refFormClass.get())) {
-                        matches.add(NodeMatch.forId(ColumnModel.RECORD_ID_SYMBOL, refFormClass.get()));
-                    }
-                }
+                // If this is a reference node, check if the any referenced forms match the query path head
+                referencedFormIdMatches(matches, path, field);
             } else if(field.getType() instanceof GeoPointType) {
                 String symbol = path.head().toLowerCase();
                 if(symbol.equals("latitude") || symbol.equals("longitude")) {
@@ -233,6 +225,18 @@ public class NodeMatcher {
             return Collections.emptyList();
         } else {
             return matchTerminal(path, children);
+        }
+    }
+
+    private void referencedFormIdMatches(List<NodeMatch> matches, QueryPath path, FormTree.Node field) {
+        for (ResourceId referencedFormId : ((ReferenceType) field.getType()).getRange()) {
+            Optional<FormClass> refFormClass = tree.getFormClassIfPresent(referencedFormId);
+            if (!refFormClass.isPresent()) {
+                continue;
+            }
+            if (path.matches(refFormClass.get())) {
+                matches.add(NodeMatch.forId(field, refFormClass.get()));
+            }
         }
     }
 
