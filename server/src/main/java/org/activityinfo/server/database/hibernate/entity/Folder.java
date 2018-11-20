@@ -98,6 +98,7 @@ public class Folder implements SchemaElement, Serializable, HardDeleteable {
             .setParentId(CuidAdapter.databaseId(database.getId()))
             .setLabel(getName())
             .setType(ResourceType.FOLDER)
+            .setPublic(false)
             .build();
     }
 

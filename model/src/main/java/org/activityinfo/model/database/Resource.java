@@ -26,10 +26,17 @@ import org.activityinfo.model.resource.ResourceId;
 import javax.annotation.Nonnull;
 
 public class Resource implements JsonSerializable {
+
+    enum Publicity {
+        PUBLIC,
+        PRIVATE
+    }
+
     private ResourceId id;
     private ResourceId parentId;
     private ResourceType type;
     private String label;
+    private Publicity publicity = Publicity.PRIVATE;
 
     private Resource() {}
 
@@ -37,6 +44,11 @@ public class Resource implements JsonSerializable {
         this.id = id;
         this.parentId = parentId;
         this.label = label;
+    }
+
+    public Resource(ResourceId id, ResourceId parentId, String label, Publicity publicity) {
+        this(id, parentId, label);
+        this.publicity = publicity;
     }
 
     public ResourceId getId() {
@@ -55,6 +67,14 @@ public class Resource implements JsonSerializable {
         return type;
     }
 
+    public Publicity getPublicity() {
+        return publicity;
+    }
+
+    public boolean isPublic() {
+        return publicity == Publicity.PUBLIC;
+    }
+
     @Override
     public JsonValue toJson() {
         JsonValue object = Json.createObject();
@@ -62,6 +82,7 @@ public class Resource implements JsonSerializable {
         object.put("parentId", parentId.asString());
         object.put("label", label);
         object.put("type", type.name());
+        object.put("publicity", publicity.name());
         return object;
     }
 
@@ -71,6 +92,7 @@ public class Resource implements JsonSerializable {
         resource.parentId = ResourceId.valueOf(object.getString("parentId"));
         resource.label = object.getString("label");
         resource.type = ResourceType.valueOf(object.getString("type"));
+        resource.publicity = Publicity.valueOf(object.getString("publicity"));
         return resource;
     }
 
@@ -94,6 +116,15 @@ public class Resource implements JsonSerializable {
 
         public Builder setType(ResourceType type) {
             resource.type = type;
+            return this;
+        }
+
+        public Builder setPublic(boolean isPublic) {
+            if (isPublic) {
+                resource.publicity = Publicity.PUBLIC;
+            } else {
+                resource.publicity = Publicity.PRIVATE;
+            }
             return this;
         }
 
