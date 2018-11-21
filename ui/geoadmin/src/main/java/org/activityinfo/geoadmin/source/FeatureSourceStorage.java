@@ -22,7 +22,6 @@ import com.google.common.base.Optional;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.ColumnQueryBuilder;
@@ -48,11 +47,6 @@ public class FeatureSourceStorage implements FormStorage {
         this.featureSource = featureSource;
     }
 
-
-    @Override
-    public FormPermissions getPermissions(int userId) {
-        return FormPermissions.readWrite();
-    }
 
     @Override
     public Optional<FormRecord> get(ResourceId resourceId) {

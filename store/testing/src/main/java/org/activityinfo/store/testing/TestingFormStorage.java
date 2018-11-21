@@ -23,7 +23,6 @@ import com.google.common.base.Supplier;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.*;
-import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.spi.*;
@@ -70,11 +69,6 @@ public class TestingFormStorage implements VersionedFormStorage {
                 index.put(record.getId(), record);
             }
         }
-    }
-
-    @Override
-    public FormPermissions getPermissions(int userId) {
-        return FormPermissions.readWrite();
     }
 
     @Override

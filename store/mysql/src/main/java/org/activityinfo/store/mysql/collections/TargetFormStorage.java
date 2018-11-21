@@ -21,7 +21,6 @@ package org.activityinfo.store.mysql.collections;
 import com.google.common.base.Optional;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -46,11 +45,6 @@ public class TargetFormStorage implements FormStorage {
         this.target = target;
         this.executor = executor;
         this.mapping = target.buildMapping();
-    }
-
-    @Override
-    public FormPermissions getPermissions(int userId) {
-        return FormPermissions.readonly();
     }
 
     @Override

@@ -21,7 +21,6 @@ package org.activityinfo.store.query.server;
 import com.google.common.base.Optional;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.*;
@@ -73,11 +72,6 @@ public class MockFormStorageProvider implements FormStorageProvider, Transaction
     }
 
     private class MockFormStorage implements FormStorage {
-
-        @Override
-        public FormPermissions getPermissions(int userId) {
-            return FormPermissions.readWrite();
-        }
 
         @Override
         public Optional<FormRecord> get(ResourceId resourceId) {

@@ -22,12 +22,7 @@ import com.google.common.base.Optional;
 import com.googlecode.objectify.VoidWork;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.*;
-import org.activityinfo.model.formula.ConstantNode;
-import org.activityinfo.model.formula.FormulaNode;
-import org.activityinfo.model.formula.Formulas;
-import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
@@ -47,7 +42,6 @@ import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
 import org.activityinfo.store.mysql.metadata.PermissionsCache;
-import org.activityinfo.store.mysql.metadata.UserPermission;
 import org.activityinfo.store.mysql.update.*;
 import org.activityinfo.store.spi.*;
 
@@ -88,51 +82,6 @@ public class SiteFormStorage implements VersionedFormStorage, FormStorageV2 {
             formEntity = Hrd.ofy().load().key(FormEntity.key(activity.getSiteFormClassId())).safe();
         }
 
-    }
-
-    @Override
-    public FormPermissions getPermissions(int userId) {
-        if(activity.getOwnerUserId() == userId) {
-           return FormPermissions.owner();
-        } else {
-
-            UserPermission databasePermission = permissionsCache.getPermission(userId, activity.getDatabaseId());
-
-            FormPermissions.Builder permissions = FormPermissions.builder();
-
-            FormulaNode partnerFilter = Formulas.equals(
-                    new SymbolNode(
-                        CuidAdapter.partnerField(activity.getId())),
-                    new ConstantNode(
-                        CuidAdapter.partnerRecordId(databasePermission.getPartnerId()).asString()));
-
-
-            if(databasePermission.isViewAll()) {
-                permissions.allowView();
-
-            } else if(databasePermission.isView()) {
-                permissions.allowFilteredView(partnerFilter.asExpression());
-            }
-
-            if(databasePermission.isEditAll()) {
-                permissions.allowEdit();
-
-            } else if(databasePermission.isEdit()) {
-                permissions.allowFilteredEdit(partnerFilter.asExpression());
-            }
-
-            if(databasePermission.isDesign()) {
-                permissions.allowSchemaUpdate();
-            }
-
-            // published property of activity overrides user permissions
-            if(activity.isPublished()) {
-                permissions.allowUnfilteredView();
-            }
-
-            return permissions.build();
-
-        }
     }
 
     @Override

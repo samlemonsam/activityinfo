@@ -21,7 +21,6 @@ package org.activityinfo.store.hrd;
 import com.google.common.base.Optional;
 import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.resource.ResourceId;
@@ -54,11 +53,6 @@ public class HrdFormStorage implements VersionedFormStorage, FormStorageV2 {
 
     public HrdFormStorage(FormClass formClass) {
         this.formClass = formClass;
-    }
-
-    @Override
-    public FormPermissions getPermissions(int userId) {
-        return FormPermissions.owner();
     }
 
     @Override

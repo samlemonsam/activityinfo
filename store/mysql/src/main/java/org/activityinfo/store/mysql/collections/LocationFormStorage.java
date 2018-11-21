@@ -26,7 +26,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -42,7 +41,6 @@ import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
 import org.activityinfo.store.mysql.metadata.CountryStructure;
 import org.activityinfo.store.mysql.metadata.PermissionsCache;
-import org.activityinfo.store.mysql.metadata.UserPermission;
 import org.activityinfo.store.mysql.update.SqlInsert;
 import org.activityinfo.store.mysql.update.SqlUpdate;
 import org.activityinfo.store.spi.ColumnQueryBuilder;
@@ -153,20 +151,6 @@ public class LocationFormStorage implements FormStorage {
 
         this.mapping = mapping.build();
 
-    }
-
-    @Override
-    public FormPermissions getPermissions(int userId) {
-        if(openWorkflow) {
-            return FormPermissions.readWrite();
-        }
-        if(databaseId != null) {
-            UserPermission permission = permissionsCache.getPermission(userId, databaseId);
-            if (permission.isDesign()) {
-                return FormPermissions.builder().allowEdit().build();
-            }
-        }
-        return FormPermissions.readonly();
     }
 
     @Override

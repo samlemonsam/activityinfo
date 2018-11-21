@@ -33,11 +33,6 @@ import java.util.List;
 public interface FormStorage {
 
     /**
-     * Fetches the permissions which apply to the given user for this collection.
-     */
-    FormPermissions getPermissions(int userId);
-    
-    /**
      * Retrieves a single resource from the ResourceStore.
      * @param resourceId the id of the resource to retrieve
      * @return the Resource

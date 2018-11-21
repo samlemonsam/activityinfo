@@ -27,7 +27,6 @@ import com.vividsolutions.jts.io.OutputStreamOutStream;
 import com.vividsolutions.jts.io.WKBWriter;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.cursor.MySqlCursorBuilder;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
@@ -57,11 +56,6 @@ public class SimpleTableStorage implements VersionedFormStorage {
         this.mapping = mapping;
         this.authorizer = authorizer;
         this.executor = executor;
-    }
-
-    @Override
-    public FormPermissions getPermissions(int userId) {
-        return authorizer.getPermissions(userId);
     }
 
     @Override
