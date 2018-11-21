@@ -69,7 +69,6 @@ public class ActivityLoader {
     private final MemcacheService memcacheService = MemcacheServiceFactory.getMemcacheService();
     private final QueryExecutor executor;
     private final ParentKeyCache parentKeys;
-    private final PermissionsCache permissionCache;
 
     /**
      * Cache for activity metadata for the duration of a request.
@@ -84,7 +83,6 @@ public class ActivityLoader {
     public ActivityLoader(QueryExecutor executor) {
         this.executor = executor;
         this.parentKeys = new ParentKeyCache(executor);
-        this.permissionCache = new PermissionsCache(executor);
     }
 
     public CountryInstance loadCountryInstance(Integer locationTypeId) throws SQLException {
@@ -124,21 +122,6 @@ public class ActivityLoader {
     
     public Map<Integer, Activity> loadForDatabaseIds(Set<Integer> databaseIds) throws SQLException {
         return load(parentKeys.queryActivitiesForDatabase(databaseIds));
-    }
-
-    public PermissionsCache getPermissionCache() {
-        return permissionCache;
-    }
-    
-    public UserPermission getPermission(int activityId, int userId) throws SQLException {
-        Activity activity = load(activityId);
-        if(activity.isPublished()) {
-            return UserPermission.viewAll();
-        }
-        if(activity.getOwnerUserId() == userId) {
-            return UserPermission.viewAll();
-        }
-        return permissionCache.getPermission(userId, activity.getDatabaseId());
     }
 
     public Activity load(int activityId) throws SQLException {

@@ -41,7 +41,6 @@ import org.activityinfo.store.mysql.cursor.SiteFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
-import org.activityinfo.store.mysql.metadata.PermissionsCache;
 import org.activityinfo.store.mysql.update.*;
 import org.activityinfo.store.spi.*;
 
@@ -64,18 +63,17 @@ public class SiteFormStorage implements VersionedFormStorage, FormStorageV2 {
     private final Activity activity;
     private final TableMapping baseMapping;
     private final QueryExecutor queryExecutor;
-    private final PermissionsCache permissionsCache;
     private final ActivityLoader activityLoader;
 
     private FormEntity formEntity;
 
-    public SiteFormStorage(Activity activity, TableMapping baseMapping,
+    public SiteFormStorage(Activity activity,
+                           TableMapping baseMapping,
                            QueryExecutor queryExecutor,
-                           PermissionsCache permissionsCache, ActivityLoader activityLoader) {
+                           ActivityLoader activityLoader) {
         this.activity = activity;
         this.baseMapping = baseMapping;
         this.queryExecutor = queryExecutor;
-        this.permissionsCache = permissionsCache;
         this.activityLoader = activityLoader;
 
         if(activity.isMigratedToHrd()) {

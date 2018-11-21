@@ -40,7 +40,6 @@ import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.mapping.TableMappingBuilder;
 import org.activityinfo.store.mysql.metadata.CountryStructure;
-import org.activityinfo.store.mysql.metadata.PermissionsCache;
 import org.activityinfo.store.mysql.update.SqlInsert;
 import org.activityinfo.store.mysql.update.SqlUpdate;
 import org.activityinfo.store.spi.ColumnQueryBuilder;
@@ -64,7 +63,6 @@ public class LocationFormStorage implements FormStorage {
     private final int locationTypeId;
     private Integer databaseId;
     private boolean openWorkflow;
-    private PermissionsCache permissionsCache;
     private final TableMapping mapping;
     private final CountryStructure country;
     private long version;
@@ -73,12 +71,11 @@ public class LocationFormStorage implements FormStorage {
     private final ResourceId adminFieldId;
     private final ResourceId pointFieldId;
 
-    public LocationFormStorage(QueryExecutor executor, ResourceId formClassId, PermissionsCache permissionsCache) throws SQLException {
+    public LocationFormStorage(QueryExecutor executor, ResourceId formClassId) throws SQLException {
 
         this.executor = executor;
 
         locationTypeId = CuidAdapter.getLegacyIdFromCuid(formClassId);
-        this.permissionsCache = permissionsCache;
         int countryId;
         String name;
 

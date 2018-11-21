@@ -32,7 +32,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
-import org.activityinfo.store.mysql.metadata.ActivityLoader;
+import org.activityinfo.store.mysql.metadata.PermissionsCache;
 import org.activityinfo.store.mysql.metadata.UserPermission;
 import org.activityinfo.store.spi.FormStorageProvider;
 
@@ -48,14 +48,14 @@ public class DatabasesFolder {
 
     public static final String ROOT_ID = "databases";
 
-    private ActivityLoader activityLoader;
     private final QueryExecutor executor;
     private final FormStorageProvider formStorageProvider;
+    private final PermissionsCache permissionsCache;
 
-    public DatabasesFolder(ActivityLoader activityLoader, QueryExecutor executor, FormStorageProvider formStorageProvider) {
-        this.activityLoader = activityLoader;
+    public DatabasesFolder(QueryExecutor executor, FormStorageProvider formStorageProvider) {
         this.executor = executor;
         this.formStorageProvider = formStorageProvider;
+        this.permissionsCache = new PermissionsCache(executor);
     }
 
     public CatalogEntry getRootEntry() {
@@ -192,7 +192,7 @@ public class DatabasesFolder {
     }
 
     private List<Integer> queryFolderGrants(int databaseId, int userId) {
-        UserPermission permission = activityLoader.getPermissionCache().getPermission(userId, databaseId);
+        UserPermission permission = permissionsCache.getPermission(userId, databaseId);
         if (Strings.isNullOrEmpty(permission.getModel())) {
             return Collections.emptyList();
         }

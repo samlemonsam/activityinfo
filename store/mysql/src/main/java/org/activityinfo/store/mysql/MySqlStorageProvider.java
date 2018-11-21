@@ -69,11 +69,11 @@ public class MySqlStorageProvider implements FormStorageProvider, FormCatalog, T
         providers.add(new SimpleTableStorageProvider(new ProjectTable(databaseCache)));
         providers.add(new TargetFormProvider());
         providers.add(new ActivityFormProvider(activityLoader));
-        providers.add(new LocationFormProvider(activityLoader.getPermissionCache()));
+        providers.add(new LocationFormProvider());
         providers.add(new HrdProvider());
 
         geodbFolder = new GeodbFolder(executor);
-        databasesFolder = new DatabasesFolder(activityLoader, executor, this);
+        databasesFolder = new DatabasesFolder(executor, this);
         formFolder = new FormFolder(this);
         
         this.executor = executor;
