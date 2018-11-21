@@ -25,13 +25,19 @@ public class PermissionOracle {
         if (!db.isVisible()) {
             return deny(query.getOperation());
         }
-        if (!isDatabase(query.getResourceId())
-                && !isPartnerForm(query.getResourceId())
-                && !isProjectForm(query.getResourceId())
-                && !db.hasResource(query.getResourceId())) {
+        // Deny permission if resource is not specially handled and is not present in resource list
+        if (!isSpecialResource(query.getResourceId()) && !db.hasResource(query.getResourceId())) {
             return deny(query.getOperation());
         }
+        // Otherwise, continue with permission determination
         return determinePermission(query.getOperation(), query.getResourceId(), db);
+    }
+
+    private static boolean isSpecialResource(ResourceId resourceId) {
+        return isDatabase(resourceId)
+                || isPartnerForm(resourceId)
+                || isProjectForm(resourceId)
+                || isAdminLevelForm(resourceId);
     }
 
     /**
@@ -42,7 +48,7 @@ public class PermissionOracle {
     }
 
     /**
-     * Allow the owner of a database full permissions with no record filters
+     * Allow the current user view permissions only with no record filters
      */
     private static Permission allowViewOnly(Operation operation) {
         if (operation != Operation.VIEW) {
@@ -96,6 +102,8 @@ public class PermissionOracle {
             return allowedPartnerOperation(operation, db);
         } else if (isProjectForm(resourceId)) {
             return allowedProjectOperation(operation, db);
+        } else if (isAdminLevelForm(resourceId)) {
+            return allowedAdminLevelOperation(operation, db);
         } else {
             return db.hasResource(resourceId) && granted(operation, db.getResource(resourceId), db);
         }
@@ -134,6 +142,10 @@ public class PermissionOracle {
         }
     }
 
+    private static boolean allowedAdminLevelOperation(Operation operation, UserDatabaseMeta db) {
+        return Operation.VIEW.equals(operation);
+    }
+
     /**
      * Checks whether the specified {@link Operation} has been granted on the given {@link Resource}, or on the
      * <b>closest</b> parent resource with an explicit grant
@@ -143,6 +155,11 @@ public class PermissionOracle {
         if (db.hasGrant(resource.getId())) {
             return db.getGrant(resource.getId()).hasOperation(operation);
         }
+        // If there is no explicit grant, check for VIEW operation requests on *public* resources
+        if (Operation.VIEW.equals(operation) && resource.isPublic()) {
+            return true;
+        }
+
         // As there is no grant defined at this level, we need to check further up the Resource tree
         // If the parent of this resource is the root database, then check whether operation exists on database grant
         if (isDatabase(resource.getParentId())) {
@@ -158,6 +175,8 @@ public class PermissionOracle {
         } else if (isPartnerForm(resourceId)) {
             return getFilter(Operation.MANAGE_USERS, db.getDatabaseId(), db);
         } else if (isProjectForm(resourceId)) {
+            return Optional.absent();
+        } else if (isAdminLevelForm(resourceId)) {
             return Optional.absent();
         } else {
             return collectFilters(operation, db.getResource(resourceId), db);
@@ -209,6 +228,8 @@ public class PermissionOracle {
         return Optional.of(and.asExpression());
     }
 
+    ////////////////////////////////////////// RESOURCE DOMAIN CHECK METHODS ///////////////////////////////////////////
+
     private static boolean isDatabase(ResourceId resourceId) {
         return resourceId.getDomain() == CuidAdapter.DATABASE_DOMAIN;
     }
@@ -219,6 +240,10 @@ public class PermissionOracle {
 
     private static boolean isProjectForm(ResourceId resourceId) {
         return resourceId.getDomain() == CuidAdapter.PROJECT_CLASS_DOMAIN;
+    }
+
+    private static boolean isAdminLevelForm(ResourceId resourceId) {
+        return resourceId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN;
     }
 
     ///////////////////////////////////////////// FORM PERMISSION METHODS //////////////////////////////////////////////
