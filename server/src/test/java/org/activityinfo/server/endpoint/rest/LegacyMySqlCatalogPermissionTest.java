@@ -116,8 +116,8 @@ public class LegacyMySqlCatalogPermissionTest {
 
         assertThat(permissions.isVisible(), equalTo(true));
         assertThat(permissions.isEditAllowed(), equalTo(true));
-        assertThat(permissions.getViewFilter(), CoreMatchers.equalTo("a00000000010000000007 == \"p0000000002\""));
-        assertThat(permissions.getUpdateFilter(), CoreMatchers.equalTo("a00000000010000000007 == \"p0000000002\""));
+        assertThat(permissions.getViewFilter(), CoreMatchers.equalTo("P0000000001 == \"p0000000002\""));
+        assertThat(permissions.getUpdateFilter(), CoreMatchers.equalTo("P0000000001 == \"p0000000002\""));
     }
 
     @Test
