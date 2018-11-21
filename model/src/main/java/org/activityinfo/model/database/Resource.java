@@ -28,7 +28,19 @@ import javax.annotation.Nonnull;
 public class Resource implements JsonSerializable {
 
     enum Publicity {
+        /**
+         * Public. Visible to *all* Users on system.
+         */
         PUBLIC,
+
+        /**
+         * Public to Database Users. Visible only to Users currently defined on Database.
+         */
+        DATABASE_USERS,
+
+        /**
+         * Private. Visible only to Users given explicit permissions.
+         */
         PRIVATE
     }
 
