@@ -49,12 +49,10 @@ import java.util.function.Predicate;
 public class SimpleTableStorage implements VersionedFormStorage {
 
     protected final TableMapping mapping;
-    protected final Authorizer authorizer;
     protected final QueryExecutor executor;
 
-    public SimpleTableStorage(TableMapping mapping, Authorizer authorizer, QueryExecutor executor) {
+    public SimpleTableStorage(TableMapping mapping, QueryExecutor executor) {
         this.mapping = mapping;
-        this.authorizer = authorizer;
         this.executor = executor;
     }
 

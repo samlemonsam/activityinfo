@@ -62,11 +62,11 @@ public class MySqlStorageProvider implements FormStorageProvider, FormCatalog, T
         activityLoader = new ActivityLoader(executor);
         DatabaseCacheImpl databaseCache = new DatabaseCacheImpl(executor);
 
-        providers.add(new SimpleTableStorageProvider(new UserTable(), FormPermissions.readonly()));
-        providers.add(new SimpleTableStorageProvider(new CountryTable(), FormPermissions.readonly()));
-        providers.add(new SimpleTableStorageProvider(new AdminEntityTable(), new AdminAuthorizer()));
-        providers.add(new SimpleTableStorageProvider(new PartnerTable(databaseCache), FormPermissions.readonly()));
-        providers.add(new SimpleTableStorageProvider(new ProjectTable(databaseCache), FormPermissions.readonly()));
+        providers.add(new SimpleTableStorageProvider(new UserTable()));
+        providers.add(new SimpleTableStorageProvider(new CountryTable()));
+        providers.add(new SimpleTableStorageProvider(new AdminEntityTable()));
+        providers.add(new SimpleTableStorageProvider(new PartnerTable(databaseCache)));
+        providers.add(new SimpleTableStorageProvider(new ProjectTable(databaseCache)));
         providers.add(new TargetFormProvider());
         providers.add(new ActivityFormProvider(activityLoader));
         providers.add(new LocationFormProvider(activityLoader.getPermissionCache()));

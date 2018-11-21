@@ -37,16 +37,9 @@ import java.util.Set;
 public class SimpleTableStorageProvider implements FormProvider {
     
     protected final SimpleTable table;
-    protected final Authorizer authorizer;
 
-    public SimpleTableStorageProvider(SimpleTable table, FormPermissions permissions) {
+    public SimpleTableStorageProvider(SimpleTable table) {
         this.table = table;
-        this.authorizer = new ConstantAuthorizer(permissions);
-    }
-
-    public SimpleTableStorageProvider(SimpleTable table, Authorizer authorizer) {
-        this.table = table;
-        this.authorizer = authorizer;
     }
 
     @Override
@@ -56,7 +49,7 @@ public class SimpleTableStorageProvider implements FormProvider {
 
     @Override
     public FormStorage openForm(QueryExecutor executor, ResourceId formId) throws SQLException {
-        return new SimpleTableStorage(table.getMapping(executor, formId), authorizer, executor);
+        return new SimpleTableStorage(table.getMapping(executor, formId), executor);
     }
 
     @Override
