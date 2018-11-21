@@ -110,27 +110,29 @@ public class PermissionOracle {
     }
 
     private static boolean allowedPartnerOperation(Operation operation, UserDatabaseMeta db) {
-        GrantModel databaseGrant = db.getGrant(db.getDatabaseId());
+        Optional<GrantModel> databaseGrant = findDatabaseGrantIfPresent(db);
         switch(operation) {
-            case MANAGE_USERS:
             case VIEW:
-                return databaseGrant.hasOperation(operation);
+                return db.isVisible();
+            case MANAGE_USERS:
+                return databaseGrant.isPresent() && databaseGrant.get().hasOperation(operation);
             case CREATE_RECORD:
             case EDIT_RECORD:
             case DELETE_RECORD:
             case IMPORT_RECORDS:
             case EXPORT_RECORDS:
-                return databaseGrant.hasOperation(Operation.MANAGE_USERS) && databaseGrant.hasOperation(operation);
+                return databaseGrant.isPresent()
+                        && databaseGrant.get().hasOperation(Operation.MANAGE_USERS)
+                        && databaseGrant.get().hasOperation(operation);
             default:
                 return false;
         }
     }
 
     private static boolean allowedProjectOperation(Operation operation, UserDatabaseMeta db) {
-        GrantModel databaseGrant = db.getGrant(db.getDatabaseId());
         switch(operation) {
             case VIEW:
-                return databaseGrant.hasOperation(operation);
+                return db.isVisible();
             case CREATE_RECORD:
             case EDIT_RECORD:
             case DELETE_RECORD:
@@ -142,8 +144,18 @@ public class PermissionOracle {
         }
     }
 
+    private static Optional<GrantModel> findDatabaseGrantIfPresent(UserDatabaseMeta db) {
+        if (!db.isVisible()) {
+            return Optional.absent();
+        }
+        if (!db.hasGrant(db.getDatabaseId())) {
+            return Optional.absent();
+        }
+        return Optional.of(db.getGrant(db.getDatabaseId()));
+    }
+
     private static boolean allowedAdminLevelOperation(Operation operation, UserDatabaseMeta db) {
-        return Operation.VIEW.equals(operation);
+        return db.isVisible() && Operation.VIEW.equals(operation);
     }
 
     /**
