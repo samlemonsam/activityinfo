@@ -97,7 +97,7 @@ public class PermissionOracle {
      */
     private static boolean operationPermitted(Operation operation, ResourceId resourceId, UserDatabaseMeta db) {
         if (isDatabase(resourceId)) {
-            return db.getDatabaseId().equals(resourceId) && db.getGrant(resourceId).hasOperation(operation);
+            return db.getDatabaseId().equals(resourceId) && db.hasGrant(resourceId) && db.getGrant(resourceId).hasOperation(operation);
         } else if (isPartnerForm(resourceId)) {
             return allowedPartnerOperation(operation, db);
         } else if (isProjectForm(resourceId)) {
