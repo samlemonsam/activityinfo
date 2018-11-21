@@ -312,12 +312,15 @@ public class UserDatabaseMeta implements JsonSerializable {
 
         public UserDatabaseMeta build() {
             meta.visible = isVisible();
+            // If not visible to current user, strip all resources, grants and lock information before building
             if (!meta.visible) {
                 meta.resources.clear();
                 meta.grants.clear();
                 meta.locks.clear();
             }
-            if (meta.visible && meta.grants.isEmpty()) {
+            // If database is visible to current user, but the user is not the owner and has no explicit grants,
+            // then remove any private resources
+            if (meta.visible && !meta.owner && meta.grants.isEmpty()) {
                 removePrivateResources();
             }
             return meta;
