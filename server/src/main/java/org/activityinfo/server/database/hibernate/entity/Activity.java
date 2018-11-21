@@ -382,7 +382,7 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
             .setType(ResourceType.FORM)
             .setParentId(getParentResourceId())
             .setLabel(getName())
-            .setPublic(getPublished() == Published.ALL_ARE_PUBLISHED.getIndex())
+            .setPublic(getPublished() != Published.NOT_PUBLISHED.getIndex())
             .build();
     }
 

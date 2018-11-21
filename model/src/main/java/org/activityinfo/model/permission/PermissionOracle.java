@@ -163,7 +163,7 @@ public class PermissionOracle {
         // As there is no grant defined at this level, we need to check further up the Resource tree
         // If the parent of this resource is the root database, then check whether operation exists on database grant
         if (isDatabase(resource.getParentId())) {
-            return db.getGrant(resource.getParentId()).hasOperation(operation);
+            return db.hasGrant(resource.getParentId()) && db.getGrant(resource.getParentId()).hasOperation(operation);
         }
         // Otherwise, we climb the resource tree to determine whether the operation is granted there
         return granted(operation, db.getResource(resource.getParentId()), db);
