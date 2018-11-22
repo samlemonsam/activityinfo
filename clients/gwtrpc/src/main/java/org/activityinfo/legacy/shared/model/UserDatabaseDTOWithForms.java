@@ -51,19 +51,13 @@ public class UserDatabaseDTOWithForms extends BaseModelData implements EntityDTO
         setName(userDatabaseDTO.getName());
         setAmOwner(userDatabaseDTO.getAmOwner());
         setCountry(userDatabaseDTO.getCountry());
-        setDesignAllowed(userDatabaseDTO.isDesignAllowed());
-        setEditAllAllowed(userDatabaseDTO.isEditAllAllowed());
-        setEditAllowed(userDatabaseDTO.isEditAllowed());
         setFullName(userDatabaseDTO.getFullName());
         setLockedPeriods(userDatabaseDTO.getLockedPeriods());
-        setManageAllUsersAllowed(userDatabaseDTO.isManageAllUsersAllowed());
-        setManageUsersAllowed(userDatabaseDTO.isManageUsersAllowed());
         setMyPartnerId(userDatabaseDTO.getMyPartnerId());
         setOwnerEmail(userDatabaseDTO.getOwnerEmail());
         setOwnerName(userDatabaseDTO.getOwnerName());
         setPartners(userDatabaseDTO.getPartners());
         setProjects(userDatabaseDTO.getProjects());
-        setViewAllAllowed(userDatabaseDTO.isViewAllAllowed());
         setAllowNestedValues(userDatabaseDTO.isAllowNestedValues());
     }
 
@@ -200,108 +194,6 @@ public class UserDatabaseDTOWithForms extends BaseModelData implements EntityDTO
 
     public void setProjects(List<ProjectDTO> projects) {
         this.projects = projects;
-    }
-
-    /**
-     * Sets the permission of the current user to view all partner's data in
-     * this UserDatabase. See
-     * {@link org.activityinfo.server.database.hibernate.entity.UserPermission#setAllowViewAll(boolean)}
-     */
-    public void setViewAllAllowed(boolean value) {
-        set("viewAllAllowed", value);
-    }
-
-    /**
-     * @return true if the client receiving the DTO is authorized to view data
-     * from all partners in this UserDatabase. See
-     * {@link org.activityinfo.server.database.hibernate.entity.UserPermission#setAllowViewAll(boolean)}
-     */
-    public boolean isViewAllAllowed() {
-        return (Boolean) get("viewAllAllowed", false);
-    }
-
-    /**
-     * Sets the permission of the current user to edit data on behalf of the
-     * Partner in this UserDatabase to which the current user belongs.
-     */
-    public void setEditAllowed(boolean allowed) {
-        set("editAllowed", allowed);
-    }
-
-    /**
-     * @return true if the client receiving the DTO is authorized to edit data
-     * for their Partner in this UserDatabase
-     */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
-    public boolean isEditAllowed() {
-        return get("editAllowed", false);
-    }
-
-    /**
-     * Sets the permission of the current user to design this UserDatabase. See
-     * {@link org.activityinfo.server.database.hibernate.entity.UserPermission#setAllowDesign(boolean)}
-     */
-    public void setDesignAllowed(boolean allowed) {
-        set("designAllowed", allowed);
-    }
-
-    /**
-     * @return true if the client receiving the DTO is authorized to design
-     * (change indicators, etc) this UserDatabase
-     */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
-    public boolean isDesignAllowed() {
-        return get("designAllowed", false);
-    }
-
-    /**
-     * Sets the permission of the current user to edit data in this UserDatabase
-     * on behalf of all partners.
-     */
-    public void setEditAllAllowed(boolean value) {
-        set("editAllAllowed", value);
-    }
-
-    /**
-     * @return true if the client receiving the DTO is authorized to edit data
-     * for all Partners in this UserDatabase
-     */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
-    public boolean isEditAllAllowed() {
-        return get("editAllAllowed", false);
-    }
-
-    /**
-     * @return true if current user is allowed to make changes to user
-     * permissions on behalf of the Partner to which they belong
-     */
-    public boolean isManageUsersAllowed() {
-        return get("manageUsersAllowed", false);
-    }
-
-    /**
-     * Sets the permission of the current user to make changes to user
-     * permissions on behalf of the Partner to which they belong in this
-     * UserDatabase.
-     */
-    public void setManageUsersAllowed(boolean allowed) {
-        set("manageUsersAllowed", allowed);
-    }
-
-    /**
-     * @return true if the current user is allowed to make changes to user
-     * permissions on behalf of all Partners in this UserDatabase
-     */
-    public boolean isManageAllUsersAllowed() {
-        return get("manageAllUsersAllowed", false);
-    }
-
-    /**
-     * Sets the permission of the current user to modify user permissions for
-     * this UserDatabase on behalf of all Partners in this UserDatabase
-     */
-    public void setManageAllUsersAllowed(boolean allowed) {
-        set("manageAllUsersAllowed", allowed);
     }
 
     /**
