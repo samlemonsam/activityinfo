@@ -19,9 +19,9 @@
 package org.activityinfo.analysis.table;
 
 import com.google.common.base.Optional;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.form.FormEvalContext;
-import org.activityinfo.model.form.FormInstance;
 import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
@@ -46,11 +46,11 @@ public class SelectionViewModel {
 
     private static final Logger LOGGER = Logger.getLogger(SelectionViewModel.class.getName());
 
-    private FormInstance record;
+    private TypedFormRecord record;
     private boolean editAllowed;
     private boolean deleteAllowed;
 
-    private SelectionViewModel(FormInstance record, boolean editAllowed, boolean deleteAllowed) {
+    private SelectionViewModel(TypedFormRecord record, boolean editAllowed, boolean deleteAllowed) {
         this.record = record;
         this.editAllowed = editAllowed;
         this.deleteAllowed = deleteAllowed;
@@ -60,7 +60,7 @@ public class SelectionViewModel {
         return record.getRef();
     }
 
-    public FormInstance getRecord() {
+    public TypedFormRecord getRecord() {
         return record;
     }
 
@@ -102,14 +102,14 @@ public class SelectionViewModel {
         if(!form.isVisible()) {
             return Optional.absent();
         }
-        FormInstance typedRecord = FormInstance.toFormInstance(form.getSchema(), record.get());
+        TypedFormRecord typedRecord = TypedFormRecord.toTypedFormRecord(form.getSchema(), record.get());
 
         boolean editAllowed = evalPermission(form, typedRecord, Operation.EDIT_RECORD);
 
         return Optional.of(new SelectionViewModel(typedRecord, editAllowed, editAllowed));
     }
 
-    private static boolean evalPermission(FormMetadata form, FormInstance record, Operation operation) {
+    private static boolean evalPermission(FormMetadata form, TypedFormRecord record, Operation operation) {
         if(!form.getPermissions().isAllowed(operation)) {
             return false;
         }

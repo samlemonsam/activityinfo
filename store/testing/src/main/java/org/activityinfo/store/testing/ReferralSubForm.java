@@ -20,7 +20,7 @@ package org.activityinfo.store.testing;
 
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.TextType;
@@ -42,7 +42,7 @@ public class ReferralSubForm implements TestForm {
     private final FormField organizationField;
     private final FormField contactNumber;
 
-    private List<FormInstance> records = null;
+    private List<TypedFormRecord> records = null;
     private RecordGenerator generator;
 
     public ReferralSubForm(IncidentForm parentForm) {
@@ -83,7 +83,7 @@ public class ReferralSubForm implements TestForm {
     }
 
     @Override
-    public List<FormInstance> getRecords() {
+    public List<TypedFormRecord> getRecords() {
         if(records == null) {
             this.records = generator.get(ROW_COUNT);
         }

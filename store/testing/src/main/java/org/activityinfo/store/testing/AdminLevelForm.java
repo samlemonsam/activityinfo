@@ -22,7 +22,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.RecordRef;
@@ -116,12 +116,12 @@ public class AdminLevelForm implements TestForm {
     }
 
     @Override
-    public List<FormInstance> getRecords() {
+    public List<TypedFormRecord> getRecords() {
         return records.get();
     }
 
     @Override
-    public Supplier<FormInstance> getGenerator() {
+    public Supplier<TypedFormRecord> getGenerator() {
         return recordGenerator;
     }
 

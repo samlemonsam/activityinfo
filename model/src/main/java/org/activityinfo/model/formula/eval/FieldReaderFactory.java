@@ -21,7 +21,7 @@ package org.activityinfo.model.formula.eval;
 import org.activityinfo.model.form.FormField;
 
 /**
- * Creates a FieldReader for a FormInstance type {@code InstanceT}
+ * Creates a FieldReader for a TypedFormRecord type {@code InstanceT}
  */
 public interface FieldReaderFactory<InstanceT> {
 

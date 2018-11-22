@@ -25,7 +25,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
@@ -116,12 +116,12 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
     }
 
     @Override
-    public void persist(FormInstance formInstance) {
+    public void persist(TypedFormRecord typedFormRecord) {
         Updater updater = new Updater(catalog.get(),
                 databaseProvider,
                 blobAuthorizer,
                 new HrdSerialNumberProvider(),
                 authenticatedUser.get().getUserId());
-        updater.execute(formInstance);
+        updater.execute(typedFormRecord);
     }
 }

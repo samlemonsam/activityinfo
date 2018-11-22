@@ -25,7 +25,7 @@ import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.database.ResourceType;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.query.ColumnSet;
@@ -257,7 +257,7 @@ public class TestingStorageProvider implements FormStorageProvider, Transactiona
         if(form == null) {
             throw new RuntimeException("No such form: " + formId);
         }
-        FormInstance newRecord = form.getGenerator().get();
+        TypedFormRecord newRecord = form.getGenerator().get();
         RecordUpdate update = new RecordUpdate();
         update.setFormId(formId);
         update.setRecordId(newRecord.getRef().getRecordId());

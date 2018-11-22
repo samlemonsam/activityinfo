@@ -21,7 +21,7 @@ package org.activityinfo.test.api;
 import org.activityinfo.client.ActivityInfoClient;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
@@ -67,11 +67,11 @@ public class SerialNumberTest {
 
         client.createForm(formClass);
 
-        FormInstance record1 = new FormInstance(harness.newRecordId(), formClass.getId());
+        TypedFormRecord record1 = new TypedFormRecord(harness.newRecordId(), formClass.getId());
         record1.set(nameField.getId(), "Sue");
         record1.set(partnerField.getId(), database.getDefaultPartner());
 
-        FormInstance record2 = new FormInstance(harness.newRecordId(), formClass.getId());
+        TypedFormRecord record2 = new TypedFormRecord(harness.newRecordId(), formClass.getId());
         record2.set(nameField.getId(), "Bob");
         record2.set(partnerField.getId(), database.getDefaultPartner());
 
@@ -113,17 +113,17 @@ public class SerialNumberTest {
 
         client.createForm(formClass);
 
-        FormInstance kunduz1 = new FormInstance(harness.newRecordId(), formClass.getId());
+        TypedFormRecord kunduz1 = new TypedFormRecord(harness.newRecordId(), formClass.getId());
         kunduz1.set(provinceField.getId(), "KUNDUZ");
         kunduz1.set(partnerField.getId(), database.getDefaultPartner());
         client.createRecord(kunduz1);
 
-        FormInstance kunduz2 = new FormInstance(harness.newRecordId(), formClass.getId());
+        TypedFormRecord kunduz2 = new TypedFormRecord(harness.newRecordId(), formClass.getId());
         kunduz2.set(provinceField.getId(), "KUNDUZ");
         kunduz2.set(partnerField.getId(), database.getDefaultPartner());
         client.createRecord(kunduz2);
 
-        FormInstance takhar = new FormInstance(harness.newRecordId(), formClass.getId());
+        TypedFormRecord takhar = new TypedFormRecord(harness.newRecordId(), formClass.getId());
         takhar.set(provinceField.getId(), "TAKHAR");
         takhar.set(partnerField.getId(), database.getDefaultPartner());
         client.createRecord(takhar);

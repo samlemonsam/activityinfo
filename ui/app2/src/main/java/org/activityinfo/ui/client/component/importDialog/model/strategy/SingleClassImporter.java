@@ -20,7 +20,7 @@ package org.activityinfo.ui.client.component.importDialog.model.strategy;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
@@ -133,7 +133,7 @@ public class SingleClassImporter implements FieldImporter {
     }
 
     @Override
-    public boolean updateInstance(SourceRow row, FormInstance instance) {
+    public boolean updateInstance(SourceRow row, TypedFormRecord instance) {
 
         final List<ValidationResult> validationResults = Lists.newArrayList();
         validateInstance(row, validationResults);

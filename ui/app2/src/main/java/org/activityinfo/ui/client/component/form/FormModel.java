@@ -29,7 +29,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
@@ -79,9 +79,9 @@ public class FormModel {
     public static class SubformValueKey {
 
         private final FormClass subForm;
-        private final FormInstance rootInstance;
+        private final TypedFormRecord rootInstance;
 
-        public SubformValueKey(FormClass subForm, FormInstance rootInstance) {
+        public SubformValueKey(FormClass subForm, TypedFormRecord rootInstance) {
             this.subForm = subForm;
             this.rootInstance = rootInstance;
         }
@@ -90,7 +90,7 @@ public class FormModel {
             return subForm;
         }
 
-        public FormInstance getRootInstance() {
+        public TypedFormRecord getRootInstance() {
             return rootInstance;
         }
 
@@ -127,8 +127,8 @@ public class FormModel {
      */
     private final Map<ResourceId, FormClass> formFieldToFormClass = Maps.newHashMap();
 
-    private final Set<FormInstance> persistedInstanceToRemoveByLocator = Sets.newHashSet();
-    private final Set<FormInstance> changedInstances = Sets.newHashSet();
+    private final Set<TypedFormRecord> persistedInstanceToRemoveByLocator = Sets.newHashSet();
+    private final Set<TypedFormRecord> changedInstances = Sets.newHashSet();
 
     private FormClass rootFormClass;
 
@@ -141,17 +141,17 @@ public class FormModel {
     /**
      * The original, unmodified instance
      */
-    private FormInstance originalRootInstance;
+    private TypedFormRecord originalRootInstance;
 
     /**
      * A new version of the root instance, being updated by the user
      */
-    private FormInstance workingRootInstance;
+    private TypedFormRecord workingRootInstance;
 
     /**
      * Subform value instances for given Subform Class and Root instance
      */
-    private final Map<SubformValueKey, Set<FormInstance>> subFormInstances = Maps.newHashMap();
+    private final Map<SubformValueKey, Set<TypedFormRecord>> subFormInstances = Maps.newHashMap();
 
     /**
      * Keeps formClass to create FieldContainers map.
@@ -247,19 +247,19 @@ public class FormModel {
         this.validationFormClass = validationFormClass;
     }
 
-    public FormInstance getWorkingRootInstance() {
+    public TypedFormRecord getWorkingRootInstance() {
         return workingRootInstance;
     }
 
-    public void setWorkingRootInstance(FormInstance workingRootInstance) {
+    public void setWorkingRootInstance(TypedFormRecord workingRootInstance) {
         this.originalRootInstance = workingRootInstance.copy();
         this.workingRootInstance = workingRootInstance;
     }
 
-    public Optional<FormInstance> getSubformValueInstance(FormClass subformClass, FormInstance rootInstance, String keyId) {
-        Set<FormInstance> formInstances = subFormInstances.get(new SubformValueKey(subformClass, rootInstance));
-        if (formInstances != null) {
-            for (FormInstance instance : formInstances) {
+    public Optional<TypedFormRecord> getSubformValueInstance(FormClass subformClass, TypedFormRecord rootInstance, String keyId) {
+        Set<TypedFormRecord> typedFormRecords = subFormInstances.get(new SubformValueKey(subformClass, rootInstance));
+        if (typedFormRecords != null) {
+            for (TypedFormRecord instance : typedFormRecords) {
                 if (instance.getId().asString().endsWith(keyId)) {
                     return Optional.of(instance);
                 }
@@ -268,21 +268,21 @@ public class FormModel {
         return Optional.absent();
     }
 
-    public Optional<FormInstance> getWorkingInstance(ResourceId formFieldId, String keyId) {
+    public Optional<TypedFormRecord> getWorkingInstance(ResourceId formFieldId, String keyId) {
         FormClass classByField = getClassByField(formFieldId);
         if (classByField.equals(rootFormClass)) {
             return Optional.of(getWorkingRootInstance());
         }
         if (classByField.isSubForm()) {
-            Optional<FormInstance> valueInstance = getSubformValueInstance(classByField, getWorkingRootInstance(), keyId);
+            Optional<TypedFormRecord> valueInstance = getSubformValueInstance(classByField, getWorkingRootInstance(), keyId);
             if (valueInstance.isPresent()) {
                 return valueInstance;
             } else {
-                FormInstance newInstance = new FormInstance(ResourceId.generatedPeriodSubmissionId(getWorkingRootInstance().getId(), keyId), classByField.getId());
+                TypedFormRecord newInstance = new TypedFormRecord(ResourceId.generatedPeriodSubmissionId(getWorkingRootInstance().getId(), keyId), classByField.getId());
                 newInstance.setParentRecordId(getWorkingRootInstance().getId());
 
                 SubformValueKey valueKey = new SubformValueKey(classByField, getWorkingRootInstance());
-                Set<FormInstance> allInstances = subFormInstances.get(valueKey);
+                Set<TypedFormRecord> allInstances = subFormInstances.get(valueKey);
                 if (allInstances == null) {
                     allInstances = Sets.newHashSet();
                     subFormInstances.put(valueKey, allInstances);
@@ -295,7 +295,7 @@ public class FormModel {
         throw new RuntimeException("Failed to identify working instance for field: " + formFieldId + ", keyId: " + keyId);
     }
 
-    public Map<SubformValueKey, Set<FormInstance>> getSubFormInstances() {
+    public Map<SubformValueKey, Set<TypedFormRecord>> getSubFormInstances() {
         return subFormInstances;
     }
 
@@ -304,7 +304,7 @@ public class FormModel {
         return containers != null ? containers : Collections.<FieldContainer>emptySet();
     }
 
-    public void applyInstanceValues(FormInstance instance, FormClass formClass) {
+    public void applyInstanceValues(TypedFormRecord instance, FormClass formClass) {
         for (FieldContainer fieldContainer : getContainersOfClass(formClass.getId())) {
             FieldValue fieldValue = instance.get(fieldContainer.getField().getId());
             if (fieldValue != null) {
@@ -331,11 +331,11 @@ public class FormModel {
         return this;
     }
 
-    public FormInstance getOriginalRootInstance() {
+    public TypedFormRecord getOriginalRootInstance() {
         return originalRootInstance;
     }
 
-    public Set<FormInstance> getPersistedInstanceToRemoveByLocator() {
+    public Set<TypedFormRecord> getPersistedInstanceToRemoveByLocator() {
         return persistedInstanceToRemoveByLocator;
     }
 
@@ -343,7 +343,7 @@ public class FormModel {
         return stateProvider;
     }
 
-    public Set<FormInstance> getChangedInstances() {
+    public Set<TypedFormRecord> getChangedInstances() {
         return changedInstances;
     }
 }

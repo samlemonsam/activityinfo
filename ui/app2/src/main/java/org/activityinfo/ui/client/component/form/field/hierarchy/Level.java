@@ -22,7 +22,7 @@ import com.google.common.collect.Lists;
 import org.activityinfo.model.form.ApplicationProperties;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceType;
@@ -100,7 +100,7 @@ public class Level {
     }
 
 
-    public Choice toChoice(FormInstance instance) {
+    public Choice toChoice(TypedFormRecord instance) {
 
 
         if(isRoot()) {

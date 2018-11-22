@@ -21,7 +21,7 @@ package org.activityinfo.ui.client.component.form.subform;
 import com.google.common.base.Function;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.FormModel;
 
@@ -36,17 +36,17 @@ public class SubFormInstanceLoader {
     private final FormModel model;
 
     // keep copy of persisted instances, we need to track persisted instance to remove them on save if they were deleted by user.
-    private final Set<FormInstance> persisted = Sets.newHashSet();
+    private final Set<TypedFormRecord> persisted = Sets.newHashSet();
 
     public SubFormInstanceLoader(FormModel model) {
         this.model = model;
     }
 
-    public Promise<List<FormInstance>> load(final FormClass subForm) {
+    public Promise<List<TypedFormRecord>> load(final FormClass subForm) {
         return model.getLocator().getSubFormInstances(subForm.getId(), model.getWorkingRootInstance().getId())
-                .then(new Function<List<FormInstance>, List<FormInstance>>() {
+                .then(new Function<List<TypedFormRecord>, List<TypedFormRecord>>() {
                     @Override
-                    public List<FormInstance> apply(List<FormInstance> instanceList) {
+                    public List<TypedFormRecord> apply(List<TypedFormRecord> instanceList) {
                         model.getSubFormInstances().put(new FormModel.SubformValueKey(subForm, model.getWorkingRootInstance()), Sets.newHashSet(instanceList));
                         persisted.addAll(instanceList);
                         return instanceList;
@@ -54,7 +54,7 @@ public class SubFormInstanceLoader {
                 });
     }
 
-    public boolean isPersisted(FormInstance instance) {
+    public boolean isPersisted(TypedFormRecord instance) {
         return persisted.contains(instance);
     }
 }

@@ -26,7 +26,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.FormModel;
 import org.activityinfo.ui.client.component.form.PanelFiller;
@@ -74,7 +74,7 @@ public class PeriodSubFormPanel implements SubFormPanel {
     }
 
     private void applyInstance(Tab tab) {
-        Optional<FormInstance> instance = formModel.getSubformValueInstance(subForm, formModel.getWorkingRootInstance(), tab.getId());
+        Optional<TypedFormRecord> instance = formModel.getSubformValueInstance(subForm, formModel.getWorkingRootInstance(), tab.getId());
         if (instance.isPresent()) {
             formModel.applyInstanceValues(instance.get(), subForm);
         } else {
@@ -118,9 +118,9 @@ public class PeriodSubFormPanel implements SubFormPanel {
 
     @Override
     public Promise<Void> show(Void value) {
-        return new SubFormInstanceLoader(formModel).load(subForm).then(new Function<List<FormInstance>, Void>() {
+        return new SubFormInstanceLoader(formModel).load(subForm).then(new Function<List<TypedFormRecord>, Void>() {
             @Override
-            public Void apply(List<FormInstance> input) {
+            public Void apply(List<TypedFormRecord> input) {
                 onInstanceLoaded();
                 return null;
             }

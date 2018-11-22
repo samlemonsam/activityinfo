@@ -30,10 +30,10 @@ public class FormInstanceComparators {
     private FormInstanceComparators() {
     }
 
-    public static Comparator<FormInstance> doubleComparator(final ResourceId sortField) {
-        return new Comparator<FormInstance>() {
+    public static Comparator<TypedFormRecord> doubleComparator(final ResourceId sortField) {
+        return new Comparator<TypedFormRecord>() {
             @Override
-            public int compare(FormInstance o1, FormInstance o2) {
+            public int compare(TypedFormRecord o1, TypedFormRecord o2) {
                 Double d1 = o1.getDouble(sortField);
                 Double d2 = o2.getDouble(sortField);
                 if (d1 != null && d2 != null) {
@@ -44,10 +44,10 @@ public class FormInstanceComparators {
         };
     }
 
-    public static Comparator<FormInstance> stringComparator(final ResourceId sortField) {
-        return new Comparator<FormInstance>() {
+    public static Comparator<TypedFormRecord> stringComparator(final ResourceId sortField) {
+        return new Comparator<TypedFormRecord>() {
             @Override
-            public int compare(FormInstance o1, FormInstance o2) {
+            public int compare(TypedFormRecord o1, TypedFormRecord o2) {
                 String s1 = o1.getString(sortField);
                 String s2 = o2.getString(sortField);
                 if (s1 != null && s2 != null) {

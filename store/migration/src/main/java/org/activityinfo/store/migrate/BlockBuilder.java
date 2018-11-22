@@ -7,7 +7,7 @@ import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.VoidWork;
 import com.googlecode.objectify.util.Closeable;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.hrd.Hrd;
@@ -107,7 +107,7 @@ public class BlockBuilder extends MapOnlyMapper<RecordBatch, Void> {
         }
 
         FormRecord formRecord = record.toFormRecord(formSchema);
-        FormInstance typedRecord = FormInstance.toFormInstance(formSchema, formRecord);
+        TypedFormRecord typedRecord = TypedFormRecord.toTypedFormRecord(formSchema, formRecord);
 
         blockUpdater.updateFields(newRecordNumber, typedRecord.getFieldValueMap());
     }

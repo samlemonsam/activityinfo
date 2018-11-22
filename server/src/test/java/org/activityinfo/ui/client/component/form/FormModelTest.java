@@ -22,7 +22,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -118,7 +118,7 @@ public class FormModelTest extends CommandTestCase2 {
         
         setupForms();
 
-        FormInstance rootInstance = new FormInstance(ResourceId.generateSubmissionId(masterFormClass), masterFormClass.getId());
+        TypedFormRecord rootInstance = new TypedFormRecord(ResourceId.generateSubmissionId(masterFormClass), masterFormClass.getId());
         rootInstance.set(CuidAdapter.field(masterFormClass.getId(), CuidAdapter.START_DATE_FIELD), new LocalDate(2016,1,1));
         rootInstance.set(CuidAdapter.field(masterFormClass.getId(), CuidAdapter.END_DATE_FIELD), new LocalDate(2016,1,1));
         rootInstance.set(CuidAdapter.field(masterFormClass.getId(), CuidAdapter.PARTNER_FIELD),
@@ -139,11 +139,11 @@ public class FormModelTest extends CommandTestCase2 {
         String tab2 = new Month(2015, 8).toString();
 
         // Tab1
-        FormInstance valueInstance1 = formModel.getWorkingInstance(subFormChildField.getId(), tab1).get();
+        TypedFormRecord valueInstance1 = formModel.getWorkingInstance(subFormChildField.getId(), tab1).get();
         valueInstance1.set(subFormChildField.getId(), TextValue.valueOf("tab1"));
 
         // Tab2
-        FormInstance valueInstance2 = formModel.getWorkingInstance(subFormChildField.getId(), tab2).get();
+        TypedFormRecord valueInstance2 = formModel.getWorkingInstance(subFormChildField.getId(), tab2).get();
         valueInstance2.set(subFormChildField.getId(), TextValue.valueOf("tab2"));
 
         formModel.getChangedInstances().add(valueInstance1);
@@ -154,8 +154,8 @@ public class FormModelTest extends CommandTestCase2 {
         assertResolves(actions.save());
 
         // make sure instances are persisted
-        FormInstance fetchedInstance1 = assertResolves(locator.getFormInstance(subFormClass.getId(), valueInstance1.getId()));
-        FormInstance fetchedInstance2 = assertResolves(locator.getFormInstance(subFormClass.getId(), valueInstance2.getId()));
+        TypedFormRecord fetchedInstance1 = assertResolves(locator.getFormInstance(subFormClass.getId(), valueInstance1.getId()));
+        TypedFormRecord fetchedInstance2 = assertResolves(locator.getFormInstance(subFormClass.getId(), valueInstance2.getId()));
 
         assertEquals(fetchedInstance1.get(subFormChildField.getId()), TextValue.valueOf("tab1"));
         assertEquals(fetchedInstance2.get(subFormChildField.getId()), TextValue.valueOf("tab2"));
@@ -189,7 +189,7 @@ public class FormModelTest extends CommandTestCase2 {
 
         // load subform instances into empty model
         assertResolves(new SubFormInstanceLoader(emptyModel).load(subFormClass));
-        Map<FormModel.SubformValueKey, Set<FormInstance>> loadedInstances = emptyModel.getSubFormInstances();
+        Map<FormModel.SubformValueKey, Set<TypedFormRecord>> loadedInstances = emptyModel.getSubFormInstances();
 
         assertEquals(1, loadedInstances.size());
         assertEquals(emptyModel.getSubformValueInstance(subFormClass, rootInstance, tab1).get(), valueInstance1);

@@ -24,7 +24,7 @@ import org.activityinfo.json.JsonMappingException;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
@@ -229,7 +229,7 @@ public class UpdaterTest {
 
         TypedRecordUpdate update = Updater.parseChange(formClass, change, userId);
 
-        FormInstance effectiveRecord = updater.computeEffectiveRecord(formClass, Optional.<FormRecord>absent(), update);
+        TypedFormRecord effectiveRecord = updater.computeEffectiveRecord(formClass, Optional.<FormRecord>absent(), update);
 
         updater.generateSerialNumber(formClass, serialNumberField, effectiveRecord, update);
 

@@ -20,7 +20,7 @@ package org.activityinfo.store.testing;
 
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.RecordRef;
@@ -46,7 +46,7 @@ public class Survey2 implements TestForm {
 
     private final RecordGenerator recordGenerator;
 
-    private List<FormInstance> records = null;
+    private List<TypedFormRecord> records = null;
     private final FormField nameField;
     private final FormField ageField;
     private final FormField numChildrenField;
@@ -334,7 +334,7 @@ public class Survey2 implements TestForm {
     }
 
     @Override
-    public List<FormInstance> getRecords() {
+    public List<TypedFormRecord> getRecords() {
         if(records == null) {
             this.records = recordGenerator.get(getRowCount());
         }

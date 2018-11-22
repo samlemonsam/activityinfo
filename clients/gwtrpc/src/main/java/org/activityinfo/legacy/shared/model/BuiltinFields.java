@@ -22,7 +22,7 @@ import com.google.common.base.Predicate;
 import org.activityinfo.model.date.DateRange;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
@@ -38,7 +38,7 @@ public class BuiltinFields {
     private BuiltinFields() {
     }
 
-    public static DateRange getDateRange(FormInstance instance, FormClass formClass) {
+    public static DateRange getDateRange(TypedFormRecord instance, FormClass formClass) {
         Date startDate = null;
         Date endDate = null;
         for (FormField field : formClass.getFields()) {
@@ -95,7 +95,7 @@ public class BuiltinFields {
         });
     }
 
-    public static FieldValue getProjectValue(FormInstance instance, FormClass formClass) {
+    public static FieldValue getProjectValue(TypedFormRecord instance, FormClass formClass) {
         return instance.get(getProjectField(formClass).getId());
     }
 

@@ -21,7 +21,7 @@ package org.activityinfo.store.testing;
 import com.google.common.base.Supplier;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.TextType;
 
@@ -43,7 +43,7 @@ public class MultipleTextKeysForm implements TestForm {
     private final FormField firstTextKey;
     private final FormField secondTextKey;
 
-    private List<FormInstance> records;
+    private List<TypedFormRecord> records;
     private RecordGenerator generator;
 
     public MultipleTextKeysForm(Ids ids) {
@@ -84,7 +84,7 @@ public class MultipleTextKeysForm implements TestForm {
     }
 
     @Override
-    public List<FormInstance> getRecords() {
+    public List<TypedFormRecord> getRecords() {
         if (records == null) {
             this.records = generator.get(ROW_COUNT);
         }
@@ -92,7 +92,7 @@ public class MultipleTextKeysForm implements TestForm {
     }
 
     @Override
-    public Supplier<FormInstance> getGenerator() {
+    public Supplier<TypedFormRecord> getGenerator() {
         return generator;
     }
 

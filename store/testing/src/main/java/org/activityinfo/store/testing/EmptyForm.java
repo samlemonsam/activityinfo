@@ -20,7 +20,7 @@ package org.activityinfo.store.testing;
 
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
@@ -53,7 +53,7 @@ public class EmptyForm implements TestForm {
     private final FormField enumField;
     private final FormField popEnumField;
 
-    private List<FormInstance> records;
+    private List<TypedFormRecord> records;
 
     public EmptyForm() {
         formClass = new FormClass(FORM_ID)
@@ -97,7 +97,7 @@ public class EmptyForm implements TestForm {
     }
 
     @Override
-    public List<FormInstance> getRecords() {
+    public List<TypedFormRecord> getRecords() {
         if(records == null) {
             this.records = getGenerator().get(ROW_COUNT);
         }

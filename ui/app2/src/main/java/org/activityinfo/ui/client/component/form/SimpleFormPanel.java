@@ -31,7 +31,7 @@ import org.activityinfo.legacy.shared.model.BuiltinFields;
 import org.activityinfo.model.date.DateRange;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.ReferenceValue;
 import org.activityinfo.model.type.attachment.AttachmentValue;
@@ -56,7 +56,7 @@ import java.util.Objects;
 /**
  * Displays a simple view of the form, where users can edit instances
  */
-public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetCreator.FieldUpdated {
+public class SimpleFormPanel implements DisplayWidget<TypedFormRecord>, FormWidgetCreator.FieldUpdated {
 
     private final FlowPanel panel;
     private final ScrollPanel scrollPanel;
@@ -121,7 +121,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     }
 
     @Override
-    public Promise<Void> show(final FormInstance instance) {
+    public Promise<Void> show(final TypedFormRecord instance) {
         model.setWorkingRootInstance(instance);
 
         final Promise<Void> result = new Promise<>();
@@ -160,7 +160,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
         }
     }
 
-    public Promise<Void> setValue(FormInstance instance) {
+    public Promise<Void> setValue(TypedFormRecord instance) {
         model.setWorkingRootInstance(instance);
 
         List<Promise<Void>> tasks = Lists.newArrayList();
@@ -207,7 +207,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     }
 
     public void onFieldUpdated(FormField field, FieldValue newValue) {
-        Optional<FormInstance> workingInstance = model.getWorkingInstance(field.getId(), getSelectedKey(field));
+        Optional<TypedFormRecord> workingInstance = model.getWorkingInstance(field.getId(), getSelectedKey(field));
 
         if (workingInstance.isPresent()) {
             if (!Objects.equals(workingInstance.get().get(field.getId()), newValue)) {
@@ -310,7 +310,7 @@ public class SimpleFormPanel implements DisplayWidget<FormInstance>, FormWidgetC
     }
 
     private FieldValue getCurrentValue(FormField field) {
-        Optional<FormInstance> instance = model.getWorkingInstance(field.getId(), getSelectedKey(field));
+        Optional<TypedFormRecord> instance = model.getWorkingInstance(field.getId(), getSelectedKey(field));
         return instance.isPresent() ? instance.get().get(field.getId()) : null;
     }
 

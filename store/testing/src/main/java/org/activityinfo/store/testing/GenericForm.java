@@ -21,8 +21,7 @@ package org.activityinfo.store.testing;
 import com.google.common.base.Supplier;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
-import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -55,7 +54,7 @@ public class GenericForm implements TestForm {
     private final FormField commentsField;
     private FormField blankSubFormField;
 
-    private List<FormInstance> records;
+    private List<TypedFormRecord> records;
     private RecordGenerator generator;
 
     public GenericForm() {
@@ -126,7 +125,7 @@ public class GenericForm implements TestForm {
     }
 
     @Override
-    public List<FormInstance> getRecords() {
+    public List<TypedFormRecord> getRecords() {
         if (records == null) {
             this.records = generator.get(ROW_COUNT);
         }
@@ -134,7 +133,7 @@ public class GenericForm implements TestForm {
     }
 
     @Override
-    public Supplier<FormInstance> getGenerator() {
+    public Supplier<TypedFormRecord> getGenerator() {
         return generator;
     }
 }

@@ -29,7 +29,7 @@ import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.SiteDTO;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -225,7 +225,7 @@ public class ImportWithMultiClassRangeTest extends AbstractImporterTest {
             throw new AssertionError("No school named '" + name + "'");
         }
 
-        Promise<FormInstance> record = locator.getFormInstance(SCHOOL_FORM_CLASS, id);
+        Promise<TypedFormRecord> record = locator.getFormInstance(SCHOOL_FORM_CLASS, id);
         ReferenceValue value = (ReferenceValue) record.get().get(CuidAdapter.field(SCHOOL_FORM_CLASS, CuidAdapter.ADMIN_FIELD));
 
         Set<ResourceId> recordIds = new HashSet<>();

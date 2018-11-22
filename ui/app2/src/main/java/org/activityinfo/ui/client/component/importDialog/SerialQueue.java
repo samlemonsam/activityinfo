@@ -21,7 +21,7 @@ package org.activityinfo.ui.client.component.importDialog;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.promise.PromisesExecutionMonitor;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
@@ -44,7 +44,7 @@ public class SerialQueue {
     private ResourceLocator locator;
 
     private class Task {
-        private FormInstance record;
+        private TypedFormRecord record;
         private Promise<Void> result;
         private int retries = 0;
     }
@@ -70,12 +70,12 @@ public class SerialQueue {
     private int retries = 0;
 
 
-    public SerialQueue(ResourceLocator locator, List<FormInstance> toPersist, PromisesExecutionMonitor monitor) {
+    public SerialQueue(ResourceLocator locator, List<TypedFormRecord> toPersist, PromisesExecutionMonitor monitor) {
         this.locator = locator;
 
-        for (FormInstance formInstance : toPersist) {
+        for (TypedFormRecord typedFormRecord : toPersist) {
             Task task = new Task();
-            task.record = formInstance;
+            task.record = typedFormRecord;
             tasks.add(task);
         }
 

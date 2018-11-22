@@ -28,7 +28,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.FormModel;
@@ -54,7 +54,7 @@ public class RepeatingSubFormPanel implements SubFormPanel {
     private final SubFormInstanceLoader loader;
     private final LoadingPanel<Void> loadingPanel;
 
-    private final Map<FormInstance, SimpleFormPanel> forms = Maps.newHashMap();
+    private final Map<TypedFormRecord, SimpleFormPanel> forms = Maps.newHashMap();
 
     public RepeatingSubFormPanel(FormClass subForm, FormModel formModel) {
         this.subForm = subForm;
@@ -90,50 +90,50 @@ public class RepeatingSubFormPanel implements SubFormPanel {
         });
     }
 
-    private Set<FormInstance> getInstances() {
-        Set<FormInstance> formInstances = formModel.getSubFormInstances().get(key());
-        if (formInstances == null) {
-            formInstances = Sets.newHashSet(newValueInstance());
-            formModel.getSubFormInstances().put(key(), formInstances);
+    private Set<TypedFormRecord> getInstances() {
+        Set<TypedFormRecord> typedFormRecords = formModel.getSubFormInstances().get(key());
+        if (typedFormRecords == null) {
+            typedFormRecords = Sets.newHashSet(newValueInstance());
+            formModel.getSubFormInstances().put(key(), typedFormRecords);
         }
-        if (formInstances.isEmpty()) {
-            formInstances.add(newValueInstance());
+        if (typedFormRecords.isEmpty()) {
+            typedFormRecords.add(newValueInstance());
         }
-        return formInstances;
+        return typedFormRecords;
     }
 
     private void render() {
-        List<FormInstance> instances = Lists.newArrayList(getInstances());
+        List<TypedFormRecord> instances = Lists.newArrayList(getInstances());
 
-        Collections.sort(instances, new Comparator<FormInstance>() {
+        Collections.sort(instances, new Comparator<TypedFormRecord>() {
             @Override
-            public int compare(FormInstance o1, FormInstance o2) {
+            public int compare(TypedFormRecord o1, TypedFormRecord o2) {
                 return getCreationTime(o1).compareTo(getCreationTime(o2));
             }
         });
 
-        for (FormInstance instance : instances) {
+        for (TypedFormRecord instance : instances) {
             addForm(instance);
         }
 
         panel.add(addButton);
     }
 
-    private static Long getCreationTime(FormInstance instance) {
+    private static Long getCreationTime(TypedFormRecord instance) {
         return 0L; // todo
     }
 
-    private void addForm(final FormInstance formInstance) {
-        addForm(formInstance, -1);
+    private void addForm(final TypedFormRecord typedFormRecord) {
+        addForm(typedFormRecord, -1);
     }
 
-    private FormInstance newValueInstance() {
-        FormInstance newInstance = new FormInstance(ResourceId.generateSubmissionId(subForm.getId()), subForm.getId());
+    private TypedFormRecord newValueInstance() {
+        TypedFormRecord newInstance = new TypedFormRecord(ResourceId.generateSubmissionId(subForm.getId()), subForm.getId());
         newInstance.setParentRecordId(formModel.getWorkingRootInstance().getId());
 
         FormModel.SubformValueKey key = key();
 
-        Set<FormInstance> instances = formModel.getSubFormInstances().get(key);
+        Set<TypedFormRecord> instances = formModel.getSubFormInstances().get(key);
         if (instances == null) {
             instances = Sets.newHashSet();
             formModel.getSubFormInstances().put(key, instances);
@@ -149,7 +149,7 @@ public class RepeatingSubFormPanel implements SubFormPanel {
         return new FormModel.SubformValueKey(subForm, formModel.getWorkingRootInstance());
     }
 
-    private void addForm(final FormInstance instance, int panelIndex) {
+    private void addForm(final TypedFormRecord instance, int panelIndex) {
 
         final SimpleFormPanel formPanel = new SimpleFormPanel(formModel.getLocator(), formModel.getStateProvider());
         formPanel.asWidget().addStyleName(FormPanelStyles.INSTANCE.subformPanel());
@@ -191,7 +191,7 @@ public class RepeatingSubFormPanel implements SubFormPanel {
         }
     }
 
-    public Map<FormInstance, SimpleFormPanel> getForms() {
+    public Map<TypedFormRecord, SimpleFormPanel> getForms() {
         return forms;
     }
 
@@ -202,9 +202,9 @@ public class RepeatingSubFormPanel implements SubFormPanel {
 
     @Override
     public Promise<Void> show(Void value) {
-        return loader.load(subForm).then(new Function<List<FormInstance>, Void>() {
+        return loader.load(subForm).then(new Function<List<TypedFormRecord>, Void>() {
             @Override
-            public Void apply(List<FormInstance> input) {
+            public Void apply(List<TypedFormRecord> input) {
                 render();
                 return null;
             }

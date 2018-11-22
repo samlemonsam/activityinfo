@@ -19,7 +19,7 @@
 package org.activityinfo.model.resource;
 
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.form.FormRecord;
 
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public class RecordTransactionBuilder {
     }
 
 
-    public RecordTransactionBuilder create(FormInstance record) {
+    public RecordTransactionBuilder create(TypedFormRecord record) {
         RecordUpdate update = new RecordUpdate();
         update.setFormId(record.getFormId());
         update.setRecordId(record.getId());

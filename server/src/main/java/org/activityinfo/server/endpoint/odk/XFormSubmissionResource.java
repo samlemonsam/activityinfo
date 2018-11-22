@@ -30,7 +30,7 @@ import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
@@ -102,7 +102,7 @@ public class XFormSubmissionResource {
 
 
         ResourceId formId = newLegacyFormInstanceId(formClass.getId());
-        FormInstance formInstance = new FormInstance(formId, formClass.getId());
+        TypedFormRecord typedFormRecord = new TypedFormRecord(formId, formClass.getId());
         String instanceId = instance.getId();
 
         LOGGER.log(Level.INFO, "Saving XForm " + instance.getId() + " as " + formId);
@@ -113,7 +113,7 @@ public class XFormSubmissionResource {
             if(formField.getType().isUpdatable()) {
                 Optional<Element> element = instance.getFieldContent(formField.getId());
                 if (element.isPresent()) {
-                    formInstance.set(formField.getId(), tryParse(formInstance, formField, element.get()));
+                    typedFormRecord.set(formField.getId(), tryParse(typedFormRecord, formField, element.get()));
                 } else if (isLocation(formClass, formField)) {
                     FieldType fieldType = formField.getType();
                     Optional<Element> gpsField = instance.getFieldContent(field(formClass.getId(), GPS_FIELD));
@@ -141,23 +141,23 @@ public class XFormSubmissionResource {
 
                         Optional<GeoPoint> geoPoint = parseLocation(gpsField);
 
-                        formInstance.set(locationFieldId, fieldValue);
+                        typedFormRecord.set(locationFieldId, fieldValue);
                         createLocation(newLocationId, locationTypeId, name, geoPoint);
                     }
                 }
             }
         }
     
-        ensurePartnerIsSet(formClass, formInstance);
+        ensurePartnerIsSet(formClass, typedFormRecord);
 
         if (!instanceIdService.exists(instanceId)) {
-            for (FieldValue fieldValue : formInstance.getFieldValueMap().values()) {
+            for (FieldValue fieldValue : typedFormRecord.getFieldValueMap().values()) {
                 if (fieldValue instanceof AttachmentValue) {
                     persist(user, instance, (AttachmentValue) fieldValue);
                 }
             }
 
-            locator.persist(formInstance);
+            locator.persist(typedFormRecord);
             instanceIdService.submit(instanceId);
         }
 
@@ -167,10 +167,10 @@ public class XFormSubmissionResource {
         return Response.status(CREATED).build();
     }
 
-    private void ensurePartnerIsSet(FormClass formClass, FormInstance formInstance) {
+    private void ensurePartnerIsSet(FormClass formClass, TypedFormRecord typedFormRecord) {
 
         ResourceId partnerFieldId = CuidAdapter.field(formClass.getId(), CuidAdapter.PARTNER_FIELD);
-        if(formInstance.get(partnerFieldId) != null) {
+        if(typedFormRecord.get(partnerFieldId) != null) {
             return;
         }
         
@@ -184,17 +184,17 @@ public class XFormSubmissionResource {
             .entity("No partner selected").build());
         }
 
-        formInstance.set(partnerFieldId, new ReferenceValue(choices.get(0).getRef()));
+        typedFormRecord.set(partnerFieldId, new ReferenceValue(choices.get(0).getRef()));
     }
 
-    private FieldValue tryParse(FormInstance formInstance, FormField formField, Element element) {
+    private FieldValue tryParse(TypedFormRecord typedFormRecord, FormField formField, Element element) {
         try {
             OdkFieldValueParser odkFieldValueParser = FieldValueParserFactory.create(formField.getType());
             return odkFieldValueParser.parse(element);
 
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to parse value for field " + formField.getId() +
-                     " in form " + formInstance.getFormId() +
+                     " in form " + typedFormRecord.getFormId() +
                      " from xml: " + element, e);
         }
         return null;

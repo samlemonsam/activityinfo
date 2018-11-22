@@ -21,7 +21,7 @@ package org.activityinfo.ui.client.component.form;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.event.BeforeSaveEvent;
@@ -42,16 +42,16 @@ public class FormActions {
         this.model = model;
     }
 
-    public Promise<List<FormInstance>> save() {
+    public Promise<List<TypedFormRecord>> save() {
 
         model.getEventBus().fireEvent(new BeforeSaveEvent());
 
-        final List<FormInstance> instancesToPersist = getInstancesToPersist();
+        final List<TypedFormRecord> instancesToPersist = getInstancesToPersist();
 
         Promise<Void> persist = locator.persist(instancesToPersist);
         Promise<Void> remove = remove();
 
-        final Promise<List<FormInstance>> result = new Promise<>();
+        final Promise<List<TypedFormRecord>> result = new Promise<>();
 
         Promise.waitAll(persist, remove).then(new AsyncCallback<Void>() {
             @Override
@@ -74,7 +74,7 @@ public class FormActions {
 
         if (!model.getPersistedInstanceToRemoveByLocator().isEmpty()) {
             List<Promise<Void>> removePromises = Lists.newArrayList();
-            for (FormInstance instance : model.getPersistedInstanceToRemoveByLocator()) {
+            for (TypedFormRecord instance : model.getPersistedInstanceToRemoveByLocator()) {
                 removePromises.add(locator.remove(instance.getFormId(), instance.getId()));
             }
             remove = Promise.waitAll(removePromises);
@@ -89,10 +89,10 @@ public class FormActions {
         return remove;
     }
 
-    private List<FormInstance> getInstancesToPersist() {
-        final List<FormInstance> toPersist = Lists.newArrayList();
+    private List<TypedFormRecord> getInstancesToPersist() {
+        final List<TypedFormRecord> toPersist = Lists.newArrayList();
 
-        for (FormInstance instance : model.getChangedInstances()) {
+        for (TypedFormRecord instance : model.getChangedInstances()) {
             if (!instance.isEmpty("classId", "keyId", "sort")) {
                 if (instance.getId().getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
                     ResourceId.checkSubmissionId(instance.getId());

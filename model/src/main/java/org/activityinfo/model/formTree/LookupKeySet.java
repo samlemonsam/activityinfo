@@ -23,7 +23,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.*;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.formula.CompoundExpr;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.SymbolNode;
@@ -242,9 +242,9 @@ public class LookupKeySet {
      * Composes a human-readable label for a record reference.
      */
     public Maybe<String> label(RecordTree tree, RecordRef ref) {
-        Optional<FormInstance> potentialRecord = tree.getRecord(ref).getIfVisible();
+        Optional<TypedFormRecord> potentialRecord = tree.getRecord(ref).getIfVisible();
         if (potentialRecord.isPresent()) {
-            FormInstance record = potentialRecord.get();
+            TypedFormRecord record = potentialRecord.get();
             for (LookupKey lookupKey : lookupKeys) {
                 if (record.getFormId().equals(lookupKey.getFormId())) {
                     return Maybe.of(lookupKey.label(record));

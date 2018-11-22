@@ -23,7 +23,7 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.util.Closeable;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
@@ -78,7 +78,7 @@ public class HrdFormStorageTest {
         int numRecords = 20;
 
         for (int i = 0; i < numRecords; i++) {
-            FormInstance newRecord = generator.get();
+            TypedFormRecord newRecord = generator.get();
             System.out.println(newRecord);
             storage.add(new TypedRecordUpdate(USER_ID, newRecord));
         }
@@ -113,7 +113,7 @@ public class HrdFormStorageTest {
         int numRecords = 5;
 
         for (int i = 0; i < numRecords; i++) {
-            FormInstance newRecord = generator.get();
+            TypedFormRecord newRecord = generator.get();
             System.out.println(newRecord);
             storage.add(new TypedRecordUpdate(USER_ID, newRecord));
         }

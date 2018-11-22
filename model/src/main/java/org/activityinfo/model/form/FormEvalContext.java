@@ -44,7 +44,7 @@ public class FormEvalContext implements EvalContext {
     private final Map<String, ValueSource> fieldMap = Maps.newHashMap();
 
 
-    private FormInstance formInstance;
+    private TypedFormRecord typedFormRecord;
 
     public FormEvalContext(FormClass formClass) {
         for (FormField field : formClass.getFields()) {
@@ -83,23 +83,23 @@ public class FormEvalContext implements EvalContext {
         return CuidAdapter.partnerFormId(CuidAdapter.getLegacyIdFromCuid(formClass.getDatabaseId())).asString();
     }
 
-    public FormEvalContext(FormClass formClass, FormInstance instance) {
+    public FormEvalContext(FormClass formClass, TypedFormRecord instance) {
         this(formClass);
         setInstance(instance);
     }
 
-    public void setInstance(FormInstance instance) {
-        this.formInstance = instance;
+    public void setInstance(TypedFormRecord instance) {
+        this.typedFormRecord = instance;
     }
 
     public ResourceId getId() {
-        return formInstance.getId();
+        return typedFormRecord.getId();
     }
 
     public FieldValue getFieldValue(String fieldName) {
-        assert formInstance != null;
+        assert typedFormRecord != null;
         try {
-            return fieldMap.get(fieldName).getValue(formInstance, this);
+            return fieldMap.get(fieldName).getValue(typedFormRecord, this);
         } catch(Exception e) {
             return new ErrorValue(e);
         }
@@ -124,7 +124,7 @@ public class FormEvalContext implements EvalContext {
 
     @Override
     public FieldValue resolveSymbol(String symbolName) {
-        return lookupSymbol(symbolName).getValue(formInstance, this);
+        return lookupSymbol(symbolName).getValue(typedFormRecord, this);
     }
 
     @Override

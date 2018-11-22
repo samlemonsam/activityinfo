@@ -19,7 +19,7 @@
 package org.activityinfo.model.formula.eval;
 
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.NullFieldValue;
@@ -35,7 +35,7 @@ public class StaticField implements FieldValueSource {
     }
 
     @Override
-    public FieldValue getValue(FormInstance instance, EvalContext context) {
+    public FieldValue getValue(TypedFormRecord instance, EvalContext context) {
         FieldValue fieldValue = instance.get(field.getId(), field.getType().getTypeClass());
         if (fieldValue != null) {
             return fieldValue;

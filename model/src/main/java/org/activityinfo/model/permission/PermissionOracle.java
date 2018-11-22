@@ -8,7 +8,7 @@ import org.activityinfo.model.database.ResourceType;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormEvalContext;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formula.*;
 import org.activityinfo.model.formula.diagnostic.FormulaException;
@@ -350,13 +350,13 @@ public class PermissionOracle {
 
     /////////////////////////////////////////////// FORM INSTANCE METHODS ////////////////////////////////////////////////
 
-    public static boolean canEdit(FormInstance record,
+    public static boolean canEdit(TypedFormRecord record,
                                   FormPermissions formPermissions,
                                   FormClass formClass) {
         return can(record, formPermissions, formClass, Operation.EDIT_RECORD);
     }
 
-    public static boolean canView(FormInstance record,
+    public static boolean canView(TypedFormRecord record,
                                   FormPermissions formPermissions,
                                   FormClass formClass) {
         return can(record, formPermissions, formClass, Operation.VIEW);
@@ -372,10 +372,10 @@ public class PermissionOracle {
                               FormPermissions formPermissions,
                               FormClass formClass,
                               Operation operation) {
-        return can(FormInstance.toFormInstance(formClass, record), formPermissions, formClass, operation);
+        return can(TypedFormRecord.toTypedFormRecord(formClass, record), formPermissions, formClass, operation);
     }
 
-    public static boolean can(FormInstance record,
+    public static boolean can(TypedFormRecord record,
                               FormPermissions formPermissions,
                               FormClass formClass,
                               Operation operation) {
@@ -401,7 +401,7 @@ public class PermissionOracle {
         }
     }
 
-    private static boolean evalFilter(FormInstance record, FormClass formClass, FormulaNode filter) {
+    private static boolean evalFilter(TypedFormRecord record, FormClass formClass, FormulaNode filter) {
         EvalContext context = new FormEvalContext(formClass, record);
         return filter.evaluate(context) == BooleanFieldValue.TRUE;
     }

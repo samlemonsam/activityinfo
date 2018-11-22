@@ -21,7 +21,7 @@ package org.activityinfo.ui.client.store;
 import com.google.gwt.core.client.testing.StubScheduler;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.indexedb.IDBFactoryStub;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formula.ConstantNode;
@@ -252,7 +252,7 @@ public class FormStoreTest {
         assertThat(pendingStatus.assertLoaded().isEmpty(), equalTo(true));
 
         // Create a new survey record
-        FormInstance newRecordTyped = survey.getGenerator().get();
+        TypedFormRecord newRecordTyped = survey.getGenerator().get();
         RecordTransaction tx = RecordTransaction.builder()
             .create(newRecordTyped)
             .build();
@@ -294,7 +294,7 @@ public class FormStoreTest {
         setup.setConnected(false);
 
         // Create a new intake record
-        FormInstance newRecord = intakeForm.getGenerator().get();
+        TypedFormRecord newRecord = intakeForm.getGenerator().get();
         newRecord.set(intakeForm.getProtectionCodeFieldId(), (FieldValue)null);
 
         Promise<Void> update = setup.getFormStore().updateRecords(new RecordTransactionBuilder().create(newRecord).build());

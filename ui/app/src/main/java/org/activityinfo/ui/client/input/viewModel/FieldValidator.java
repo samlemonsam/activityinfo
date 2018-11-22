@@ -19,7 +19,7 @@
 package org.activityinfo.ui.client.input.viewModel;
 
 import com.google.common.collect.Multimap;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 
@@ -34,7 +34,7 @@ public class FieldValidator {
         this.validator = validator;
     }
 
-    public void run(FormInstance record, Multimap<ResourceId, String> validationErrors) {
+    public void run(TypedFormRecord record, Multimap<ResourceId, String> validationErrors) {
         FieldValue value = record.get(fieldId);
         if(value != null) {
             Optional<String> errorMessage = validator.validate(value);

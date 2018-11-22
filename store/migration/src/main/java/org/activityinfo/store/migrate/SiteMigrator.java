@@ -6,7 +6,7 @@ import com.google.common.base.Strings;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.LoadResult;
 import com.googlecode.objectify.VoidWork;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.store.hrd.Hrd;
 import org.activityinfo.store.hrd.entity.FormRecordEntity;
@@ -54,7 +54,7 @@ public class SiteMigrator extends MapOnlyMapper<Integer, Void> {
     public void map(Integer siteId) {
 
         SiteFetcher fetcher = new SiteFetcher(activityLoader, queryExecutor);
-        com.google.common.base.Optional<FormInstance> siteRecord = fetcher.fetch(siteId);
+        com.google.common.base.Optional<TypedFormRecord> siteRecord = fetcher.fetch(siteId);
 
         if (!siteRecord.isPresent()) {
             throw new RuntimeException("No such site " + siteId);

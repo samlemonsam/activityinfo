@@ -21,7 +21,7 @@ package org.activityinfo.legacy.shared.adapter;
 import com.google.common.collect.Lists;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.formTree.FieldPath;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -56,27 +56,27 @@ public class SitePersisterTest extends CommandTestCase2 {
     public void test() {
         FormClass formClass = assertResolves(locator.getFormClass(PEAR_Activity));
 
-        FormInstance siteFormInstance = new FormInstance(CuidAdapter.generateSiteCuid(), formClass.getId());
-        siteFormInstance.set(CONTENU_DI_KIT_FIELD, new EnumValue(CONTENU_DI_KIT_FIELD_ATTR_VALUE));
+        TypedFormRecord siteFormRecord = new TypedFormRecord(CuidAdapter.generateSiteCuid(), formClass.getId());
+        siteFormRecord.set(CONTENU_DI_KIT_FIELD, new EnumValue(CONTENU_DI_KIT_FIELD_ATTR_VALUE));
 
         // built-in values
-        siteFormInstance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.PARTNER_FIELD), 
+        siteFormRecord.set(CuidAdapter.field(formClass.getId(), CuidAdapter.PARTNER_FIELD),
                 new ReferenceValue(
                         new RecordRef(
                                 CuidAdapter.partnerFormId(DATABASE_ID),
                                 CuidAdapter.partnerRecordId(1))));
-        siteFormInstance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.START_DATE_FIELD), new LocalDate(2014, 1, 1));
-        siteFormInstance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.END_DATE_FIELD), new LocalDate(2014, 1, 2));
-        siteFormInstance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.LOCATION_FIELD),
+        siteFormRecord.set(CuidAdapter.field(formClass.getId(), CuidAdapter.START_DATE_FIELD), new LocalDate(2014, 1, 1));
+        siteFormRecord.set(CuidAdapter.field(formClass.getId(), CuidAdapter.END_DATE_FIELD), new LocalDate(2014, 1, 2));
+        siteFormRecord.set(CuidAdapter.field(formClass.getId(), CuidAdapter.LOCATION_FIELD),
                 new ReferenceValue(
                         new RecordRef(
                             CuidAdapter.locationFormClass(1),
                             CuidAdapter.locationInstanceId(1))));
 
-        assertResolves(locator.persist(siteFormInstance));
+        assertResolves(locator.persist(siteFormRecord));
 
         // query by id
-        FormInstance fromServer = assertResolves(locator.getFormInstance(siteFormInstance.getFormId(), siteFormInstance.getId()));
+        TypedFormRecord fromServer = assertResolves(locator.getFormInstance(siteFormRecord.getFormId(), siteFormRecord.getId()));
         Assert.assertNotNull(fromServer);
         Assert.assertEquals(fromServer.get(CONTENU_DI_KIT_FIELD), new EnumValue(CONTENU_DI_KIT_FIELD_ATTR_VALUE));
 
@@ -86,7 +86,7 @@ public class SitePersisterTest extends CommandTestCase2 {
         Assert.assertTrue(paths.contains(new FieldPath(CONTENU_DI_KIT_FIELD)));
 
         // query projection
-        FormInstance instance = assertResolves(locator.getFormInstance(formClass.getId(), siteFormInstance.getId()));
+        TypedFormRecord instance = assertResolves(locator.getFormInstance(formClass.getId(), siteFormRecord.getId()));
         EnumValue fieldValue = (EnumValue) instance.get(CONTENU_DI_KIT_FIELD);
         assertThat(fieldValue.getValueId(), equalTo(CONTENU_DI_KIT_FIELD_ATTR_VALUE));
     }

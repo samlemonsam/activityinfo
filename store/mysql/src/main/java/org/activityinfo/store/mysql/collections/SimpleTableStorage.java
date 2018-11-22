@@ -111,7 +111,7 @@ public class SimpleTableStorage implements VersionedFormStorage {
 
         // Otherwise send the whole shebang...
         RecordCursor recordCursor = new RecordCursor(mapping, executor);
-        Iterator<FormInstance> it = recordCursor.execute();
+        Iterator<TypedFormRecord> it = recordCursor.execute();
 
         List<FormRecord> records = new ArrayList<>();
         while(it.hasNext()) {

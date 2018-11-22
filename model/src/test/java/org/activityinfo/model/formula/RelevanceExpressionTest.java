@@ -22,7 +22,7 @@ import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.formula.functions.Casting;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -65,7 +65,7 @@ public class RelevanceExpressionTest {
 
     @Test
     public void enumType() {
-        FormInstance instance = new FormInstance(ResourceId.generateSubmissionId(formClass), formClass.getId());
+        TypedFormRecord instance = new TypedFormRecord(ResourceId.generateSubmissionId(formClass), formClass.getId());
         instance.set(GENDER_FIELD_ID, enumFieldValue(GENDER_FIELD_ID, "Male"));
 
         eval(String.format("{%s}=={%s}", GENDER_FIELD_ID.asString(), enumValue(GENDER_FIELD_ID, "Male").getId()), true, instance);
@@ -108,7 +108,7 @@ public class RelevanceExpressionTest {
 
     @Test
     public void text() {
-        FormInstance instance = new FormInstance(ResourceId.generateSubmissionId(formClass), formClass.getId());
+        TypedFormRecord instance = new TypedFormRecord(ResourceId.generateSubmissionId(formClass), formClass.getId());
         instance.set(TEXT_FIELD_ID, "1");
 
         eval(String.format("{%s}==\"1\"", TEXT_FIELD_ID.asString()), true, instance);
@@ -117,7 +117,7 @@ public class RelevanceExpressionTest {
 
     @Test
     public void quantity() {
-        FormInstance instance = new FormInstance(ResourceId.generateSubmissionId(formClass), formClass.getId());
+        TypedFormRecord instance = new TypedFormRecord(ResourceId.generateSubmissionId(formClass), formClass.getId());
         instance.set(QUANTITY_FIELD_ID, 3);
 
         eval(String.format("{%s}==3", QUANTITY_FIELD_ID.asString()), true, instance);
@@ -131,7 +131,7 @@ public class RelevanceExpressionTest {
     }
 
 
-    private void eval(String relevanceExpression, boolean expectedValue, FormInstance instance) {
+    private void eval(String relevanceExpression, boolean expectedValue, TypedFormRecord instance) {
         FormulaLexer lexer = new FormulaLexer(relevanceExpression);
         FormulaParser parser = new FormulaParser(lexer);
         FormulaNode expr = parser.parse();

@@ -36,7 +36,7 @@ import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.adapter.ActivityInfoClientAsyncStub;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
@@ -248,7 +248,7 @@ public class GcsBlobFieldStorageServiceTest {
                 blobId, formClass.getId(),
                 GcsBlobFieldStorageServiceTest.class.getResourceAsStream("goabout.png"));
 
-        FormInstance instance = new FormInstance(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()),
+        TypedFormRecord instance = new TypedFormRecord(CuidAdapter.cuid(SITE_DOMAIN, new KeyGenerator().generateInt()),
                 formClass.getId());
 
         Attachment attachment = new Attachment();
@@ -303,7 +303,7 @@ public class GcsBlobFieldStorageServiceTest {
         return addAttachmentField(formClass, attachmentFieldId);
     }
 
-    private FormInstance assertInstanceExists(ResourceId formId, ResourceId instanceId) {
+    private TypedFormRecord assertInstanceExists(ResourceId formId, ResourceId instanceId) {
         return assertResolves(locator.getFormInstance(formId, instanceId));
     }
 

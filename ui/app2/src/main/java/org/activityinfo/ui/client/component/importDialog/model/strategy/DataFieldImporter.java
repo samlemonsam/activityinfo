@@ -23,7 +23,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.BuiltinFields;
 import org.activityinfo.model.date.DateRange;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.promise.Promise;
@@ -112,7 +112,7 @@ public class DataFieldImporter implements FieldImporter {
     }
 
     @Override
-    public boolean updateInstance(SourceRow row, FormInstance instance) {
+    public boolean updateInstance(SourceRow row, TypedFormRecord instance) {
         final ValidationResult validateResult = validate(row);
         if (validateResult.isPersistable()) {
             instance.set(target.getFormField().getId(), parser.convert(source.getValue(row)));

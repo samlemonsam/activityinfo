@@ -20,7 +20,7 @@ package org.activityinfo.store.testing;
 
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
@@ -71,7 +71,7 @@ public class IntakeForm implements TestForm {
     private final EnumItem access;
 
 
-    private List<FormInstance> records;
+    private List<TypedFormRecord> records;
     private RecordGenerator generator;
     private FormField regNumberField;
 
@@ -216,7 +216,7 @@ public class IntakeForm implements TestForm {
     }
 
     @Override
-    public List<FormInstance> getRecords() {
+    public List<TypedFormRecord> getRecords() {
         if(records == null) {
             this.records = generator.get(ROW_COUNT);
         }

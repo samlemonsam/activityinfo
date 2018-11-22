@@ -18,7 +18,7 @@
  */
 package org.activityinfo.model.formula.eval;
 
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 
@@ -31,7 +31,7 @@ public class ConstantValue implements ValueSource {
     }
 
     @Override
-    public FieldValue getValue(FormInstance instance, EvalContext context) {
+    public FieldValue getValue(TypedFormRecord instance, EvalContext context) {
         return value;
     }
 

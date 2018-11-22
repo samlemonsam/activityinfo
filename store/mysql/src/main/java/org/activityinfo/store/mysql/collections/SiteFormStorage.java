@@ -317,7 +317,7 @@ public class SiteFormStorage implements VersionedFormStorage, FormStorageV2 {
         }
 
         FormRecord formRecord = get(update.getRecordId()).get();
-        FormInstance formInstance = FormInstance.toFormInstance(getFormClass(), formRecord);
+        TypedFormRecord typedFormRecord = TypedFormRecord.toTypedFormRecord(getFormClass(), formRecord);
 
         BaseTableUpdater baseTable = new BaseTableUpdater(baseMapping, update.getRecordId());
         IndicatorValueTableUpdater indicatorValues = new IndicatorValueTableUpdater(update.getRecordId());
@@ -357,7 +357,7 @@ public class SiteFormStorage implements VersionedFormStorage, FormStorageV2 {
         }
 
         Map<ResourceId, FieldValue> fieldValues = new HashMap<>();
-        fieldValues.putAll(formInstance.getFieldValueMap());
+        fieldValues.putAll(typedFormRecord.getFieldValueMap());
         fieldValues.putAll(update.getChangedFieldValues());
 
         RecordChangeType changeType = update.isDeleted() ? RecordChangeType.DELETED : RecordChangeType.UPDATED;

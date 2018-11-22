@@ -6,7 +6,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonException;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
@@ -43,7 +43,7 @@ public class SiteFetcher {
         this.queryExecutor = queryExecutor;
     }
 
-    public Optional<FormInstance> fetch(int siteId) {
+    public Optional<TypedFormRecord> fetch(int siteId) {
         try (ResultSet site = queryExecutor.query("select s.activityId, s.partnerId, s.projectId, " +
                 "s.date1, s.date2, s.comments " +
                 "from site s " +
@@ -89,7 +89,7 @@ public class SiteFetcher {
             queryIndicatorValues(activity, siteId, fieldValues);
             queryAttributes(activity, siteId, fieldValues);
 
-            FormInstance record = new FormInstance(new RecordRef(activity.getSiteFormClassId(), recordId));
+            TypedFormRecord record = new TypedFormRecord(new RecordRef(activity.getSiteFormClassId(), recordId));
             record.setAll(fieldValues);
 
             return Optional.of(record);

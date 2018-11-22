@@ -23,7 +23,7 @@ import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
@@ -60,7 +60,7 @@ public class ActivityFormClassBuilderTest extends CommandTestCase2 {
         assertThat(partnerField, hasProperty("visible", equalTo(true))); // according to ai-1009 : partner field is always visible
 
         // Make sure we can update if partner is not specified
-        FormInstance instance = new FormInstance(CuidAdapter.newLegacyFormInstanceId(formClass.getId()), formClass.getId());
+        TypedFormRecord instance = new TypedFormRecord(CuidAdapter.newLegacyFormInstanceId(formClass.getId()), formClass.getId());
         instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.START_DATE_FIELD), new LocalDate(2014, 1, 1));
         instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.END_DATE_FIELD), new LocalDate(2014, 1, 2));
         instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.LOCATION_FIELD),
@@ -86,7 +86,7 @@ public class ActivityFormClassBuilderTest extends CommandTestCase2 {
 
 
         // Make sure we can update if location is not specified
-        FormInstance instance = new FormInstance(CuidAdapter.newLegacyFormInstanceId(formClass.getId()), formClass.getId());
+        TypedFormRecord instance = new TypedFormRecord(CuidAdapter.newLegacyFormInstanceId(formClass.getId()), formClass.getId());
         instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.START_DATE_FIELD), new LocalDate(2014, 1, 1));
         instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.END_DATE_FIELD), new LocalDate(2014, 1, 2));
         instance.set(CuidAdapter.field(formClass.getId(), CuidAdapter.PARTNER_FIELD), CuidAdapter.partnerRef(databaseId, 1734));

@@ -21,7 +21,7 @@ package org.activityinfo.model.formula.eval;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ErrorValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
@@ -50,7 +50,7 @@ public class FormEvalContextTest {
         formClass.addElement(b);
 
         FormEvalContext context = new FormEvalContext(formClass);
-        context.setInstance(new FormInstance(ResourceId.generateSubmissionId(formClass), formClass.getId()));
+        context.setInstance(new TypedFormRecord(ResourceId.generateSubmissionId(formClass), formClass.getId()));
 
         assertThat(context.getFieldValue(a.getId()), instanceOf(ErrorValue.class));
 

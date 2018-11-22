@@ -187,7 +187,7 @@ public class OfflineStoreGwtTest extends GWTTestCase {
 
     private FormSyncSet toFormRecordSet(Survey survey) {
 
-        List<FormInstance> records = survey.getRecords();
+        List<TypedFormRecord> records = survey.getRecords();
         FormRecord array[] = new FormRecord[records.size()];
 
         for (int i = 0; i < records.size(); i++) {

@@ -114,7 +114,7 @@ public class FormRecord implements JsonSerializable {
         return list;
     }
 
-    public static FormRecord fromInstance(FormInstance instance) {
+    public static FormRecord fromInstance(TypedFormRecord instance) {
         FormRecord record = new FormRecord();
         record.recordId = instance.getId().asString();
         record.formId = instance.getFormId().asString();

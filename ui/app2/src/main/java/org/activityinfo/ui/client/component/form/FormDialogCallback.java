@@ -18,11 +18,11 @@
  */
 package org.activityinfo.ui.client.component.form;
 
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 
 import java.util.List;
 
 public interface FormDialogCallback {
 
-    void onPersisted(List<FormInstance> instance);
+    void onPersisted(List<TypedFormRecord> instance);
 }

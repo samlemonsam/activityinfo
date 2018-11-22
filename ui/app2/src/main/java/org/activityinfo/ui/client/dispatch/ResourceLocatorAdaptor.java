@@ -79,7 +79,7 @@ ResourceLocatorAdaptor implements ResourceLocator {
     }
 
     @Override
-    public Promise<FormInstance> getFormInstance(final ResourceId formId, final ResourceId formRecordId) {
+    public Promise<TypedFormRecord> getFormInstance(final ResourceId formId, final ResourceId formRecordId) {
         final Promise<FormClass> formClass = client.getFormSchema(formId.asString());
         final Promise<Maybe<FormRecord>> maybeRecord = client.getRecord(formId.asString(), formRecordId.asString());
         final Promise<FormRecord> record = maybeRecord.then(new Function<Maybe<FormRecord>, FormRecord>() {
@@ -93,26 +93,26 @@ ResourceLocatorAdaptor implements ResourceLocator {
             }
         });
 
-        return Promise.waitAll(formClass, record).then(new Function<Void, FormInstance>() {
+        return Promise.waitAll(formClass, record).then(new Function<Void, TypedFormRecord>() {
             @Nullable
             @Override
-            public FormInstance apply(@Nullable Void input) {
-               return FormInstance.toFormInstance(formClass.get(), record.get());
+            public TypedFormRecord apply(@Nullable Void input) {
+               return TypedFormRecord.toTypedFormRecord(formClass.get(), record.get());
             }
         });
     }
 
     @Override
-    public Promise<List<FormInstance>> getSubFormInstances(ResourceId subFormId, ResourceId parentRecordId) {
+    public Promise<List<TypedFormRecord>> getSubFormInstances(ResourceId subFormId, ResourceId parentRecordId) {
         final Promise<FormRecordSet> records = client.getRecords(subFormId.asString(), parentRecordId.asString());
         final Promise<FormClass> subFormClass = getFormClass(subFormId);
-        return Promise.waitAll(records, subFormClass).then(new Function<Void, List<FormInstance>>() {
+        return Promise.waitAll(records, subFormClass).then(new Function<Void, List<TypedFormRecord>>() {
             @Nullable
             @Override
-            public List<FormInstance> apply(@Nullable Void aVoid) {
-                List<FormInstance> instances = Lists.newArrayList();
+            public List<TypedFormRecord> apply(@Nullable Void aVoid) {
+                List<TypedFormRecord> instances = Lists.newArrayList();
                 for (FormRecord record : records.get().getRecords()) {
-                    instances.add(FormInstance.toFormInstance(subFormClass.get(), record));
+                    instances.add(TypedFormRecord.toTypedFormRecord(subFormClass.get(), record));
                 }
                 return instances;
             }
@@ -126,7 +126,7 @@ ResourceLocatorAdaptor implements ResourceLocator {
 
 
     @Override
-    public Promise<Void> persist(FormInstance instance) {
+    public Promise<Void> persist(TypedFormRecord instance) {
         return client.createRecord(
                 instance.getFormId().asString(),
                 buildUpdate(instance))
@@ -138,7 +138,7 @@ ResourceLocatorAdaptor implements ResourceLocator {
         return client.updateFormSchema(formClass.getId().asString(), formClass);
     }
 
-    private NewFormRecordBuilder buildUpdate(FormInstance instance) {
+    private NewFormRecordBuilder buildUpdate(TypedFormRecord instance) {
         NewFormRecordBuilder update = new NewFormRecordBuilder();
         update.setId(instance.getId().asString());
         update.setParentRecordId(instance.getParentRecordId().asString());
@@ -166,14 +166,14 @@ ResourceLocatorAdaptor implements ResourceLocator {
     }
 
     @Override
-    public Promise<Void> persist(List<FormInstance> formInstances) {
-        return persist(formInstances, null);
+    public Promise<Void> persist(List<TypedFormRecord> typedFormRecords) {
+        return persist(typedFormRecords, null);
     }
 
     @Override
-    public Promise<Void> persist(List<FormInstance> formInstances, @Nullable PromisesExecutionMonitor monitor) {
+    public Promise<Void> persist(List<TypedFormRecord> typedFormRecords, @Nullable PromisesExecutionMonitor monitor) {
         List<Promise<Void>> promises = Lists.newArrayList();
-        for (FormInstance instance : formInstances) {
+        for (TypedFormRecord instance : typedFormRecords) {
             promises.add(persist(instance));
         }
         return Promise.waitAll(promises);

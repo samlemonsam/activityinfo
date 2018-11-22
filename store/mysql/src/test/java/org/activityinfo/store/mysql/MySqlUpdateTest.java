@@ -29,7 +29,7 @@ import org.activityinfo.json.JsonMappingException;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
@@ -390,7 +390,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         ResourceId siteId = CuidAdapter.generateSiteCuid();
 
         // Create the record
-        FormInstance creation = new FormInstance(siteId, formClass.getId());
+        TypedFormRecord creation = new TypedFormRecord(siteId, formClass.getId());
         creation.set(nameField.getId(), TextValue.valueOf("Bob"));
         creation.set(partnerField(activityId), CuidAdapter.partnerRef(1, 1));
 
@@ -399,7 +399,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         newRequest();
 
         // Verify that the record has been created
-        FormInstance created = FormInstance.toFormInstance(formClass,
+        TypedFormRecord created = TypedFormRecord.toTypedFormRecord(formClass,
                 catalog.getForm(formClass.getId()).get().get(siteId).get());
 
         assertThat(created.get(nameField.getId()), equalTo((FieldValue)TextValue.valueOf("Bob")));
@@ -422,7 +422,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
         newRequest();
 
         // Finally verify that the serial number is unchanged
-        FormInstance updated = FormInstance.toFormInstance(formClass,
+        TypedFormRecord updated = TypedFormRecord.toTypedFormRecord(formClass,
                 catalog.getForm(formClass.getId()).get().get(siteId).get());
 
         assertThat(updated.get(nameField.getId()), equalTo((FieldValue)TextValue.valueOf("Sue")));
@@ -431,7 +431,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     }
 
 
-    private void executeUpdate(FormInstance creation) {
+    private void executeUpdate(TypedFormRecord creation) {
         Updater updater = updater();
         updater.execute(creation);
     }
@@ -534,7 +534,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 
         FieldValue valueC = new EnumValue(updatedType.getValues().get(0).getId());
 
-        FormInstance newRecord = new FormInstance(CuidAdapter.generateSiteCuid(), formClass.getId());
+        TypedFormRecord newRecord = new TypedFormRecord(CuidAdapter.generateSiteCuid(), formClass.getId());
         newRecord.set(selectField.getId(), new EnumValue(updatedType.getValues().get(0).getId()));
         newRecord.set(CuidAdapter.partnerField(activityId), CuidAdapter.partnerRef(1, 1));
 
@@ -542,7 +542,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 
         // Ensure that the select field has been saved
         FormRecord saved = catalog.getForm(formClass.getId()).get().get(newRecord.getId()).get();
-        FormInstance savedInstance = FormInstance.toFormInstance(formClass, saved);
+        TypedFormRecord savedInstance = TypedFormRecord.toTypedFormRecord(formClass, saved);
 
         assertThat(savedInstance.get(selectField.getId()), equalTo(valueC));
     }
@@ -566,7 +566,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
 
         FormStorage formStorage = catalog.getForm(formId).get();
         FormRecord record = formStorage.get(recordId).get();
-        FormInstance typedRecord = FormInstance.toFormInstance(formStorage.getFormClass(), record);
+        TypedFormRecord typedRecord = TypedFormRecord.toTypedFormRecord(formStorage.getFormClass(), record);
 
         GeoPoint point = (GeoPoint) typedRecord.get(CuidAdapter.field(formId, CuidAdapter.GEOMETRY_FIELD));
 

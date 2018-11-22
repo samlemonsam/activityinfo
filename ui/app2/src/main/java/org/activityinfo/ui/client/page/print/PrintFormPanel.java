@@ -22,7 +22,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.inject.Inject;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.ActivityInfoEntryPoint;
@@ -78,15 +78,15 @@ public class PrintFormPanel extends FlowPanel {
         formPanel.setHeadingVisible(true);
 
 
-        LoadingPanel<FormInstance> loadingPanel = new LoadingPanel<>(new PageLoadingPanel());
+        LoadingPanel<TypedFormRecord> loadingPanel = new LoadingPanel<>(new PageLoadingPanel());
         loadingPanel.setDisplayWidget(formPanel);
         add(loadingPanel);
 
         
-        loadingPanel.show(new Provider<Promise<FormInstance>>() {
+        loadingPanel.show(new Provider<Promise<TypedFormRecord>>() {
 
             @Override
-            public Promise<FormInstance> get() {
+            public Promise<TypedFormRecord> get() {
                 return resourceLocator.getFormInstance(formId, recordId);
             }
         });

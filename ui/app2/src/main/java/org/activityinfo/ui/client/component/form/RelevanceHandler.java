@@ -25,7 +25,7 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.formula.FormulaLexer;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.FormulaParser;
@@ -62,7 +62,7 @@ public class RelevanceHandler {
                 FieldContainer fieldContainer = simpleFormPanel.getWidgetCreator().get(field.getId());
                 if (fieldContainer != null) {
                     FormModel model = simpleFormPanel.getModel();
-                    Optional<FormInstance> instance = model.getWorkingInstance(field.getId(), simpleFormPanel.getSelectedKey(field));
+                    Optional<TypedFormRecord> instance = model.getWorkingInstance(field.getId(), simpleFormPanel.getSelectedKey(field));
                     FormClass formClass = model.getClassByField(field.getId());
                     boolean relevant;
                     if (instance.isPresent()) {
@@ -70,7 +70,7 @@ public class RelevanceHandler {
                     }
                     else {
                         relevant = expr.evaluateAsBoolean(new FormEvalContext(formClass, 
-                                new FormInstance(ResourceId.generateSubmissionId(formClass), formClass.getId())));
+                                new TypedFormRecord(ResourceId.generateSubmissionId(formClass), formClass.getId())));
                     }
                     fieldContainer.getFieldWidget().setReadOnly(!relevant);
 

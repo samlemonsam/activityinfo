@@ -39,19 +39,19 @@ public class TestingFormStorage implements VersionedFormStorage {
 
     private Map<String, Integer> serialNumbers = new HashMap<>();
 
-    private List<FormInstance> records = null;
+    private List<TypedFormRecord> records = null;
 
-    private Map<ResourceId, FormInstance> index = null;
+    private Map<ResourceId, TypedFormRecord> index = null;
 
     public TestingFormStorage(TestForm testForm) {
         this.testForm = testForm;
     }
 
-    public Supplier<FormInstance> getGenerator() {
+    public Supplier<TypedFormRecord> getGenerator() {
         return testForm.getGenerator();
     }
 
-    private List<FormInstance> records() {
+    private List<TypedFormRecord> records() {
         if(records == null) {
             return testForm.getRecords();
         }
@@ -61,11 +61,11 @@ public class TestingFormStorage implements VersionedFormStorage {
     private void ensureWeHaveOwnCopy() {
         if(records == null) {
             records = new ArrayList<>();
-            for (FormInstance record : testForm.getRecords()) {
+            for (TypedFormRecord record : testForm.getRecords()) {
                 records.add(record.copy());
             }
             index = new HashMap<>();
-            for (FormInstance record : records) {
+            for (TypedFormRecord record : records) {
                 index.put(record.getId(), record);
             }
         }
@@ -75,7 +75,7 @@ public class TestingFormStorage implements VersionedFormStorage {
     public Optional<FormRecord> get(ResourceId resourceId) {
         ensureWeHaveOwnCopy();
 
-        FormInstance instance = index.get(resourceId);
+        TypedFormRecord instance = index.get(resourceId);
         if(instance == null) {
             return Optional.absent();
         } else {
@@ -87,7 +87,7 @@ public class TestingFormStorage implements VersionedFormStorage {
     public List<FormRecord> getSubRecords(ResourceId parentId) {
 
         List<FormRecord> result = new ArrayList<>();
-        for (FormInstance record : records()) {
+        for (TypedFormRecord record : records()) {
             if(parentId.equals(record.getParentRecordId())) {
                 result.add(FormRecord.fromInstance(record));
             }
@@ -109,7 +109,7 @@ public class TestingFormStorage implements VersionedFormStorage {
     public FormSyncSet getVersionRange(long localVersion, long toVersion, Predicate<ResourceId> visibilityPredicate, java.util.Optional<String> cursor) {
         List<FormRecord> records = new ArrayList<>();
         if(localVersion < version) {
-            for (FormInstance record : records()) {
+            for (TypedFormRecord record : records()) {
                 records.add(FormRecord.fromInstance(record));
             }
         }
@@ -129,7 +129,7 @@ public class TestingFormStorage implements VersionedFormStorage {
     @Override
     public void add(TypedRecordUpdate update) {
 
-        FormInstance newRecord = new FormInstance(update.getRecordId(), update.getFormId());
+        TypedFormRecord newRecord = new TypedFormRecord(update.getRecordId(), update.getFormId());
         for (Map.Entry<ResourceId, FieldValue> entry : update.getChangedFieldValues().entrySet()) {
             newRecord.set(entry.getKey(), entry.getValue());
         }
@@ -145,11 +145,11 @@ public class TestingFormStorage implements VersionedFormStorage {
     public void update(TypedRecordUpdate update) {
         ensureWeHaveOwnCopy();
         if(update.isDeleted()) {
-            FormInstance deleted = index.remove(update.getRecordId());
+            TypedFormRecord deleted = index.remove(update.getRecordId());
             records.remove(deleted);
         } else if(!index.containsKey(update.getRecordId())) {
             // Create
-            FormInstance newRecord = new FormInstance(update.getFormId(), update.getFormId());
+            TypedFormRecord newRecord = new TypedFormRecord(update.getFormId(), update.getFormId());
             newRecord.setParentRecordId(update.getParentId());
             newRecord.setAll(update.getChangedFieldValues());
             records.add(newRecord);

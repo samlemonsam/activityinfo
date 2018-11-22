@@ -130,18 +130,18 @@ public class RecordTreeLoader implements ObservableTree.TreeLoader<
 
         protected abstract Iterable<NodeKey> getChildren();
 
-        protected abstract void addTo(Map<RecordRef, Maybe<FormInstance>> records, Multimap<RecordTree.ParentKey, FormInstance> subRecords);
+        protected abstract void addTo(Map<RecordRef, Maybe<TypedFormRecord>> records, Multimap<RecordTree.ParentKey, TypedFormRecord> subRecords);
     }
 
     private class RecordNode extends Node {
         private final RecordRef ref;
         private final FormClass formClass;
-        private final Maybe<FormInstance> record;
+        private final Maybe<TypedFormRecord> record;
 
         public RecordNode(RecordRef ref, Maybe<FormRecord> record) {
             this.ref = ref;
             this.formClass = formTree.getFormClass(ref.getFormId());
-            this.record = record.transform(r -> FormInstance.toFormInstance(formClass, r));
+            this.record = record.transform(r -> TypedFormRecord.toTypedFormRecord(formClass, r));
         }
 
         @Override
@@ -154,7 +154,7 @@ public class RecordTreeLoader implements ObservableTree.TreeLoader<
         }
 
         @Override
-        protected void addTo(Map<RecordRef, Maybe<FormInstance>> records, Multimap<RecordTree.ParentKey, FormInstance> subRecords) {
+        protected void addTo(Map<RecordRef, Maybe<TypedFormRecord>> records, Multimap<RecordTree.ParentKey, TypedFormRecord> subRecords) {
             records.put(ref, record);
         }
 
@@ -163,37 +163,37 @@ public class RecordTreeLoader implements ObservableTree.TreeLoader<
     private class SubFormNode extends Node {
         private final RecordTree.ParentKey parentKey;
         private final FormClass formClass;
-        private final List<FormInstance> records;
+        private final List<TypedFormRecord> records;
 
         public SubFormNode(RecordRef parentRef, ResourceId formId, List<FormRecord> records) {
             this.parentKey = new RecordTree.ParentKey(parentRef, formId);
             formClass = formTree.getFormClass(formId);
             this.records = records
                 .stream()
-                .map(record -> FormInstance.toFormInstance(formClass, record))
+                .map(record -> TypedFormRecord.toTypedFormRecord(formClass, record))
                 .collect(Collectors.toList());
         }
 
         @Override
         public Iterable<NodeKey> getChildren() {
             Set<NodeKey> children = new HashSet<>();
-            for (FormInstance record : records) {
+            for (TypedFormRecord record : records) {
                 findChildren(children, formClass, record);
             }
             return children;
         }
 
         @Override
-        protected void addTo(Map<RecordRef, Maybe<FormInstance>> records, Multimap<RecordTree.ParentKey, FormInstance> subRecords) {
+        protected void addTo(Map<RecordRef, Maybe<TypedFormRecord>> records, Multimap<RecordTree.ParentKey, TypedFormRecord> subRecords) {
             subRecords.putAll(parentKey, this.records);
-            for (FormInstance record : this.records) {
+            for (TypedFormRecord record : this.records) {
                 records.put(record.getRef(), Maybe.of(record));
             }
         }
     }
 
 
-    private void findChildren(Set<NodeKey> children, FormClass schema, FormInstance record) {
+    private void findChildren(Set<NodeKey> children, FormClass schema, TypedFormRecord record) {
         // Add referenced records
         for (FieldValue value : record.getFieldValueMap().values()) {
             if (value instanceof ReferenceValue) {
@@ -240,8 +240,8 @@ public class RecordTreeLoader implements ObservableTree.TreeLoader<
     @Override
     public RecordTree build(Map<NodeKey, Observable<Node>> nodes) {
 
-        Map<RecordRef, Maybe<FormInstance>> records = new HashMap<>();
-        Multimap<RecordTree.ParentKey, FormInstance> subRecords = HashMultimap.create();
+        Map<RecordRef, Maybe<TypedFormRecord>> records = new HashMap<>();
+        Multimap<RecordTree.ParentKey, TypedFormRecord> subRecords = HashMultimap.create();
 
         for (Observable<Node> node : nodes.values()) {
             node.get().addTo(records, subRecords);

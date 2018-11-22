@@ -19,7 +19,7 @@
 package org.activityinfo.ui.client.component.importDialog;
 
 import com.google.common.collect.Lists;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
@@ -52,14 +52,14 @@ public class PersistImportCommand implements ImportCommand<Void> {
         final ImportModel model = commandExecutor.getImportModel();
 
         final ResourceId formClassId = model.getFormTree().getRootFields().iterator().next().getDefiningFormClass().getId();
-        final List<FormInstance> toPersist = Lists.newArrayList();
+        final List<TypedFormRecord> toPersist = Lists.newArrayList();
         final ValidatedRowTable validatedRowTable = model.getValidatedRowTable();
 
         for (SourceRow row : model.getSource().getRows()) {
             ValidatedRow validatedRow = validatedRowTable.getRow(row);
             if (validatedRow.isValid()) { // persist instance only if it's valid
                 // new instance per row
-                FormInstance newInstance = new FormInstance(CuidAdapter.newLegacyFormInstanceId(formClassId), formClassId);
+                TypedFormRecord newInstance = new TypedFormRecord(CuidAdapter.newLegacyFormInstanceId(formClassId), formClassId);
                 for (FieldImporter importer : commandExecutor.getImporters()) {
                     importer.updateInstance(row, newInstance);
                 }

@@ -20,7 +20,7 @@ package org.activityinfo.test.api;
 
 import org.activityinfo.client.ActivityInfoClient;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
@@ -71,7 +71,7 @@ public class SurveyTest {
         RecordGenerator generator = survey.getGenerator();
         int numRows = 20;
         for (int i = 0; i < numRows; i++) {
-            FormInstance newRecord = generator.get();
+            TypedFormRecord newRecord = generator.get();
             System.out.println(newRecord);
             client.createRecord(newRecord);
         }

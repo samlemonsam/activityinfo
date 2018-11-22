@@ -45,7 +45,7 @@ import static org.activityinfo.json.Json.createObject;
  *
  * @author yuriyz on 1/29/14.
  */
-public class FormInstance {
+public class TypedFormRecord {
 
     private ResourceId id;
     private ResourceId classId;
@@ -53,13 +53,13 @@ public class FormInstance {
     private Map<ResourceId, FieldValue> fieldMap;
 
     /**
-     * Constructs a new FormInstance. To obtain an id for a new instance
+     * Constructs a new TypedFormRecord. To obtain an id for a new instance
      * use
      *
      * @param id the id of the instance.
      * @param classId the id of this form's class
      */
-    public FormInstance(@Nonnull ResourceId id, @Nonnull ResourceId classId) {
+    public TypedFormRecord(@Nonnull ResourceId id, @Nonnull ResourceId classId) {
         Preconditions.checkNotNull(id);
         Preconditions.checkNotNull(classId);
         this.id = id;
@@ -68,12 +68,12 @@ public class FormInstance {
         this.fieldMap = new HashMap<>();
     }
 
-    public FormInstance(RecordRef recordRef) {
+    public TypedFormRecord(RecordRef recordRef) {
         this(recordRef.getRecordId(), recordRef.getFormId());
     }
 
-    public static FormInstance toFormInstance(FormClass formClass, FormRecord record) {
-        FormInstance instance = new FormInstance(ResourceId.valueOf(record.getRecordId()), formClass.getId());
+    public static TypedFormRecord toTypedFormRecord(FormClass formClass, FormRecord record) {
+        TypedFormRecord instance = new TypedFormRecord(ResourceId.valueOf(record.getRecordId()), formClass.getId());
 
         if (record.getParentRecordId() != null) {
             instance.setParentRecordId(ResourceId.valueOf(record.getParentRecordId()));
@@ -99,12 +99,12 @@ public class FormInstance {
         return new RecordRef(getFormId(), getId());
     }
 
-    public FormInstance setId(ResourceId id) {
+    public TypedFormRecord setId(ResourceId id) {
         this.id = id;
         return this;
     }
 
-    public FormInstance setClassId(ResourceId classId) {
+    public TypedFormRecord setClassId(ResourceId classId) {
         this.classId = classId;
         return this;
     }
@@ -114,7 +114,7 @@ public class FormInstance {
         return classId;
     }
 
-    public FormInstance setParentRecordId(ResourceId parentRecordId) {
+    public TypedFormRecord setParentRecordId(ResourceId parentRecordId) {
         assert parentRecordId != null;
         this.parentRecordId = parentRecordId;
         return this;
@@ -138,7 +138,7 @@ public class FormInstance {
         fieldMap.putAll(valueMap);
     }
 
-    public FormInstance set(@Nonnull ResourceId fieldId, String value) {
+    public TypedFormRecord set(@Nonnull ResourceId fieldId, String value) {
         if(value == null) {
             fieldMap.remove(fieldId);
         } else {
@@ -148,20 +148,20 @@ public class FormInstance {
     }
 
 
-    public FormInstance set(String fieldId, String name) {
+    public TypedFormRecord set(String fieldId, String name) {
         return set(ResourceId.valueOf(fieldId), name);
     }
 
-    public FormInstance set(@Nonnull ResourceId fieldId, double value) {
+    public TypedFormRecord set(@Nonnull ResourceId fieldId, double value) {
         return set(fieldId, new Quantity(value));
     }
 
-    public FormInstance set(@Nonnull ResourceId fieldId, boolean value) {
+    public TypedFormRecord set(@Nonnull ResourceId fieldId, boolean value) {
         fieldMap.put(fieldId, BooleanFieldValue.valueOf(value));
         return this;
     }
 
-    public FormInstance set(@Nonnull ResourceId fieldId, FieldValue fieldValue) {
+    public TypedFormRecord set(@Nonnull ResourceId fieldId, FieldValue fieldValue) {
         fieldMap.put(fieldId, fieldValue);
         return this;
     }
@@ -218,8 +218,8 @@ public class FormInstance {
         return null;
     }
 
-    public FormInstance copy() {
-        final FormInstance copy = new FormInstance(getId(), getFormId());
+    public TypedFormRecord copy() {
+        final TypedFormRecord copy = new TypedFormRecord(getId(), getFormId());
         copy.fieldMap.putAll(fieldMap);
         return copy;
     }
@@ -230,7 +230,7 @@ public class FormInstance {
 
     @Override
     public String toString() {
-        return "FormInstance{" +
+        return "TypedFormRecord{" +
                 "id=" + id +
                 ", classId=" + classId +
                 ", parentRecordId=" + parentRecordId +
@@ -255,7 +255,7 @@ public class FormInstance {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        FormInstance instance = (FormInstance) o;
+        TypedFormRecord instance = (TypedFormRecord) o;
 
         return !(id != null ? !id.equals(instance.id) : instance.id != null);
 

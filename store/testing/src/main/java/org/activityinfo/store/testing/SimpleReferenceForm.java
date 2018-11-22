@@ -21,7 +21,7 @@ package org.activityinfo.store.testing;
 import com.google.common.base.Supplier;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.ReferenceType;
@@ -40,7 +40,7 @@ public class SimpleReferenceForm implements TestForm {
     private final FormField refField;
     private final TestForm referencedForm;
 
-    private List<FormInstance> records;
+    private List<TypedFormRecord> records;
     private RecordGenerator generator;
 
     public SimpleReferenceForm(Ids ids, TestForm referencedForm) {
@@ -71,7 +71,7 @@ public class SimpleReferenceForm implements TestForm {
     }
 
     @Override
-    public List<FormInstance> getRecords() {
+    public List<TypedFormRecord> getRecords() {
         if (records == null) {
             this.records = generator.get(ROW_COUNT);
         }
@@ -79,7 +79,7 @@ public class SimpleReferenceForm implements TestForm {
     }
 
     @Override
-    public Supplier<FormInstance> getGenerator() {
+    public Supplier<TypedFormRecord> getGenerator() {
         return generator;
     }
 

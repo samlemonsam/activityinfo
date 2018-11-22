@@ -30,14 +30,14 @@ import static junit.framework.Assert.assertEquals;
 /**
  * @author yuriyz on 01/22/2016.
  */
-public class FormInstanceComparatorTest {
+public class TypedFormRecordComparatorTest {
 
     private static final ResourceId CLASS_ID = ResourceId.valueOf("id");
 
     @Test
     public void doubleComparatorTest() {
 
-        List<FormInstance> list = testList();
+        List<TypedFormRecord> list = testList();
 
         Collections.sort(list, FormInstanceComparators.doubleComparator(ResourceId.valueOf("key1")));
 
@@ -49,7 +49,7 @@ public class FormInstanceComparatorTest {
     @Test
     public void stringComparatorTest() {
 
-        List<FormInstance> list = testList();
+        List<TypedFormRecord> list = testList();
 
         Collections.sort(list, FormInstanceComparators.stringComparator(ResourceId.valueOf("key2")));
 
@@ -58,26 +58,26 @@ public class FormInstanceComparatorTest {
         assertEquals("1", list.get(2).getId().asString());
     }
 
-    private List<FormInstance> testList() {
+    private List<TypedFormRecord> testList() {
         final ResourceId key1 = ResourceId.valueOf("key1");
         final ResourceId key2 = ResourceId.valueOf("key2");
 
-        FormInstance instance1 = newInstance(1);
+        TypedFormRecord instance1 = newInstance(1);
         instance1.set(key1, 3);
         instance1.set(key2, "d");
 
-        FormInstance instance2 = newInstance(2);
+        TypedFormRecord instance2 = newInstance(2);
         instance2.set(key1, 2);
         instance2.set(key2, "b");
 
-        FormInstance instance3 = newInstance(3);
+        TypedFormRecord instance3 = newInstance(3);
         instance3.set(key1, 1);
         instance3.set(key2, "c");
 
         return Lists.newArrayList(instance1, instance2, instance3);
     }
 
-    private FormInstance newInstance(int id) {
-        return new FormInstance(ResourceId.valueOf(Integer.toString(id)), CLASS_ID);
+    private TypedFormRecord newInstance(int id) {
+        return new TypedFormRecord(ResourceId.valueOf(Integer.toString(id)), CLASS_ID);
     }
 }

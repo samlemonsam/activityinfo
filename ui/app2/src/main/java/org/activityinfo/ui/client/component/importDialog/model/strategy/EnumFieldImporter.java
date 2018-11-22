@@ -22,7 +22,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
@@ -101,7 +101,7 @@ public class EnumFieldImporter implements FieldImporter {
     }
 
     @Override
-    public boolean updateInstance(SourceRow row, FormInstance instance) {
+    public boolean updateInstance(SourceRow row, TypedFormRecord instance) {
         if (enumType.getCardinality() == Cardinality.SINGLE) {
             return persistSingleValuedEnum(row, instance);
         } else {
@@ -109,7 +109,7 @@ public class EnumFieldImporter implements FieldImporter {
         }
     }
 
-    private boolean persistMultiValuedEnum(SourceRow row, FormInstance instance) {
+    private boolean persistMultiValuedEnum(SourceRow row, TypedFormRecord instance) {
         if (ValidationResult.isPersistable(validateMultiValuedEnum(row))) {
             final Set<ResourceId> result = Sets.newHashSet();
             for (int i = 0; i< sources.size(); i++) {
@@ -129,7 +129,7 @@ public class EnumFieldImporter implements FieldImporter {
         return false;
     }
 
-    private boolean persistSingleValuedEnum(SourceRow row, FormInstance instance) {
+    private boolean persistSingleValuedEnum(SourceRow row, TypedFormRecord instance) {
         if (validateSingleValuedEnum(row).isPersistable()) {
             final Set<ResourceId> result = Sets.newHashSet();
             String value = sources.get(0).getValue(row);

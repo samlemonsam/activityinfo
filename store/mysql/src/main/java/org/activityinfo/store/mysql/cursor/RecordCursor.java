@@ -19,7 +19,7 @@
 package org.activityinfo.store.mysql.cursor;
 
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.mysql.mapping.TableMapping;
@@ -89,11 +89,11 @@ public class RecordCursor {
         }
     }
 
-    public Iterator<FormInstance> execute() {
+    public Iterator<TypedFormRecord> execute() {
         Cursor cursor = builder.open();
         while(cursor.next()) { }
 
-        return new Iterator<FormInstance>() {
+        return new Iterator<TypedFormRecord>() {
 
             private int row = 0;
 
@@ -103,9 +103,9 @@ public class RecordCursor {
             }
 
             @Override
-            public FormInstance next() {
+            public TypedFormRecord next() {
 
-                FormInstance record = new FormInstance(id.values.get(row), formId);
+                TypedFormRecord record = new TypedFormRecord(id.values.get(row), formId);
                 for (FieldCollector field : fields) {
                     record.set(field.fieldId, field.values.get(row));
                 }

@@ -287,7 +287,7 @@ public class Updater {
                                        Optional<FormRecord> existingRecord,
                                        TypedRecordUpdate update) {
 
-        FormInstance effectiveRecord = computeEffectiveRecord(formClass, existingRecord, update);
+        TypedFormRecord effectiveRecord = computeEffectiveRecord(formClass, existingRecord, update);
 
         for (FormField formField : formClass.getFields()) {
             if(formField.getType() instanceof SerialNumberType) {
@@ -301,7 +301,7 @@ public class Updater {
     @VisibleForTesting
     void generateSerialNumber(FormClass formClass,
                               FormField formField,
-                              FormInstance effectiveRecord,
+                              TypedFormRecord effectiveRecord,
                               TypedRecordUpdate update) {
 
         SerialNumberType type = (SerialNumberType) formField.getType();
@@ -315,7 +315,7 @@ public class Updater {
     private String computeSerialNumberPrefix(
         FormClass formClass,
         SerialNumberType type,
-        FormInstance effectiveRecord) {
+        TypedFormRecord effectiveRecord) {
 
         if(!type.hasPrefix()) {
             return null;
@@ -343,10 +343,10 @@ public class Updater {
     }
 
     @VisibleForTesting
-    FormInstance computeEffectiveRecord(FormClass formClass, Optional<FormRecord> existingRecord, TypedRecordUpdate update) {
-        FormInstance record = new FormInstance(update.getRecordId(), formClass.getId());
+    TypedFormRecord computeEffectiveRecord(FormClass formClass, Optional<FormRecord> existingRecord, TypedRecordUpdate update) {
+        TypedFormRecord record = new TypedFormRecord(update.getRecordId(), formClass.getId());
         if(existingRecord.isPresent()) {
-            FormInstance existingTypedRecord = FormInstance.toFormInstance(formClass, existingRecord.get());
+            TypedFormRecord existingTypedRecord = TypedFormRecord.toTypedFormRecord(formClass, existingRecord.get());
             record.setAll(existingTypedRecord.getFieldValueMap());
         }
         for (Map.Entry<ResourceId, FieldValue> entry : update.getChangedFieldValues().entrySet()) {
@@ -425,10 +425,10 @@ public class Updater {
 
             // Verify that the user has the right to modify the *existing* record
 
-            Optional<FormInstance> existingTypedRecord = existingResource.transform(new Function<FormRecord, FormInstance>() {
+            Optional<TypedFormRecord> existingTypedRecord = existingResource.transform(new Function<FormRecord, TypedFormRecord>() {
                 @Override
-                public FormInstance apply(FormRecord record) {
-                    return FormInstance.toFormInstance(form.getFormClass(), record);
+                public TypedFormRecord apply(FormRecord record) {
+                    return TypedFormRecord.toTypedFormRecord(form.getFormClass(), record);
                 }
             });
 
@@ -452,8 +452,8 @@ public class Updater {
         }
     }
 
-    private FormInstance applyUpdates(Optional<FormInstance> existingRecord, TypedRecordUpdate update) {
-        FormInstance updated = new FormInstance(update.getRecordId(), update.getFormId());
+    private TypedFormRecord applyUpdates(Optional<TypedFormRecord> existingRecord, TypedRecordUpdate update) {
+        TypedFormRecord updated = new TypedFormRecord(update.getRecordId(), update.getFormId());
 
         if(existingRecord.isPresent()) {
             updated.setAll(existingRecord.get().getFieldValueMap());
@@ -533,9 +533,9 @@ public class Updater {
     }
 
 
-    public void execute(FormInstance formInstance) {
+    public void execute(TypedFormRecord typedFormRecord) {
         RecordTransaction tx = new RecordTransactionBuilder()
-            .create(formInstance)
+            .create(typedFormRecord)
             .build();
 
         execute(tx);

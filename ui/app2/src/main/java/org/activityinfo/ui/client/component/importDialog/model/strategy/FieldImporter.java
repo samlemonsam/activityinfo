@@ -18,7 +18,7 @@
  */
 package org.activityinfo.ui.client.component.importDialog.model.strategy;
 
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.importDialog.model.source.SourceRow;
 import org.activityinfo.ui.client.component.importDialog.model.validation.ValidationResult;
@@ -35,7 +35,7 @@ public interface FieldImporter {
 
     void validateInstance(SourceRow row, List<ValidationResult> results);
 
-    boolean updateInstance(SourceRow row, FormInstance instance);
+    boolean updateInstance(SourceRow row, TypedFormRecord instance);
 
     List<FieldImporterColumn> getColumns();
 

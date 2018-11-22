@@ -35,25 +35,25 @@ public class FormInstanceLabeler {
     private FormInstanceLabeler() {
     }
 
-    public static String getLabel(FormInstance instance) {
+    public static String getLabel(TypedFormRecord instance) {
         return Strings.nullToEmpty(instance.getString(getFormInstanceLabelCuid(instance)));
     }
 
-    public static void setLabel(FormInstance instance, String label) {
+    public static void setLabel(TypedFormRecord instance, String label) {
         instance.set(getFormInstanceLabelCuid(instance), label);
     }
 
-    public static List<String> getLabels(List<FormInstance> list) {
+    public static List<String> getLabels(List<TypedFormRecord> list) {
         final List<String> labels = Lists.newArrayList();
         if (list != null && !list.isEmpty()) {
-            for (FormInstance instance : list) {
+            for (TypedFormRecord instance : list) {
                 labels.add(getLabel(instance));
             }
         }
         return labels;
     }
 
-    public static Set<String> getDuplicatedInstanceLabels(List<FormInstance> list) {
+    public static Set<String> getDuplicatedInstanceLabels(List<TypedFormRecord> list) {
         final List<String> existingNames = FormInstanceLabeler.getLabels(list);
         final Set<String> duplicates = Sets.newHashSet();
         final Set<String> temp = Sets.newHashSet();
@@ -65,7 +65,7 @@ public class FormInstanceLabeler {
         return duplicates;
     }
 
-    public static ResourceId getFormInstanceLabelCuid(FormInstance formInstance) {
-        return CuidAdapter.field(formInstance.getFormId(), CuidAdapter.NAME_FIELD);
+    public static ResourceId getFormInstanceLabelCuid(TypedFormRecord typedFormRecord) {
+        return CuidAdapter.field(typedFormRecord.getFormId(), CuidAdapter.NAME_FIELD);
     }
 }

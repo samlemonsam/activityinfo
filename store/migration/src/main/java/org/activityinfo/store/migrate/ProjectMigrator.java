@@ -20,7 +20,7 @@ package org.activityinfo.store.migrate;
 
 import com.google.appengine.tools.mapreduce.MapOnlyMapper;
 import com.googlecode.objectify.Work;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.hrd.Hrd;
@@ -62,7 +62,7 @@ public class ProjectMigrator extends MapOnlyMapper<Integer, Void> {
                 @Override
                 public Void run() {
                     RecordCursor recordBuilder = new RecordCursor(mapping, executor);
-                    Iterator<FormInstance> it = recordBuilder.execute();
+                    Iterator<TypedFormRecord> it = recordBuilder.execute();
 
                     // Only create if there is one or more projects....
                     if(!it.hasNext()) {
@@ -88,7 +88,7 @@ public class ProjectMigrator extends MapOnlyMapper<Integer, Void> {
 
                     while (it.hasNext()) {
 
-                        FormInstance record = it.next();
+                        TypedFormRecord record = it.next();
 
                         FormRecordEntity recordEntity = new FormRecordEntity(formId, record.getId());
                         recordEntity.setFieldValues(mapping.getFormClass(), record.getFieldValueMap());

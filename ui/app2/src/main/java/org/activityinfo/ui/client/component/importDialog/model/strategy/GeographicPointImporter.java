@@ -21,7 +21,7 @@ package org.activityinfo.ui.client.component.importDialog.model.strategy;
 import org.activityinfo.io.match.coord.CoordinateAxis;
 import org.activityinfo.io.match.coord.CoordinateFormatException;
 import org.activityinfo.io.match.coord.CoordinateParser;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.geo.GeoPoint;
 import org.activityinfo.promise.Promise;
@@ -103,7 +103,7 @@ public class GeographicPointImporter implements FieldImporter {
     }
 
     @Override
-    public boolean updateInstance(SourceRow row, FormInstance instance) {
+    public boolean updateInstance(SourceRow row, TypedFormRecord instance) {
         final boolean isLatOk = validateCoordinate(row, 0).isPersistable();
         final boolean isLonOk = validateCoordinate(row, 1).isPersistable();
         if (isLatOk && isLonOk) {

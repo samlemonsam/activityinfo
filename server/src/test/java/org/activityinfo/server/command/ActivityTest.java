@@ -400,7 +400,7 @@ public class ActivityTest extends CommandTestCase2 {
         assertThat(formClass.getFields(), not(hasItem(withId(endDateId))));
         
         // Now submit a new entry without dates...
-        FormInstance newInstance = new FormInstance(ResourceId.generateSubmissionId(formId), formId);
+        TypedFormRecord newInstance = new TypedFormRecord(ResourceId.generateSubmissionId(formId), formId);
         newInstance.set(CuidAdapter.partnerField(activityId), CuidAdapter.partnerRef(databaseId, 1));
 
         assertResolves(locator.persist(newInstance));

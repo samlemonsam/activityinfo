@@ -28,7 +28,7 @@ import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.*;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.resource.ResourceId;
@@ -79,7 +79,7 @@ public class CreateSiteTest extends CommandTestCase2 {
     public void persistSite() {
 
         ResourceId locationClassId = CuidAdapter.locationFormClass(1);
-        FormInstance location = new FormInstance(CuidAdapter.generateLocationCuid(), locationClassId);
+        TypedFormRecord location = new TypedFormRecord(CuidAdapter.generateLocationCuid(), locationClassId);
         location.set(field(locationClassId, CuidAdapter.NAME_FIELD), "Virunga");
         location.set(field(locationClassId, CuidAdapter.AXE_FIELD), "Goma - Rutshuru");
         location.set(field(locationClassId, CuidAdapter.GEOMETRY_FIELD), new GeoPoint(27.432, 1.23));
@@ -87,7 +87,7 @@ public class CreateSiteTest extends CommandTestCase2 {
 
         int databaseId = 1;
         ResourceId formClassId = CuidAdapter.activityFormClass(1);
-        FormInstance instance = new FormInstance(CuidAdapter.generateSiteCuid(), formClassId);
+        TypedFormRecord instance = new TypedFormRecord(CuidAdapter.generateSiteCuid(), formClassId);
         instance.set(field(formClassId, LOCATION_FIELD), new ReferenceValue(new RecordRef(locationClassId, location.getId())));
         instance.set(field(formClassId, PARTNER_FIELD), CuidAdapter.partnerRef(databaseId, 1));
         instance.set(field(formClassId, START_DATE_FIELD), new LocalDate(2008, 12, 1));

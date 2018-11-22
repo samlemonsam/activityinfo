@@ -27,7 +27,7 @@ import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonParser;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.query.*;
@@ -94,7 +94,7 @@ public class ActivityInfoClient {
                 .put(formClass.toJsonString());
     }
 
-    public void createRecord(FormInstance record) {
+    public void createRecord(TypedFormRecord record) {
         ClientResponse response = client.resource(root)
                 .path("resources")
                 .path("form")
@@ -157,9 +157,9 @@ public class ActivityInfoClient {
         return FormRecord.fromJson(jsonObject);
     }
 
-    public FormInstance getTypedRecord(FormClass formClass, ResourceId recordId) {
+    public TypedFormRecord getTypedRecord(FormClass formClass, ResourceId recordId) {
         FormRecord record = getRecord(formClass.getId(), recordId);
-        FormInstance instance = FormInstance.toFormInstance(formClass, record);
+        TypedFormRecord instance = TypedFormRecord.toTypedFormRecord(formClass, record);
         return instance;
     }
 

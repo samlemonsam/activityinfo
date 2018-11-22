@@ -19,7 +19,7 @@
 package org.activityinfo.model.formula.eval;
 
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.FormulaParser;
 import org.activityinfo.model.formula.diagnostic.CircularReferenceException;
@@ -61,7 +61,7 @@ public class CalculatedField implements FieldValueSource {
     }
 
     @Override
-    public FieldValue getValue(FormInstance instance, EvalContext context) {
+    public FieldValue getValue(TypedFormRecord instance, EvalContext context) {
         if(errorValue != null) {
             return errorValue;
         }

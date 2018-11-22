@@ -54,9 +54,9 @@ public interface ResourceLocator {
     
     Promise<ColumnSet> queryTable(QueryModel queryModel);
     
-    Promise<FormInstance> getFormInstance(ResourceId formId, ResourceId formRecordId);
+    Promise<TypedFormRecord> getFormInstance(ResourceId formId, ResourceId formRecordId);
 
-    Promise<List<FormInstance>> getSubFormInstances(ResourceId subFormId, ResourceId parentRecordId);
+    Promise<List<TypedFormRecord>> getSubFormInstances(ResourceId subFormId, ResourceId parentRecordId);
     
     Promise<RecordHistory> getFormRecordHistory(ResourceId formId, ResourceId recordId);
     
@@ -67,13 +67,13 @@ public interface ResourceLocator {
      * @return a Promise that resolves when the persistance operation completes
      * successfully.
      */
-    Promise<Void> persist(FormInstance resource);
+    Promise<Void> persist(TypedFormRecord resource);
 
     Promise<Void> persist(FormClass formClass);
     
-    Promise<Void> persist(List<FormInstance> formInstances);
+    Promise<Void> persist(List<TypedFormRecord> typedFormRecords);
 
-    Promise<Void> persist(List<FormInstance> formInstances, @Nullable PromisesExecutionMonitor monitor);
+    Promise<Void> persist(List<TypedFormRecord> typedFormRecords, @Nullable PromisesExecutionMonitor monitor);
 
     Promise<Void> persistOperation(List<PromiseExecutionOperation> resources, @Nullable PromisesExecutionMonitor monitor);
 

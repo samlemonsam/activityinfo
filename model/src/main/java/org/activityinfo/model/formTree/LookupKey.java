@@ -20,7 +20,7 @@ package org.activityinfo.model.formTree;
 
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.formula.CompoundExpr;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.SymbolNode;
@@ -248,7 +248,7 @@ public class LookupKey {
         return keys;
     }
 
-    public String label(FormInstance record) {
+    public String label(TypedFormRecord record) {
         if(fieldId.getName().equals(ColumnModel.RECORD_ID_SYMBOL)) {
             return record.getId().asString();
         }

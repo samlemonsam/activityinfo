@@ -20,7 +20,7 @@ package org.activityinfo.ui.client.store;
 
 import com.google.common.collect.Iterables;
 import net.lightoze.gwt.i18n.server.LocaleProxy;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.formTree.LookupKeySet;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.type.RecordRef;
@@ -96,7 +96,7 @@ public class RecordTreeLoaderTest {
         Observable<Maybe<RecordTree>> recordTree = setup.getFormStore().getRecordTree(rootRecordRef);
         Connection<Maybe<RecordTree>> recordTreeView = setup.connect(recordTree);
 
-        Iterable<FormInstance> subRecords = recordTreeView.assertLoaded().get().getSubRecords(rootRecordRef, ReferralSubForm.FORM_ID);
+        Iterable<TypedFormRecord> subRecords = recordTreeView.assertLoaded().get().getSubRecords(rootRecordRef, ReferralSubForm.FORM_ID);
 
         assertThat(Iterables.size(subRecords), equalTo(4));
 

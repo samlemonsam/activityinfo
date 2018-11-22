@@ -22,7 +22,7 @@ import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.GetLocations;
 import org.activityinfo.legacy.shared.command.result.LocationResult;
 import org.activityinfo.legacy.shared.model.LocationDTO;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.query.ColumnSet;
@@ -82,7 +82,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
     @OnDataSet("/dbunit/jordan-locations.db.xml")
     public void getLocation() {
         ResourceId classId = locationFormClass(50512);
-        FormInstance instance = assertResolves(locator.getFormInstance(classId, locationInstanceId(1590565828)));
+        TypedFormRecord instance = assertResolves(locator.getFormInstance(classId, locationInstanceId(1590565828)));
         ReferenceValue adminUnits = (ReferenceValue) instance.get(field(classId, ADMIN_FIELD));
         System.out.println(adminUnits);
     }
@@ -92,7 +92,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
     @OnDataSet("/dbunit/sites-calculated-indicators.db.xml")
     public void persistSiteWithCalculatedIndicators() {
         int siteId = new KeyGenerator().generateInt();
-        FormInstance instance = new FormInstance(CuidAdapter.cuid(SITE_DOMAIN, siteId), NFI_DIST_FORM_CLASS);
+        TypedFormRecord instance = new TypedFormRecord(CuidAdapter.cuid(SITE_DOMAIN, siteId), NFI_DIST_FORM_CLASS);
 
         instance.set(indicatorField(1), 1);
         instance.set(indicatorField(2), 2);
@@ -105,7 +105,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 
         assertResolves(locator.persist(instance));
 
-        FormInstance firstRead = assertResolves(locator.getFormInstance(NFI_DIST_FORM_CLASS, instance.getId()));
+        TypedFormRecord firstRead = assertResolves(locator.getFormInstance(NFI_DIST_FORM_CLASS, instance.getId()));
 
         assertThat(firstRead.get(indicatorField(1)), equalTo((FieldValue)new Quantity(1)));
         assertThat(firstRead.get(indicatorField(2)), equalTo((FieldValue)new Quantity(2)));
@@ -118,7 +118,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
         assertResolves(locator.persist(instance));
 
         // read from server
-        FormInstance secondRead = assertResolves(locator.getFormInstance(NFI_DIST_FORM_CLASS, instance.getId()));
+        TypedFormRecord secondRead = assertResolves(locator.getFormInstance(NFI_DIST_FORM_CLASS, instance.getId()));
 
         assertThat(secondRead.get(indicatorField(1)), nullValue()); // BENE
         assertThat(secondRead.get(indicatorField(2)), nullValue()); // BACHE
@@ -133,7 +133,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
     @Test
     public void persistLocation() {
 
-        FormInstance instance = new FormInstance(newLegacyFormInstanceId(HEALTH_CENTER_CLASS), HEALTH_CENTER_CLASS);
+        TypedFormRecord instance = new TypedFormRecord(newLegacyFormInstanceId(HEALTH_CENTER_CLASS), HEALTH_CENTER_CLASS);
         instance.set(field(HEALTH_CENTER_CLASS, NAME_FIELD), "CS Ubuntu");
         instance.set(field(HEALTH_CENTER_CLASS, GEOMETRY_FIELD), new GeoPoint(-1, 13));
         instance.set(field(HEALTH_CENTER_CLASS, ADMIN_FIELD), entityRef(TERRITOIRE, IRUMU));
@@ -207,7 +207,7 @@ public class ResourceLocatorAdaptorTest extends CommandTestCase2 {
 //        <locationAdminLink locationId="1" adminEntityId="2"/>
 //        <locationAdminLink locationId="1" adminEntityId="12"/>
 
-        FormInstance instance = assertResolves(locator.getFormInstance(HEALTH_CENTER_CLASS, locationInstanceId(1)));
+        TypedFormRecord instance = assertResolves(locator.getFormInstance(HEALTH_CENTER_CLASS, locationInstanceId(1)));
         instance.set(field(HEALTH_CENTER_CLASS, NAME_FIELD), "New Penekusu");
 
         assertResolves(locator.persist(instance));

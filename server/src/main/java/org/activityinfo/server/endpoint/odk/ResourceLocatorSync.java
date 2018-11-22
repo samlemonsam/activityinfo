@@ -20,7 +20,7 @@ package org.activityinfo.server.endpoint.odk;
 
 import com.google.inject.ImplementedBy;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
@@ -33,7 +33,7 @@ import java.util.List;
 @ImplementedBy(ResourceLocatorSyncImpl.class)
 public interface ResourceLocatorSync extends FormClassProvider {
     
-    void persist(FormInstance formInstance);
+    void persist(TypedFormRecord typedFormRecord);
 
     FormClass getFormClass(ResourceId formId);
 

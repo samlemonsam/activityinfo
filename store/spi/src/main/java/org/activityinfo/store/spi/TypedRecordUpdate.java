@@ -20,7 +20,7 @@ package org.activityinfo.store.spi;
 
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 
@@ -42,7 +42,7 @@ public class TypedRecordUpdate {
     public TypedRecordUpdate() {
     }
 
-    public TypedRecordUpdate(long userId, FormInstance record) {
+    public TypedRecordUpdate(long userId, TypedFormRecord record) {
         this.userId = userId;
         this.formId = record.getFormId();
         this.recordId = record.getRef().getRecordId();

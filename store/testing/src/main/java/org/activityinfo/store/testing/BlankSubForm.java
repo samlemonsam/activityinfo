@@ -20,7 +20,7 @@ package org.activityinfo.store.testing;
 
 import com.google.common.base.Supplier;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -35,7 +35,7 @@ public class BlankSubForm implements TestForm {
     private final GenericForm parentForm;
     private final FormClass formClass;
 
-    private List<FormInstance> records = null;
+    private List<TypedFormRecord> records = null;
     private RecordGenerator generator;
 
     public BlankSubForm(GenericForm parentForm) {
@@ -60,7 +60,7 @@ public class BlankSubForm implements TestForm {
     }
 
     @Override
-    public List<FormInstance> getRecords() {
+    public List<TypedFormRecord> getRecords() {
         if (records == null) {
             this.records = generator.get(ROW_COUNT);
         }
@@ -68,7 +68,7 @@ public class BlankSubForm implements TestForm {
     }
 
     @Override
-    public Supplier<FormInstance> getGenerator() {
+    public Supplier<TypedFormRecord> getGenerator() {
         return generator;
     }
 }

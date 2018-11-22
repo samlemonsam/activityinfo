@@ -24,7 +24,7 @@ import com.google.common.collect.Multimap;
 import org.activityinfo.model.database.RecordLockSet;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.formula.FormulaNode;
@@ -60,7 +60,7 @@ public class FormInputViewModelBuilder {
     private final FormEvalContext evalContext;
     private final RecordLockSet locks;
 
-    private Map<ResourceId, Predicate<FormInstance>> relevanceCalculators = new HashMap<>();
+    private Map<ResourceId, Predicate<TypedFormRecord>> relevanceCalculators = new HashMap<>();
 
     private List<FieldValidator> validators = new ArrayList<>();
 
@@ -141,7 +141,7 @@ public class FormInputViewModelBuilder {
                 .transform(r -> r.getRoot().getFieldValueMap())
                 .or(emptyMap());
 
-        FormInstance record = computeUpdatedRecord(existingValues, inputModel);
+        TypedFormRecord record = computeUpdatedRecord(existingValues, inputModel);
 
         // Now construct the viewModel that includes everything about
         // the current state of data entry.
@@ -176,11 +176,11 @@ public class FormInputViewModelBuilder {
      * @param inputModel
      * @return
      */
-    private FormInstance computeUpdatedRecord(Map<ResourceId, FieldValue> existingValues, FormInputModel inputModel) {
+    private TypedFormRecord computeUpdatedRecord(Map<ResourceId, FieldValue> existingValues, FormInputModel inputModel) {
 
         // We inherit all the existing values...
 
-        FormInstance record = new FormInstance(ResourceId.generateId(), formTree.getRootFormId());
+        TypedFormRecord record = new TypedFormRecord(ResourceId.generateId(), formTree.getRootFormId());
         record.setAll(existingValues);
 
         // Now apply changes...
@@ -211,7 +211,7 @@ public class FormInputViewModelBuilder {
      * form and the rules defined in the form's schema.
      *
      */
-    private Set<ResourceId> computeRelevance(FormInstance record) {
+    private Set<ResourceId> computeRelevance(TypedFormRecord record) {
         // All fields are relevant by default
         Set<ResourceId> relevantSet = new HashSet<>();
         for (FormTree.Node node : formTree.getRootFields()) {
@@ -223,7 +223,7 @@ public class FormInputViewModelBuilder {
         do {
             changing = false;
 
-            for (Map.Entry<ResourceId, Predicate<FormInstance>> field : relevanceCalculators.entrySet()) {
+            for (Map.Entry<ResourceId, Predicate<TypedFormRecord>> field : relevanceCalculators.entrySet()) {
 
                 boolean relevant = field.getValue().apply(record);
                 if(!relevant) {
@@ -259,7 +259,7 @@ public class FormInputViewModelBuilder {
     /**
      * Computes the set of fields that are relevant, required, but still missing values.
      */
-    private Set<ResourceId> computeMissing(FormInstance record, Set<ResourceId> relevantSet) {
+    private Set<ResourceId> computeMissing(TypedFormRecord record, Set<ResourceId> relevantSet) {
         Set<ResourceId> missing = new HashSet<>();
         for (FormTree.Node node : formTree.getRootFields()) {
             if(node.getType() instanceof SerialNumberType) {
@@ -291,7 +291,7 @@ public class FormInputViewModelBuilder {
         return subFormMap;
     }
 
-    private Multimap<ResourceId, String> validateFieldValues(FormInstance record) {
+    private Multimap<ResourceId, String> validateFieldValues(TypedFormRecord record) {
         Multimap<ResourceId, String> validationErrors = HashMultimap.create();
         for (FieldValidator validator : validators) {
             validator.run(record, validationErrors);
@@ -299,7 +299,7 @@ public class FormInputViewModelBuilder {
         return validationErrors;
     }
 
-    private boolean checkLocks(FormInstance record) {
+    private boolean checkLocks(TypedFormRecord record) {
         FieldValue period = record.get(ResourceId.valueOf("period"));
         if(period instanceof PeriodValue) {
             boolean locked = locks.isLocked(((PeriodValue) period).asInterval());
@@ -312,7 +312,7 @@ public class FormInputViewModelBuilder {
         return false;
     }
 
-    private boolean computeDirty(boolean placeholder, Map<ResourceId, FieldValue> existingValues, FormInstance currentValues) {
+    private boolean computeDirty(boolean placeholder, Map<ResourceId, FieldValue> existingValues, TypedFormRecord currentValues) {
 
         if(placeholder) {
             // if this is a placeholder subrecord, there may be a key

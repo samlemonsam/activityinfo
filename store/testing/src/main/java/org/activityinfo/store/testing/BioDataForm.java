@@ -20,7 +20,7 @@ package org.activityinfo.store.testing;
 
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.RecordRef;
@@ -40,7 +40,7 @@ public class BioDataForm implements TestForm {
     private final FormClass formClass;
     private final FormField codeField;
 
-    private List<FormInstance> records = null;
+    private List<TypedFormRecord> records = null;
     private IntakeForm intakeForm;
     private RecordGenerator generator;
 
@@ -74,7 +74,7 @@ public class BioDataForm implements TestForm {
 
 
     @Override
-    public List<FormInstance> getRecords() {
+    public List<TypedFormRecord> getRecords() {
         if(records == null) {
 
             this.records = generator.get(ROW_COUNT);

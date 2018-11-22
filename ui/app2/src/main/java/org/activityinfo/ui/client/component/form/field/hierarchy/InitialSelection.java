@@ -21,7 +21,7 @@ package org.activityinfo.ui.client.component.form.field.hierarchy;
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.promise.Promise;
@@ -56,11 +56,11 @@ class InitialSelection {
         List<Promise<Void>> promises = new ArrayList<>();
         for (RecordRef reference : references) {
             promises.add(locator.getFormInstance(reference.getFormId(), reference.getRecordId())
-                    .join(new Function<FormInstance, Promise<Void>>() {
+                    .join(new Function<TypedFormRecord, Promise<Void>>() {
 
                         @Nullable
                         @Override
-                        public Promise<Void> apply(@Nullable FormInstance instance) {
+                        public Promise<Void> apply(@Nullable TypedFormRecord instance) {
                             Set<RecordRef> parentsToFetch = populateSelection(instance);
                             if (parentsToFetch.isEmpty()) {
                                 return Promise.done();
@@ -74,7 +74,7 @@ class InitialSelection {
         return Promise.waitAll(promises);
     }
 
-    private Set<RecordRef> populateSelection(FormInstance instance) {
+    private Set<RecordRef> populateSelection(TypedFormRecord instance) {
         Set<RecordRef> parents = Sets.newHashSet();
 
         Level level = hierarchy.getLevel(instance.getFormId());

@@ -26,7 +26,6 @@ import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
@@ -37,7 +36,6 @@ import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.VersionedFormStorage;
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -245,7 +243,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public void singleSite() {
         FormStorage siteStorage = catalog.getForm(CuidAdapter.activityFormClass(1)).get();
         FormRecord siteRecord = siteStorage.get(CuidAdapter.cuid(CuidAdapter.SITE_DOMAIN, 1)).get();
-        FormInstance site = FormInstance.toFormInstance(siteStorage.getFormClass(), siteRecord);
+        TypedFormRecord site = TypedFormRecord.toTypedFormRecord(siteStorage.getFormClass(), siteRecord);
 
         EnumValue cause = (EnumValue) site.get(CuidAdapter.attributeGroupField(1));
         EnumValue kitContents = (EnumValue) site.get(CuidAdapter.attributeGroupField(2));
@@ -260,7 +258,7 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
     public void singleSiteWithBoundLocation() {
         FormStorage siteStorage = catalog.getForm(CuidAdapter.activityFormClass(4)).get();
         FormRecord siteRecord = siteStorage.get(CuidAdapter.cuid(CuidAdapter.SITE_DOMAIN, 6)).get();
-        FormInstance site = FormInstance.toFormInstance(siteStorage.getFormClass(), siteRecord);
+        TypedFormRecord site = TypedFormRecord.toTypedFormRecord(siteStorage.getFormClass(), siteRecord);
 
         FieldValue location = site.get(CuidAdapter.locationField(4));
     }

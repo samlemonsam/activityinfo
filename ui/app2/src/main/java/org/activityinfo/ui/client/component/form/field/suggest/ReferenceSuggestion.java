@@ -19,7 +19,7 @@
 package org.activityinfo.ui.client.component.form.field.suggest;
 
 import com.google.gwt.user.client.ui.SuggestOracle;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.form.FormInstanceLabeler;
 import org.activityinfo.model.type.RecordRef;
 
@@ -33,7 +33,7 @@ public class ReferenceSuggestion implements SuggestOracle.Suggestion {
         this.ref = ref;
     }
 
-    public ReferenceSuggestion(FormInstance instance) {
+    public ReferenceSuggestion(TypedFormRecord instance) {
         this.label = FormInstanceLabeler.getLabel(instance);
         this.ref = new RecordRef(instance.getFormId(), instance.getId());
     }

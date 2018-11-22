@@ -22,7 +22,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gwt.core.shared.GwtIncompatible;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
@@ -38,13 +38,13 @@ import java.util.Map;
 @GwtIncompatible
 public class TestingFormQueryBuilder implements ColumnQueryBuilder {
 
-    private final List<FormInstance> records;
+    private final List<TypedFormRecord> records;
     private final List<CursorObserver<ResourceId>> idObservers = new ArrayList<>();
     private final List<CursorObserver<FieldValue>> parentObservers = new ArrayList<>();
     private final Multimap<ResourceId, CursorObserver<FieldValue>> fieldObservers = HashMultimap.create();
     private final FormClass formClass;
 
-    public TestingFormQueryBuilder(FormClass formClass, List<FormInstance> records) {
+    public TestingFormQueryBuilder(FormClass formClass, List<TypedFormRecord> records) {
         this.records = records;
         this.formClass = formClass;
     }
@@ -79,7 +79,7 @@ public class TestingFormQueryBuilder implements ColumnQueryBuilder {
 
     @Override
     public void execute() {
-        for (FormInstance record : records) {
+        for (TypedFormRecord record : records) {
             for (CursorObserver<ResourceId> idObserver : idObservers) {
                 idObserver.onNext(record.getId());
             }

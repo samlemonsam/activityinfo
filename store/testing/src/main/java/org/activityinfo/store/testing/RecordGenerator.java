@@ -22,7 +22,7 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldValue;
@@ -44,7 +44,7 @@ import java.util.Map;
 /**
  * Generates random, but reproducible records for testing purposes.
  */
-public class RecordGenerator implements Supplier<FormInstance> {
+public class RecordGenerator implements Supplier<TypedFormRecord> {
 
     private Ids ids;
     private final FormClass schema;
@@ -125,8 +125,8 @@ public class RecordGenerator implements Supplier<FormInstance> {
         return distribution(field.getId(), new EnumGenerator(field, seed));
     }
 
-    public List<FormInstance> get(int rowCount) {
-        List<FormInstance> records = new ArrayList<>();
+    public List<TypedFormRecord> get(int rowCount) {
+        List<TypedFormRecord> records = new ArrayList<>();
         for (int i = 0; i < rowCount; i++) {
             records.add(get());
         }
@@ -134,9 +134,9 @@ public class RecordGenerator implements Supplier<FormInstance> {
     }
 
     @Override
-    public FormInstance get() {
+    public TypedFormRecord get() {
         ResourceId recordId = ids.recordId(schema.getId(), nextRecordIndex++);
-        FormInstance record = new FormInstance(recordId, schema.getId());
+        TypedFormRecord record = new TypedFormRecord(recordId, schema.getId());
 
         for (Map.Entry<ResourceId, FieldValue> entry : ids.builtinValues().entrySet()) {
             record.set(entry.getKey(), entry.getValue());

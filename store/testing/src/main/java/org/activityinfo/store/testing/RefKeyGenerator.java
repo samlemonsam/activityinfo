@@ -19,7 +19,7 @@
 package org.activityinfo.store.testing;
 
 import com.google.common.base.Supplier;
-import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.ReferenceValue;
@@ -36,7 +36,7 @@ public class RefKeyGenerator implements Supplier<FieldValue> {
 
     public RefKeyGenerator(TestForm rangeForm) {
         List<RecordRef> range = new ArrayList<>();
-        for (FormInstance record : rangeForm.getRecords()) {
+        for (TypedFormRecord record : rangeForm.getRecords()) {
             range.add(new RecordRef(rangeForm.getFormId(), record.getId()));
         }
 
