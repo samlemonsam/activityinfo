@@ -21,14 +21,19 @@ package org.activityinfo.store.spi;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.resource.ResourceId;
 
+import java.util.List;
+
 /**
- * Provides metadata associated with a user's database.
+ * Provides metadata for a database, dependent on user's permissions.
  */
 public interface DatabaseProvider {
-
 
   UserDatabaseMeta getDatabaseMetadata(ResourceId databaseId, int userId);
 
   UserDatabaseMeta getDatabaseMetadata(int databaseId, int userId);
+
+  List<UserDatabaseMeta> getVisibleDatabases(int userId);
+
+  UserDatabaseMeta getDatabaseMetadataByResource(ResourceId resourceId, int userId);
 
 }

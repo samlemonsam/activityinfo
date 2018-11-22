@@ -5,6 +5,8 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.DatabaseProvider;
 
+import java.util.List;
+
 public class MockDatabaseProvider implements DatabaseProvider {
 
     @Override
@@ -22,5 +24,15 @@ public class MockDatabaseProvider implements DatabaseProvider {
     @Override
     public UserDatabaseMeta getDatabaseMetadata(int databaseId, int userId) {
         return getDatabaseMetadata(CuidAdapter.databaseId(databaseId), userId);
+    }
+
+    @Override
+    public List<UserDatabaseMeta> getVisibleDatabases(int userId) {
+        throw new IllegalArgumentException("TODO");
+    }
+
+    @Override
+    public UserDatabaseMeta getDatabaseMetadataByResource(ResourceId resourceId, int userId) {
+        throw new IllegalArgumentException("TODO");
     }
 }
