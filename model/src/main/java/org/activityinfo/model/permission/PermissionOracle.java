@@ -1,14 +1,22 @@
 package org.activityinfo.model.permission;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.database.ResourceType;
 import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormEvalContext;
+import org.activityinfo.model.form.FormInstance;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formula.*;
+import org.activityinfo.model.formula.diagnostic.FormulaException;
+import org.activityinfo.model.formula.eval.EvalContext;
 import org.activityinfo.model.formula.functions.EqualFunction;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.primitive.BooleanFieldValue;
 
 public class PermissionOracle {
 
@@ -338,6 +346,64 @@ public class PermissionOracle {
         } else {
             builder.allowEdit();
         }
+    }
+
+    /////////////////////////////////////////////// FORM INSTANCE METHODS ////////////////////////////////////////////////
+
+    public static boolean canEdit(FormInstance record,
+                                  FormPermissions formPermissions,
+                                  FormClass formClass) {
+        return can(record, formPermissions, formClass, Operation.EDIT_RECORD);
+    }
+
+    public static boolean canView(FormInstance record,
+                                  FormPermissions formPermissions,
+                                  FormClass formClass) {
+        return can(record, formPermissions, formClass, Operation.VIEW);
+    }
+
+    public static boolean canView(FormRecord record,
+                                  FormPermissions formPermissions,
+                                  FormClass formClass) {
+        return can(record, formPermissions, formClass, Operation.VIEW);
+    }
+
+    public static boolean can(FormRecord record,
+                              FormPermissions formPermissions,
+                              FormClass formClass,
+                              Operation operation) {
+        return can(FormInstance.toFormInstance(formClass, record), formPermissions, formClass, operation);
+    }
+
+    public static boolean can(FormInstance record,
+                              FormPermissions formPermissions,
+                              FormClass formClass,
+                              Operation operation) {
+        if (!formPermissions.isAllowed(operation)) {
+            return false;
+        }
+        if (!formPermissions.isFiltered(operation)) {
+            return true;
+        }
+        FormulaNode filter = parseFilter(formPermissions.getFilter(operation));
+        return evalFilter(record, formClass, filter);
+    }
+
+    private static FormulaNode parseFilter(String filter) {
+        if(Strings.isNullOrEmpty(filter)) {
+            return new ConstantNode(true);
+        }
+        try {
+            return FormulaParser.parse(filter);
+        } catch (FormulaException e) {
+            // Failed to parse filter, falling back to denied access
+            return new ConstantNode(false);
+        }
+    }
+
+    private static boolean evalFilter(FormInstance record, FormClass formClass, FormulaNode filter) {
+        EvalContext context = new FormEvalContext(formClass, record);
+        return filter.evaluate(context) == BooleanFieldValue.TRUE;
     }
 
     /////////////////////////////////////////////////// UTIL METHODS ///////////////////////////////////////////////////
