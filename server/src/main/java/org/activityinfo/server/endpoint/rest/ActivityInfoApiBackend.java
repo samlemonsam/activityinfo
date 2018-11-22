@@ -32,7 +32,6 @@ import org.activityinfo.store.mysql.MySqlStorageProvider;
 import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
-import org.activityinfo.store.query.server.PermissionsEnforcer;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.FormSupervisor;
 import org.activityinfo.store.spi.*;
@@ -65,7 +64,8 @@ public class ActivityInfoApiBackend implements ApiBackend {
         return new FormSupervisorAdapter(getStorage(), getDatabaseProvider(), getAuthenticatedUserId());
     }
 
-    private DatabaseProvider getDatabaseProvider() {
+    @Override
+    public DatabaseProvider getDatabaseProvider() {
         return injector.getInstance(DatabaseProvider.class);
     }
 
@@ -115,13 +115,6 @@ public class ActivityInfoApiBackend implements ApiBackend {
     @Override
     public ColumnSetBuilder newQueryBuilder() {
         return new ColumnSetBuilder(getStorage(), new AppEngineFormScanCache(), getFormSupervisor());
-    }
-
-    @Override
-    public PermissionsEnforcer newPermissionsEnforcer() {
-        return new PermissionsEnforcer(injector.getInstance(FormStorageProvider.class),
-                getDatabaseProvider(),
-                getAuthenticatedUser().getUserId());
     }
 
     @Override

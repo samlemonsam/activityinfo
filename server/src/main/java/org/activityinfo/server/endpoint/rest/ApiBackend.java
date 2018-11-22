@@ -20,9 +20,9 @@ package org.activityinfo.server.endpoint.rest;
 
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
-import org.activityinfo.store.query.server.PermissionsEnforcer;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.FormSupervisor;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.RecordHistoryProvider;
@@ -46,8 +46,8 @@ public interface ApiBackend {
 
     ColumnSetBuilder newQueryBuilder();
 
-    PermissionsEnforcer newPermissionsEnforcer();
-
     RecordHistoryProvider getRecordHistoryProvider();
+
+    DatabaseProvider getDatabaseProvider();
 
 }

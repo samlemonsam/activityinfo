@@ -40,6 +40,7 @@ import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.permission.FormPermissions;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
@@ -50,7 +51,7 @@ import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
 import org.activityinfo.store.query.server.InvalidUpdateException;
-import org.activityinfo.store.query.server.PermissionsEnforcer;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.VersionedFormStorage;
 
@@ -188,14 +189,17 @@ public class FormResource {
     public FormRecord getRecord(@PathParam("recordId") String recordId) {
 
         FormStorage form = assertVisible(formId);
+        DatabaseProvider databaseProvider = backend.getDatabaseProvider();
+        int userId = backend.getAuthenticatedUserId();
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(form.getFormClass().getDatabaseId(), userId);
+        FormPermissions formPermissions = PermissionOracle.formPermissions(form.getFormClass().getId(), databaseMeta);
 
         Optional<FormRecord> record = form.get(ResourceId.valueOf(recordId));
         if(!record.isPresent()) {
             throw new NotFoundException("Record " + recordId + " does not exist.");
         }
 
-        PermissionsEnforcer enforcer = backend.newPermissionsEnforcer();
-        if(!enforcer.canView(record.get())) {
+        if(!PermissionOracle.canView(record.get(), formPermissions, form.getFormClass())) {
             throw new NotAuthorizedException();
         }
 

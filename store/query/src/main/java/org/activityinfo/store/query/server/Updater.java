@@ -29,9 +29,12 @@ import com.google.common.collect.Multimap;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonMappingException;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.FormulaParser;
+import org.activityinfo.model.permission.FormPermissions;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.resource.RecordUpdate;
@@ -416,8 +419,9 @@ public class Updater {
 
         // Check form-level permissions
         if(enforcePermissions) {
-
-            PermissionsEnforcer enforcer = new PermissionsEnforcer(new FormSupervisorAdapter(catalog, databaseProvider, userId), catalog);
+            FormClass formClass = form.getFormClass();
+            UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(formClass.getDatabaseId(), userId);
+            FormPermissions formPermissions = PermissionOracle.formPermissions(formClass.getId(), databaseMeta);
 
             // Verify that the user has the right to modify the *existing* record
 
@@ -429,11 +433,11 @@ public class Updater {
             });
 
             if (existingTypedRecord.isPresent()) {
-                if (!enforcer.canEdit(existingTypedRecord.get())) {
+                if (!PermissionOracle.canEdit(existingTypedRecord.get(), formPermissions, formClass)) {
                     throw new InvalidUpdateException("Unauthorized update");
                 }
             }
-            if (!enforcer.canEdit(applyUpdates(existingTypedRecord, update))) {
+            if (!PermissionOracle.canEdit(applyUpdates(existingTypedRecord, update), formPermissions, formClass)) {
                 throw new InvalidUpdateException("Unauthorized update");
             }
         }
