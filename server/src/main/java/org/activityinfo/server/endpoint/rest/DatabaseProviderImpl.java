@@ -18,6 +18,8 @@
  */
 package org.activityinfo.server.endpoint.rest;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.database.*;
@@ -32,8 +34,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.store.spi.DatabaseProvider;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.util.*;
@@ -47,7 +47,7 @@ public class DatabaseProviderImpl implements DatabaseProvider {
 
     public static final ResourceId GEODB_ID = ResourceId.valueOf("geodb");
 
-    private Provider<EntityManager> entityManager;
+    private final Provider<EntityManager> entityManager;
 
     @Inject
     public DatabaseProviderImpl(Provider<EntityManager> entityManager) {
