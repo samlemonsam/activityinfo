@@ -45,13 +45,13 @@ public class DatabaseProviderImpl implements DatabaseProvider {
 
     private static final Logger LOGGER = Logger.getLogger(DatabaseProviderImpl.class.getName());
 
-    public static final ResourceId GEODB_ID = ResourceId.valueOf("geodb");
-
     private final Provider<EntityManager> entityManager;
+    private final GeoDatabaseProvider geoDbProvider;
 
     @Inject
     public DatabaseProviderImpl(Provider<EntityManager> entityManager) {
         this.entityManager = entityManager;
+        this.geoDbProvider = new GeoDatabaseProvider(entityManager);
     }
 
     @Override
@@ -118,8 +118,8 @@ public class DatabaseProviderImpl implements DatabaseProvider {
 
     @Override
     public UserDatabaseMeta getDatabaseMetadata(ResourceId databaseId, int userId) {
-        if(databaseId.equals(GEODB_ID)) {
-            return queryGeoDb(userId);
+        if(geoDbProvider.accept(databaseId)) {
+            return geoDbProvider.queryGeoDb(userId);
         } else {
             return queryMySQLDatabase(databaseId, userId);
         }
@@ -128,17 +128,6 @@ public class DatabaseProviderImpl implements DatabaseProvider {
     @Override
     public UserDatabaseMeta getDatabaseMetadata(int databaseId, int userId) {
         return getDatabaseMetadata(CuidAdapter.databaseId(databaseId), userId);
-    }
-
-    private UserDatabaseMeta queryGeoDb(int userId) {
-        return new UserDatabaseMeta.Builder()
-                .setDatabaseId(GEODB_ID)
-                .setUserId(userId)
-                .setLabel("Geographic Database")
-                .setOwner(false)
-                .setVersion("1")
-                .setPublished(true)
-                .build();
     }
 
     private UserDatabaseMeta queryMySQLDatabase(ResourceId databaseId, int userId) {
