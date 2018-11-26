@@ -193,6 +193,11 @@ public class NodeMatcher {
             matches.add(NodeMatch.forId(path.head(), tree.getRootFormClass()));
         }
 
+        // check for a match on the form id of the current form tree
+        if (path.isLeaf() && path.head().equals(tree.getRootFormId().asString())) {
+            matches.add(NodeMatch.forId(ColumnModel.RECORD_ID_SYMBOL, tree.getRootFormClass()));
+        }
+
         // Check for a match of the query Path head to the set of fields
         for (FormTree.Node field : fields) {
             if(path.matches(field)) {
