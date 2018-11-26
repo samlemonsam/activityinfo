@@ -24,6 +24,8 @@ import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Resource implements JsonSerializable {
 
@@ -42,6 +44,42 @@ public class Resource implements JsonSerializable {
          * Private. Visible only to Users given explicit permissions.
          */
         PRIVATE
+    }
+
+    static class Node {
+
+        private Node parentNode;
+        private Resource resource;
+        private List<Node> childNodes = new ArrayList<>(0);
+
+        public Node(Node parentNode, Resource resource) {
+            this.parentNode = parentNode;
+            this.resource = resource;
+        }
+
+        public boolean isRoot() {
+            return parentNode == null;
+        }
+
+        public boolean isLeaf() {
+            return childNodes.isEmpty();
+        }
+
+        public void addChildNode(Node childNode) {
+            childNodes.add(childNode);
+        }
+
+        public Node getParentNode() {
+            return parentNode;
+        }
+
+        public Resource getResource() {
+            return resource;
+        }
+
+        public List<Node> getChildNodes() {
+            return childNodes;
+        }
     }
 
     private ResourceId id;
