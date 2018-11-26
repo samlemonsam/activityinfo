@@ -23,6 +23,7 @@ import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.login.RestMockUtils;
 import org.activityinfo.server.mail.MailSender;
 import org.activityinfo.server.mail.MailSenderStubModule;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.junit.After;
 import org.junit.Before;
@@ -67,13 +68,16 @@ public class DatabaseResourceTest extends CommandTestCase {
     @Inject
     private AuthTokenProvider authTokenProvider;
 
+    @Inject
+    private DatabaseProvider databaseProvider;
+
     private UriInfo uri;
 
     @Before
     public void setUp() throws URISyntaxException {
         resource = new DatabaseResource(formStorageProvider,
                 dispatcher,
-                new DatabaseProviderImpl(Providers.of(em)),
+                databaseProvider,
                 Providers.of(em),
                 mailSender,
                 databaseId);

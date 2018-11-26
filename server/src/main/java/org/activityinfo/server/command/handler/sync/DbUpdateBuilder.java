@@ -21,7 +21,6 @@ package org.activityinfo.server.command.handler.sync;
 import com.bedatadriven.rebar.sql.client.query.SqlQuery;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
-import com.google.inject.util.Providers;
 import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
 import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.legacy.shared.impl.Tables;
@@ -29,7 +28,6 @@ import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.store.spi.DatabaseProvider;
 import org.json.JSONException;
 
@@ -52,9 +50,10 @@ public class DbUpdateBuilder implements UpdateBuilder {
     private UserDatabaseMeta databaseMeta;
 
     @Inject
-    public DbUpdateBuilder(EntityManager entityManager) {
+    public DbUpdateBuilder(EntityManager entityManager,
+                           DatabaseProvider databaseProvider) {
         this.entityManager = entityManager;
-        this.provider = new DatabaseProviderImpl(Providers.of(entityManager));
+        this.provider = databaseProvider;
     }
 
     @SuppressWarnings("unchecked") @Override

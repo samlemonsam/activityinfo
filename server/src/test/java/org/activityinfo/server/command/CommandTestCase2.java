@@ -45,6 +45,7 @@ import org.activityinfo.server.util.config.ConfigModuleStub;
 import org.activityinfo.store.mysql.collections.AdminEntityTable;
 import org.activityinfo.store.mysql.metadata.CountryStructure;
 import org.activityinfo.store.spi.BlobAuthorizerStub;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.ResourceLocatorAdaptor;
 import org.activityinfo.ui.client.dispatch.remote.AbstractDispatcher;
@@ -112,6 +113,7 @@ public class CommandTestCase2 {
     public final void setUpResourceLocator() {
         locator = new ResourceLocatorAdaptor(
                 new ActivityInfoClientAsyncStub(injector.getProvider(EntityManager.class),
+                        injector.getInstance(DatabaseProvider.class),
                         new BlobAuthorizerStub()));
     }
 

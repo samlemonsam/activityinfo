@@ -41,7 +41,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.Folder;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
-import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
@@ -65,9 +64,10 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
     private final DatabaseProvider provider;
 
     @Inject
-    public GetUsersHandler(EntityManager em) {
+    public GetUsersHandler(EntityManager em,
+                           DatabaseProvider databaseProvider) {
         this.em = em;
-        this.provider = new DatabaseProviderImpl(Providers.of(em));
+        this.provider = databaseProvider;
     }
 
     @Override

@@ -143,7 +143,7 @@ public class RootResource {
     public DatabaseResource getDatabaseSchema(@PathParam("id") int id) {
         return new DatabaseResource(catalog,
                 dispatcher,
-                new DatabaseProviderImpl(entityManager),
+                databaseProvider,
                 entityManager,
                 mailSender,
                 id);

@@ -35,7 +35,7 @@ import org.activityinfo.model.database.RecordLock;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.database.OnDataSet;
-import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -100,7 +100,7 @@ public class LockedPeriodTest extends CommandTestCase {
         assertTrue(locks.isActivityLocked(1, new LocalDate(2011, 1,1)));
 
         // Verify that the new code works too...
-        DatabaseProviderImpl provider = new DatabaseProviderImpl(Providers.of(em));
+        DatabaseProvider provider = injector.getInstance(DatabaseProvider.class);
         UserDatabaseMeta metadata = provider.getDatabaseMetadata(CuidAdapter.databaseId(1), 1);
 
         ArrayList<RecordLock> folderLocks = Lists.newArrayList(metadata.getEffectiveLocks(CuidAdapter.folderId(1)));

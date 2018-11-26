@@ -23,8 +23,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.util.Providers;
 import org.activityinfo.json.Json;
 import org.activityinfo.legacy.shared.command.CloneDatabase;
 import org.activityinfo.legacy.shared.command.UpdatePartner;
@@ -54,7 +52,6 @@ import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.*;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
 import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
@@ -91,9 +88,11 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
     private UserDatabaseMeta sourceDbMeta;
 
     @Inject
-    public CloneDatabaseHandler(Injector injector, Provider<FormStorageProvider> formCatalog) {
-        this.em = injector.getInstance(EntityManager.class);
-        this.databaseProvider = new DatabaseProviderImpl(Providers.of(em));
+    public CloneDatabaseHandler(Provider<EntityManager> entityManager,
+                                DatabaseProvider databaseProvider,
+                                Provider<FormStorageProvider> formCatalog) {
+        this.em = entityManager.get();
+        this.databaseProvider = databaseProvider;
         this.formCatalog = formCatalog;
     }
 
@@ -138,7 +137,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         PartnerDTO partner = new PartnerDTO();
         partner.setName("Default");
 
-        new UpdatePartnerHandler(em).execute(new UpdatePartner(targetDb.getId(), partner), user);
+        new UpdatePartnerHandler(em, databaseProvider).execute(new UpdatePartner(targetDb.getId(), partner), user);
     }
 
     private void copyUserPermissions() {

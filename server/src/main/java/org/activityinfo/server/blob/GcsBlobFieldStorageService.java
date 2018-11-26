@@ -41,7 +41,6 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.database.hibernate.entity.Activity;
-import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.server.util.blob.DevAppIdentityService;
 import org.activityinfo.store.spi.*;
 import org.apache.commons.io.IOUtils;
@@ -79,10 +78,11 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
     @Inject
     public GcsBlobFieldStorageService(DeploymentConfiguration config,
                                       Provider<EntityManager> em,
-                                      Provider<FormStorageProvider> formStorage) {
+                                      Provider<FormStorageProvider> formStorage,
+                                      DatabaseProvider databaseProvider) {
         this.bucketName = config.getBlobServiceBucketName();
         this.em = em;
-        this.databaseProvider = new DatabaseProviderImpl(em);
+        this.databaseProvider = databaseProvider;
         this.formStorage = formStorage;
 
         if (Strings.isNullOrEmpty(bucketName)) {

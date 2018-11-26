@@ -31,6 +31,7 @@ import org.activityinfo.server.command.handler.crud.LocationTypePolicy;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.command.handler.crud.UserDatabasePolicy;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import javax.persistence.QueryTimeoutException;
@@ -47,8 +48,10 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
     private final KeyGenerator generator = new KeyGenerator();
 
     @Inject
-    public CreateEntityHandler(EntityManager em, Injector injector) {
-        super(em);
+    public CreateEntityHandler(EntityManager em,
+                               DatabaseProvider databaseProvider,
+                               Injector injector) {
+        super(em, databaseProvider);
         this.injector = injector;
     }
 

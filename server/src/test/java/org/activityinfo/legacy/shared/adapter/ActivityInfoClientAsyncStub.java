@@ -44,7 +44,6 @@ import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.database.hibernate.HibernateQueryExecutor;
-import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.store.hrd.HrdFormStorage;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
@@ -70,9 +69,10 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
     @Inject
     public ActivityInfoClientAsyncStub(Provider<EntityManager> entityManager,
+                                       DatabaseProvider databaseProvider,
                                        BlobAuthorizer blobAuthorizer) {
         this.entityManager = entityManager;
-        this.databaseProvider = new DatabaseProviderImpl(entityManager);
+        this.databaseProvider = databaseProvider;
         this.blobAuthorizer = blobAuthorizer;
     }
 

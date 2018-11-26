@@ -33,7 +33,7 @@ import org.activityinfo.server.command.handler.crud.LocationTypePolicy;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -53,6 +53,9 @@ public class LocationBuilderTest {
 
     @Inject
     private EntityManagerFactory emf;
+
+    @Inject
+    private DatabaseProvider databaseProvider;
 
     @Test
     @OnDataSet("/dbunit/sites-simple1.db.xml")
@@ -115,7 +118,7 @@ public class LocationBuilderTest {
         changes.put("name", "Ishamael");
         
         em.getTransaction().begin();
-        LocationTypePolicy locationTypePolicy = new LocationTypePolicy(em, new DatabaseProviderImpl(Providers.of(em)));
+        LocationTypePolicy locationTypePolicy = new LocationTypePolicy(em, databaseProvider);
         locationTypePolicy.update(user, 1, new PropertyMap(changes)); 
         em.getTransaction().commit();
 

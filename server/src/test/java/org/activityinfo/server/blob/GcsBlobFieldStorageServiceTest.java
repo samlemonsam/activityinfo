@@ -52,6 +52,7 @@ import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
 import org.activityinfo.server.util.TemplateModule;
 import org.activityinfo.server.util.config.ConfigModuleStub;
 import org.activityinfo.store.spi.BlobId;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.ui.client.component.form.field.attachment.MimeTypeUtil;
 import org.activityinfo.ui.client.dispatch.ResourceLocatorAdaptor;
 import org.junit.After;
@@ -121,7 +122,9 @@ public class GcsBlobFieldStorageServiceTest {
         blobService.setTestBucketName();
 
         locator = new ResourceLocatorAdaptor(
-                new ActivityInfoClientAsyncStub(injector.getProvider(EntityManager.class), blobService));
+                new ActivityInfoClientAsyncStub(injector.getProvider(EntityManager.class),
+                        injector.getInstance(DatabaseProvider.class),
+                        blobService));
 
         AuthenticationModuleStub.setUserId(1);
 

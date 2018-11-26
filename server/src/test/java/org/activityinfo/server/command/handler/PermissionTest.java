@@ -13,13 +13,9 @@ import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.permission.PermissionQuery;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.OnDataSet;
-import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.store.spi.DatabaseProvider;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import javax.persistence.EntityManager;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.*;
@@ -30,14 +26,7 @@ import static org.junit.Assert.*;
 public class PermissionTest {
 
     @Inject
-    protected EntityManager em;
-
     protected DatabaseProvider provider;
-
-    @Before
-    public void setUp() {
-        this.provider = new DatabaseProviderImpl(Providers.of(em));
-    }
 
     private static final int DB_ID = 2;
     private static final ResourceId FORM_ID = CuidAdapter.activityFormClass(3);

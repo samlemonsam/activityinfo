@@ -88,7 +88,7 @@ public class FormResource {
     @GET
     @NoCache
     @Produces(JSON_CONTENT_TYPE)
-    public FormMetadata getMetadataResponse(@InjectParam DatabaseProviderImpl databaseProvider,
+    public FormMetadata getMetadataResponse(@InjectParam DatabaseProvider databaseProvider,
                                             @InjectParam AuthenticatedUser user,
                                             @QueryParam("localVersion") Long localVersion) {
 

@@ -54,7 +54,6 @@ public class TestHibernateModule extends AbstractModule {
         bind(EntityManager.class).toProvider(EntityManagerProvider.class).in(TestScoped.class);
         bind(MySqlStorageProvider.class).toProvider(HibernateCatalogProvider.class).in(TestScoped.class);
         bind(FormStorageProvider.class).toProvider(HibernateCatalogProvider.class).in(TestScoped.class);
-        bind(FormCatalog.class).toProvider(HibernateCatalogProvider.class).in(TestScoped.class);
 
         bind(SqlDialect.class).to(MySqlDialect.class);
         bind(Connection.class).toProvider(TestConnectionProvider.class);

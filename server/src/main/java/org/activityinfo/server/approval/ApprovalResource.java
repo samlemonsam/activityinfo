@@ -8,9 +8,9 @@ import org.activityinfo.server.authentication.AuthTokenProvider;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.server.endpoint.rest.DatabaseResource;
 import org.activityinfo.server.mail.MailSender;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 
 import javax.persistence.EntityManager;
@@ -34,18 +34,21 @@ public class ApprovalResource {
     private Provider<FormStorageProvider> catalog;
     private MailSender mailSender;
     private AuthTokenProvider authTokenProvider;
+    private DatabaseProvider databaseProvider;
 
     @Inject
     public ApprovalResource(Provider<EntityManager> entityManager,
                             DispatcherSync dispatcher,
                             Provider<FormStorageProvider> catalog,
                             MailSender mailSender,
-                            AuthTokenProvider authTokenProvider) {
+                            AuthTokenProvider authTokenProvider,
+                            DatabaseProvider databaseProvider) {
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
         this.catalog = catalog;
         this.mailSender = mailSender;
         this.authTokenProvider = authTokenProvider;
+        this.databaseProvider = databaseProvider;
     }
 
     @GET
@@ -69,7 +72,7 @@ public class ApprovalResource {
 
         DatabaseResource resource = new DatabaseResource(catalog,
                 dispatcher,
-                new DatabaseProviderImpl(entityManager),
+                databaseProvider,
                 entityManager,
                 mailSender,
                 database.getId());
@@ -95,7 +98,7 @@ public class ApprovalResource {
 
         DatabaseResource resource = new DatabaseResource(catalog,
                 dispatcher,
-                new DatabaseProviderImpl(entityManager),
+                databaseProvider,
                 entityManager,
                 mailSender,
                 database.getId());

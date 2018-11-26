@@ -36,7 +36,6 @@ import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
@@ -59,9 +58,9 @@ public class BaseEntityHandler {
     protected final EntityManager em;
     protected final DatabaseProvider databaseProvider;
 
-    public BaseEntityHandler(EntityManager em) {
+    public BaseEntityHandler(EntityManager em, DatabaseProvider databaseProvider) {
         this.em = em;
-        this.databaseProvider = new DatabaseProviderImpl(Providers.of(em));
+        this.databaseProvider = databaseProvider;
     }
 
     protected void updateIndicatorProperties(Indicator indicator, Map<String, Object> changeMap) {

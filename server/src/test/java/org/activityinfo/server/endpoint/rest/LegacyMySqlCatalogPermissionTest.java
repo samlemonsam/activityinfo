@@ -47,13 +47,14 @@ public class LegacyMySqlCatalogPermissionTest {
     @Inject
     MySqlStorageProvider catalog;
 
+    @Inject
+    DatabaseProvider databaseProvider;
+
     private ColumnSet columnSet;
-    private DatabaseProvider databaseProvider;
     private FormScanCache cache;
 
     @Before
     public void setUp() {
-        this.databaseProvider = new DatabaseProviderImpl(em);
         this.cache = new NullFormScanCache();
     }
 

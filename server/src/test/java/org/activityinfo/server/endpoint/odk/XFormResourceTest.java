@@ -109,7 +109,8 @@ public class XFormResourceTest extends CommandTestCase2 {
 
         TestBlobstoreService blobstore = new TestBlobstoreService(injector.getInstance(DeploymentConfiguration.class),
                 injector.getInstance(EntityManager.class),
-                injector.getInstance(FormStorageProvider.class));
+                injector.getInstance(FormStorageProvider.class),
+                injector.getInstance(DatabaseProvider.class));
         TestInstanceIdService idService = new TestInstanceIdService();
         SubmissionArchiver backupService = new SubmissionArchiver(
                 new DeploymentConfiguration(new Properties()));

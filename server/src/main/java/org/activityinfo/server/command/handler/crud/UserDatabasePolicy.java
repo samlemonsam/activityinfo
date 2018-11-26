@@ -77,7 +77,7 @@ public class UserDatabasePolicy implements EntityPolicy<Database> {
 
         UpdatePartner command = new UpdatePartner(databaseId, partner);
 
-        new UpdatePartnerHandler(em).execute(command, user);
+        new UpdatePartnerHandler(em, databaseProvider).execute(command, user);
     }
 
     public Database findById(int dbId) {

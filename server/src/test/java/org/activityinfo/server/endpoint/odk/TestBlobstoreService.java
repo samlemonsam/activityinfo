@@ -26,6 +26,7 @@ import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.blob.GcsBlobFieldStorageService;
 import org.activityinfo.store.spi.BlobAuthorizer;
 import org.activityinfo.store.spi.BlobId;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 
 import javax.persistence.EntityManager;
@@ -35,8 +36,11 @@ import java.io.InputStream;
 
 public class TestBlobstoreService extends GcsBlobFieldStorageService implements BlobAuthorizer {
 
-    public TestBlobstoreService(DeploymentConfiguration config, final EntityManager em, final FormStorageProvider formStorage) {
-        super(config, Providers.of(em), Providers.of(formStorage));
+    public TestBlobstoreService(DeploymentConfiguration config,
+                                final EntityManager em,
+                                final FormStorageProvider formStorage,
+                                final DatabaseProvider databaseProvider) {
+        super(config, Providers.of(em), Providers.of(formStorage), databaseProvider);
     }
 
     @Override
