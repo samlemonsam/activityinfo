@@ -88,6 +88,14 @@ public class DatabaseProviderImpl implements DatabaseProvider {
 
     @Override
     public UserDatabaseMeta getDatabaseMetadataByResource(ResourceId resourceId, int userId) {
+        if (geoDbProvider.accept(resourceId)) {
+            return geoDbProvider.queryGeoDb(userId);
+        } else {
+            return findByResource(resourceId, userId);
+        }
+    }
+
+    private UserDatabaseMeta findByResource(ResourceId resourceId, int userId) {
         switch(resourceId.getDomain()) {
             case CuidAdapter.DATABASE_DOMAIN:
                 return getDatabaseMetadata(resourceId, userId);
@@ -97,6 +105,20 @@ public class DatabaseProviderImpl implements DatabaseProvider {
                 return getDatabaseMetadataForFolder(resourceId, userId);
             default:
                 throw new IllegalArgumentException("Cannot fetch UserDatabaseMeta for Resource: " + resourceId.toString());
+        }
+    }
+
+    @Override
+    public UserDatabaseMeta getDatabaseMetadata(int databaseId, int userId) {
+        return getDatabaseMetadata(CuidAdapter.databaseId(databaseId), userId);
+    }
+
+    @Override
+    public UserDatabaseMeta getDatabaseMetadata(ResourceId databaseId, int userId) {
+        if(geoDbProvider.accept(databaseId)) {
+            return geoDbProvider.queryGeoDb(userId);
+        } else {
+            return queryMySQLDatabase(databaseId, userId);
         }
     }
 
@@ -116,30 +138,26 @@ public class DatabaseProviderImpl implements DatabaseProvider {
         return buildMetadata(db, CuidAdapter.databaseId(db.getId()), userId);
     }
 
-    @Override
-    public UserDatabaseMeta getDatabaseMetadata(ResourceId databaseId, int userId) {
-        if(geoDbProvider.accept(databaseId)) {
-            return geoDbProvider.queryGeoDb(userId);
-        } else {
-            return queryMySQLDatabase(databaseId, userId);
-        }
-    }
-
-    @Override
-    public UserDatabaseMeta getDatabaseMetadata(int databaseId, int userId) {
-        return getDatabaseMetadata(CuidAdapter.databaseId(databaseId), userId);
-    }
-
     private UserDatabaseMeta queryMySQLDatabase(ResourceId databaseId, int userId) {
         Database database = queryDatabase(databaseId);
         if (database == null) {
-            return metaBuilder(databaseId, userId).build();
+            return meta(databaseId, userId).build();
         }
         return buildMetadata(database, databaseId, userId);
     }
 
+    private Database queryDatabase(ResourceId databaseId) {
+        return entityManager.get().find(Database.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
+    }
+
+    private UserDatabaseMeta.Builder meta(ResourceId databaseId, int userId) {
+        return new UserDatabaseMeta.Builder()
+                .setDatabaseId(databaseId)
+                .setUserId(userId);
+    }
+
     private UserDatabaseMeta buildMetadata(Database database, ResourceId databaseId, int userId) {
-        UserDatabaseMeta.Builder meta = metaBuilder(databaseId, userId);
+        UserDatabaseMeta.Builder meta = meta(databaseId, userId);
         meta.setLabel(database.getName());
         meta.setPublished(false);
         meta.addResources(fetchResources(database));
@@ -150,16 +168,6 @@ public class DatabaseProviderImpl implements DatabaseProvider {
             userPermissions(database, userId, meta);
         }
         return meta.build();
-    }
-
-    private UserDatabaseMeta.Builder metaBuilder(ResourceId databaseId, int userId) {
-        return new UserDatabaseMeta.Builder()
-                .setDatabaseId(databaseId)
-                .setUserId(userId);
-    }
-
-    private Database queryDatabase(ResourceId databaseId) {
-        return entityManager.get().find(Database.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
     }
 
     private Database queryDatabaseByForm(ResourceId formId) {
