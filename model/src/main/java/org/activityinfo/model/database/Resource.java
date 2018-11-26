@@ -69,6 +69,10 @@ public class Resource implements JsonSerializable {
             childNodes.add(childNode);
         }
 
+        public void addChildNodes(List<Node> children) {
+            childNodes.addAll(children);
+        }
+
         public Node getParentNode() {
             return parentNode;
         }
