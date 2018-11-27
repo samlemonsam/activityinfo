@@ -77,6 +77,11 @@ public enum Operation {
     /**
      * Export Records from a form, folder or database.
      */
-    EXPORT_RECORDS
+    EXPORT_RECORDS,
+
+    /**
+     * Add, modify, or remove targets on fields.
+     */
+    MANAGE_TARGETS
 
 }
