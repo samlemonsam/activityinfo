@@ -26,6 +26,7 @@ import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.TargetDTO;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.store.spi.DatabaseProvider;
@@ -56,8 +57,8 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
                 CuidAdapter.databaseId(db.getId()),
                 user.getId());
 
-        assertDesignPrivileges(databaseMeta);
-        
+        assertManageTargetsRights(databaseMeta);
+
         Partner partner = null;
         if (form.get("partnerId") != null) {
             partner = em.find(Partner.class, form.get("partnerId"));
@@ -97,12 +98,15 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
         return new CreateResult(target.getId());
     }
 
-    private void assertDesignPrivileges(UserDatabaseMeta databaseMeta) {
-        if (!PermissionOracle.canDesign(databaseMeta)) {
-            LOGGER.severe(String.format("User %d does not have design privileges on database %d",
+    private void assertManageTargetsRights(UserDatabaseMeta databaseMeta) {
+        if (!PermissionOracle.canManageTargets(databaseMeta.getDatabaseId(), databaseMeta)) {
+            LOGGER.severe(String.format("User %d does not have "
+                            + Operation.MANAGE_TARGETS.name()
+                            + " rights on Database %d",
                     databaseMeta.getUserId(),
                     databaseMeta.getLegacyDatabaseId()));
             throw new IllegalAccessCommandException();
         }
     }
+
 }

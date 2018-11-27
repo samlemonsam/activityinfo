@@ -125,7 +125,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
 
         Folder folder = entityManager().find(Folder.class, id);
 
-        assertDesignPrivileges(user, folder.getDatabase());
+        assertEditFolderRights(user, folder);
 
         if(changeMap.containsKey("name")) {
             String newName = changeMap.get("name");
@@ -149,7 +149,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
                                  Map<String, Object> changes) {
         Indicator indicator = entityManager().find(Indicator.class, cmd.getId());
 
-        assertDesignPrivileges(user, indicator.getActivity().getDatabase());
+        assertEditFormRights(user, indicator.getActivity());
 
         updateIndicatorProperties(indicator, changes);
     }
@@ -157,7 +157,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
     private void updateLockedPeriod(User user, UpdateEntity cmd, Map<String, Object> changes) {
         LockedPeriod lockedPeriod = entityManager().find(LockedPeriod.class, cmd.getId());
 
-        assertDesignPrivileges(user, lockedPeriod.getDatabase());
+        assertLockRecordsRights(user, lockedPeriod);
 
         updateLockedPeriodProperties(lockedPeriod, changes);
     }
@@ -165,7 +165,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
     private void updateAttribute(User user, UpdateEntity cmd, Map<String, Object> changes) {
         Attribute attribute = entityManager().find(Attribute.class, cmd.getId());
 
-        assertDesignPrivileges(user, attribute.getGroup());
+        assertEditFormRights(user, attribute.getGroup());
 
         updateAttributeProperties(changes, attribute);
         AttributeGroup ag = entityManager().find(AttributeGroup.class, attribute.getGroup().getId());
@@ -177,7 +177,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
     private void updateAttributeGroup(User user, UpdateEntity cmd, Map<String, Object> changes) {
         AttributeGroup group = entityManager().find(AttributeGroup.class, cmd.getId());
 
-        assertDesignPrivileges(user, group);
+        assertEditFormRights(user, group);
 
         updateAttributeGroupProperties(group, changes);
 
@@ -189,7 +189,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
     private void updateTarget(User user, UpdateEntity cmd, Map<String, Object> changes) {
         Target target = entityManager().find(Target.class, cmd.getId());
 
-        assertDesignPrivileges(user, target.getDatabase());
+        assertManageTargetsRights(user, target.getDatabase());
 
         updateTargetProperties(target, changes);
 

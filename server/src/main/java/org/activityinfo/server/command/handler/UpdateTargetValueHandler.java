@@ -44,6 +44,9 @@ public class UpdateTargetValueHandler extends BaseEntityHandler implements Comma
     @Override
     public CommandResult execute(UpdateTargetValue cmd, User user) throws CommandException {
 
+        Indicator indicator = entityManager().find(Indicator.class, cmd.getIndicatorId());
+        assertManageTargetsRights(user, indicator.getActivity().getDatabase());
+
         Double newValue = cmd.getChanges().get("value");
 
         TargetValue targetValue = entityManager().find(TargetValue.class,
@@ -54,7 +57,6 @@ public class UpdateTargetValueHandler extends BaseEntityHandler implements Comma
             if(newValue != null) {
                 // Need a new record
                 Target target = entityManager().find(Target.class, cmd.getTargetId());
-                Indicator indicator = entityManager().find(Indicator.class, cmd.getIndicatorId());
 
                 targetValue = new TargetValue();
                 targetValue.setId(new TargetValueId(cmd.getTargetId(), cmd.getIndicatorId()));

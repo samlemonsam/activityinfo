@@ -105,13 +105,13 @@ public class UserDatabasePolicy implements EntityPolicy<Database> {
         UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(database.getId()),
                 user.getId());
-        assertDesignPrivileges(databaseMeta);
+        assertEditDatabaseRights(databaseMeta);
         applyProperties(database, changes);
     }
 
-    private void assertDesignPrivileges(UserDatabaseMeta databaseMeta) {
-        if (!PermissionOracle.canDesign(databaseMeta)) {
-            LOGGER.severe(String.format("User %d does not have design privileges on database %d",
+    private void assertEditDatabaseRights(UserDatabaseMeta databaseMeta) {
+        if (!PermissionOracle.canEditDatabase(databaseMeta)) {
+            LOGGER.severe(String.format("User %d does not have edit privileges on database %d",
                     databaseMeta.getUserId(),
                     databaseMeta.getLegacyDatabaseId()));
             throw new IllegalAccessCommandException();

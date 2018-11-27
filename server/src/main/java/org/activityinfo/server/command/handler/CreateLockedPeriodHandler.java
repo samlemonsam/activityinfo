@@ -28,6 +28,7 @@ import org.activityinfo.legacy.shared.model.LockedPeriodDTO;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.PermissionOracle;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.store.spi.DatabaseProvider;
 
@@ -70,7 +71,7 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
             databaseId = database.getId();
             UserDatabaseMeta databaseMeta = getDatabaseMeta(databaseId, user.getId());
 
-            assertDesignPrivileges(databaseMeta);
+            assertLockRecordsRights(databaseMeta.getDatabaseId(), databaseMeta);
 
         } else if (cmd.getProjectId() != 0) {
             project = em.find(Project.class, cmd.getProjectId());
@@ -79,7 +80,7 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
             databaseId = project.getDatabase().getId();
             UserDatabaseMeta databaseMeta = getDatabaseMeta(databaseId, user.getId());
 
-            assertDesignPrivileges(databaseMeta);
+            assertLockRecordsRights(databaseMeta.getDatabaseId(), databaseMeta);
 
         } else if (cmd.getActivityId() != 0) {
             activity = em.find(Activity.class, cmd.getActivityId());
@@ -88,7 +89,7 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
             databaseId = activity.getDatabase().getId();
             UserDatabaseMeta databaseMeta = getDatabaseMeta(databaseId, user.getId());
 
-            assertDesignPrivileges(databaseMeta);
+            assertLockRecordsRights(activity.getFormId(), databaseMeta);
 
         } else if (cmd.getFolderId() != 0) {
             folder = em.find(Folder.class, cmd.getFolderId());
@@ -97,7 +98,7 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
             databaseId = folder.getDatabase().getId();
             UserDatabaseMeta databaseMeta = getDatabaseMeta(databaseId, user.getId());
 
-            assertDesignPrivileges(databaseMeta);
+            assertLockRecordsRights(CuidAdapter.folderId(folder.getId()), databaseMeta);
 
         } else {
             throw new CommandException("One of the following must be provided: userDatabaseId, projectId, activityId, folderId");
@@ -119,11 +120,8 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
                 userId);
     }
 
-    private void assertDesignPrivileges(UserDatabaseMeta databaseMeta) {
-        if (!PermissionOracle.canDesign(databaseMeta)) {
-            LOGGER.severe(String.format("User %d does not have design privileges on database %d",
-                    databaseMeta.getUserId(),
-                    databaseMeta.getLegacyDatabaseId()));
+    void assertLockRecordsRights(ResourceId resourceId, UserDatabaseMeta userDatabaseMeta) {
+        if (!PermissionOracle.canLockRecords(resourceId, userDatabaseMeta)) {
             throw new IllegalAccessCommandException();
         }
     }

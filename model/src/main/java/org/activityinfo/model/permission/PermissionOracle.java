@@ -109,7 +109,7 @@ public class PermissionOracle {
         } else if (isPartnerForm(resourceId)) {
             return allowedPartnerOperation(operation, db);
         } else if (isProjectForm(resourceId)) {
-            return allowedProjectOperation(operation, db);
+            return allowedProjectOperation(resourceId, operation, db);
         } else if (isAdminLevelForm(resourceId)) {
             return allowedAdminLevelOperation(operation, db);
         } else {
@@ -137,7 +137,7 @@ public class PermissionOracle {
         }
     }
 
-    private static boolean allowedProjectOperation(Operation operation, UserDatabaseMeta db) {
+    private static boolean allowedProjectOperation(ResourceId projectFormId, Operation operation, UserDatabaseMeta db) {
         switch(operation) {
             case VIEW:
                 return db.isVisible();
@@ -146,7 +146,7 @@ public class PermissionOracle {
             case DELETE_RECORD:
             case IMPORT_RECORDS:
             case EXPORT_RECORDS:
-                return canDesign(db);
+                return canEditResource(projectFormId, db);
             default:
                 return false;
         }
@@ -452,6 +452,10 @@ public class PermissionOracle {
         return db.isOwner();
     }
 
+    public static boolean canEditDatabase(UserDatabaseMeta db) {
+        return db.isOwner();
+    }
+
     public static Permission manageUsers(ResourceId resourceId, UserDatabaseMeta db) {
          PermissionQuery query = new PermissionQuery(db.getUserId(),
                 CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
@@ -522,6 +526,28 @@ public class PermissionOracle {
         return query(query, db);
     }
 
+    public static boolean canDeleteSite(ResourceId activityId, int partnerId, UserDatabaseMeta db) {
+        Permission delete = deleteRecord(activityId, db);
+
+        if (delete.isPermitted() && !delete.isFiltered()) {
+            return true;
+        } else if (delete.isPermitted()){
+            return PermissionOracle.filterContainsPartner(delete.getFilter(),
+                    CuidAdapter.partnerFormId(db.getLegacyDatabaseId()),
+                    CuidAdapter.partnerRecordId(partnerId));
+        } else {
+            return false;
+        }
+    }
+
+    public static Permission deleteResource(ResourceId resourceId, UserDatabaseMeta db) {
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
+                Operation.DELETE_FORM,
+                resourceId);
+        return query(query, db);
+    }
+
     public static Permission editResource(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
                 CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
@@ -570,6 +596,61 @@ public class PermissionOracle {
         }
     }
 
+    public static Permission lockRecords(ResourceId resourceId, UserDatabaseMeta db) {
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                db.getLegacyDatabaseId(),
+                Operation.LOCK_RECORDS,
+                resourceId);
+        return query(query, db);
+    }
+
+    public static boolean canLockRecords(ResourceId resourceId, UserDatabaseMeta db) {
+        return lockRecords(resourceId,db).isPermitted();
+    }
+
+    public static Permission createForm(ResourceId resourceId, UserDatabaseMeta db) {
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                db.getLegacyDatabaseId(),
+                Operation.CREATE_FORM,
+                resourceId);
+        return query(query, db);
+    }
+
+    public static boolean canCreateForm(ResourceId resoruceId, UserDatabaseMeta db) {
+        return createForm(resoruceId,db).isPermitted();
+    }
+
+    public static boolean canEditForm(ResourceId formId, UserDatabaseMeta db) {
+        return editResource(formId,db).isPermitted();
+    }
+
+    public static boolean canEditFolder(ResourceId folderId, UserDatabaseMeta db) {
+        return editResource(folderId,db).isPermitted();
+    }
+
+    public static boolean canDeleteForm(ResourceId formId, UserDatabaseMeta db) {
+        return deleteResource(formId,db).isPermitted();
+    }
+
+    public static boolean canDeleteFolder(ResourceId folderId, UserDatabaseMeta db) {
+        return deleteResource(folderId,db).isPermitted();
+    }
+
+    public static Permission manageTargets(ResourceId resourceId, UserDatabaseMeta db) {
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                db.getLegacyDatabaseId(),
+                Operation.MANAGE_TARGETS,
+                resourceId);
+        return query(query, db);
+    }
+
+    public static boolean canManageTargets(ResourceId resourceId, UserDatabaseMeta db) {
+        return manageTargets(resourceId,db).isPermitted();
+    }
+
+    /**
+     * This remains solely for the AuthorizationHandler. Should use correct task method instead.
+     */
     public static boolean canDesign(UserDatabaseMeta db) {
         // Legacy Design requires CREATE_FORM, EDIT_FORM and DELETE_FORM permissions on root database
         PermissionQuery query = new PermissionQuery(db.getUserId(),

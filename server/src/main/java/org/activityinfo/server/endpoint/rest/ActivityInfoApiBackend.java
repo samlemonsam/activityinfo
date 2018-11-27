@@ -24,6 +24,7 @@ import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
@@ -87,16 +88,18 @@ public class ActivityInfoApiBackend implements ApiBackend {
                 formClass.getDatabaseId(),
                 authenticatedUser.getUserId());
 
-        assertDesignPrivileges(databaseMeta);
+        assertCreateFormRights(databaseMeta);
 
         ((MySqlStorageProvider) getStorage()).createOrUpdateFormSchema(formClass);
 
         UsageTracker.track(getAuthenticatedUserId(), "create_form", formClass);
     }
 
-    private void assertDesignPrivileges(UserDatabaseMeta databaseMeta) {
-        if (!PermissionOracle.canDesign(databaseMeta)) {
-            LOGGER.severe(String.format("User %d does not have design privileges on database %d",
+    private void assertCreateFormRights(UserDatabaseMeta databaseMeta) {
+        if (!PermissionOracle.canCreateForm(databaseMeta.getDatabaseId(), databaseMeta)) {
+            LOGGER.severe(String.format("User %d does not have "
+                            + Operation.CREATE_FORM.name()
+                            + " rights on Database %d",
                     databaseMeta.getUserId(),
                     databaseMeta.getLegacyDatabaseId()));
             throw new IllegalAccessCommandException();

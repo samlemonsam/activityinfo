@@ -109,7 +109,8 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         String name = (String) properties.get(EntityDTO.NAME_PROPERTY);
 
         Database database = entityManager().find(Database.class, databaseId);
-        assertDesignPrivileges(user, database);
+
+        assertCreateFolderRights(user, database);
 
         Folder folder = new Folder();
         folder.setDatabase(database);
@@ -170,8 +171,8 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         indicator.setId(generator.generateInt());
         Activity activity = entityManager().getReference(Activity.class, properties.get("activityId"));
         indicator.setActivity(activity);
-        assertDesignPrivileges(user, activity.getDatabase());
 
+        assertEditFormRights(user, activity);
         
         updateIndicatorProperties(indicator, properties);
         

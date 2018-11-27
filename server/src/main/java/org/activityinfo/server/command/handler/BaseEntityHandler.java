@@ -21,7 +21,6 @@ package org.activityinfo.server.command.handler;
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.inject.util.Providers;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.AttributeGroupDTO;
@@ -259,28 +258,58 @@ public class BaseEntityHandler {
 
     }
 
-    /**
-     * Asserts that the user has permission to modify the structure of the given
-     * database.
-     *
-     * @param user     THe user for whom to check permissions
-     * @param database The database the user is trying to modify
-     * @throws IllegalAccessCommandException If the user does not have permission
-     */
-    protected void assertDesignPrivileges(User user, Database database) {
+    void assertCreateFormRights(User user, Database database) {
         ResourceId databaseId = CuidAdapter.databaseId(database.getId());
         UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, user.getId());
-        if (!PermissionOracle.canDesign(databaseMeta)) {
+        if (!PermissionOracle.canCreateForm(databaseId, databaseMeta)) {
             throw new IllegalAccessCommandException();
         }
     }
 
-    public void assertDesignPrivileges(User user,AttributeGroup group) {
+    void assertCreateFolderRights(User user, Database database) {
+        ResourceId databaseId = CuidAdapter.databaseId(database.getId());
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, user.getId());
+        if (!PermissionOracle.canCreateForm(databaseId, databaseMeta)) {
+            throw new IllegalAccessCommandException();
+        }
+    }
+
+    void assertEditFormRights(User user, Activity activity) {
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(activity.getDatabase().getId(), user.getId());
+        if (!PermissionOracle.canEditForm(activity.getFormId(), databaseMeta)) {
+            throw new IllegalAccessCommandException();
+        }
+    }
+
+    void assertEditFormRights(User user, AttributeGroup group) {
         if (group.getActivities().isEmpty()) {
             throw new IllegalAccessCommandException();
         }
         for (Activity activity : group.getActivities()) {
-            assertDesignPrivileges(user, activity.getDatabase());
+            assertEditFormRights(user, activity);
+        }
+    }
+
+    void assertEditFolderRights(User user, Folder folder) {
+        ResourceId folderId = CuidAdapter.folderId(folder.getId());
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(folderId, user.getId());
+        if (!PermissionOracle.canEditFolder(folderId, databaseMeta)) {
+            throw new IllegalAccessCommandException();
+        }
+    }
+
+    void assertLockRecordsRights(User user, LockedPeriod lockedPeriod) {
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(lockedPeriod.getDatabase().getId(), user.getId());
+        if (!PermissionOracle.canLockRecords(lockedPeriod.getResourceId(), databaseMeta)) {
+            throw new IllegalAccessCommandException();
+        }
+    }
+
+    void assertManageTargetsRights(User user, Database database) {
+        ResourceId databaseId = CuidAdapter.databaseId(database.getId());
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, user.getId());
+        if (!PermissionOracle.canManageTargets(databaseId, databaseMeta)) {
+            throw new IllegalAccessCommandException();
         }
     }
 

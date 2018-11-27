@@ -25,7 +25,9 @@ import org.activityinfo.legacy.shared.model.LocationDTO;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.permission.PermissionOracle;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.LocationType;
@@ -61,7 +63,7 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
                 CuidAdapter.databaseId(databaseId),
                 user.getId());
 
-        assertDesignPrivileges(databaseMeta);
+        assertCreateFormRights(databaseMeta);
 
         // create the entity
         LocationType locationType = new LocationType();
@@ -85,19 +87,35 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
                 CuidAdapter.databaseId(databaseId),
                 user.getId());
 
-        assertDesignPrivileges(databaseMeta);
+        assertEditFormRights(locationType, databaseMeta);
 
         applyProperties(locationType, changes);
         
         locationType.incrementVersion();
     }
 
-    private void assertDesignPrivileges(UserDatabaseMeta databaseMeta) {
-        if (!PermissionOracle.canDesign(databaseMeta)) {
-            LOGGER.severe(String.format("User %d does not have design privileges on database %d",
+    private void assertCreateFormRights(UserDatabaseMeta databaseMeta) {
+        if (!PermissionOracle.canCreateForm(databaseMeta.getDatabaseId(), databaseMeta)) {
+            LOGGER.severe(String.format("User %d does not have "
+                            + Operation.CREATE_FORM.name()
+                            + " rights on Database %d",
                     databaseMeta.getUserId(),
                     databaseMeta.getLegacyDatabaseId()));
             throw new IllegalAccessCommandException();
+
+        }
+    }
+
+    private void assertEditFormRights(LocationType locationType, UserDatabaseMeta databaseMeta) {
+        ResourceId locationTypeForm = CuidAdapter.locationFormClass(locationType.getId());
+        if (!PermissionOracle.canEditForm(locationTypeForm, databaseMeta)) {
+            LOGGER.severe(String.format("User %d does not have "
+                            + Operation.EDIT_FORM.name()
+                            + " rights on Database %d",
+                    databaseMeta.getUserId(),
+                    databaseMeta.getLegacyDatabaseId()));
+            throw new IllegalAccessCommandException();
+
         }
     }
 

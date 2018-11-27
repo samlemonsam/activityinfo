@@ -27,6 +27,7 @@ import org.activityinfo.legacy.shared.model.LocationTypeDTO;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.command.handler.json.JsonHelper;
@@ -66,7 +67,7 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         Database database = getDatabase(properties);
         UserDatabaseMeta databaseMeta = getDatabaseMeta(properties, user);
 
-        assertDesignPrivileges(databaseMeta);
+        assertCreateFormRights(databaseMeta);
 
         // create the entity
         Activity activity = new Activity();
@@ -85,9 +86,22 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         return activity.getId();
     }
 
-    private void assertDesignPrivileges(UserDatabaseMeta databaseMeta) {
-        if (!PermissionOracle.canDesign(databaseMeta)) {
-            LOGGER.severe(String.format("User %d does not have design privileges on database %d",
+    private void assertCreateFormRights(UserDatabaseMeta databaseMeta) {
+        if (!PermissionOracle.canCreateForm(databaseMeta.getDatabaseId(), databaseMeta)) {
+            LOGGER.severe(String.format("User %d does not have "
+                            + Operation.CREATE_FORM.name()
+                            + " rights on Database %d",
+                    databaseMeta.getUserId(),
+                    databaseMeta.getLegacyDatabaseId()));
+            throw new IllegalAccessCommandException();
+        }
+    }
+
+    private void assertEditFormRights(ResourceId formId, UserDatabaseMeta databaseMeta) {
+        if (!PermissionOracle.canEditForm(formId, databaseMeta)) {
+            LOGGER.severe(String.format("User %d does not have "
+                            + Operation.EDIT_FORM.name()
+                            + " rights on Database %d",
                     databaseMeta.getUserId(),
                     databaseMeta.getLegacyDatabaseId()));
             throw new IllegalAccessCommandException();
@@ -110,9 +124,9 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(activity.getDatabase().getId()),
                 user.getId());
-        
-        assertDesignPrivileges(databaseMeta);
-       
+
+        assertEditFormRights(activity.getFormId(), databaseMeta);
+
         activity.incrementSchemaVersion();
 
         applyProperties(activity, changes);
