@@ -292,6 +292,8 @@ public class UserDatabaseProvider {
             grantModel.addOperation(Operation.CREATE_FORM);
             grantModel.addOperation(Operation.EDIT_FORM);
             grantModel.addOperation(Operation.DELETE_FORM);
+            grantModel.addOperation(Operation.LOCK_RECORDS);
+            grantModel.addOperation(Operation.MANAGE_TARGETS);
         }
     }
 
