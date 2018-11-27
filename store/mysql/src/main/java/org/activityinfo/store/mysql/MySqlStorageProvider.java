@@ -23,10 +23,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Iterables;
-import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.hrd.HrdStorageProvider;
@@ -43,8 +40,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
-public class MySqlStorageProvider implements FormStorageProvider, FormCatalog, TransactionalStorageProvider {
+public class MySqlStorageProvider implements FormStorageProvider, TransactionalStorageProvider {
 
     private static final Logger LOGGER = Logger.getLogger(MySqlStorageProvider.class.getName());
 
@@ -52,10 +48,6 @@ public class MySqlStorageProvider implements FormStorageProvider, FormCatalog, T
     private final QueryExecutor executor;
     private LoadingCache<ResourceId, Optional<FormStorage>> sessionCache;
     private final ActivityLoader activityLoader;
-    
-    private GeodbFolder geodbFolder;
-    private DatabasesFolder databasesFolder;
-    private final FormFolder formFolder;
 
     public MySqlStorageProvider(final QueryExecutor executor) {
 
@@ -71,10 +63,6 @@ public class MySqlStorageProvider implements FormStorageProvider, FormCatalog, T
         providers.add(new ActivityFormProvider(activityLoader));
         providers.add(new LocationFormProvider());
         providers.add(new HrdProvider());
-
-        geodbFolder = new GeodbFolder(executor);
-        databasesFolder = new DatabasesFolder(executor, this);
-        formFolder = new FormFolder(this);
         
         this.executor = executor;
         this.sessionCache = CacheBuilder.newBuilder().build(new CacheLoader<ResourceId, Optional<FormStorage>>() {
@@ -158,35 +146,6 @@ public class MySqlStorageProvider implements FormStorageProvider, FormCatalog, T
         }
         
         return resultMap;
-    }
-
-    @Override
-    public List<CatalogEntry> getRootEntries() {
-        
-        List<CatalogEntry> entries = new ArrayList<>();
-        entries.add(geodbFolder.getRootEntry());
-        entries.add(databasesFolder.getRootEntry());
-
-        return entries;
-    }
-
-    @Override
-    public List<CatalogEntry> getChildren(String parentId, int userId) {
-        
-        try {
-            // Start async queries
-            Iterable<CatalogEntry> analyses = ReportFolder.queryReports(parentId);
-
-            List<CatalogEntry> entries = new ArrayList<>();
-            entries.addAll(geodbFolder.getChildren(parentId));
-            entries.addAll(databasesFolder.getChildren(parentId, userId));
-            entries.addAll(formFolder.getChildren(ResourceId.valueOf(parentId)));
-            Iterables.addAll(entries, analyses);
-            return entries;
-            
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
