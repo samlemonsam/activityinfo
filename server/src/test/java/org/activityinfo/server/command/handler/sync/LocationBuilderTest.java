@@ -31,6 +31,7 @@ import org.activityinfo.legacy.shared.command.result.SyncRegions;
 import org.activityinfo.server.command.handler.GetSyncRegionsHandler;
 import org.activityinfo.server.command.handler.crud.LocationTypePolicy;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
+import org.activityinfo.server.database.DatabaseModule;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.store.spi.DatabaseProvider;
@@ -48,6 +49,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(InjectionSupport.class)
 @Modules({
         TestHibernateModule.class,
+        DatabaseModule.class
 })
 public class LocationBuilderTest {
 

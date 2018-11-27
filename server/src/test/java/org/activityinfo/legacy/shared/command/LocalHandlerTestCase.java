@@ -35,6 +35,7 @@ import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.legacy.shared.util.Collector;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
 import org.activityinfo.server.blob.GcsBlobFieldStorageServiceModule;
+import org.activityinfo.server.database.DatabaseModule;
 import org.activityinfo.server.endpoint.gwtrpc.CommandServlet;
 import org.activityinfo.server.util.config.ConfigModuleStub;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
@@ -62,7 +63,8 @@ import static org.easymock.EasyMock.replay;
 @Modules({
         AuthenticationModuleStub.class,
         ConfigModuleStub.class,
-        GcsBlobFieldStorageServiceModule.class
+        GcsBlobFieldStorageServiceModule.class,
+        DatabaseModule.class
 })
 public abstract class LocalHandlerTestCase {
     @Inject

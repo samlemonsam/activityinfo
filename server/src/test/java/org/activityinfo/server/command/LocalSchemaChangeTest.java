@@ -53,8 +53,7 @@ import static org.junit.Assert.assertThat;
 @Modules({
         MailSenderStubModule.class,
         TestHibernateModule.class,
-        GwtRpcModule.class,
-        DatabaseModule.class
+        GwtRpcModule.class
 })
 @OnDataSet("/dbunit/sites-simple1.db.xml")
 public class LocalSchemaChangeTest extends LocalHandlerTestCase {

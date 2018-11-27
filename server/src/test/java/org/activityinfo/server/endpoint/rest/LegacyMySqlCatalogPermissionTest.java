@@ -13,6 +13,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.server.database.DatabaseModule;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
@@ -34,15 +35,15 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.*;
 
 @RunWith(InjectionSupport.class)
-@Modules(TestHibernateModule.class)
+@Modules({
+        TestHibernateModule.class,
+        DatabaseModule.class
+})
 @OnDataSet("/dbunit/catalog-test.db.xml")
 public class LegacyMySqlCatalogPermissionTest {
 
     private int userId = 1;
     private int activityId = 1;
-
-    @Inject
-    Provider<EntityManager> em;
 
     @Inject
     MySqlStorageProvider catalog;

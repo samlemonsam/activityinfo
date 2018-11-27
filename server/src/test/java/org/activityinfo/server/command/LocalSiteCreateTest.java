@@ -42,8 +42,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(InjectionSupport.class)
 @Modules({
         TestHibernateModule.class,
-        GwtRpcModule.class,
-        DatabaseModule.class
+        GwtRpcModule.class
 })
 public class LocalSiteCreateTest extends LocalHandlerTestCase {
 

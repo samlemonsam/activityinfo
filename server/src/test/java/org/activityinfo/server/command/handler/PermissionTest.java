@@ -1,7 +1,6 @@
 package org.activityinfo.server.command.handler;
 
 import com.google.inject.Inject;
-import com.google.inject.util.Providers;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.fixtures.TestHibernateModule;
@@ -12,6 +11,7 @@ import org.activityinfo.model.permission.Permission;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.permission.PermissionQuery;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.server.database.DatabaseModule;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.store.spi.DatabaseProvider;
 import org.junit.Test;
@@ -21,7 +21,10 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.*;
 
 @RunWith(InjectionSupport.class)
-@Modules(TestHibernateModule.class)
+@Modules({
+        TestHibernateModule.class,
+        DatabaseModule.class
+})
 @OnDataSet("/dbunit/sites-simple2.db.xml")
 public class PermissionTest {
 

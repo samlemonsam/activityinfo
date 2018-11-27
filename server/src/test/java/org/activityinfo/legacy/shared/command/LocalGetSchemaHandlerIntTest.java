@@ -26,6 +26,7 @@ import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.AttributeGroupDTO;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.server.database.DatabaseModule;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
 import org.junit.Test;
@@ -37,7 +38,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(InjectionSupport.class)
 @Modules({
         TestHibernateModule.class,
-        GwtRpcModule.class,
+        GwtRpcModule.class
 })
 public class LocalGetSchemaHandlerIntTest extends LocalHandlerTestCase {
 

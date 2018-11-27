@@ -47,6 +47,7 @@ import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
+import org.activityinfo.server.database.DatabaseModule;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
 import org.activityinfo.server.util.TemplateModule;
@@ -83,7 +84,8 @@ import static org.junit.Assert.*;
         GwtRpcModule.class,
         AuthenticationModuleStub.class,
         ConfigModuleStub.class,
-        GcsBlobFieldStorageServiceModule.class
+        GcsBlobFieldStorageServiceModule.class,
+        DatabaseModule.class
 })
 @OnDataSet("/dbunit/schema1.db.xml")
 public class GcsBlobFieldStorageServiceTest {
