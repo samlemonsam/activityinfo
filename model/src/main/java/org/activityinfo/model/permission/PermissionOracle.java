@@ -175,17 +175,22 @@ public class PermissionOracle {
         if (db.hasGrant(resource.getId())) {
             return db.getGrant(resource.getId()).hasOperation(operation);
         }
-        // If there is no explicit grant, check for VIEW operation requests on *public* resources
+
+        // If there is no explicit grant:
+        // 1. Check for VIEW operation requests on Resources which are Public
         if (Operation.VIEW.equals(operation) && resource.isPublic()) {
             return true;
         }
-
-        // As there is no grant defined at this level, we need to check further up the Resource tree
-        // If the parent of this resource is the root database, then check whether operation exists on database grant
+        // 2. Check for VIEW operation requests on Resources which are Public to Database Users
+        if (Operation.VIEW.equals(operation) && resource.isPublicToDatabaseUsers() && db.isVisible()) {
+            return true;
+        }
+        // 3. Check further up the Resource tree:
+        // -> If the parent of this resource is the root database, then check whether operation exists on database grant
         if (isDatabase(resource.getParentId())) {
             return db.hasGrant(resource.getParentId()) && db.getGrant(resource.getParentId()).hasOperation(operation);
         }
-        // Otherwise, we climb the resource tree to determine whether the operation is granted there
+        // -> Otherwise, we climb the resource tree to determine whether the operation is granted there
         return granted(operation, db.getResource(resource.getParentId()), db);
     }
 

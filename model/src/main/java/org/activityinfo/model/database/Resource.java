@@ -29,7 +29,7 @@ import java.util.List;
 
 public class Resource implements JsonSerializable {
 
-    enum Publicity {
+    public enum Visibility {
         /**
          * Public. Visible to *all* Users on system.
          */
@@ -90,7 +90,7 @@ public class Resource implements JsonSerializable {
     private ResourceId parentId;
     private ResourceType type;
     private String label;
-    private Publicity publicity = Publicity.PRIVATE;
+    private Visibility visibility = Visibility.PRIVATE;
 
     private Resource() {}
 
@@ -100,9 +100,9 @@ public class Resource implements JsonSerializable {
         this.label = label;
     }
 
-    public Resource(ResourceId id, ResourceId parentId, String label, Publicity publicity) {
+    public Resource(ResourceId id, ResourceId parentId, String label, Visibility visibility) {
         this(id, parentId, label);
-        this.publicity = publicity;
+        this.visibility = visibility;
     }
 
     public ResourceId getId() {
@@ -121,12 +121,20 @@ public class Resource implements JsonSerializable {
         return type;
     }
 
-    public Publicity getPublicity() {
-        return publicity;
+    public Visibility getVisibility() {
+        return visibility;
     }
 
     public boolean isPublic() {
-        return publicity == Publicity.PUBLIC;
+        return visibility == Visibility.PUBLIC;
+    }
+
+    public boolean isPublicToDatabaseUsers() {
+        return visibility == Visibility.DATABASE_USERS;
+    }
+
+    public boolean isPrivate() {
+        return visibility == Visibility.PRIVATE;
     }
 
     @Override
@@ -136,7 +144,7 @@ public class Resource implements JsonSerializable {
         object.put("parentId", parentId.asString());
         object.put("label", label);
         object.put("type", type.name());
-        object.put("publicity", publicity.name());
+        object.put("visibility", visibility.name());
         return object;
     }
 
@@ -146,7 +154,7 @@ public class Resource implements JsonSerializable {
         resource.parentId = ResourceId.valueOf(object.getString("parentId"));
         resource.label = object.getString("label");
         resource.type = ResourceType.valueOf(object.getString("type"));
-        resource.publicity = Publicity.valueOf(object.getString("publicity"));
+        resource.visibility = Visibility.valueOf(object.getString("visibility"));
         return resource;
     }
 
@@ -173,13 +181,21 @@ public class Resource implements JsonSerializable {
             return this;
         }
 
-        public Builder setPublic(boolean isPublic) {
-            if (isPublic) {
-                resource.publicity = Publicity.PUBLIC;
-            } else {
-                resource.publicity = Publicity.PRIVATE;
-            }
+        public Builder setVisibility(Visibility visibility) {
+            resource.visibility = visibility;
             return this;
+        }
+
+        public Builder setVisibleToPublic() {
+            return setVisibility(Visibility.PUBLIC);
+        }
+
+        public Builder setVisibleToDatabaseUser() {
+            return setVisibility(Visibility.DATABASE_USERS);
+        }
+
+        public Builder setPrivate() {
+            return setVisibility(Visibility.PRIVATE);
         }
 
         public Resource build() {

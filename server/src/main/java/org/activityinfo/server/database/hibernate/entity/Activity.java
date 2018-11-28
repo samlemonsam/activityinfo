@@ -339,6 +339,17 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
         this.published = published;
     }
 
+    public Resource.Visibility resourceVisibility() {
+        switch (Published.fromIndex(getPublished())) {
+            case ALL_ARE_PUBLISHED:
+            case ONLY_SOME_SITES_ARE_PUBLISHED:
+                return Resource.Visibility.PUBLIC;
+            case NOT_PUBLISHED:
+            default:
+                return Resource.Visibility.PRIVATE;
+        }
+    }
+
     public long getSiteVersion() {
         return siteVersion;
     }
@@ -382,7 +393,7 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
             .setType(ResourceType.FORM)
             .setParentId(getParentResourceId())
             .setLabel(getName())
-            .setPublic(getPublished() != Published.NOT_PUBLISHED.getIndex())
+            .setVisibility(resourceVisibility())
             .build();
     }
 
