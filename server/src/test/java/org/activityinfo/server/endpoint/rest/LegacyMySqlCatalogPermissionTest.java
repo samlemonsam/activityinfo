@@ -1,7 +1,8 @@
 package org.activityinfo.server.endpoint.rest;
 
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.fixtures.TestHibernateModule;
@@ -23,11 +24,10 @@ import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorage;
 import org.hamcrest.CoreMatchers;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import javax.persistence.EntityManager;
 
 import static org.activityinfo.store.testing.ColumnSetMatchers.hasValues;
 import static org.hamcrest.Matchers.equalTo;
@@ -41,6 +41,9 @@ import static org.junit.Assert.*;
 })
 @OnDataSet("/dbunit/catalog-test.db.xml")
 public class LegacyMySqlCatalogPermissionTest {
+
+    private final LocalServiceTestHelper helper =
+            new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
     private int userId = 1;
     private int activityId = 1;
@@ -56,7 +59,13 @@ public class LegacyMySqlCatalogPermissionTest {
 
     @Before
     public void setUp() {
+        helper.setUp();
         this.cache = new NullFormScanCache();
+    }
+
+    @After
+    public void tearDown() {
+        helper.tearDown();
     }
 
     @Test
