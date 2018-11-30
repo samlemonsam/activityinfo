@@ -19,6 +19,8 @@
 package org.activityinfo.server.database.hibernate;
 
 import com.bedatadriven.appengine.cloudsql.CloudSqlFilter;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.ServletModule;
@@ -101,6 +103,16 @@ public class HibernateModule extends ServletModule {
     @Singleton
     protected HibernateEntityManager provideHibernateEntityManager(EntityManager entityManager) {
         return (HibernateEntityManager) entityManager;
+    }
+
+    @Provides
+    protected HibernateDatabaseMetaProvider provideHibernateDatabaseMetaProvider(Provider<EntityManager> entityManager) {
+        return new HibernateDatabaseMetaProvider(entityManager, MemcacheServiceFactory.getMemcacheService());
+    }
+
+    @Provides
+    protected HibernateDatabaseGrantProvider provideHibernateDatabaseGrantProvider(Provider<EntityManager> entityManager) {
+        return new HibernateDatabaseGrantProvider(entityManager, MemcacheServiceFactory.getMemcacheService());
     }
     
 }

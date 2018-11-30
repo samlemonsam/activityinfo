@@ -20,7 +20,9 @@ package org.activityinfo.fixtures;
 
 import com.bedatadriven.rebar.sql.client.query.MySqlDialect;
 import com.bedatadriven.rebar.sql.client.query.SqlDialect;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.inject.AbstractModule;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.activityinfo.server.database.TestConnectionProvider;
@@ -102,6 +104,15 @@ public class TestHibernateModule extends AbstractModule {
         }
         return emf;
     }
-    
+
+    @Provides
+    protected HibernateDatabaseMetaProvider provideHibernateDatabaseMetaProvider(Provider<EntityManager> entityManager) {
+        return new HibernateDatabaseMetaProvider(entityManager, MemcacheServiceFactory.getMemcacheService());
+    }
+
+    @Provides
+    protected HibernateDatabaseGrantProvider provideHibernateDatabaseGrantProvider(Provider<EntityManager> entityManager) {
+        return new HibernateDatabaseGrantProvider(entityManager, MemcacheServiceFactory.getMemcacheService());
+    }
     
 }

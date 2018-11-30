@@ -1,5 +1,6 @@
 package org.activityinfo.server.database.hibernate;
 
+import com.google.appengine.api.memcache.MemcacheService;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.model.database.DatabaseMeta;
@@ -27,10 +28,13 @@ import java.util.stream.Stream;
 public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
 
     private final Provider<EntityManager> entityManager;
+    private final MemcacheService memcacheService;
 
     @Inject
-    public HibernateDatabaseMetaProvider(Provider<EntityManager> entityManager) {
+    public HibernateDatabaseMetaProvider(Provider<EntityManager> entityManager,
+                                         MemcacheService memcacheService) {
         this.entityManager = entityManager;
+        this.memcacheService = memcacheService;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.activityinfo.server.database.hibernate;
 
+import com.google.appengine.api.memcache.MemcacheService;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.json.Json;
@@ -30,10 +31,13 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
     private static final Logger LOGGER = Logger.getLogger(HibernateDatabaseGrantProvider.class.getName());
 
     private final Provider<EntityManager> entityManager;
+    private final MemcacheService memcacheService;
 
     @Inject
-    public HibernateDatabaseGrantProvider(Provider<EntityManager> entityManager) {
+    public HibernateDatabaseGrantProvider(Provider<EntityManager> entityManager,
+                                          MemcacheService memcacheService) {
         this.entityManager = entityManager;
+        this.memcacheService = memcacheService;
     }
 
     @Override
