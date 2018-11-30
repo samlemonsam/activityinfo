@@ -82,6 +82,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
                 .setLabel(database.getName())
                 .setDescription(database.getFullName())
                 .setPublished(false)
+                .setPendingTransfer(database.hasPendingTransfer())
                 .addResources(fetchResources(database))
                 .addLocks(fetchLocks(database))
                 .build();
