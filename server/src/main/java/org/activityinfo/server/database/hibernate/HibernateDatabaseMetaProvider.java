@@ -3,6 +3,7 @@ package org.activityinfo.server.database.hibernate;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.activityinfo.json.Json;
 import org.activityinfo.model.database.DatabaseMeta;
 import org.activityinfo.model.database.RecordLock;
 import org.activityinfo.model.database.Resource;
@@ -18,14 +19,14 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.validation.constraints.NotNull;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
+
+    private final Logger LOGGER = Logger.getLogger(HibernateDatabaseGrantProvider.class.getName());
 
     private final Provider<EntityManager> entityManager;
     private final MemcacheService memcacheService;
@@ -39,41 +40,38 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
 
     @Override
     public @Nullable DatabaseMeta getDatabaseMeta(@NotNull ResourceId databaseId) {
-        try {
-            Database database = entityManager.get().createQuery("SELECT db " +
-                    "FROM Database db " +
-                    "WHERE db.id=:databaseId", Database.class)
-                    .setParameter("databaseId", CuidAdapter.getLegacyIdFromCuid(databaseId))
-                    .getSingleResult();
-            return buildMeta(database);
-        } catch (NoResultException noDatabase) {
+        Long databaseVersion = queryDatabaseVersion(databaseId);
+        if (databaseVersion == null) {
             return null;
         }
+        Map<ResourceId,DatabaseMeta> loaded = loadFromMemcache(Collections.singletonMap(databaseId,databaseVersion));
+        if (!loaded.isEmpty()) {
+            return loaded.get(databaseId);
+        }
+        Map<ResourceId,DatabaseMeta> loadedFromDb = loadFromDb(Collections.singleton(databaseId));
+        cacheToMemcache(loadedFromDb.values());
+        return loadedFromDb.get(databaseId);
     }
 
     @Override
-    public Map<ResourceId, DatabaseMeta> getDatabaseMeta(@NotNull Set<ResourceId> databaseIds) {
-        if (databaseIds.isEmpty()) {
-            return Collections.emptyMap();
+    public Map<ResourceId,DatabaseMeta> getDatabaseMeta(@NotNull Set<ResourceId> databases) {
+        Map<ResourceId,DatabaseMeta> loaded = new HashMap<>(databases.size());
+        Map<ResourceId,Long> toFetch = queryDatabaseVersions(databases);
+        loaded.putAll(loadFromMemcache(toFetch));
+        if (loaded.size() == toFetch.size()) {
+            return loaded;
         }
-        return entityManager.get().createQuery("SELECT db " +
-                "FROM Database db " +
-                "WHERE db.id IN :databaseIds", Database.class)
-                .setParameter("databaseIds", databaseIds.stream().map(CuidAdapter::getLegacyIdFromCuid).collect(Collectors.toList()))
-                .getResultList().stream()
-                .map(this::buildMeta)
-                .collect(Collectors.toMap(DatabaseMeta::getDatabaseId, dbMeta -> dbMeta));
+        loaded.forEach((dbId,cachedDbMeta) -> toFetch.remove(dbId));
+        Map<ResourceId,DatabaseMeta> loadedFromDb = loadFromDb(toFetch.keySet());
+        cacheToMemcache(loadedFromDb.values());
+        loaded.putAll(loadedFromDb);
+        return loaded;
     }
 
     @Override
     public Map<ResourceId, DatabaseMeta> getOwnedDatabaseMeta(int ownerId) {
-        return entityManager.get().createQuery("SELECT db " +
-                "FROM Database db " +
-                "WHERE db.owner.id=:ownerId", Database.class)
-                .setParameter("ownerId", ownerId)
-                .getResultList().stream()
-                .map(this::buildMeta)
-                .collect(Collectors.toMap(DatabaseMeta::getDatabaseId, dbMeta -> dbMeta));
+        Set<ResourceId> ownedDatabases = queryOwnedDatabaseIds(ownerId);
+        return getDatabaseMeta(ownedDatabases);
     }
 
     @Override
@@ -82,43 +80,134 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
             case CuidAdapter.DATABASE_DOMAIN:
                 return getDatabaseMeta(resourceId);
             case CuidAdapter.ACTIVITY_DOMAIN:
-                return getDatabaseMetaForForm(resourceId);
+                ResourceId activityDatabaseId = queryDatabaseIdForForm(resourceId);
+                return getDatabaseMeta(activityDatabaseId);
             case CuidAdapter.FOLDER_DOMAIN:
-                return getDatabaseMetaForFolder(resourceId);
+                ResourceId folderDatabaseId = queryDatabaseIdForFolder(resourceId);
+                return getDatabaseMeta(folderDatabaseId);
             default:
                 throw new IllegalArgumentException("Cannot fetch UserDatabaseMeta for Resource: " + resourceId.toString());
         }
     }
 
-    private @Nullable DatabaseMeta getDatabaseMetaForForm(@NotNull ResourceId formId) {
-        Database database = getDatabaseForForm(formId);
-        return buildMeta(database);
+    private Map<ResourceId,Long> queryDatabaseVersions(@NotNull Set<ResourceId> databaseIds) {
+        LOGGER.info(() -> String.format("Querying %d DatabaseMeta Versions from MySqlDatabase", databaseIds.size()));
+        Map<ResourceId,Long> versions = databaseIds.stream()
+                .collect(Collectors.toMap(
+                        dbId -> dbId,
+                        this::queryDatabaseVersion));
+        return versions.entrySet().stream()
+                .filter(dbVersion -> dbVersion.getValue() != null)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue));
     }
 
-    private @Nullable DatabaseMeta getDatabaseMetaForFolder(@NotNull ResourceId folderId) {
-        Database database = getDatabaseForFolder(folderId);
-        return buildMeta(database);
+    private Set<ResourceId> queryOwnedDatabaseIds(int ownerId) {
+        return entityManager.get().createQuery("SELECT db.id " +
+                "FROM Database db " +
+                "WHERE db.owner.id=:ownerId", Integer.class)
+                .setParameter("ownerId", ownerId)
+                .getResultList().stream()
+                .map(CuidAdapter::databaseId)
+                .collect(Collectors.toSet());
     }
 
-    private @Nullable Database getDatabaseForForm(@NotNull ResourceId formId) {
+    private Map<ResourceId,DatabaseMeta> loadFromMemcache(Map<ResourceId,Long> toFetch) {
+        LOGGER.info(() -> String.format("Fetching %d DatabaseMeta from Memcache", toFetch.size()));
+        Map<ResourceId,DatabaseMeta> loaded = new HashMap<>(toFetch.size());
+        Map<String,ResourceId> fetchKeys = toFetch.entrySet().stream()
+                .collect(Collectors.toMap(
+                        db -> memcacheKey(db.getKey(), db.getValue()),
+                        Map.Entry::getKey));
         try {
-            return entityManager.get().createQuery("select form.database " +
+            Map<String,Object> cached = memcacheService.getAll(fetchKeys.keySet());
+            loaded.putAll(cached.entrySet().stream()
+                    .collect(Collectors.toMap(
+                            cachedDb -> fetchKeys.get(cachedDb.getKey()),
+                            cachedDb -> deserialize((String) cachedDb.getValue()))));
+        } catch (Exception ignorable) {
+            // Memcache load failed, but we can still retrieve from database
+            LOGGER.severe(String.format("Fetching failed for %d DatabaseMeta from Memcache", toFetch.size()));
+        }
+        LOGGER.info(() -> String.format("Fetched %d/%d DatabaseMeta from Memcache", loaded.size(), toFetch.size()));
+        return loaded;
+    }
+
+    private DatabaseMeta deserialize(String serializedDatabaseMeta) {
+        return DatabaseMeta.fromJson(Json.parse(serializedDatabaseMeta));
+    }
+
+    private Map<ResourceId,DatabaseMeta> loadFromDb(Set<ResourceId> toFetch) {
+        LOGGER.info(() -> String.format("Fetching %d DatabaseMeta from MySqlDatabase", toFetch.size()));
+        if (toFetch.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<Integer> legacysIds = toFetch.stream()
+                .map(CuidAdapter::getLegacyIdFromCuid)
+                .collect(Collectors.toList());
+        return entityManager.get().createQuery("SELECT db " +
+                "FROM Database db " +
+                "WHERE db.id IN :databaseIds", Database.class)
+                .setParameter("databaseIds", legacysIds)
+                .getResultList().stream()
+                .map(this::buildMeta)
+                .collect(Collectors.toMap(
+                        DatabaseMeta::getDatabaseId,
+                        dbMeta -> dbMeta));
+    }
+
+    private void cacheToMemcache(Collection<DatabaseMeta> databases) {
+        LOGGER.info(() -> String.format("Caching %d DatabaseMeta to Memcache", databases.size()));
+        Map<String,String> toCache = databases.stream()
+                .collect(Collectors.toMap(
+                        db -> memcacheKey(db.getDatabaseId(),db.getVersion()),
+                        db -> db.toJson().toJson()));
+        try {
+            memcacheService.putAll(toCache);
+        } catch (Exception ignorable) {
+            // Caching failed, but is not terminal
+            LOGGER.severe(String.format("Caching failed for %d DatabaseMeta to Memcache", databases.size()));
+        }
+    }
+
+    private static String memcacheKey(ResourceId databaseId, long databaseVersion) {
+        return String.format("%s:%d", databaseId.asString(), databaseVersion);
+    }
+
+    private Long queryDatabaseVersion(ResourceId databaseId) {
+        try {
+            return entityManager.get().createQuery("SELECT db.version " +
+                    "FROM Database db " +
+                    "WHERE db.id=:dbId", Long.class)
+                    .setParameter("dbId", CuidAdapter.getLegacyIdFromCuid(databaseId))
+                    .getSingleResult();
+        } catch (NoResultException noDatabase) {
+            return null;
+        }
+    }
+
+    private @Nullable ResourceId queryDatabaseIdForForm(@NotNull ResourceId formId) {
+        try {
+            int dbId = entityManager.get().createQuery("select form.database.id " +
                     "from Activity form " +
-                    "where form.id = :formId", Database.class)
+                    "where form.id = :formId", Integer.class)
                     .setParameter("formId", CuidAdapter.getLegacyIdFromCuid(formId))
                     .getSingleResult();
+            return CuidAdapter.databaseId(dbId);
         } catch (NoResultException noResult) {
             return null;
         }
     }
 
-    private @Nullable Database getDatabaseForFolder(@NotNull ResourceId folderId) {
+    private @Nullable ResourceId queryDatabaseIdForFolder(@NotNull ResourceId folderId) {
         try {
-            return entityManager.get().createQuery("select folder.database " +
+            int dbId = entityManager.get().createQuery("select folder.database.id " +
                     "from Folder folder " +
-                    "where folder.id = :folderId", Database.class)
+                    "where folder.id = :folderId", Integer.class)
                     .setParameter("folderId", CuidAdapter.getLegacyIdFromCuid(folderId))
                     .getSingleResult();
+            return CuidAdapter.databaseId(dbId);
         } catch (NoResultException noResult) {
             return null;
         }
