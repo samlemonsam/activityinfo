@@ -292,7 +292,7 @@ public class BaseEntityHandler {
 
     void assertEditFolderRights(User user, Folder folder) {
         ResourceId folderId = CuidAdapter.folderId(folder.getId());
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(folderId, user.getId());
+        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(folder.getDatabase().getId(), user.getId());
         if (!PermissionOracle.canEditFolder(folderId, databaseMeta)) {
             throw new IllegalAccessCommandException();
         }
