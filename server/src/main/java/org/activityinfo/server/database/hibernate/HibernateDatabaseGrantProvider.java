@@ -80,7 +80,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
                 .collect(Collectors.toList());
     }
 
-    private static DatabaseGrant buildDatabaseGrant(UserPermission userPermission) {
+    private static DatabaseGrant buildDatabaseGrant(@NotNull UserPermission userPermission) {
         return new DatabaseGrant.Builder()
                 .setUserId(userPermission.getUser().getId())
                 .setDatabaseId(CuidAdapter.databaseId(userPermission.getDatabase().getId()))
@@ -89,7 +89,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
                 .build();
     }
 
-    private static List<GrantModel> buildGrants(UserPermission userPermission) {
+    private static List<GrantModel> buildGrants(@NotNull UserPermission userPermission) {
         List<GrantModel> grants = new ArrayList<>();
         if(!userPermission.isAllowView()) {
             return grants;
@@ -103,14 +103,14 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         return grants;
     }
 
-    private static GrantModel buildRootGrant(ResourceId databaseId, UserPermission userPermission) {
+    private static GrantModel buildRootGrant(@NotNull ResourceId databaseId, @NotNull UserPermission userPermission) {
         GrantModel.Builder databaseGrant = new GrantModel.Builder();
         databaseGrant.setResourceId(databaseId);
         setOperations(databaseGrant, userPermission);
         return databaseGrant.build();
     }
 
-    private static List<GrantModel> buildGrantsFromModel(JsonValue modelObject) {
+    private static List<GrantModel> buildGrantsFromModel(@NotNull JsonValue modelObject) {
         if (!modelObject.hasKey("grants")) {
             LOGGER.severe(() -> "Could not parse permissions model: " + modelObject);
             throw new UnsupportedOperationException("Unsupported model");
@@ -123,7 +123,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         return grants;
     }
 
-    private static void setOperations(GrantModel.Builder grantModel, UserPermission userPermission) {
+    private static void setOperations(@NotNull GrantModel.Builder grantModel, @NotNull UserPermission userPermission) {
         if(userPermission.isAllowViewAll()) {
             grantModel.addOperation(Operation.VIEW);
         } else if(userPermission.isAllowView()) {
@@ -152,7 +152,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         }
     }
 
-    private static String getPartnerFilter(UserPermission userPermission) {
+    private static String getPartnerFilter(@NotNull UserPermission userPermission) {
         SymbolNode partnerForm = new SymbolNode(CuidAdapter.partnerFormId(userPermission.getDatabase().getId()));
         ConstantNode partnerRecord = new ConstantNode(CuidAdapter.partnerRecordId(userPermission.getPartner().getId()).asString());
         return new FunctionCallNode(EqualFunction.INSTANCE, partnerForm, partnerRecord).asExpression();

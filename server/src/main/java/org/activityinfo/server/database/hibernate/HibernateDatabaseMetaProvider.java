@@ -76,7 +76,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
     }
 
     @Override
-    public DatabaseMeta getDatabaseMetaForResource(ResourceId resourceId) {
+    public @Nullable DatabaseMeta getDatabaseMetaForResource(@NotNull ResourceId resourceId) {
         switch(resourceId.getDomain()) {
             case CuidAdapter.DATABASE_DOMAIN:
                 return getDatabaseMeta(resourceId);
@@ -89,17 +89,17 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         }
     }
 
-    private DatabaseMeta getDatabaseMetaForForm(ResourceId formId) {
+    private @Nullable DatabaseMeta getDatabaseMetaForForm(@NotNull ResourceId formId) {
         Database database = getDatabaseForForm(formId);
         return buildMeta(database);
     }
 
-    private DatabaseMeta getDatabaseMetaForFolder(ResourceId folderId) {
+    private @Nullable DatabaseMeta getDatabaseMetaForFolder(@NotNull ResourceId folderId) {
         Database database = getDatabaseForFolder(folderId);
         return buildMeta(database);
     }
 
-    private Database getDatabaseForForm(ResourceId formId) {
+    private @Nullable Database getDatabaseForForm(@NotNull ResourceId formId) {
         try {
             return entityManager.get().createQuery("select form.database " +
                     "from Activity form " +
@@ -111,7 +111,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         }
     }
 
-    private Database getDatabaseForFolder(ResourceId folderId) {
+    private @Nullable Database getDatabaseForFolder(@NotNull ResourceId folderId) {
         try {
             return entityManager.get().createQuery("select folder.database " +
                     "from Folder folder " +
@@ -123,7 +123,10 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         }
     }
 
-    private DatabaseMeta buildMeta(Database database) {
+    private @Nullable DatabaseMeta buildMeta(@Nullable  Database database) {
+        if (database == null) {
+            return null;
+        }
         return new DatabaseMeta.Builder()
                 .setDatabaseId(CuidAdapter.databaseId(database.getId()))
                 .setOwnerId(database.getOwner().getId())
@@ -136,19 +139,19 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
                 .build();
     }
 
-    private List<Resource> fetchResources(Database database) {
+    private List<Resource> fetchResources(@NotNull Database database) {
         Stream<Resource> formResources = fetchForms(database);
         Stream<Resource> folderResources = fetchFolders(database);
         return Stream.concat(formResources, folderResources).collect(Collectors.toList());
     }
 
-    private Stream<Resource> fetchForms(Database database) {
+    private Stream<Resource> fetchForms(@NotNull Database database) {
         return database.getActivities().stream()
                 .filter(a -> !a.isDeleted())
                 .map(Activity::asResource);
     }
 
-    private Stream<Resource> fetchFolders(Database database) {
+    private Stream<Resource> fetchFolders(@NotNull Database database) {
         return entityManager.get().createQuery("SELECT f " +
                 "FROM Folder f " +
                 "WHERE f.database=:database", Folder.class)
@@ -157,7 +160,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
                 .map(Folder::asResource);
     }
 
-    private List<RecordLock> fetchLocks(Database database) {
+    private List<RecordLock> fetchLocks(@NotNull Database database) {
         return database.getLockedPeriods().stream()
                 .filter(LockedPeriod::isEnabled)
                 .map(LockedPeriod::asDatabaseLock)

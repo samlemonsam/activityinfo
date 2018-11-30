@@ -307,7 +307,7 @@ public class UserDatabaseMeta implements JsonSerializable {
             return this;
         }
 
-        public Builder addGrants(List<GrantModel> grants) {
+        public Builder addGrants(Collection<GrantModel> grants) {
             for (GrantModel grant : grants) {
                 assert !meta.grants.containsKey(grant.getResourceId()) : "Cannot define more than 1 Grant for a given Resource.";
                 meta.grants.put(grant.getResourceId(), grant);

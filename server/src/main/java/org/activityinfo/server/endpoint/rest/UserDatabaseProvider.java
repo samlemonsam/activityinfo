@@ -19,24 +19,11 @@
 package org.activityinfo.server.endpoint.rest;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
-import org.activityinfo.json.Json;
-import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.database.*;
-import org.activityinfo.model.formula.ConstantNode;
-import org.activityinfo.model.formula.FunctionCallNode;
-import org.activityinfo.model.formula.SymbolNode;
-import org.activityinfo.model.formula.functions.EqualFunction;
-import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.permission.GrantModel;
-import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.store.spi.DatabaseGrantProvider;
 import org.activityinfo.store.spi.DatabaseMetaProvider;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -67,50 +54,43 @@ public class UserDatabaseProvider {
 
     public UserDatabaseMeta queryDatabaseMeta(ResourceId databaseId, int userId) {
         DatabaseMeta databaseMeta = metaProvider.getDatabaseMeta(databaseId);
-        if (databaseMeta.getOwnerId() == userId) {
-            return buildOwnedUserDatabaseMeta(databaseMeta);
+        if (databaseMeta == null) {
+            LOGGER.severe(String.format("Database %s requested by User %d does not exist", databaseId.asString(), userId));
+            throw new IllegalArgumentException();
         }
-        DatabaseGrant databaseGrant = grantProvider.getDatabaseGrant(userId, databaseId);
-        return buildUserDatabaseMeta(databaseGrant,databaseMeta);
+        return findGrantAndBuildMeta(databaseMeta, userId);
     }
 
     public UserDatabaseMeta queryUserDatabaseMetaByResource(ResourceId resourceId, int userId) {
         DatabaseMeta databaseMeta = metaProvider.getDatabaseMetaForResource(resourceId);
+        if (databaseMeta == null) {
+            LOGGER.severe(String.format("Database with Resource %s requested by User %d does not exist", resourceId.asString(), userId));
+            throw new IllegalArgumentException();
+        }
+        return findGrantAndBuildMeta(databaseMeta, userId);
+    }
+
+    private UserDatabaseMeta findGrantAndBuildMeta(DatabaseMeta databaseMeta, int userId) {
         if (databaseMeta.getOwnerId() == userId) {
             return buildOwnedUserDatabaseMeta(databaseMeta);
         }
         DatabaseGrant databaseGrant = grantProvider.getDatabaseGrant(userId, databaseMeta.getDatabaseId());
-        return buildUserDatabaseMeta(databaseGrant,databaseMeta);
+        if (databaseGrant == null) {
+            return buildGrantlessUserDatabaseMeta(databaseMeta, userId);
+        }
+        return buildUserDatabaseMeta(databaseGrant, databaseMeta);
     }
 
     private Stream<UserDatabaseMeta> fetchAssignedUserDatabaseMeta(int userId) {
         List<DatabaseGrant> databaseGrants = grantProvider.getAllDatabaseGrantsForUser(userId);
         Set<ResourceId> assignedDatabaseIds = databaseGrants.stream().map(DatabaseGrant::getDatabaseId).collect(Collectors.toSet());
         Map<ResourceId,DatabaseMeta> databaseMeta = metaProvider.getDatabaseMeta(assignedDatabaseIds);
-        return databaseGrants.stream()
-                .map(grant -> buildUserDatabaseMeta(grant, databaseMeta.get(grant.getDatabaseId())));
+        return databaseGrants.stream().map(grant -> buildUserDatabaseMeta(grant, databaseMeta.get(grant.getDatabaseId())));
     }
 
     private Stream <UserDatabaseMeta> fetchOwnedUserDatabaseMeta(int userId) {
         return metaProvider.getOwnedDatabaseMeta(userId).values().stream()
                 .map(UserDatabaseProvider::buildOwnedUserDatabaseMeta);
-    }
-
-    private static UserDatabaseMeta buildUserDatabaseMeta(DatabaseGrant databaseGrant, DatabaseMeta databaseMeta) {
-        return new UserDatabaseMeta.Builder()
-                .setDatabaseId(databaseMeta.getDatabaseId())
-                .setUserId(databaseGrant.getUserId())
-                .setOwner(databaseGrant.getUserId() == databaseMeta.getOwnerId())
-                .setLabel(databaseMeta.getLabel())
-                .setPublished(databaseMeta.isPublished())
-                .setVersion(version(databaseMeta.getVersion(), databaseGrant.getVersion()))
-                .addResources(databaseMeta.getResources().values())
-                .addLocks(databaseMeta.getLocks().values())
-                .build();
-    }
-
-    private static String version(long databaseVersion, long grantVersion) {
-        return Long.toString(databaseVersion) + UserDatabaseMeta.VERSION_SEP + Long.toString(grantVersion);
     }
 
     private static UserDatabaseMeta buildOwnedUserDatabaseMeta(DatabaseMeta databaseMeta) {
@@ -125,6 +105,36 @@ public class UserDatabaseProvider {
                 .addResources(databaseMeta.getResources().values())
                 .addLocks(databaseMeta.getLocks().values())
                 .build();
+    }
+
+    private static UserDatabaseMeta buildUserDatabaseMeta(DatabaseGrant databaseGrant, DatabaseMeta databaseMeta) {
+        return new UserDatabaseMeta.Builder()
+                .setDatabaseId(databaseMeta.getDatabaseId())
+                .setUserId(databaseGrant.getUserId())
+                .setOwner(databaseGrant.getUserId() == databaseMeta.getOwnerId())
+                .setLabel(databaseMeta.getLabel())
+                .setPublished(databaseMeta.isPublished())
+                .setVersion(version(databaseMeta.getVersion(), databaseGrant.getVersion()))
+                .addResources(databaseMeta.getResources().values())
+                .addLocks(databaseMeta.getLocks().values())
+                .addGrants(databaseGrant.getGrants().values())
+                .build();
+    }
+
+    private static UserDatabaseMeta buildGrantlessUserDatabaseMeta(DatabaseMeta databaseMeta, int userId) {
+        return new UserDatabaseMeta.Builder()
+                .setDatabaseId(databaseMeta.getDatabaseId())
+                .setUserId(userId)
+                .setLabel(databaseMeta.getLabel())
+                .setPublished(databaseMeta.isPublished())
+                .setVersion(Long.toString(databaseMeta.getVersion()))
+                .addResources(databaseMeta.getResources().values())
+                .addLocks(databaseMeta.getLocks().values())
+                .build();
+    }
+
+    private static String version(long databaseVersion, long grantVersion) {
+        return Long.toString(databaseVersion) + UserDatabaseMeta.VERSION_SEP + Long.toString(grantVersion);
     }
 
 }
