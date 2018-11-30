@@ -42,7 +42,6 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         try {
             Database database = entityManager.get().createQuery("SELECT db " +
                     "FROM Database db " +
-                    "JOIN FETCH db.activities " +
                     "WHERE db.id=:databaseId", Database.class)
                     .setParameter("databaseId", CuidAdapter.getLegacyIdFromCuid(databaseId))
                     .getSingleResult();
@@ -59,7 +58,6 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         }
         return entityManager.get().createQuery("SELECT db " +
                 "FROM Database db " +
-                "JOIN FETCH db.activities " +
                 "WHERE db.id IN :databaseIds", Database.class)
                 .setParameter("databaseIds", databaseIds.stream().map(CuidAdapter::getLegacyIdFromCuid).collect(Collectors.toList()))
                 .getResultList().stream()
@@ -71,7 +69,6 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
     public Map<ResourceId, DatabaseMeta> getOwnedDatabaseMeta(int ownerId) {
         return entityManager.get().createQuery("SELECT db " +
                 "FROM Database db " +
-                "JOIN FETCH db.activities " +
                 "WHERE db.owner.id=:ownerId", Database.class)
                 .setParameter("ownerId", ownerId)
                 .getResultList().stream()
