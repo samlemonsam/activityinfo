@@ -32,6 +32,8 @@ import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.store.spi.DatabaseGrantProvider;
+import org.activityinfo.store.spi.DatabaseMetaProvider;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -47,10 +49,16 @@ public class UserDatabaseProvider {
     private static final Logger LOGGER = Logger.getLogger(UserDatabaseProvider.class.getName());
 
     private final Provider<EntityManager> entityManager;
+    private final DatabaseGrantProvider grantProvider;
+    private final DatabaseMetaProvider metaProvider;
 
     @Inject
-    public UserDatabaseProvider(Provider<EntityManager> entityManager) {
+    public UserDatabaseProvider(Provider<EntityManager> entityManager,
+                                DatabaseGrantProvider grantProvider,
+                                DatabaseMetaProvider metaProvider) {
         this.entityManager = entityManager;
+        this.grantProvider = grantProvider;
+        this.metaProvider = metaProvider;
     }
 
     public List<UserDatabaseMeta> fetchVisibleDatabaseMeta(int userId) {
