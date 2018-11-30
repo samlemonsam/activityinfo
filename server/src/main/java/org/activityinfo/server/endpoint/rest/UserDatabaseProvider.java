@@ -48,267 +48,83 @@ public class UserDatabaseProvider {
 
     private static final Logger LOGGER = Logger.getLogger(UserDatabaseProvider.class.getName());
 
-    private final Provider<EntityManager> entityManager;
     private final DatabaseGrantProvider grantProvider;
     private final DatabaseMetaProvider metaProvider;
 
     @Inject
-    public UserDatabaseProvider(Provider<EntityManager> entityManager,
-                                DatabaseGrantProvider grantProvider,
+    public UserDatabaseProvider(DatabaseGrantProvider grantProvider,
                                 DatabaseMetaProvider metaProvider) {
-        this.entityManager = entityManager;
         this.grantProvider = grantProvider;
         this.metaProvider = metaProvider;
     }
 
-    public List<UserDatabaseMeta> fetchVisibleDatabaseMeta(int userId) {
-        return fetchVisibleDatabases(userId).stream()
-                .map(db -> buildMetadata(db, CuidAdapter.databaseId(db.getId()), userId))
+    public List<UserDatabaseMeta> queryVisibleUserDatabaseMeta(int userId) {
+        return Stream
+                .concat(fetchAssignedUserDatabaseMeta(userId),
+                        fetchOwnedUserDatabaseMeta(userId))
                 .collect(Collectors.toList());
     }
 
-    private List<Database> fetchVisibleDatabases(int userId) {
-        List<Database> databases = new ArrayList<>();
-        databases.addAll(queryAssignedDatabases(userId));
-        databases.addAll(queryOwnedDatabases(userId));
-        return databases;
-    }
-
-    private List<Database> queryAssignedDatabases(int userId) {
-        return entityManager.get().createQuery("select up.database " +
-                "from UserPermission up " +
-                "where up.user.id = :userId " +
-                "and up.allowView = true", Database.class)
-                .setParameter("userId", userId)
-                .getResultList();
-    }
-
-    protected List<Database> queryOwnedDatabases(int userId) {
-        return entityManager.get().createQuery("select db " +
-                "from Database db " +
-                "where db.owner.id = :userId " +
-                "and db.dateDeleted is null", Database.class)
-                .setParameter("userId", userId)
-                .getResultList();
-    }
-
-    public UserDatabaseMeta queryByResource(ResourceId resourceId, int userId) {
-        switch(resourceId.getDomain()) {
-            case CuidAdapter.DATABASE_DOMAIN:
-                return getDatabaseMetadata(resourceId, userId);
-            case CuidAdapter.ACTIVITY_DOMAIN:
-                return getDatabaseMetadataForForm(resourceId, userId);
-            case CuidAdapter.FOLDER_DOMAIN:
-                return getDatabaseMetadataForFolder(resourceId, userId);
-            default:
-                throw new IllegalArgumentException("Cannot fetch UserDatabaseMeta for Resource: " + resourceId.toString());
+    public UserDatabaseMeta queryDatabaseMeta(ResourceId databaseId, int userId) {
+        DatabaseMeta databaseMeta = metaProvider.getDatabaseMeta(databaseId);
+        if (databaseMeta.getOwnerId() == userId) {
+            return buildOwnedUserDatabaseMeta(databaseMeta);
         }
+        DatabaseGrant databaseGrant = grantProvider.getDatabaseGrant(userId, databaseId);
+        return buildUserDatabaseMeta(databaseGrant,databaseMeta);
     }
 
-    public UserDatabaseMeta getDatabaseMetadata(ResourceId databaseId, int userId) {
-        Database database = queryDatabase(databaseId);
-        if (database == null) {
-            return meta(databaseId, userId).build();
+    public UserDatabaseMeta queryUserDatabaseMetaByResource(ResourceId resourceId, int userId) {
+        DatabaseMeta databaseMeta = metaProvider.getDatabaseMetaForResource(resourceId);
+        if (databaseMeta.getOwnerId() == userId) {
+            return buildOwnedUserDatabaseMeta(databaseMeta);
         }
-        return buildMetadata(database, databaseId, userId);
+        DatabaseGrant databaseGrant = grantProvider.getDatabaseGrant(userId, databaseMeta.getDatabaseId());
+        return buildUserDatabaseMeta(databaseGrant,databaseMeta);
     }
 
-    private UserDatabaseMeta getDatabaseMetadataForForm(ResourceId formId, int userId) {
-        Database db = queryDatabaseByForm(formId);
-        if (db == null) {
-            throw new IllegalArgumentException("Cannot fetch UserDatabaseMeta for Form " + formId.toString());
-        }
-        return buildMetadata(db, CuidAdapter.databaseId(db.getId()), userId);
+    private Stream<UserDatabaseMeta> fetchAssignedUserDatabaseMeta(int userId) {
+        List<DatabaseGrant> databaseGrants = grantProvider.getAllDatabaseGrantsForUser(userId);
+        Set<ResourceId> assignedDatabaseIds = databaseGrants.stream().map(DatabaseGrant::getDatabaseId).collect(Collectors.toSet());
+        Map<ResourceId,DatabaseMeta> databaseMeta = metaProvider.getDatabaseMeta(assignedDatabaseIds);
+        return databaseGrants.stream()
+                .map(grant -> buildUserDatabaseMeta(grant, databaseMeta.get(grant.getDatabaseId())));
     }
 
-    private UserDatabaseMeta getDatabaseMetadataForFolder(ResourceId folderId, int userId) {
-        Database db = queryDatabaseByFolder(folderId);
-        if (db == null) {
-            throw new IllegalArgumentException("Cannot fetch UserDatabaseMeta for Folder " + folderId.toString());
-        }
-        return buildMetadata(db, CuidAdapter.databaseId(db.getId()), userId);
+    private Stream <UserDatabaseMeta> fetchOwnedUserDatabaseMeta(int userId) {
+        return metaProvider.getOwnedDatabaseMeta(userId).values().stream()
+                .map(UserDatabaseProvider::buildOwnedUserDatabaseMeta);
     }
 
-    private Database queryDatabase(ResourceId databaseId) {
-        return entityManager.get().find(Database.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
-    }
-
-    private UserDatabaseMeta.Builder meta(ResourceId databaseId, int userId) {
+    private static UserDatabaseMeta buildUserDatabaseMeta(DatabaseGrant databaseGrant, DatabaseMeta databaseMeta) {
         return new UserDatabaseMeta.Builder()
-                .setDatabaseId(databaseId)
-                .setUserId(userId);
+                .setDatabaseId(databaseMeta.getDatabaseId())
+                .setUserId(databaseGrant.getUserId())
+                .setOwner(databaseGrant.getUserId() == databaseMeta.getOwnerId())
+                .setLabel(databaseMeta.getLabel())
+                .setPublished(databaseMeta.isPublished())
+                .setVersion(version(databaseMeta.getVersion(), databaseGrant.getVersion()))
+                .addResources(databaseMeta.getResources().values())
+                .addLocks(databaseMeta.getLocks().values())
+                .build();
     }
 
-    private UserDatabaseMeta buildMetadata(Database database, ResourceId databaseId, int userId) {
-        UserDatabaseMeta.Builder meta = meta(databaseId, userId);
-        meta.setLabel(database.getName());
-        meta.setPublished(false);
-        meta.addResources(fetchResources(database));
-        meta.addLocks(fetchLocks(database));
-        if (database.getOwner().getId() == userId) {
-            ownerPermissions(database, meta);
-        } else {
-            userPermissions(database, userId, meta);
-        }
-        return meta.build();
+    private static String version(long databaseVersion, long grantVersion) {
+        return Long.toString(databaseVersion) + UserDatabaseMeta.VERSION_SEP + Long.toString(grantVersion);
     }
 
-    private Database queryDatabaseByForm(ResourceId formId) {
-        try {
-            return entityManager.get().createQuery("select form.database " +
-                    "from Activity form " +
-                    "where form.id = :formId", Database.class)
-                    .setParameter("formId", CuidAdapter.getLegacyIdFromCuid(formId))
-                    .getSingleResult();
-        } catch (NoResultException noResult) {
-            return null;
-        }
-    }
-
-    private Database queryDatabaseByFolder(ResourceId folderId) {
-        try {
-            return entityManager.get().createQuery("select folder.database " +
-                    "from Folder folder " +
-                    "where folder.id = :folderId", Database.class)
-                    .setParameter("folderId", CuidAdapter.getLegacyIdFromCuid(folderId))
-                    .getSingleResult();
-        } catch (NoResultException noResult) {
-            return null;
-        }
-    }
-
-    private List<Resource> fetchResources(Database database) {
-        Stream<Resource> formResources = fetchForms(database);
-        Stream<Resource> folderResources = fetchFolders(database);
-        return Stream.concat(formResources, folderResources).collect(Collectors.toList());
-    }
-
-    private Stream<Resource> fetchForms(Database database) {
-        return database.getActivities().stream()
-                .filter(a -> !a.isDeleted())
-                .map(Activity::asResource);
-    }
-
-    private Stream<Resource> fetchFolders(Database database) {
-        return entityManager.get()
-                .createQuery("select f from Folder f where f.database = :database", Folder.class)
-                .setParameter("database", database)
-                .getResultList()
-                .stream()
-                .map(Folder::asResource);
-    }
-
-    public List<RecordLock> fetchLocks(Database database) {
-        return entityManager.get()
-                .createQuery("select k from LockedPeriod k where k.database = :database", LockedPeriod.class)
-                .setParameter("database", database)
-                .getResultList()
-                .stream()
-                .filter(LockedPeriod::isEnabled)
-                .map(LockedPeriod::asDatabaseLock)
-                .collect(Collectors.toList());
-    }
-
-    private void ownerPermissions(Database database, UserDatabaseMeta.Builder meta) {
-        meta.setOwner(true);
-        meta.setVersion(Long.toString(database.getVersion()));
-        meta.setPendingTransfer(database.hasPendingTransfer());
-    }
-
-    private void userPermissions(Database database, int userId, UserDatabaseMeta.Builder meta) {
-        Optional<UserPermission> userPermission = fetchUserPermission(database, userId);
-        if (userPermission.isPresent()) {
-            meta.addGrants(fetchGrants(CuidAdapter.databaseId(database.getId()), userPermission.get()));
-            meta.setVersion(database.getVersion() + UserDatabaseMeta.VERSION_SEP + userPermission.get().getVersion());
-        } else {
-            meta.setVersion(Long.toString(database.getVersion()));
-        }
-    }
-
-    private Optional<UserPermission> fetchUserPermission(Database database, int userId) {
-        try {
-            return Optional.of(queryUserPermission(database, userId));
-        } catch (NoResultException noPermission) {
-            return Optional.empty();
-        }
-    }
-
-    private UserPermission queryUserPermission(Database database, int userId) {
-        return entityManager.get()
-                .createQuery("select u from UserPermission u where u.user.id = :userId and u.database = :db",
-                        UserPermission.class)
-                .setParameter("userId", userId)
-                .setParameter("db", database)
-                .getSingleResult();
-    }
-
-    private List<GrantModel> fetchGrants(ResourceId databaseId, UserPermission userPermission) {
-        List<GrantModel> grants = new ArrayList<>();
-        if(!userPermission.isAllowView()) {
-            return grants;
-        }
-        grants.add(buildDatabaseGrant(databaseId, userPermission));
-        if (userPermission.getModel() == null) {
-            return grants;
-        }
-        JsonValue modelObject = Json.parse(userPermission.getModel());
-        grants.addAll(buildGrantsFromModel(modelObject));
-        return grants;
-    }
-
-    private GrantModel buildDatabaseGrant(ResourceId databaseId, UserPermission userPermission) {
-        GrantModel.Builder databaseGrant = new GrantModel.Builder();
-        databaseGrant.setResourceId(databaseId);
-        setOperations(databaseGrant, userPermission);
-        return databaseGrant.build();
-    }
-
-    private List<GrantModel> buildGrantsFromModel(JsonValue modelObject) {
-        if (!modelObject.hasKey("grants")) {
-            LOGGER.severe(() -> "Could not parse permissions model: " + modelObject);
-            throw new UnsupportedOperationException("Unsupported model");
-        }
-        List<GrantModel> grants = new ArrayList<>();
-        for (JsonValue grant : modelObject.get("grants").values()) {
-            GrantModel grantModel = GrantModel.fromJson(grant);
-            grants.add(grantModel);
-        }
-        return grants;
-    }
-
-    private void setOperations(GrantModel.Builder grantModel, UserPermission userPermission) {
-        if(userPermission.isAllowViewAll()) {
-            grantModel.addOperation(Operation.VIEW);
-        } else if(userPermission.isAllowView()) {
-            grantModel.addOperation(Operation.VIEW, getPartnerFilter(userPermission));
-        }
-        if(userPermission.isAllowEditAll()) {
-            grantModel.addOperation(Operation.EDIT_RECORD);
-            grantModel.addOperation(Operation.CREATE_RECORD);
-            grantModel.addOperation(Operation.DELETE_RECORD);
-        } else if(userPermission.isAllowEdit()) {
-            grantModel.addOperation(Operation.EDIT_RECORD, getPartnerFilter(userPermission));
-            grantModel.addOperation(Operation.CREATE_RECORD, getPartnerFilter(userPermission));
-            grantModel.addOperation(Operation.DELETE_RECORD, getPartnerFilter(userPermission));
-        }
-        if(userPermission.isAllowManageAllUsers()) {
-            grantModel.addOperation(Operation.MANAGE_USERS);
-        } else if(userPermission.isAllowManageUsers()) {
-            grantModel.addOperation(Operation.MANAGE_USERS, getPartnerFilter(userPermission));
-        }
-        if(userPermission.isAllowDesign()) {
-            grantModel.addOperation(Operation.CREATE_FORM);
-            grantModel.addOperation(Operation.EDIT_FORM);
-            grantModel.addOperation(Operation.DELETE_FORM);
-            grantModel.addOperation(Operation.LOCK_RECORDS);
-            grantModel.addOperation(Operation.MANAGE_TARGETS);
-        }
-    }
-
-    private String getPartnerFilter(UserPermission userPermission) {
-        SymbolNode partnerForm = new SymbolNode(CuidAdapter.partnerFormId(userPermission.getDatabase().getId()));
-        ConstantNode partnerRecord = new ConstantNode(CuidAdapter.partnerRecordId(userPermission.getPartner().getId()).asString());
-        return new FunctionCallNode(EqualFunction.INSTANCE, partnerForm, partnerRecord).asExpression();
+    private static UserDatabaseMeta buildOwnedUserDatabaseMeta(DatabaseMeta databaseMeta) {
+        return new UserDatabaseMeta.Builder()
+                .setDatabaseId(databaseMeta.getDatabaseId())
+                .setUserId(databaseMeta.getOwnerId())
+                .setOwner(true)
+                .setLabel(databaseMeta.getLabel())
+                .setPublished(databaseMeta.isPublished())
+                .setVersion(Long.toString(databaseMeta.getVersion()))
+                .setPendingTransfer(databaseMeta.isPendingTransfer())
+                .addResources(databaseMeta.getResources().values())
+                .addLocks(databaseMeta.getLocks().values())
+                .build();
     }
 
 }

@@ -25,7 +25,7 @@ public class DatabaseProviderImpl implements DatabaseProvider {
         if (geoDbProvider.accept(databaseId)) {
             return geoDbProvider.queryGeoDb(userId);
         } else {
-            return userDbProvider.getDatabaseMetadata(databaseId, userId);
+            return userDbProvider.queryDatabaseMeta(databaseId, userId);
         }
     }
 
@@ -36,7 +36,7 @@ public class DatabaseProviderImpl implements DatabaseProvider {
 
     @Override
     public List<UserDatabaseMeta> getVisibleDatabases(int userId) {
-        return userDbProvider.fetchVisibleDatabaseMeta(userId);
+        return userDbProvider.queryVisibleUserDatabaseMeta(userId);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class DatabaseProviderImpl implements DatabaseProvider {
         if (geoDbProvider.accept(resourceId)) {
             return geoDbProvider.queryGeoDb(userId);
         } else {
-            return userDbProvider.queryByResource(resourceId, userId);
+            return userDbProvider.queryUserDatabaseMetaByResource(resourceId, userId);
         }
     }
 

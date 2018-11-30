@@ -320,14 +320,14 @@ public class UserDatabaseMeta implements JsonSerializable {
             return this;
         }
 
-        public Builder addLocks(List<RecordLock> locks) {
+        public Builder addLocks(Collection<RecordLock> locks) {
             for (RecordLock lock : locks) {
                 addLock(lock);
             }
             return this;
         }
 
-        public Builder addResources(List<Resource> resources) {
+        public Builder addResources(Collection<Resource> resources) {
             for (Resource resource : resources) {
                 addResource(resource);
             }

@@ -75,6 +75,54 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
                 .collect(Collectors.toMap(DatabaseMeta::getDatabaseId, dbMeta -> dbMeta));
     }
 
+    @Override
+    public DatabaseMeta getDatabaseMetaForResource(ResourceId resourceId) {
+        switch(resourceId.getDomain()) {
+            case CuidAdapter.DATABASE_DOMAIN:
+                return getDatabaseMeta(resourceId);
+            case CuidAdapter.ACTIVITY_DOMAIN:
+                return getDatabaseMetaForForm(resourceId);
+            case CuidAdapter.FOLDER_DOMAIN:
+                return getDatabaseMetaForFolder(resourceId);
+            default:
+                throw new IllegalArgumentException("Cannot fetch UserDatabaseMeta for Resource: " + resourceId.toString());
+        }
+    }
+
+    private DatabaseMeta getDatabaseMetaForForm(ResourceId formId) {
+        Database database = getDatabaseForForm(formId);
+        return buildMeta(database);
+    }
+
+    private DatabaseMeta getDatabaseMetaForFolder(ResourceId folderId) {
+        Database database = getDatabaseForFolder(folderId);
+        return buildMeta(database);
+    }
+
+    private Database getDatabaseForForm(ResourceId formId) {
+        try {
+            return entityManager.get().createQuery("select form.database " +
+                    "from Activity form " +
+                    "where form.id = :formId", Database.class)
+                    .setParameter("formId", CuidAdapter.getLegacyIdFromCuid(formId))
+                    .getSingleResult();
+        } catch (NoResultException noResult) {
+            return null;
+        }
+    }
+
+    private Database getDatabaseForFolder(ResourceId folderId) {
+        try {
+            return entityManager.get().createQuery("select folder.database " +
+                    "from Folder folder " +
+                    "where folder.id = :folderId", Database.class)
+                    .setParameter("folderId", CuidAdapter.getLegacyIdFromCuid(folderId))
+                    .getSingleResult();
+        } catch (NoResultException noResult) {
+            return null;
+        }
+    }
+
     private DatabaseMeta buildMeta(Database database) {
         return new DatabaseMeta.Builder()
                 .setDatabaseId(CuidAdapter.databaseId(database.getId()))

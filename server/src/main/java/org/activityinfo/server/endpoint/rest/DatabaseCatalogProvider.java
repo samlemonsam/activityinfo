@@ -60,12 +60,12 @@ public class DatabaseCatalogProvider implements FormCatalog {
 
         // Otherwise, the UserDatabaseMeta has sufficient data to construct the Catalog Entries
         ResourceId parentResourceId = ResourceId.valueOf(parentId);
-        UserDatabaseMeta db = userDatabaseProvider.queryByResource(parentResourceId, userId);
+        UserDatabaseMeta db = userDatabaseProvider.queryUserDatabaseMetaByResource(parentResourceId, userId);
         return db.findCatalogEntries(ResourceId.valueOf(parentId));
     }
 
     private List<CatalogEntry> findDatabaseEntries(int userId) {
-        return userDatabaseProvider.fetchVisibleDatabaseMeta(userId).stream()
+        return userDatabaseProvider.queryVisibleUserDatabaseMeta(userId).stream()
                 .map(DatabaseCatalogProvider::databaseEntry)
                 .collect(Collectors.toList());
     }

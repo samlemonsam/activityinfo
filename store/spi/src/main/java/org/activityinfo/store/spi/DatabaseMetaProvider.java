@@ -14,4 +14,6 @@ public interface DatabaseMetaProvider {
 
     DatabaseMeta getDatabaseMeta(ResourceId databaseId);
 
+    DatabaseMeta getDatabaseMetaForResource(ResourceId resourceId);
+
 }
