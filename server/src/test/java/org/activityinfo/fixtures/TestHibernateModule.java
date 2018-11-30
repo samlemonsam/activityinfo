@@ -26,10 +26,13 @@ import com.google.inject.Singleton;
 import org.activityinfo.server.database.TestConnectionProvider;
 import org.activityinfo.server.database.hibernate.EntityManagerProvider;
 import org.activityinfo.server.database.hibernate.HibernateCatalogProvider;
+import org.activityinfo.server.database.hibernate.HibernateDatabaseGrantProvider;
+import org.activityinfo.server.database.hibernate.HibernateDatabaseMetaProvider;
 import org.activityinfo.server.database.hibernate.dao.HibernateDAOModule;
 import org.activityinfo.server.database.hibernate.dao.TransactionModule;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
-import org.activityinfo.store.spi.FormCatalog;
+import org.activityinfo.store.spi.DatabaseGrantProvider;
+import org.activityinfo.store.spi.DatabaseMetaProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.hibernate.Session;
 import org.hibernate.ejb.HibernateEntityManager;
@@ -54,6 +57,9 @@ public class TestHibernateModule extends AbstractModule {
         bind(EntityManager.class).toProvider(EntityManagerProvider.class).in(TestScoped.class);
         bind(MySqlStorageProvider.class).toProvider(HibernateCatalogProvider.class).in(TestScoped.class);
         bind(FormStorageProvider.class).toProvider(HibernateCatalogProvider.class).in(TestScoped.class);
+
+        bind(DatabaseGrantProvider.class).to(HibernateDatabaseGrantProvider.class);
+        bind(DatabaseMetaProvider.class).to(HibernateDatabaseMetaProvider.class);
 
         bind(SqlDialect.class).to(MySqlDialect.class);
         bind(Connection.class).toProvider(TestConnectionProvider.class);

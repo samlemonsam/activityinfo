@@ -1,4 +1,4 @@
-package org.activityinfo.server.database;
+package org.activityinfo.server.database.hibernate;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

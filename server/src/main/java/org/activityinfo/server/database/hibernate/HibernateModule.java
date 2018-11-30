@@ -23,8 +23,6 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.servlet.ServletModule;
 import org.activityinfo.server.DeploymentConfiguration;
-import org.activityinfo.server.database.HibernateDatabaseGrantProvider;
-import org.activityinfo.server.database.HibernateDatabaseMetaProvider;
 import org.activityinfo.server.database.hibernate.dao.HibernateDAOModule;
 import org.activityinfo.server.database.hibernate.dao.TransactionModule;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
