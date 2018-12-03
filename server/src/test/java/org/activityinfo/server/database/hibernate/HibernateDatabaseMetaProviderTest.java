@@ -64,6 +64,14 @@ public class HibernateDatabaseMetaProviderTest {
         match(databaseMeta, database);
     }
 
+    @Test
+    public void getMissingDatabase() {
+        Database database = entityManager.get().find(Database.class, 66666);
+        DatabaseMeta databaseMeta = databaseMetaProvider.getDatabaseMeta(databaseId(66666));
+        assertNull(database);
+        assertNull(databaseMeta);
+    }
+
     private void match(DatabaseMeta databaseMeta, Database database) {
         assertThat(databaseMeta.getDatabaseId(), equalTo(databaseId(database.getId())));
         assertThat(databaseMeta.getOwnerId(), equalTo(database.getOwner().getId()));

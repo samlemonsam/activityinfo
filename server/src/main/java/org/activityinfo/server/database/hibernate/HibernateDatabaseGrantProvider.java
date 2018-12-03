@@ -14,6 +14,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.util.Pair;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
 import org.activityinfo.store.spi.DatabaseGrantProvider;
 
@@ -90,7 +91,8 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
     private Set<Integer> queryGrantedUsers(ResourceId databaseId) {
         return new HashSet<>(entityManager.get().createQuery("SELECT up.user.id " +
                 "FROM UserPermission up " +
-                "WHERE up.database.id=:databaseId", Integer.class)
+                "WHERE up.database.id=:databaseId " +
+                "AND up.allowView = TRUE", Integer.class)
                 .setParameter("databaseId", CuidAdapter.getLegacyIdFromCuid(databaseId))
                 .getResultList());
     }
@@ -98,7 +100,8 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
     private Set<ResourceId> queryGrantedDatabases(int userId) {
         return entityManager.get().createQuery("SELECT up.database.id " +
                 "FROM UserPermission up " +
-                "WHERE up.user.id=:userId", Integer.class)
+                "WHERE up.user.id=:userId " +
+                "AND up.allowView = TRUE", Integer.class)
                 .setParameter("userId", userId)
                 .getResultList().stream()
                 .map(CuidAdapter::databaseId)
@@ -107,16 +110,16 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
 
     private Map<ResourceId,Long> queryGrantVersions(int userId, Set<ResourceId> databaseIds) {
         return databaseIds.stream()
-                .collect(Collectors.toMap(
-                        dbId -> dbId,
-                        dbId -> queryGrantVersion(userId, dbId)));
+                .map(dbId -> new Pair<>(dbId, queryGrantVersion(userId, dbId)))
+                .filter(dbGrantVersion -> dbGrantVersion.getSecond() != null)
+                .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
     }
 
     private Map<Integer,Long> queryGrantVersions(Set<Integer> userIds, ResourceId databaseId) {
         return userIds.stream()
-                .collect(Collectors.toMap(
-                        u -> u,
-                        u -> queryGrantVersion(u, databaseId)));
+                .map(userId -> new Pair<>(userId, queryGrantVersion(userId, databaseId)))
+                .filter(userGrantVersion -> userGrantVersion.getSecond() != null)
+                .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
     }
 
     private Long queryGrantVersion(int userId, ResourceId databaseId) {
@@ -124,7 +127,8 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
             return entityManager.get().createQuery("SELECT up.version " +
                     "FROM UserPermission up " +
                     "WHERE up.user.id=:userId " +
-                    "AND up.database.id=:databaseId", Long.class)
+                    "AND up.database.id=:databaseId " +
+                    "AND up.allowView = TRUE", Long.class)
                     .setParameter("userId", userId)
                     .setParameter("databaseId", CuidAdapter.getLegacyIdFromCuid(databaseId))
                     .getSingleResult();
@@ -198,7 +202,8 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         return entityManager.get().createQuery("SELECT up " +
                 "FROM UserPermission up " +
                 "WHERE up.user.id=:userId " +
-                "AND up.database.id IN :databaseIds", UserPermission.class)
+                "AND up.database.id IN :databaseIds " +
+                "AND up.allowView = TRUE", UserPermission.class)
                 .setParameter("userId", userId)
                 .setParameter("databaseIds", legacyIds)
                 .getResultList().stream()
@@ -210,9 +215,10 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         return entityManager.get().createQuery("SELECT up " +
                 "FROM UserPermission up " +
                 "WHERE up.user.id IN :userIds " +
-                "AND up.database.id=:databaseId", UserPermission.class)
+                "AND up.database.id=:databaseId " +
+                "AND up.allowView = TRUE", UserPermission.class)
                 .setParameter("userIds", userIds)
-                .setParameter("databaseId", databaseId)
+                .setParameter("databaseId", CuidAdapter.getLegacyIdFromCuid(databaseId))
                 .getResultList().stream()
                 .map(HibernateDatabaseGrantProvider::buildDatabaseGrant)
                 .collect(Collectors.toMap(DatabaseGrant::getUserId, grant -> grant));
@@ -231,7 +237,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
                 .build();
     }
 
-    private static List<GrantModel> buildGrants(@NotNull UserPermission userPermission) {
+    public static List<GrantModel> buildGrants(@NotNull UserPermission userPermission) {
         List<GrantModel> grants = new ArrayList<>();
         if(!userPermission.isAllowView()) {
             return grants;
