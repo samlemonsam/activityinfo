@@ -21,8 +21,7 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -42,46 +41,185 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
 
     @Override
     public @Nullable DatabaseGrant getDatabaseGrant(int userId, @NotNull ResourceId databaseId) {
-        try {
-            UserPermission userPermission = entityManager.get().createQuery("SELECT up " +
-                    "FROM UserPermission up " +
-                    "JOIN FETCH up.database " +
-                    "JOIN FETCH up.user " +
-                    "WHERE up.user.id=:userId " +
-                    "AND up.database.id=:databaseId", UserPermission.class)
-                    .setParameter("userId", userId)
-                    .setParameter("databaseId", CuidAdapter.getLegacyIdFromCuid(databaseId))
-                    .getSingleResult();
-            return buildDatabaseGrant(userPermission);
-        } catch (NoResultException noGrant) {
+        Map<ResourceId,Long> grantVersion = queryGrantVersions(userId, Collections.singleton(databaseId));
+        if (grantVersion.isEmpty()) {
             return null;
         }
+        Map<ResourceId,DatabaseGrant> loaded = loadFromCache(userId, grantVersion);
+        if (!loaded.isEmpty()) {
+            return loaded.get(databaseId);
+        }
+        loaded = loadFromDb(userId, grantVersion.keySet());
+        cacheToMemcache(loaded.values());
+        return loaded.get(databaseId);
     }
 
     @Override
     public List<DatabaseGrant> getAllDatabaseGrantsForUser(int userId) {
-        return entityManager.get().createQuery("SELECT up " +
-                "FROM UserPermission up " +
-                "JOIN FETCH up.database " +
-                "JOIN FETCH up.user " +
-                "WHERE up.user.id = :userId", UserPermission.class)
-                .setParameter("userId", userId)
-                .getResultList().stream()
-                .map(HibernateDatabaseGrantProvider::buildDatabaseGrant)
-                .collect(Collectors.toList());
+        Set<ResourceId> grantedDatabases = queryGrantedDatabases(userId);
+        Map<ResourceId,Long> grantVersions = queryGrantVersions(userId, grantedDatabases);
+        Map<ResourceId,DatabaseGrant> loaded = loadFromCache(userId, grantVersions);
+        if (loaded.size() == grantVersions.size()) {
+            return new ArrayList<>(loaded.values());
+        }
+        loaded.forEach((dbId,grant) -> grantVersions.remove(dbId));
+        Map<ResourceId,DatabaseGrant> loadedFromDb = loadFromDb(userId, grantVersions.keySet());
+        cacheToMemcache(loadedFromDb.values());
+        loaded.putAll(loadedFromDb);
+        return new ArrayList<>(loaded.values());
     }
 
     @Override
     public List<DatabaseGrant> getAllDatabaseGrantsForDatabase(@NotNull ResourceId databaseId) {
+        Set<Integer> users = queryGrantedUsers(databaseId);
+        if (users.isEmpty()) {
+            return null;
+        }
+        Map<Integer,Long> grantVersions = queryGrantVersions(users, databaseId);
+        Map<Integer,DatabaseGrant> loaded = loadFromCache(databaseId, grantVersions);
+        if (loaded.size() == grantVersions.size()) {
+            return new ArrayList<>(loaded.values());
+        }
+        loaded.forEach((userId,grant) -> grantVersions.remove(userId));
+        Map<Integer,DatabaseGrant> loadedFromDb = loadFromDb(databaseId, grantVersions.keySet());
+        cacheToMemcache(loadedFromDb.values());
+        loaded.putAll(loadedFromDb);
+        return new ArrayList<>(loaded.values());
+    }
+
+    private Set<Integer> queryGrantedUsers(ResourceId databaseId) {
+        return new HashSet<>(entityManager.get().createQuery("SELECT up.user.id " +
+                "FROM UserPermission up " +
+                "WHERE up.database.id=:databaseId", Integer.class)
+                .setParameter("databaseId", CuidAdapter.getLegacyIdFromCuid(databaseId))
+                .getResultList());
+    }
+
+    private Set<ResourceId> queryGrantedDatabases(int userId) {
+        return entityManager.get().createQuery("SELECT up.database.id " +
+                "FROM UserPermission up " +
+                "WHERE up.user.id=:userId", Integer.class)
+                .setParameter("userId", userId)
+                .getResultList().stream()
+                .map(CuidAdapter::databaseId)
+                .collect(Collectors.toSet());
+    }
+
+    private Map<ResourceId,Long> queryGrantVersions(int userId, Set<ResourceId> databaseIds) {
+        return databaseIds.stream()
+                .collect(Collectors.toMap(
+                        dbId -> dbId,
+                        dbId -> queryGrantVersion(userId, dbId)));
+    }
+
+    private Map<Integer,Long> queryGrantVersions(Set<Integer> userIds, ResourceId databaseId) {
+        return userIds.stream()
+                .collect(Collectors.toMap(
+                        u -> u,
+                        u -> queryGrantVersion(u, databaseId)));
+    }
+
+    private Long queryGrantVersion(int userId, ResourceId databaseId) {
+        try {
+            return entityManager.get().createQuery("SELECT up.version " +
+                    "FROM UserPermission up " +
+                    "WHERE up.user.id=:userId " +
+                    "AND up.database.id=:databaseId", Long.class)
+                    .setParameter("userId", userId)
+                    .setParameter("databaseId", CuidAdapter.getLegacyIdFromCuid(databaseId))
+                    .getSingleResult();
+        } catch (NoResultException noGrant) {
+            // User has no grant, so return null
+            return null;
+        }
+    }
+
+    private Map<ResourceId,DatabaseGrant> loadFromCache(int userId, Map<ResourceId,Long> databaseGrantVersions) {
+        Map<String,ResourceId> fetchKeys = databaseGrantVersions.entrySet().stream()
+                .collect(Collectors.toMap(
+                        dbGrant -> memcacheKey(userId, dbGrant.getKey(), dbGrant.getValue()),
+                        Map.Entry::getKey));
+        Map<String,DatabaseGrant> loaded = loadFromMemcache(fetchKeys.keySet());
+        return loaded.entrySet().stream()
+                .collect(Collectors.toMap(
+                        cachedGrant -> fetchKeys.get(cachedGrant.getKey()),
+                        Map.Entry::getValue));
+    }
+
+    private Map<Integer,DatabaseGrant> loadFromCache(ResourceId databaseId, Map<Integer,Long> userGrantVersions) {
+        Map<String,Integer> fetchKeys = userGrantVersions.entrySet().stream()
+                .collect(Collectors.toMap(
+                        userGrant -> memcacheKey(userGrant.getKey(), databaseId, userGrant.getValue()),
+                        Map.Entry::getKey));
+        Map<String,DatabaseGrant> loaded = loadFromMemcache(fetchKeys.keySet());
+        return loaded.entrySet().stream()
+                .collect(Collectors.toMap(
+                        cachedGrant -> fetchKeys.get(cachedGrant.getKey()),
+                        Map.Entry::getValue));
+    }
+
+    private Map<String,DatabaseGrant> loadFromMemcache(Set<String> fetchKeys) {
+        LOGGER.info(() -> String.format("Fetching %d DatabaseGrant(s) from Memcache", fetchKeys.size()));
+        Map<String,DatabaseGrant> loaded = new HashMap<>();
+        try {
+            Map<String,Object> cached = memcacheService.getAll(fetchKeys);
+            loaded.putAll(cached.entrySet().stream()
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            cachedGrant -> deserialize((String) cachedGrant.getValue()))));
+        } catch (Exception ignorable) {
+            // Memcache load failed, but we can still retrieve from database
+            LOGGER.info(() -> String.format("Failed to fetch %d DatabaseGrant(s) from Memcache", fetchKeys.size()));
+        }
+        LOGGER.info(() -> String.format("Fetched %d/%d DatabaseGrant(s) from Memcache", loaded.size(), fetchKeys.size()));
+        return loaded;
+    }
+
+    private void cacheToMemcache(Collection<DatabaseGrant> grants) {
+        LOGGER.info(() -> String.format("Caching %d DatabaseGrant(s) to Memcache", grants.size()));
+        Map<String,String> toCache = grants.stream()
+                .collect(Collectors.toMap(
+                        grant -> memcacheKey(grant.getUserId(), grant.getDatabaseId(), grant.getVersion()),
+                        grant -> grant.toJson().toJson()));
+        try {
+            memcacheService.putAll(toCache);
+        } catch (Exception ignorable) {
+            // Caching failed, but is not terminal
+            LOGGER.severe(String.format("Caching failed for %d DatabaseGrant(s) to Memcache", grants.size()));
+        }
+    }
+
+    private static String memcacheKey(int userId, ResourceId databaseId, long grantVersion) {
+        return String.format("%d:%s:%d", userId, databaseId.asString(), grantVersion);
+    }
+
+    private Map<ResourceId,DatabaseGrant> loadFromDb(int userId, Set<ResourceId> databaseIds) {
+        Set<Integer> legacyIds = databaseIds.stream().map(CuidAdapter::getLegacyIdFromCuid).collect(Collectors.toSet());
         return entityManager.get().createQuery("SELECT up " +
                 "FROM UserPermission up " +
-                "JOIN FETCH up.database " +
-                "JOIN FETCH up.user " +
-                "WHERE up.database.id = :databaseId", UserPermission.class)
-                .setParameter("databaseId", CuidAdapter.getLegacyIdFromCuid(databaseId))
+                "WHERE up.user.id=:userId " +
+                "AND up.database.id IN :databaseIds", UserPermission.class)
+                .setParameter("userId", userId)
+                .setParameter("databaseIds", legacyIds)
                 .getResultList().stream()
                 .map(HibernateDatabaseGrantProvider::buildDatabaseGrant)
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(DatabaseGrant::getDatabaseId, grant -> grant));
+    }
+
+    private Map<Integer,DatabaseGrant> loadFromDb(ResourceId databaseId, Set<Integer> userIds) {
+        return entityManager.get().createQuery("SELECT up " +
+                "FROM UserPermission up " +
+                "WHERE up.user.id IN :userIds " +
+                "AND up.database.id=:databaseId", UserPermission.class)
+                .setParameter("userIds", userIds)
+                .setParameter("databaseId", databaseId)
+                .getResultList().stream()
+                .map(HibernateDatabaseGrantProvider::buildDatabaseGrant)
+                .collect(Collectors.toMap(DatabaseGrant::getUserId, grant -> grant));
+    }
+
+    private DatabaseGrant deserialize(String grant) {
+        return DatabaseGrant.fromJson(Json.parse(grant));
     }
 
     private static DatabaseGrant buildDatabaseGrant(@NotNull UserPermission userPermission) {

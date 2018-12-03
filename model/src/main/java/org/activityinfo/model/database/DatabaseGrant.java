@@ -34,7 +34,7 @@ public class DatabaseGrant implements JsonSerializable {
         return grants;
     }
 
-    public DatabaseGrant fromJson(JsonValue object) {
+    public static DatabaseGrant fromJson(JsonValue object) {
         DatabaseGrant databaseGrant = new DatabaseGrant();
         databaseGrant.userId = object.get("userId").asInt();
         databaseGrant.databaseId = ResourceId.valueOf(object.get("databaseId").asString());
