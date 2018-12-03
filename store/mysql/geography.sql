@@ -1,6 +1,11 @@
 
---- MySQL Script to populate fresh database with geographic reference data
+-- MySQL Script to populate fresh database with geographic reference data
 
+
+DELETE FROM adminentity;
+DELETE FROM locationtype;
+DELETE FROM adminlevel;
+DELETE FROM country;
 
 --
 -- Dumping data for table `country`

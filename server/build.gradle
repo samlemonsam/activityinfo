@@ -25,7 +25,7 @@ ext {
 appengine {
     deploy {
         project = environment.projectId
-        version = 'columns'
+        version = 'qa'
         promote = false
 
     }
