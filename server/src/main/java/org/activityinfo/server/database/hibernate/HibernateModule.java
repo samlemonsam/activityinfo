@@ -59,8 +59,8 @@ public class HibernateModule extends ServletModule {
         bind(FormStorageProvider.class).toProvider(HibernateCatalogProvider.class).in(HibernateSessionScoped.class);
         bind(MySqlStorageProvider.class).toProvider(HibernateCatalogProvider.class).in(HibernateSessionScoped.class);
 
-        bind(DatabaseMetaProvider.class).to(HibernateDatabaseMetaProvider.class).in(HibernateSessionScoped.class);
-        bind(DatabaseGrantProvider.class).to(HibernateDatabaseGrantProvider.class).in(HibernateSessionScoped.class);
+        bind(DatabaseMetaProvider.class).to(HibernateDatabaseMetaProvider.class);
+        bind(DatabaseGrantProvider.class).to(HibernateDatabaseGrantProvider.class);
 
         /*
          * Important: the CloudSqlFilter must be listed before
