@@ -16,10 +16,8 @@ ext {
 
         guava:              "com.google.guava:guava:${guavaVersion}",
         gson:               "com.google.code.gson:gson:2.2.4",
-        guice:              "com.google.inject:guice:3.0",
-        guiceServlet:       "com.google.inject.extensions:guice-servlet:3.0",
-        guiceMultibindings: "com.google.inject.extensions:guice-multibindings:3.0",
-            
+        guice:              "com.google.inject:guice:4.2.2",
+        guiceServlet:       "com.google.inject.extensions:guice-servlet:4.2.2",
         appengine: [
             all:            "com.google.appengine:appengine:${gaeVersion}",
             api:            "com.google.appengine:appengine-api-1.0-sdk:${gaeVersion}",
@@ -49,7 +47,6 @@ ext {
             dev:            "com.google.gwt:gwt-dev:${gwtVersion}",
             i18nServer:     'net.lightoze.gwt-i18n-server:gwt-i18n-server:0.22',
             leaflet:        'org.discotools.gwt.leaflet:gwtl-core:0.4.15',
-            guice:          "com.google.gwt.inject:gin:2.1.2",
             guava:          "com.google.guava:guava-gwt:${guavaVersion}",
             gson:           "gson-gwt:gson-gwt:2.1",
             jsinterop:      'com.google.jsinterop:jsinterop-annotations:1.0.1'

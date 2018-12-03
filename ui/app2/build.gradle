@@ -23,7 +23,9 @@ dependencies {
     compile libraries.gxt
     compile libraries.gwt.gson
 
-    compile libraries.gwt.guice
+
+    compile "com.google.gwt.inject:gin:2.1.2"
+
     compile libraries.gwt.gson
     compile libraries.gwt.leaflet
     compile libraries.gwt.guava
@@ -42,6 +44,14 @@ dependencies {
 
     gwtSdk libraries.gwt.dev
 
+}
+
+configurations.all {
+    resolutionStrategy {
+        // Use an older version of Guice for compiling this module
+        // As GIN is not compatible with Guice 4.0
+        force "com.google.inject:guice:3.0"
+    }
 }
 
 task compileApp(type: JavaExec) {
