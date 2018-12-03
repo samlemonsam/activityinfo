@@ -50,6 +50,7 @@ cat store/mysql/geography.sql >> /tmp/init.sql
 cat store/mysql/nullary-locations.sql >> /tmp/init.sql
 cat store/mysql/training-db-stub.sql >> /tmp/init.sql
 cat store/mysql/bound-location-types.sql >> /tmp/init.sql
+cat store/mysql/dev-user.sql >> /tmp/init.sql
 gzip -f /tmp/init.sql
 
 gsutil cp /tmp/init.sql.gz gs://staging.$PROJECT.appspot.com
