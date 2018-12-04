@@ -134,10 +134,6 @@ public class UserDatabaseMeta implements JsonSerializable {
         return new RecordLockSet(effective);
     }
 
-    public Resource getResource(ResourceId resourceId) {
-        return resources.get(resourceId);
-    }
-
     public String getVersion() {
         return version;
     }
