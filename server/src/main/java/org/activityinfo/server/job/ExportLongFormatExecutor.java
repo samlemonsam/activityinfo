@@ -69,12 +69,11 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
                                     StorageProvider storageProvider,
                                     DispatcherSync dispatcher,
                                     FormSource formSource,
-                                    Provider<EntityManager> entityManager,
-                                    BillingAccountOracle billingAccountOracle) {
+                                    DatabaseProvider databaseProvider) {
         this.authenticatedUser = authenticatedUser;
         this.dispatcher = dispatcher;
         this.formSource = formSource;
-        this.databaseProvider = new DatabaseProviderImpl(entityManager, billingAccountOracle);
+        this.databaseProvider = databaseProvider;
         this.pivotTableExporter = new ExportPivotTableExecutor(storageProvider, formSource);
     }
 
