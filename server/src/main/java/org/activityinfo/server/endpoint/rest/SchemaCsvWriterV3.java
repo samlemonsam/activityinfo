@@ -19,6 +19,7 @@
 package org.activityinfo.server.endpoint.rest;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.activityinfo.io.csv.CsvWriter;
 import org.activityinfo.legacy.shared.SchemaCsv;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;

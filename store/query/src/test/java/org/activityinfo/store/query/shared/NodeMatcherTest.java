@@ -20,7 +20,6 @@ package org.activityinfo.store.query.shared;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormClassProvider;
@@ -40,7 +39,6 @@ import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.hamcrest.Matchers;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.*;
@@ -54,12 +52,6 @@ public class NodeMatcherTest {
     private FormClass rootFormClass;
     private Map<ResourceId, FormClass> formClasses = Maps.newHashMap();
     private NodeMatcher symbolTable;
-
-    @BeforeClass
-    public static void setupI18N() {
-        LocaleProxy.initialize();
-    }
-
 
     @Test
     public void basicForm() {

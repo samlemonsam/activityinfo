@@ -114,7 +114,7 @@ public class TableToolBar extends ToolBar {
             return false;
         }
         FormMetadata rootForm = tree.get().getRootMetadata();
-        return rootForm.getPermissions().isCreateRecordAllowed();
+        return tree.get().getRootState() == FormTree.State.VALID && rootForm.getPermissions().isCreateRecordAllowed();
     }
 
     @Override

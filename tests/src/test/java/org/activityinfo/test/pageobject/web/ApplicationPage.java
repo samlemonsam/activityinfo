@@ -18,7 +18,6 @@
  */
 package org.activityinfo.test.pageobject.web;
 
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.test.pageobject.api.FluentElement;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -31,10 +30,6 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfEl
  * Interface to the single-pageobject application
  */
 public class ApplicationPage {
-    
-    static {
-        LocaleProxy.initialize();
-    }
 
     private final FluentElement page;
 

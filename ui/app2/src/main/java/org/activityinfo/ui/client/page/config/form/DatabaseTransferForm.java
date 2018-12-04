@@ -19,17 +19,21 @@
 package org.activityinfo.ui.client.page.config.form;
 
 import com.extjs.gxt.ui.client.Style;
-
-import com.extjs.gxt.ui.client.data.*;
+import com.extjs.gxt.ui.client.data.BasePagingLoader;
+import com.extjs.gxt.ui.client.data.PagingLoader;
+import com.extjs.gxt.ui.client.data.RpcProxy;
+import com.extjs.gxt.ui.client.data.SortInfo;
 import com.extjs.gxt.ui.client.event.ComponentEvent;
 import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.FieldEvent;
 import com.extjs.gxt.ui.client.store.ListStore;
-import com.extjs.gxt.ui.client.widget.*;
-import com.extjs.gxt.ui.client.widget.form.*;
+import com.extjs.gxt.ui.client.widget.Html;
+import com.extjs.gxt.ui.client.widget.ModelPropertyRenderer;
+import com.extjs.gxt.ui.client.widget.Text;
+import com.extjs.gxt.ui.client.widget.form.ComboBox;
+import com.extjs.gxt.ui.client.widget.form.FormPanel;
 import com.extjs.gxt.ui.client.widget.layout.FormLayout;
 import com.google.gwt.core.client.GWT;
-
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -37,7 +41,6 @@ import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.i18n.shared.UiConstants;
-
 import org.activityinfo.legacy.shared.command.GetUsers;
 import org.activityinfo.legacy.shared.command.result.UserResult;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
@@ -55,7 +58,6 @@ public class DatabaseTransferForm extends FormPanel {
     private UserDatabaseDTO database;
     private UserComboBox userField;
 
-    private Text addUserWarning;
     private Text userInfo;
 
     public DatabaseTransferForm(UserDatabaseDTO database, Dispatcher dispatcher) {
@@ -84,19 +86,14 @@ public class DatabaseTransferForm extends FormPanel {
 
         userField = new UserComboBox();
         userField.setName("user");
-        userField.setFieldLabel(constants.newDatabaseOwner());
-        userField.setDisplayField("name");
+        userField.setFieldLabel(constants.newDatabaseOwnerEmail());
+        userField.setDisplayField("email");
         userField.setAllowBlank(false);
         userField.setStore(store);
-        userField.setForceSelection(true);
+        userField.setForceSelection(false);
         userField.setItemRenderer(new MultilineRenderer<>(new UserNameEmailRenderer()));
         userField.addListener(Events.BeforeRender, rendering -> userField.doQuery(userField.getAllQuery(), true));
         this.add(userField);
-
-        addUserWarning = new Text(I18N.CONSTANTS.addUserBeforeTransferWarning());
-        addUserWarning.setVisible(false);
-        addUserWarning.setStyleAttribute("color", "red");
-        this.add(addUserWarning);
     }
 
     public class UserComboBox extends ComboBox<UserPermissionDTO> {
@@ -145,8 +142,12 @@ public class DatabaseTransferForm extends FormPanel {
         }
     }
 
-    public UserPermissionDTO getUser() {
-        return userField.getSelection().get(0);
+    public String getUser() {
+        if(userField.getSelection().isEmpty()) {
+            return userField.getRawValue();
+        } else {
+            return userField.getSelection().get(0).getEmail();
+        }
     }
 
     private class UserPermissionProxy extends RpcProxy<UserResult> {
@@ -166,12 +167,8 @@ public class DatabaseTransferForm extends FormPanel {
 
                 @Override
                 public void onSuccess(UserResult result) {
-                    if (result.getData().isEmpty()) {
-                        userField.disable();
-                        addUserWarning.setVisible(true);
-                    } else {
+                    if (!result.getData().isEmpty()) {
                         userField.enable();
-                        addUserWarning.setVisible(false);
                     }
                     callback.onSuccess(result);
                 }

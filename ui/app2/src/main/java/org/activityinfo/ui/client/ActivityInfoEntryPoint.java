@@ -28,6 +28,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 import org.activityinfo.legacy.shared.Log;
+import org.activityinfo.ui.client.billing.BillingSupervisor;
 import org.activityinfo.ui.client.component.importDialog.ImportPresenter;
 import org.activityinfo.ui.client.dispatch.state.SafeStateProvider;
 import org.activityinfo.ui.client.inject.AppInjector;
@@ -112,6 +113,12 @@ public class ActivityInfoEntryPoint implements EntryPoint {
         Log.info("Application: everyone plugged, firing Init event");
 
         injector.getEventBus().fireEvent(AppEvents.INIT);
+
+        try {
+            new BillingSupervisor().run();
+        } catch (Throwable e){
+            Log.error("Billing warning failed", e);
+        }
 
     }
 

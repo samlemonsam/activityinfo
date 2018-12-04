@@ -65,7 +65,8 @@ public class RootResource {
     private DatabaseProvider databaseProvider;
 
     private ApiBackend backend;
-    
+    private final BillingAccountOracle billingOracle;
+
     @Inject
     public RootResource(Provider<EntityManager> entityManager,
                         Provider<FormStorageProvider> catalog,
@@ -75,7 +76,8 @@ public class RootResource {
                         ServerSideAuthProvider authProvider,
                         ApiBackend backend,
                         MailSender mailSender,
-                        DatabaseProvider databaseProvider) {
+                        DatabaseProvider databaseProvider,
+                        BillingAccountOracle billingOracle) {
         super();
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
@@ -86,6 +88,7 @@ public class RootResource {
         this.backend = backend;
         this.mailSender = mailSender;
         this.databaseProvider = databaseProvider;
+        this.billingOracle = billingOracle;
     }
 
     @Path("/adminEntity/{id}")

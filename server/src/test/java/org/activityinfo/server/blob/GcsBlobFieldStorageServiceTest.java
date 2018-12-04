@@ -28,7 +28,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.util.Closeable;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.fixtures.TestHibernateModule;
@@ -58,7 +57,6 @@ import org.activityinfo.ui.client.component.form.field.attachment.MimeTypeUtil;
 import org.activityinfo.ui.client.dispatch.ResourceLocatorAdaptor;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -109,10 +107,6 @@ public class GcsBlobFieldStorageServiceTest {
     private ResourceId resourceId = CuidAdapter.activityFormClass(1);
     private Closeable ofy;
 
-    @BeforeClass
-    public static void setupI18N() {
-        LocaleProxy.initialize();
-    }
 
     @Before
     public final void uploadBlob() throws IOException {

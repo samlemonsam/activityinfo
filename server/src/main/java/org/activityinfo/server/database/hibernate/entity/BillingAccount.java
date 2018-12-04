@@ -17,6 +17,8 @@ public class BillingAccount {
     private Date startTime;
     private Date endTime;
 
+    private Date expectedPaymentDate;
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(unique = true, nullable = false)
@@ -58,5 +60,13 @@ public class BillingAccount {
 
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
+    }
+
+    public Date getExpectedPaymentDate() {
+        return expectedPaymentDate;
+    }
+
+    public void setExpectedPaymentDate(Date expectedPaymentDate) {
+        this.expectedPaymentDate = expectedPaymentDate;
     }
 }

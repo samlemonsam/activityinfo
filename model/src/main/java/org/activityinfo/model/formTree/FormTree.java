@@ -50,7 +50,8 @@ public class FormTree implements FormClassProvider, FormMetadataProvider {
     public enum State {
         VALID,
         DELETED,
-        FORBIDDEN
+        FORBIDDEN,
+        SUSPENDED
     }
 
     public class Node {
@@ -448,7 +449,11 @@ public class FormTree implements FormClassProvider, FormMetadataProvider {
     }
 
     public Optional<FormClass> getFormClassIfPresent(ResourceId formId) {
-        return Optional.fromNullable(getFormMetadata(formId).getSchema());
+        if (!getFormMetadata(formId).isAccessible()) {
+            return Optional.absent();
+        } else {
+            return Optional.fromNullable(getFormMetadata(formId).getSchema());
+        }
     }
 
     public Node getNodeByPath(FieldPath path) {

@@ -22,6 +22,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.container.CenterLayoutContainer;
+import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.model.formTree.FormTree;
 
 /**
  * Widget that fills an area with the message that the user
@@ -32,9 +34,18 @@ public class ForbiddenWidget implements IsWidget {
 
     private final CenterLayoutContainer container;
 
-    public ForbiddenWidget() {
+    public ForbiddenWidget(FormTree.State rootFormState) {
         container = new CenterLayoutContainer();
-        container.add(new Label("You do not have permission to view this form"));
+        switch (rootFormState) {
+            case FORBIDDEN:
+                container.add(new Label("You do not have permission to view this form"));
+                break;
+            case SUSPENDED:
+                container.add(new Label(I18N.CONSTANTS.trialAccountExpired()));
+                container.add(new Label(I18N.CONSTANTS.trialAccountExpiredMessage()));
+                break;
+
+        }
     }
 
     @Override

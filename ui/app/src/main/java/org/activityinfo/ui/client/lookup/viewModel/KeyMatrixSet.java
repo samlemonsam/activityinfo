@@ -78,6 +78,9 @@ public class KeyMatrixSet {
         this.lookupKeySet = lookupKeySet;
 
         for (ResourceId referencedFormId : referenceType.getRange()) {
+            if (!lookupKeySet.hasLeafKey(referencedFormId)) {
+                continue;
+            }
             LookupKey leafKey = lookupKeySet.getLeafKey(referencedFormId);
             KeyMatrix keyMatrix = new KeyMatrix(formSource, lookupKeySet, leafKey, filter);
             map.put(referencedFormId, keyMatrix);

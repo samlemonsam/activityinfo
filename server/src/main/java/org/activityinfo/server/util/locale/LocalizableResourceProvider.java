@@ -21,7 +21,6 @@ package org.activityinfo.server.util.locale;
 import com.google.gwt.i18n.client.LocalizableResource;
 import com.google.inject.Provider;
 import net.lightoze.gwt.i18n.client.LocaleFactory;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 
 
 public class LocalizableResourceProvider<T extends LocalizableResource> implements Provider<T> {
@@ -31,7 +30,6 @@ public class LocalizableResourceProvider<T extends LocalizableResource> implemen
     public LocalizableResourceProvider(Class<T> clazz) {
         super();
         this.clazz = clazz;
-        LocaleProxy.initialize();
     }
 
     @Override

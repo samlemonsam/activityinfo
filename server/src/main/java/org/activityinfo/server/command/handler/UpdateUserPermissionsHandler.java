@@ -20,6 +20,7 @@ package org.activityinfo.server.command.handler;
 
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.UpdateUserPermissions;
+import org.activityinfo.legacy.shared.command.result.BillingException;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.UserExistsException;
 import org.activityinfo.legacy.shared.exception.CommandException;
@@ -33,9 +34,11 @@ import org.activityinfo.server.database.hibernate.dao.*;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
+import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.server.mail.InvitationMessage;
 import org.activityinfo.server.mail.MailSender;
 import org.activityinfo.server.mail.Message;
+import org.activityinfo.store.query.UsageTracker;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -53,6 +56,7 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
     private final UserDatabaseDAO databaseDAO;
     private final PartnerDAO partnerDAO;
     private final UserPermissionDAO permDAO;
+    private final BillingAccountOracle billingAccountOracle;
 
     private final MailSender mailSender;
 
@@ -64,10 +68,11 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
                                         PartnerDAO partnerDAO,
                                         UserDAO userDAO,
                                         UserPermissionDAO permDAO,
-                                        MailSender mailSender) {
+                                        BillingAccountOracle billingAccountOracle, MailSender mailSender) {
         this.userDAO = userDAO;
         this.partnerDAO = partnerDAO;
         this.permDAO = permDAO;
+        this.billingAccountOracle = billingAccountOracle;
         this.mailSender = mailSender;
         this.databaseDAO = databaseDAO;
     }
@@ -103,6 +108,10 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
             user = userDAO.findUserByEmail(dto.getEmail());
         }
 
+        if(!billingAccountOracle.isAllowAddUser(user, database)) {
+            throw new BillingException(billingAccountOracle.getStatusForDatabase(database.getId()));
+        }
+
         if (user == null) {
             user = createNewUser(executingUser, dto);
         }
@@ -115,13 +124,18 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
             perm = new UserPermission(database, user);
             doUpdate(perm, dto, isOwner, executingUserPermission);
             permDAO.persist(perm);
+
+            UsageTracker.track(executingUser.getId(), "invite_user", database.getResourceId());
+
         } else {
             // If the user is intending to add a new user, verify that this user doesn't already exist
             if(cmd.isNewUser() && perm.isAllowView()) {
                 throw new UserExistsException();
             }
             doUpdate(perm, dto, isOwner, executingUserPermission);
+            UsageTracker.track(executingUser.getId(), "update_permissions", database.getResourceId());
         }
+
 
         return null;
     }

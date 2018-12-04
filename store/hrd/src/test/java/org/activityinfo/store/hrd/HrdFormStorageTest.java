@@ -22,7 +22,6 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.util.Closeable;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
@@ -32,7 +31,10 @@ import org.activityinfo.store.spi.TypedRecordUpdate;
 import org.activityinfo.store.testing.IntakeForm;
 import org.activityinfo.store.testing.RecordGenerator;
 import org.activityinfo.store.testing.Survey;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import static org.activityinfo.store.testing.ColumnSetMatchers.hasValues;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -51,11 +53,6 @@ public class HrdFormStorageTest {
     public void setUp() {
         helper.setUp();
         objectifyCloseable = ObjectifyService.begin();
-    }
-    
-    @BeforeClass
-    public static void setUpLocale() {
-        LocaleProxy.initialize();
     }
 
     @After

@@ -18,11 +18,11 @@
  */
 package org.activityinfo.ui.client.widget;
 
+import com.arcbees.chosen.client.ChosenOptions;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style;
-import com.arcbees.chosen.client.ChosenOptions;
 
 /**
  * @author yuriyz on 12/30/2015.

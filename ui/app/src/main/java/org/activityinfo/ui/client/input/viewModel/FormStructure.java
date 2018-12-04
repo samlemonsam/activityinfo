@@ -18,6 +18,7 @@
  */
 package org.activityinfo.ui.client.input.viewModel;
 
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.type.RecordRef;
@@ -30,10 +31,12 @@ import org.activityinfo.ui.client.store.FormStore;
  *
  */
 public class FormStructure {
+    private final UserDatabaseMeta database;
     private FormTree formTree;
     private Maybe<RecordTree> existingRecord;
 
-    public FormStructure(FormTree formTree, Maybe<RecordTree> existingRecord) {
+    public FormStructure(UserDatabaseMeta database, FormTree formTree, Maybe<RecordTree> existingRecord) {
+        this.database = database;
         this.formTree = formTree;
         this.existingRecord = existingRecord;
     }
@@ -46,10 +49,15 @@ public class FormStructure {
         return existingRecord;
     }
 
+    public UserDatabaseMeta getDatabase() {
+        return database;
+    }
+
     public static Observable<FormStructure> fetch(FormStore store, RecordRef ref) {
         Observable<FormTree> formTree = store.getFormTree(ref.getFormId());
         Observable<Maybe<RecordTree>> existingRecord = store.getRecordTree(ref);
+        Observable<UserDatabaseMeta> database = formTree.join(form -> store.getDatabase(form.getRootFormClass().getDatabaseId()));
 
-        return Observable.transform(formTree, existingRecord, FormStructure::new);
+        return Observable.transform(database, formTree, existingRecord, FormStructure::new);
     }
 }

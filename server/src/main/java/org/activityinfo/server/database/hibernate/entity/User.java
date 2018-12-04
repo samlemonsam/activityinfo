@@ -52,6 +52,7 @@ public class User implements java.io.Serializable {
     private String features;
     private boolean bounced;
     private BillingAccount billingAccount;
+    private Date trialEndDate;
 
     public User() {
         dateCreated = new Date();
@@ -258,6 +259,15 @@ public class User implements java.io.Serializable {
         this.billingAccount = billingAccount;
     }
 
+    @Temporal(TemporalType.DATE)
+    public Date getTrialEndDate() {
+        return trialEndDate;
+    }
+
+    public void setTrialEndDate(Date trialEndDate) {
+        this.trialEndDate = trialEndDate;
+    }
+
     @Override
     public int hashCode() {
         return getEmail().hashCode();
@@ -275,4 +285,5 @@ public class User implements java.io.Serializable {
     public AuthenticatedUser asAuthenticatedUser() {
         return new AuthenticatedUser("XYZ", getId(), getEmail(), getLocale());
     }
+
 }

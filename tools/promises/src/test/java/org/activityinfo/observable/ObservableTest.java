@@ -233,7 +233,23 @@ public class ObservableTest {
 
         remoteValue1.updateValue("name1");
         assertThat(result.get(), equalTo("name1"));
-        
-        
     }
+
+
+    @Test
+    public void reentrantConnections() {
+        StatefulValue<Integer> x = new StatefulValue<>(3);
+        Observable<Integer> z = x.transform(x_ -> x_ * x_);
+
+        z.subscribe(zo1 -> {
+            System.out.println("zo1 change");
+
+            z.subscribe(zo2 -> {
+                System.out.println("zo2 change");
+            });
+        });
+
+    }
+
+
 }

@@ -101,6 +101,14 @@ public class DataEntryPlace extends AbstractPagingGridPageState {
         return Arrays.asList(DataEntryPage.PAGE_ID);
     }
 
+    public boolean isSingleActivity() {
+        return filter.getRestrictions(DimensionType.Activity).size() == 1;
+    }
+
+    public boolean isSingleDatabase() {
+        return filter.getRestrictions(DimensionType.Database).size() == 1;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

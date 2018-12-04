@@ -19,7 +19,6 @@
 package org.activityinfo.server.report.renderer.itext;
 
 import com.google.common.collect.Lists;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.model.BaseMap;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
@@ -41,7 +40,6 @@ import org.activityinfo.server.report.renderer.Renderer;
 import org.activityinfo.server.report.renderer.excel.ExcelReportRenderer;
 import org.activityinfo.server.report.renderer.image.ImageMapRenderer;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -55,11 +53,6 @@ import java.util.List;
 public class ItextReportRendererTest {
 
     private StorageProviderStub storageProvider;
-
-    @BeforeClass
-    public static void initLocale() {
-        LocaleProxy.initialize();
-    }
 
     private Comparator<PivotTableData.Axis> comparator = new Comparator<PivotTableData.Axis>() {
 
@@ -75,11 +68,6 @@ public class ItextReportRendererTest {
         boolean created = outputDir.mkdirs();
         
         storageProvider = new StorageProviderStub(outputDir.getAbsolutePath());
-    }
-
-    @Before
-    public void setupLocale() {
-        LocaleProxy.initialize();
     }
 
     @Test

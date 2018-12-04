@@ -18,7 +18,6 @@
  */
 package org.activityinfo.ui.client.widget.coord;
 
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.io.match.coord.CoordinateAxis;
 import org.activityinfo.io.match.coord.CoordinateFormatException;
@@ -36,7 +35,6 @@ public class CoordinateParserTest {
     @SuppressWarnings("NonJREEmulationClassesInClientCode")
     @Before
     public void before() {
-        LocaleProxy.initialize();
         ThreadLocalLocaleProvider.pushLocale(java.util.Locale.ENGLISH);
     }
 

@@ -19,7 +19,6 @@
 package org.activityinfo.ui.client.store;
 
 import com.google.common.collect.Iterables;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.formTree.LookupKeySet;
 import org.activityinfo.model.formTree.RecordTree;
@@ -33,7 +32,6 @@ import org.activityinfo.store.testing.BioDataForm;
 import org.activityinfo.store.testing.IncidentForm;
 import org.activityinfo.store.testing.ReferralSubForm;
 import org.activityinfo.store.testing.Survey;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -44,10 +42,6 @@ public class RecordTreeLoaderTest {
 
     private TestSetup setup = new TestSetup();
 
-    @Before
-    public void setup() {
-        LocaleProxy.initialize();
-    }
 
     @Test
     public void simpleSurvey() {

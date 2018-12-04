@@ -18,6 +18,7 @@
  */
 package org.activityinfo.ui.client.input.viewModel;
 
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.SubFormKind;
@@ -53,6 +54,7 @@ class SubFormViewModelBuilder {
     private ResourceId placeholderRecordId;
 
     SubFormViewModelBuilder(FormStore formStore,
+                            UserDatabaseMeta database,
                             FormTree parentTree,
                             FormTree.Node node,
                             ActivePeriodMemory memory) {
@@ -61,7 +63,7 @@ class SubFormViewModelBuilder {
         this.subTree = parentTree.subTree(subFormId);
         this.subFormKind = subTree.getRootFormClass().getSubFormKind();
         this.placeholderRecordId = ResourceId.generateId();
-        this.formBuilder = new FormInputViewModelBuilder(formStore, subTree, memory);
+        this.formBuilder = new FormInputViewModelBuilder(formStore, database, subTree, memory);
         this.keyField = findKeyField(subTree.getRootFormClass());
         this.memory = memory;
 

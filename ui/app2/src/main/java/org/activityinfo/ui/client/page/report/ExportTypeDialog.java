@@ -1,6 +1,5 @@
 package org.activityinfo.ui.client.page.report;
 
-
 import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.SelectionListener;
@@ -9,30 +8,29 @@ import com.extjs.gxt.ui.client.widget.form.Radio;
 import com.extjs.gxt.ui.client.widget.form.RadioGroup;
 import com.extjs.gxt.ui.client.widget.layout.HBoxLayout;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import org.activityinfo.i18n.shared.I18N;
 
 import java.util.function.Function;
-import java.util.logging.Logger;
 
-public class ExportTypeDialog extends Dialog {
+/**
+ * Allows users to select between multiple options for export
+ */
+public abstract class ExportTypeDialog extends Dialog {
 
-    private static final Logger LOGGER = Logger.getLogger(ExportTypeDialog.class.getName());
+    private static final int SPACING = 5;
 
-    public static final String WIDE_FORMAT = "wideFormat";
-    public static final String LONG_FORMAT = "longFormat";
+    private final RadioGroup optionGroup = new RadioGroup();
+    private final HorizontalPanel optionsPanel = new HorizontalPanel();
 
-    private final Radio wideFormat = new Radio();
-    private final Radio longFormat = new Radio();
-    private final RadioGroup formatGroup = new RadioGroup();
     private Function<String,Void> callback;
 
-    public ExportTypeDialog(Function<String, Void> callback) {
-        super();
+    ExportTypeDialog(Function<String, Void> callback) {
+        this();
         this.callback = callback;
     }
 
-    public ExportTypeDialog() {
+    ExportTypeDialog() {
+        super();
         initializeComponent();
         addButtons();
         addRadios();
@@ -52,6 +50,7 @@ public class ExportTypeDialog extends Dialog {
         layout.setHBoxLayoutAlign(HBoxLayout.HBoxLayoutAlign.MIDDLE);
         setLayout(layout);
         setClosable(true);
+        optionsPanel.setSpacing(SPACING);
     }
 
     private void addButtons() {
@@ -61,7 +60,7 @@ public class ExportTypeDialog extends Dialog {
         getButtonById(Dialog.OK).addSelectionListener(new SelectionListener<ButtonEvent>() {
             @Override
             public void componentSelected(ButtonEvent buttonEvent) {
-                String optionSelected = formatGroup.getValue().getValueAttribute();
+                String optionSelected = optionGroup.getValue().getValueAttribute();
                 hide();
                 if (callback != null) {
                     callback.apply(optionSelected);
@@ -77,30 +76,24 @@ public class ExportTypeDialog extends Dialog {
         });
     }
 
-    private void addRadios() {
-        wideFormat.setValueAttribute(WIDE_FORMAT);
-        wideFormat.setValue(true);
+    abstract void addRadios();
 
-        longFormat.setValueAttribute(LONG_FORMAT);
-        longFormat.setValue(false);
+    abstract void addOptionPanels();
 
-        formatGroup.add(wideFormat);
-        formatGroup.add(longFormat);
+    void addRadiosToGroup(Radio... radios) {
+        for (Radio radio : radios) {
+            optionGroup.add(radio);
+        }
     }
 
-    private void addOptionPanels() {
-        HorizontalPanel panel = new HorizontalPanel();
-        panel.setSpacing(5);
-        panel.add(createOptionPanel(wideFormat,
-                I18N.CONSTANTS.wideFormat(),
-                SafeHtmlUtils.fromTrustedString(I18N.CONSTANTS.wideFormatDescription())));
-        panel.add(createOptionPanel(longFormat,
-                I18N.CONSTANTS.longFormat(),
-                SafeHtmlUtils.fromTrustedString(I18N.CONSTANTS.longFormatDescription())));
-        add(panel);
+    Radio createRadio(String valueAttribute, boolean initialValue) {
+        Radio radio = new Radio();
+        radio.setValueAttribute(valueAttribute);
+        radio.setValue(initialValue);
+        return radio;
     }
 
-    private VerticalPanel createOptionPanel(Radio radio, String radioLabel, SafeHtml optionDescription) {
+    void createOptionPanel(Radio radio, String radioLabel, SafeHtml optionDescription) {
         VerticalPanel optionPanel = new VerticalPanel();
         optionPanel.setStyleAttribute("background-color", "white");
         optionPanel.setBorders(true);
@@ -118,7 +111,12 @@ public class ExportTypeDialog extends Dialog {
 
         optionPanel.add(selectOptionPanel);
         optionPanel.add(new Html(optionDescription));
-        return optionPanel;
+        optionsPanel.add(optionPanel);
     }
 
+    @Override
+    public void show() {
+        add(optionsPanel);
+        super.show();
+    }
 }

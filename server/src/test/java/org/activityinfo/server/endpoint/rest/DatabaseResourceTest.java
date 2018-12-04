@@ -32,10 +32,9 @@ import org.junit.runner.RunWith;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
 import java.net.URISyntaxException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(InjectionSupport.class)
 @Modules(MailSenderStubModule.class)
@@ -70,6 +69,9 @@ public class DatabaseResourceTest extends CommandTestCase {
 
     @Inject
     private DatabaseProvider databaseProvider;
+
+    @Inject
+    private BillingAccountOracle billingOracle;
 
     private UriInfo uri;
 

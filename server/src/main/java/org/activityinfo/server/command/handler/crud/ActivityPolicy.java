@@ -34,6 +34,7 @@ import org.activityinfo.server.command.handler.json.JsonHelper;
 import org.activityinfo.server.database.hibernate.dao.ActivityDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
@@ -54,7 +55,10 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
     private final UserDatabaseDAO databaseDAO;
 
     @Inject
-    public ActivityPolicy(EntityManager em, DatabaseProvider databaseProvider, ActivityDAO activityDAO, UserDatabaseDAO databaseDAO) {
+    public ActivityPolicy(EntityManager em,
+                          DatabaseProvider databaseProvider,
+                          ActivityDAO activityDAO,
+                          UserDatabaseDAO databaseDAO) {
         this.em = em;
         this.databaseProvider = databaseProvider;
         this.activityDAO = activityDAO;
@@ -82,6 +86,8 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         applyProperties(activity, properties);
 
         activityDAO.persist(activity);
+
+        UsageTracker.track(user.getId(), "create_activity", database.getResourceId());
 
         return activity.getId();
     }
@@ -128,6 +134,9 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         assertEditFormRights(activity.getFormId(), databaseMeta);
 
         activity.incrementSchemaVersion();
+
+        UsageTracker.track(user.getId(), "update_activity", activity.getDatabase().getResourceId(), activity.getResourceId());
+
 
         applyProperties(activity, changes);
     }

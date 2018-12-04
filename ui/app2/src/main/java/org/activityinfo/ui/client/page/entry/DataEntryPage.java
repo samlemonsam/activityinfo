@@ -19,7 +19,10 @@
 package org.activityinfo.ui.client.page.entry;
 
 import com.extjs.gxt.ui.client.Style.LayoutRegion;
-import com.extjs.gxt.ui.client.event.*;
+import com.extjs.gxt.ui.client.event.BaseEvent;
+import com.extjs.gxt.ui.client.event.Events;
+import com.extjs.gxt.ui.client.event.SelectionChangedEvent;
+import com.extjs.gxt.ui.client.event.SelectionChangedListener;
 import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.widget.*;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
@@ -36,7 +39,9 @@ import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.job.ExportActivityFormJob;
 import org.activityinfo.model.job.ExportLongFormatJob;
+import org.activityinfo.model.job.ExportSitesJob;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.ClientContext;
@@ -55,15 +60,15 @@ import org.activityinfo.ui.client.page.common.toolbar.ActionListener;
 import org.activityinfo.ui.client.page.common.toolbar.ActionToolBar;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
 import org.activityinfo.ui.client.page.config.design.ExportJobTask;
-import org.activityinfo.ui.client.page.entry.column.DefaultColumnModelProvider;
+import org.activityinfo.ui.client.page.entry.column.GridLayout;
 import org.activityinfo.ui.client.page.entry.form.PrintDataEntryForm;
 import org.activityinfo.ui.client.page.entry.form.SiteDialogLauncher;
 import org.activityinfo.ui.client.page.entry.grouping.GroupingComboBox;
 import org.activityinfo.ui.client.page.entry.place.DataEntryPlace;
 import org.activityinfo.ui.client.page.entry.sitehistory.SiteHistoryTab;
+import org.activityinfo.ui.client.page.report.ActivityExportTypeDialog;
 import org.activityinfo.ui.client.page.report.ExportDialog;
-import org.activityinfo.ui.client.page.report.ExportSitesTask;
-import org.activityinfo.ui.client.page.report.ExportTypeDialog;
+import org.activityinfo.ui.client.page.report.DatabaseExportTypeDialog;
 import org.activityinfo.ui.client.page.resource.ResourcePage;
 import org.activityinfo.ui.client.page.resource.ResourcePlace;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
@@ -135,7 +140,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
     }
 
     private void addCenter() {
-        gridPanel = new SiteGridPanel(dispatcher, new DefaultColumnModelProvider(dispatcher));
+        gridPanel = new SiteGridPanel(dispatcher);
         gridPanel.setTopComponent(createToolBar());
 
         LayoutContainer center = new LayoutContainer();
@@ -363,63 +368,37 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
     private void doNavigate() {
         Filter filter = currentPlace.getFilter();
 
-        gridPanel.load(currentPlace.getGrouping(), filter);
-        groupingComboBox.setFilter(filter);
-        filterPane.getSet().applyBaseFilter(filter);
-        tabPanel.enable();
+        // Disable while loading
+        toolBar.disable();
+        tabPanel.disable();
 
-        // currently the print form only does one activity
-        Set<Integer> activities = filter.getRestrictions(DimensionType.Activity);
-        toolBar.enable();
-        toolBar.setActionEnabled(UIActions.PRINT, activities.size() == 1);
-        toolBar.setActionEnabled(UIActions.IMPORT, activities.size() == 1);
-
-        // adding is also only enabled for one activity, but we have to
-        // lookup to see whether it possible for this activity
+        // Enable some buttons based on navigation
+        toolBar.setActionEnabled(UIActions.PRINT, currentPlace.isSingleActivity());
+        toolBar.setActionEnabled(UIActions.IMPORT, false);
         toolBar.setActionEnabled(UIActions.ADD, false);
 
-        if (activities.size() == 1) {
-            maybeShowTableViewLinkPanel(activities.iterator().next());
-        } 
-        onNoSelection();
-    }
+        final DataEntryPlace place = currentPlace;
 
-    private void maybeShowTableViewLinkPanel(final Integer activityId) {
-        dispatcher.execute(new GetActivityForm(activityId), new AsyncCallback<ActivityFormDTO>() {
-
+        gridPanel.load(place.getGrouping(), filter, new AsyncCallback<GridLayout>() {
             @Override
-            public void onFailure(Throwable throwable) {
-                // sigh, ignore.
-                // will try again when the user navigates
+            public void onFailure(Throwable caught) {
             }
 
             @Override
-            public void onSuccess(ActivityFormDTO form) {
-                if (showTableView(form)) {
-                    toolBar.disable();
-                    // SiteGridPanel holds TableViewLinkPanel
-                    tabPanel.disable();
-                } else {
-                    enableToolbarButtons(form);
-                    tabPanel.enable();
+            public void onSuccess(GridLayout layout) {
+                if (place.equals(currentPlace)) {
+                    if(layout.isVisibleClassic()) {
+                        toolBar.enable();
+                        tabPanel.enable();
+                        filterPane.getSet().applyBaseFilter(currentPlace.getFilter());
+                        if(layout.isSingleClassicActivity()) {
+                            enableToolbarButtons(layout.getActivity());
+                        }
+                    }
                 }
             }
         });
-    }
-
-    private boolean showTableView(ActivityFormDTO form) {
-        // make sure we haven't navigated away by the time the request comes back
-        Optional<Integer> currentActivityId = getCurrentActivityId();
-        if(!currentActivityId.isPresent() || !Objects.equals(currentActivityId.get(), form.getId())) {
-            return false;
-        }
-        if(form.getReportingFrequency() != ActivityFormDTO.REPORT_ONCE) {
-            return false;
-        }
-        if(form.getClassicView()) {
-            return false;
-        }
-        return true;
+        onNoSelection();
     }
 
     private void enableToolbarButtons(ActivityFormDTO activity) {
@@ -427,6 +406,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         boolean isAllowed = activity.isEditAllowed();
         toolBar.setActionEnabled(UIActions.ADD, isAllowed);
         toolBar.setActionEnabled(UIActions.IMPORT, isAllowed);
+        toolBar.setActionEnabled(UIActions.PRINT, true);
     }
 
     private void updateEditedSelection(final SiteDTO site) {
@@ -484,19 +464,36 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     private void onExport(Filter filter) {
         if (filter.isDimensionRestrictedToSingleCategory(DimensionType.Database)) {
-            ExportTypeDialog dialog = new ExportTypeDialog();
-            dialog.setCallback(selection -> {
-                if (ExportTypeDialog.LONG_FORMAT.equals(selection)) {
-                    exportLongFormat(filter);
-                } else if (ExportTypeDialog.WIDE_FORMAT.equals(selection)) {
-                    exportSites(filter);
-                }
-                return null;
-            });
-            dialog.show();
+            databaseExportDialog(filter);
         } else {
-            exportSites(filter);
+            activityExportDialog(filter);
         }
+    }
+
+    private void databaseExportDialog(Filter filter) {
+        DatabaseExportTypeDialog dialog = new DatabaseExportTypeDialog();
+        dialog.setCallback(selection -> {
+            if (DatabaseExportTypeDialog.LONG_FORMAT.equals(selection)) {
+                exportLongFormat(filter);
+            } else if (DatabaseExportTypeDialog.WIDE_FORMAT.equals(selection)) {
+                exportSites(filter);
+            }
+            return null;
+        });
+        dialog.show();
+    }
+
+    private void activityExportDialog(Filter filter) {
+        ActivityExportTypeDialog dialog = new ActivityExportTypeDialog();
+        dialog.setCallback(selection -> {
+            if (ActivityExportTypeDialog.FORM_STRUCTURE.equals(selection)) {
+                exportSitesAsForm(filter);
+            } else if (ActivityExportTypeDialog.CLASSIC_STRUCTURE.equals(selection)) {
+                exportSites(filter);
+            }
+            return null;
+        });
+        dialog.show();
     }
 
     private void exportLongFormat(Filter filter) {
@@ -507,7 +504,14 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     private void exportSites(Filter filter) {
         ExportDialog dialog = new ExportDialog();
-        dialog.start(new ExportSitesTask(dispatcher, filter));
+        ExportSitesJob job = new ExportSitesJob(FilterUrlSerializer.toUrlFragment(filter));
+        dialog.start(new ExportJobTask(client, job));
+    }
+
+    private void exportSitesAsForm(Filter filter) {
+        ExportDialog dialog = new ExportDialog();
+        ExportActivityFormJob job = new ExportActivityFormJob(FilterUrlSerializer.toUrlFragment(filter));
+        dialog.start(new ExportJobTask(client, job));
     }
 
     private void editSite(SiteDTO site) {

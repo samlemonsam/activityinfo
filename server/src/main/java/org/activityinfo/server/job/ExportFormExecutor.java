@@ -18,12 +18,16 @@
  */
 package org.activityinfo.server.job;
 
+import com.google.common.net.UrlEscapers;
 import com.google.inject.Inject;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.ExportViewModel;
 import org.activityinfo.analysis.table.TableViewModel;
+import org.activityinfo.io.csv.CsvTableWriter;
 import org.activityinfo.io.xls.XlsTableWriter;
 import org.activityinfo.model.analysis.TableModel;
+import org.activityinfo.model.analysis.table.ExportFormat;
+import org.activityinfo.model.analysis.table.UnsupportedExportFormatException;
 import org.activityinfo.model.job.ExportFormJob;
 import org.activityinfo.model.job.ExportResult;
 import org.activityinfo.model.query.ColumnSet;
@@ -33,6 +37,9 @@ import org.activityinfo.store.query.shared.FormSource;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResult> {
 
@@ -50,17 +57,30 @@ public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResu
     public ExportResult execute(ExportFormJob descriptor) throws IOException {
 
         TableModel tableModel = descriptor.getTableModel();
-
-        GeneratedResource export = storageProvider.create(XlsTableWriter.EXCEL_MIME_TYPE, "Export.xls");
+        ExportFormat format = descriptor.getFormat();
 
         TableViewModel viewModel = new TableViewModel(formSource, tableModel);
-
         EffectiveTableModel effectiveTableModel = viewModel.getEffectiveTable().waitFor();
-        ColumnSet columnSet = effectiveTableModel.getColumnSet().waitFor();
 
-        if (ExportViewModel.columnLimitExceeded(effectiveTableModel)) {
-            throw new IOException("Current column length " + ExportViewModel.exportedColumnSize(effectiveTableModel) + " exceeds XLS Column Limitation of " + ExportViewModel.XLS_COLUMN_LIMIT);
+        if (ExportViewModel.columnLimitExceeded(effectiveTableModel, descriptor.getFormat())) {
+            throw new IOException("Current column length " + ExportViewModel.exportedColumnSize(effectiveTableModel)
+                    + " exceeds " + format.name() + " Column Limitation of " + format.getColumnLimit());
         }
+
+        switch (format) {
+            case CSV:
+                return csvExport(effectiveTableModel);
+            case XLS:
+                return xlsExport(effectiveTableModel);
+            default:
+                throw new UnsupportedExportFormatException(format.name());
+        }
+    }
+
+    private ExportResult xlsExport(EffectiveTableModel effectiveTableModel) throws IOException {
+        ColumnSet columnSet = effectiveTableModel.getColumnSet().waitFor();
+        String fileName = fileName(effectiveTableModel.getFormLabel(), ".xls");
+        GeneratedResource export = storageProvider.create(XlsTableWriter.EXCEL_MIME_TYPE, fileName);
 
         XlsTableWriter writer = new XlsTableWriter();
         writer.addSheet(effectiveTableModel, columnSet);
@@ -71,4 +91,23 @@ public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResu
 
         return new ExportResult(export.getDownloadUri());
     }
+
+    private ExportResult csvExport(EffectiveTableModel effectiveTableModel) throws IOException {
+        ColumnSet columnSet = effectiveTableModel.getColumnSet().waitFor();
+        String fileName = fileName(effectiveTableModel.getFormLabel(), ".csv");
+        GeneratedResource export = storageProvider.create(CsvTableWriter.CSV_MIME_TYPE, fileName);
+
+        try(CsvTableWriter writer = new CsvTableWriter(new OutputStreamWriter(export.openOutputStream(), "UTF-8"))) {
+            writer.writeTable(effectiveTableModel, columnSet);
+        }
+
+        return new ExportResult(export.getDownloadUri());
+    }
+
+    private String fileName(String formName, String fileExtension) {
+        String date = new SimpleDateFormat("yyyy-MM-dd_HHmmss").format(new Date());
+        String unescaped = "ActivityInfo_Export_" + formName + "_" + date + fileExtension;
+        return UrlEscapers.urlPathSegmentEscaper().escape(unescaped);
+    }
+
 }

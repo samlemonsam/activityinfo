@@ -22,7 +22,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.geoadmin.model.Country;
 import org.activityinfo.geoadmin.model.GeoAdminClient;
 
@@ -49,14 +48,7 @@ import java.util.prefs.Preferences;
  *
  */
 public class GeoAdmin extends JFrame {
-    
-    static {
-        LocaleProxy.initialize();
-    }
 
-    static {
-        LocaleProxy.initialize();
-    }
 
     private static final String OPEN_TABS = "open_tabs";
     private static final String ACTIVE_TAB = "active_tab";

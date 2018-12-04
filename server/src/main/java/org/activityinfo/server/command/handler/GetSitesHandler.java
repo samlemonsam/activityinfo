@@ -53,6 +53,7 @@ import org.activityinfo.server.command.handler.binding.dim.PartnerDimBinding;
 import org.activityinfo.server.command.handler.binding.dim.ProjectDimBinding;
 import org.activityinfo.server.command.handler.binding.dim.SiteDimBinding;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.endpoint.rest.BatchingFormTreeBuilder;
 import org.activityinfo.server.util.Trace;
 import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
@@ -61,7 +62,6 @@ import org.activityinfo.store.mysql.metadata.CountryInstance;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.shared.FormScanBatch;
-import org.activityinfo.store.spi.BatchingFormTreeBuilder;
 import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.Slot;
 
@@ -175,10 +175,9 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
 
         this.command = command;
 
-        builder = new ColumnSetBuilder(catalog,
-                new AppEngineFormScanCache(),
-                new FormSupervisorAdapter(catalog, databaseProvider, user.getId()));
-        batchFormTreeBuilder = new BatchingFormTreeBuilder(catalog);
+        FormSupervisorAdapter supervisor = new FormSupervisorAdapter(catalog, databaseProvider, user.getId());
+        builder = new ColumnSetBuilder(catalog, new AppEngineFormScanCache(), supervisor);
+        batchFormTreeBuilder = new BatchingFormTreeBuilder(catalog, supervisor, user.getId());
 
         batch = builder.createNewBatch();
 

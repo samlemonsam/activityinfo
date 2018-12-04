@@ -1855,9 +1855,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Current Filter")
     String currentFilter();
 
-    @DefaultStringValue("Current column length {0} exceeds Column Export Limitation of {1} for Export Type {2}")
-    String columnLimit();
-
     @DefaultStringValue("To request change of email address or account deletion, please contact support@activityinfo.org.")
     String requestDeleteChangeEmail();
 
@@ -1867,8 +1864,8 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Transfer Database")
     String transferDatabaseLabel();
 
-    @DefaultStringValue("New Owner")
-    String newDatabaseOwner();
+    @DefaultStringValue("Email of new owner")
+    String newDatabaseOwnerEmail();
 
     @DefaultStringValue("Database Transfer Failed")
     String transferFailed();
@@ -1876,14 +1873,11 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Cannot Find User")
     String noUser();
 
-    @DefaultStringValue("There is a currently pending transfer for this Database. Do you wish to cancel?")
+    @DefaultStringValue("There is a currently pending transfer for this Database. Do you wish to cancel the pending transfer?")
     String pendingTransfer();
 
     @DefaultStringValue("Cancel Transfer")
     String cancelTransfer();
-
-    @DefaultStringValue("You must add a User to your Database before you can transfer ownership.")
-    String addUserBeforeTransferWarning();
 
     @DefaultStringValue("Please select a User to transfer ownership to. The selected User must accept responsibility for the Database before ownership will be transferred.")
     String transferDatabaseUserInfo();
@@ -1894,7 +1888,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Wide Format")
     String wideFormat();
 
-    @DefaultStringValue("Each Activity is exported as a separate worksheet. <br> <br> All Fields appear as columns, with each Record in  a separate row. <br> <br> NOTE: Only Activities will be exported via this method.")
+    @DefaultStringValue("Each Activity is exported as a separate worksheet. <br> <br> All Fields appear as columns, with each Record in a separate row. <br> <br> NOTE: Only Activities will be exported via this method.")
     String wideFormatDescription();
 
     @DefaultStringValue("Long Format")
@@ -1912,4 +1906,42 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Delete Target")
     String deleteTarget();
 
+    @DefaultStringValue("Billing Account")
+    String billingAccount();
+
+    @DefaultStringValue("User limit exceeded")
+    String usersExceeded();
+
+    @DefaultStringValue("Referenced Form(s) not accessible by current User")
+    String refFormsNotAccessible();
+
+    @DefaultStringValue("Your trial account has expired.")
+    String trialAccountExpired();
+
+    @DefaultStringValue("Unfortunately your trial period with ActivityInfo has ended. Your data is safe, but you no longer have access to it. Contact us to set up billing and to restore access.")
+    String trialAccountExpiredMessage();
+
+    @DefaultStringValue("Your access to this database has expired")
+    String accessExpired();
+
+    @DefaultStringValue("The data in this database remains safe, but access is currently restricted. Please contact the database owner for more information.")
+    String accessExpiredMessage();
+
+    @DefaultStringValue("Contact us")
+    String contactUs();
+
+    @DefaultStringValue("Export Format")
+    String exportFormat();
+
+    @DefaultStringValue("Classic Structure")
+    String classicExportStructure();
+
+    @DefaultStringValue("Traditional Activity export. Choose this option for standard Sites export. <br> <br> Exports to an Excel XLS file. <br> <br> NOTE: Due to XLS limitations, there is an export limit of 256 columns.")
+    String classicExportStructureDescription();
+
+    @DefaultStringValue("Form Structure")
+    String formExportStructure();
+
+    @DefaultStringValue("Export Activity as a Form. Choose this option if Activity is greater than 256 columns. <br> <br> Exports to a CSV file. <br> <br> No column export limit.")
+    String formExportStructureDescription();
 }

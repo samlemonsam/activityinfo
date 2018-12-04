@@ -16,15 +16,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.activityinfo.ui.client.page.entry.column;
+package org.activityinfo.i18n.shared;
 
-import com.extjs.gxt.ui.client.widget.grid.ColumnModel;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.activityinfo.legacy.shared.command.Filter;
-import org.activityinfo.ui.client.page.entry.grouping.GroupingModel;
+import com.google.gwt.core.shared.GWT;
+import net.lightoze.gwt.i18n.client.LocaleFactory;
+import net.lightoze.gwt.i18n.server.LocaleProxy;
 
-public interface ColumnModelProvider {
+/**
+ * Contains global instances of UiConstants and UiMessages
+ */
+public final class I18N {
 
-    void fetchColumnModels(Filter filter, GroupingModel grouping, AsyncCallback<ColumnModel> callback);
+    private I18N() {
+    }
 
+    public static final UiConstants CONSTANTS;
+    public static final UiMessages MESSAGES;
+
+    static {
+        CONSTANTS = GWT.create(UiConstants.class);
+        MESSAGES = GWT.create(UiMessages.class);
+    }
 }

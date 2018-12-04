@@ -54,7 +54,7 @@ task appengineDevMode(type: JavaExec) {
     classpath configurations.devServer
 
     // Java sources first, so that changes get picked up on refresh
-    def sourceProjects = [":ui:app", ":ui:app2", ":i18n", ":clients:gwtrest", ":tools:json", ":model", ":analysis"];
+    def sourceProjects = [":ui:app", ":ui:app2", ":i18n", ":clients:gwtrest", ":tools:json", ":tools:promises", ":model", ":analysis"];
     for(sourceProject in sourceProjects) {
         classpath project(sourceProject).sourceSets.main.java.srcDirs
         classpath project(sourceProject).sourceSets.main.resources.srcDirs

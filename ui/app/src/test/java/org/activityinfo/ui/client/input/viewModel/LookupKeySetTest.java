@@ -19,7 +19,6 @@
 package org.activityinfo.ui.client.input.viewModel;
 
 import com.google.common.collect.Iterables;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.analysis.ParsedFormula;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
@@ -44,7 +43,6 @@ import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.store.TestSetup;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Map;
@@ -58,11 +56,6 @@ import static org.junit.Assert.assertThat;
 public class LookupKeySetTest {
 
     private TestSetup setup = new TestSetup();
-
-    @BeforeClass
-    public static void setupLocale() {
-        LocaleProxy.initialize();
-    }
 
     /**
      * In the case of a simple hierarchy, we are referencing a single form that

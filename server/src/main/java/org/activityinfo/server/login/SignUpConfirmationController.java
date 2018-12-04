@@ -30,9 +30,11 @@ import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
+import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.server.login.model.SignUpConfirmationInvalidPageModel;
 import org.activityinfo.server.login.model.SignUpConfirmationPageModel;
 import org.activityinfo.server.util.MailingListClient;
+import org.activityinfo.store.query.UsageTracker;
 
 import javax.inject.Provider;
 import javax.persistence.EntityManager;
@@ -62,6 +64,7 @@ public class SignUpConfirmationController {
     private final Provider<UserDAO> userDAO;
     private final EntityManager entityManager;
     private final AuthTokenProvider authTokenProvider;
+    private final BillingAccountOracle billingAccountOracle;
 
     @Inject
     public SignUpConfirmationController(Provider<UserDAO> userDAO,
@@ -69,12 +72,14 @@ public class SignUpConfirmationController {
                                         EntityManager entityManager, Provider<PartnerDAO> partnerDAO,
                                         Provider<UserPermissionDAO> permissionDAO,
                                         MailingListClient mailChimp,
-                                        AuthTokenProvider authTokenProvider) {
+                                        AuthTokenProvider authTokenProvider,
+                                        BillingAccountOracle billingAccountOracle) {
         super();
         this.userDAO = userDAO;
         this.entityManager = entityManager;
         this.authTokenProvider = authTokenProvider;
         this.mailingList = mailChimp;
+        this.billingAccountOracle = billingAccountOracle;
     }
 
     @GET
@@ -82,6 +87,9 @@ public class SignUpConfirmationController {
     public Viewable getPage(@Context UriInfo uri) throws Exception {
         try {
             User user = userDAO.get().findUserByChangePasswordKey(uri.getRequestUri().getQuery());
+
+            UsageTracker.track(user.getId(), "signup_confirm_start");
+
             return new SignUpConfirmationPageModel(user.getChangePasswordKey()).asViewable();
         } catch (NoResultException e) {
             return new SignUpConfirmationInvalidPageModel().asViewable();
@@ -107,12 +115,18 @@ public class SignUpConfirmationController {
             user.clearChangePasswordKey();
             user.setEmailNotification(true);
 
+            billingAccountOracle.startFreeTrial(user);
+
+            UsageTracker.track(user.getId(), "signup_confirm_finish");
+            UsageTracker.track(user.getId(), "login");
+
             // add user to default database
             addUserToDefaultDatabase(user);
 
             entityManager.getTransaction().commit();
 
             mailingList.subscribe(user, false, newsletter);
+
 
             // go to the home page
             return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/app").build())
@@ -128,7 +142,6 @@ public class SignUpConfirmationController {
                 .build();
         }
     }
-
     protected void addUserToDefaultDatabase(User user) {
         Database database = entityManager.find(Database.class, DEFAULT_DATABASE_ID);
         if(database == null) {

@@ -35,6 +35,7 @@ import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.type.geo.Extents;
+import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.promise.Promise;
 
 import java.util.*;
@@ -258,12 +259,18 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                             .from("userpermission")
                             .where("userpermission.UserId")
                             .equalTo(context.getUser().getId()), "p")
-                    .on("p.DatabaseId = d.DatabaseId")
-                    .leftJoin("userlogin o")
-                    .on("d.OwnerUserId = o.UserId")
+                            .on("p.DatabaseId = d.DatabaseId")
+                    .leftJoin("userlogin o").on("d.OwnerUserId = o.UserId")
                     .where("d.DateDeleted")
                     .isNull()
                     .orderBy("d.Name");
+
+            if(context.isRemote()) {
+                query.leftJoin("billingaccount ba").on("ba.id=o.billingAccountId");
+                query.appendColumn("ba.name", "baName");
+                query.appendColumn("ba.endTime", "baEndDate");
+                query.appendColumn("o.trialEndDate", "trialEndDate");
+            }
 
             // this is quite hackesh. we ultimately need to split up GetSchema()
             // into
@@ -283,6 +290,8 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                 @Override
                 public void onSuccess(SqlTransaction tx, SqlResultSet results) {
 
+                    LocalDate today = new LocalDate();
+
                     for (SqlResultSetRow row : results.getRows()) {
                         UserDatabaseDTO db = new UserDatabaseDTO();
                         db.setId(row.getInt("DatabaseId"));
@@ -292,6 +301,23 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                         db.setCountry(countries.get(row.getInt("CountryId")));
                         db.setOwnerName(row.getString("OwnerName"));
                         db.setOwnerEmail(row.getString("OwnerEmail"));
+
+                        if(context.isRemote()) {
+                            if(row.isNull("baName")) {
+                                db.setBillingAccountName("Free Trial Account");
+                                LocalDate trialEndDate;
+                                if(!row.isNull("trialEndDate")) {
+                                    trialEndDate = new LocalDate(row.getDate("trialEndDate"));
+                                } else {
+                                    trialEndDate = new LocalDate(2050,1,1);
+                                }
+                                db.setAccountEndDate(trialEndDate.toString());
+                                db.setSuspended(trialEndDate.before(today));
+                            } else {
+                                db.setBillingAccountName(row.get("baName"));
+                                db.setAccountEndDate(new LocalDate(row.getDate("baEndDate")).toString());
+                            }
+                        }
 
                         if (db.getAmOwner()) {
                             db.setHasPendingTransfer(row.getBoolean("pendingTransfer"));

@@ -41,6 +41,7 @@ import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
+import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.server.mail.MailSenderStub;
 import org.activityinfo.server.mail.MailSenderStubModule;
 import org.activityinfo.server.util.TemplateModule;
@@ -89,7 +90,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
         handler = new UpdateUserPermissionsHandler(
                 db.getDAO(UserDatabaseDAO.class), db.getDAO(PartnerDAO.class),
                 db.getDAO(UserDAO.class),
-                db.getDAO(UserPermissionDAO.class), mailer);
+                db.getDAO(UserPermissionDAO.class), new BillingAccountOracle(Providers.of(em)), mailer);
 
         owner = new User();
         owner.setId(99);

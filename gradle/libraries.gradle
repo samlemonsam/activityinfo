@@ -60,13 +60,8 @@ ext {
             asyncFun:       "com.bedatadriven.rebar:rebar-asyncfun:${rebarVersion}",
             sql:            "com.bedatadriven.rebar:rebar-sql:${rebarVersion}",
             sync:           "com.bedatadriven.rebar:rebar-sync:${rebarVersion}",
+            appcache:       "com.bedatadriven.rebar:rebar-appcache:${rebarVersion}",
             style:          "com.bedatadriven.rebar:rebar-style:${rebarVersion}"
-        ],
-
-        appcache: [
-            client:         "org.realityforge.gwt.appcache:gwt-appcache-client:1.0.9",
-            linker:         "org.realityforge.gwt.appcache:gwt-appcache-linker:1.0.9",
-            server:         "org.realityforge.gwt.appcache:gwt-appcache-server:1.0.9"
         ],
             
         jersey: [

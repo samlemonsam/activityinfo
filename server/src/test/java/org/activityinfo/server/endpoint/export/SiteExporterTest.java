@@ -18,7 +18,6 @@
  */
 package org.activityinfo.server.endpoint.export;
 
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
@@ -38,8 +37,6 @@ public class SiteExporterTest {
 
     @Test
     public void sheetNameTest() {
-
-        LocaleProxy.initialize();
 
         CountryDTO somalia = new CountryDTO(1, "Somalia");
         LocationTypeDTO locationType = new LocationTypeDTO(1, "Village");

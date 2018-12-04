@@ -18,6 +18,7 @@ import org.activityinfo.server.command.CommandTestCase;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.hibernate.entity.Database;
+import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.server.endpoint.rest.DatabaseResource;
 import org.activityinfo.server.login.RestMockUtils;
 import org.activityinfo.server.mail.MailSender;
@@ -70,6 +71,9 @@ public class ApprovalResourceTest extends CommandTestCase {
     @Inject
     private DatabaseProvider databaseProvider;
 
+    @Inject
+    private BillingAccountOracle billingOracle;
+
     private UriInfo uri;
 
     @Before
@@ -86,7 +90,8 @@ public class ApprovalResourceTest extends CommandTestCase {
                 formStorageProvider,
                 mailSender,
                 authTokenProvider,
-                databaseProvider);
+                databaseProvider,
+                billingOracle);
 
         uri = RestMockUtils.mockUriInfo("https://activityinfo.org/");
         helper.setUp();

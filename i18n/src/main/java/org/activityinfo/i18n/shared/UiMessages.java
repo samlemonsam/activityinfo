@@ -20,7 +20,6 @@ package org.activityinfo.i18n.shared;
 
 import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.safehtml.shared.SafeHtml;
-
 import java.util.Date;
 
 /**
@@ -278,7 +277,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("{0} pending changes")
     @AlternateMessage({ "one", "One pending change" })
-    String pendingChanges(@PluralCount  int count);
+    String pendingChanges(@PluralCount int count);
 
     @DefaultMessage("Distinct count of {0}")
     String countDistinctMeasure(String formLabel);
@@ -303,5 +302,8 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("Do you want to delete Target: ''{0}'' from your Database?")
     String requestConfirmationToDeleteTarget(String targetName);
+
+    @DefaultMessage("Activity ''{0}'' has too many Attributes/Indicators defined and exceeds the export file column limit ({1}). Please deselect this Activity from the export, or use an alternative export method.")
+    String activityColumnLimitExceeded(String activity, int colLimit);
 
 }

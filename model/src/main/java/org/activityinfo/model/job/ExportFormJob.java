@@ -21,6 +21,7 @@ package org.activityinfo.model.job;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.analysis.ImmutableTableModel;
 import org.activityinfo.model.analysis.TableModel;
+import org.activityinfo.model.analysis.table.ExportFormat;
 import org.activityinfo.model.resource.ResourceId;
 
 import static org.activityinfo.json.Json.createObject;
@@ -33,9 +34,11 @@ public class ExportFormJob implements JobDescriptor<ExportResult> {
     public static final String TYPE = "exportForm";
 
     private TableModel tableModel;
+    private ExportFormat format;
 
-    public ExportFormJob(TableModel tableModel) {
+    public ExportFormJob(TableModel tableModel, ExportFormat format) {
         this.tableModel = tableModel;
+        this.format = format;
     }
 
     public ResourceId getFormId() {
@@ -56,10 +59,15 @@ public class ExportFormJob implements JobDescriptor<ExportResult> {
         return tableModel;
     }
 
+    public ExportFormat getFormat() {
+        return format;
+    }
+
     @Override
     public JsonValue toJson() {
         JsonValue object = createObject();
         object.put("model", tableModel.toJson());
+        object.put("format", format.name());
         return object;
     }
 
@@ -72,6 +80,12 @@ public class ExportFormJob implements JobDescriptor<ExportResult> {
         } else {
             tableModel = TableModel.fromJson(object.get("model"));
         }
-        return new ExportFormJob(tableModel);
+        ExportFormat format;
+        if (object.hasKey("format")) {
+            format = ExportFormat.valueOf(object.get("format").asString());
+        } else {
+            format = ExportFormat.CSV;
+        }
+        return new ExportFormJob(tableModel, format);
     }
 }

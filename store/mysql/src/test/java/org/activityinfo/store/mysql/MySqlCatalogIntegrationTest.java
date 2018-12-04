@@ -20,7 +20,6 @@ package org.activityinfo.store.mysql;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.io.Resources;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
@@ -57,8 +56,6 @@ public class MySqlCatalogIntegrationTest {
 
     @BeforeClass
     public static void setup() throws Throwable {
-        System.out.println("Initializing Locale...");
-        LocaleProxy.initialize();
 
         System.out.println("Running setup...");
         dbunit = new DbUnit();

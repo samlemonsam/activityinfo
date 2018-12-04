@@ -18,22 +18,15 @@
  */
 package org.activityinfo.model.type.expr;
 
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.resource.ResourceId;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 public class CalculatedFieldTypeTest {
-    
-    @BeforeClass
-    public static void setupI18N() {
-        LocaleProxy.initialize();
-    }
 
     @Test
     public void serialization() {

@@ -25,7 +25,7 @@
 
         <div class="row row--padded">
 
-            <h1>Get Free Account</h1>
+            <h1>Start your free trial</h1>
 
             <#if genericError == true || formError == true>
                 <div class="alert alert--error">
@@ -44,7 +44,7 @@
 
                     <form action="" method="post" id="signUpForm">
 
-                        <p>Complete the following form to create a new account on
+                        <p>Complete the following form to start your free trial of
                             ActivityInfo.org.</p>
 
                         <label>
@@ -76,7 +76,7 @@
                             </ul>
                         </label>
 
-                        <button type="submit">Get Free Account</button>
+                        <button type="submit">Start your trial</button>
                     </form>
 
                     <div>

@@ -8,14 +8,18 @@ import org.activityinfo.server.authentication.AuthTokenProvider;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.server.endpoint.rest.DatabaseResource;
 import org.activityinfo.server.mail.MailSender;
 import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.spi.FormStorageProvider;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -35,6 +39,7 @@ public class ApprovalResource {
     private MailSender mailSender;
     private AuthTokenProvider authTokenProvider;
     private DatabaseProvider databaseProvider;
+    private BillingAccountOracle billingOracle;
 
     @Inject
     public ApprovalResource(Provider<EntityManager> entityManager,
@@ -42,13 +47,15 @@ public class ApprovalResource {
                             Provider<FormStorageProvider> catalog,
                             MailSender mailSender,
                             AuthTokenProvider authTokenProvider,
-                            DatabaseProvider databaseProvider) {
+                            DatabaseProvider databaseProvider,
+                            BillingAccountOracle billingOracle) {
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
         this.catalog = catalog;
         this.mailSender = mailSender;
         this.authTokenProvider = authTokenProvider;
         this.databaseProvider = databaseProvider;
+        this.billingOracle = billingOracle;
     }
 
     @GET
@@ -69,6 +76,8 @@ public class ApprovalResource {
         User proposedOwner = database.getTransferUser();
 
         TransferAuthorized transfer = new TransferAuthorized(currentOwner.getId(), proposedOwner.getId(), database.getId(), token);
+
+        UsageTracker.track(proposedOwner.getId(), "db_transfer_accept", database.getResourceId());
 
         DatabaseResource resource = new DatabaseResource(catalog,
                 dispatcher,
@@ -95,6 +104,8 @@ public class ApprovalResource {
         }
 
         User proposedOwner = database.getTransferUser();
+
+        UsageTracker.track(proposedOwner.getId(), "db_transfer_reject", database.getResourceId());
 
         DatabaseResource resource = new DatabaseResource(catalog,
                 dispatcher,

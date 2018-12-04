@@ -48,10 +48,6 @@ import java.util.Map;
 @GwtIncompatible
 public class TestingStorageProvider implements FormStorageProvider, TransactionalStorageProvider {
 
-    static {
-        LocaleProxy.initialize();
-    }
-
     private final LocaliteForm localiteForm;
     private Map<ResourceId, TestingFormStorage> formMap = new HashMap<>();
 

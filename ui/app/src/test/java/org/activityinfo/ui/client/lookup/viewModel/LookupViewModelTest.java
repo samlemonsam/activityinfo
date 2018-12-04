@@ -19,7 +19,6 @@
 package org.activityinfo.ui.client.lookup.viewModel;
 
 import com.google.common.base.Optional;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormMetadataProviderStub;
@@ -41,7 +40,6 @@ import org.activityinfo.store.testing.*;
 import org.activityinfo.ui.client.store.TestSetup;
 import org.easymock.EasyMock;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.*;
@@ -57,11 +55,6 @@ public class LookupViewModelTest {
     private TestingStorageProvider catalog;
     private NfiForm nfiForm;
     private VillageForm villageForm;
-
-    @BeforeClass
-    public static void setupLocale() {
-        LocaleProxy.initialize();
-    }
 
 
     @Before

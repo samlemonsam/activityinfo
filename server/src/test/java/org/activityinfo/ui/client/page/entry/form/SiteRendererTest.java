@@ -18,7 +18,6 @@
  */
 package org.activityinfo.ui.client.page.entry.form;
 
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.legacy.shared.SiteRenderer;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
@@ -26,7 +25,6 @@ import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.server.endpoint.kml.JreIndicatorValueFormatter;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
@@ -35,10 +33,6 @@ public class SiteRendererTest {
 
     private SiteRenderer siteRenderer;
 
-    @BeforeClass
-    public static void setupLocale() {
-        LocaleProxy.initialize();
-    }
 
     @Before
     public void setup() {

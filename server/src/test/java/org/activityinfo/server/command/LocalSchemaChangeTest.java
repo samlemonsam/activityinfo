@@ -322,6 +322,12 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
     private void dumpModelProperties(StringBuilder sb, Set<Object> visited, String prefix, Object modelData) throws IntrospectionException {
         BeanInfo beanInfo = Introspector.getBeanInfo(modelData.getClass());
         for (PropertyDescriptor property : beanInfo.getPropertyDescriptors()) {
+
+            if (property.getName().equals("billingAccountName") ||
+                property.getName().equals("accountEndDate")) {
+                continue;
+            }
+
             if (property.getReadMethod() != null &&
                 property.getReadMethod().getDeclaringClass().getName().startsWith("org.activityinfo")) {
 

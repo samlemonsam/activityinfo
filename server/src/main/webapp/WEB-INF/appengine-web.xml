@@ -18,7 +18,6 @@
   <runtime>java8</runtime>
 
   <static-files>
-    <include path="/robots.txt" expiration="1d"/>
     <include path="/ActivityInfo/**.gif" expiration="365d"/>
     <include path="/ActivityInfo/**.png" expiration="365d"/>
     <include path="/ActivityInfo/**.js" expiration="365d"/>

@@ -18,7 +18,6 @@
  */
 package org.activityinfo.ui.client.input.viewModel;
 
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.database.RecordLock;
 import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.database.ResourceType;
@@ -54,7 +53,6 @@ import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.store.TestSetup;
 import org.activityinfo.ui.client.store.TestingFormStore;
 import org.easymock.EasyMock;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -67,12 +65,6 @@ import static org.junit.Assert.*;
 public class FormInputViewModelTest {
 
     private TestSetup setup = new TestSetup();
-
-    @Before
-    public void setup() {
-        LocaleProxy.initialize();
-    }
-
 
     @Test
     public void testSurveyRelevance() {
@@ -154,7 +146,9 @@ public class FormInputViewModelTest {
         FormTree formTree = treeBuilder.queryTree(formClass.getId());
 
         RecordRef recordRef = new RecordRef(formClass.getId(), ResourceId.valueOf("R1"));
-        FormInputViewModelBuilder viewModelBuilder = new FormInputViewModelBuilder(setup.getFormStore(), formTree, new TestingActivePeriodMemory());
+        FormInputViewModelBuilder viewModelBuilder = new FormInputViewModelBuilder(setup.getFormStore(),
+                database(formTree),
+                formTree, new TestingActivePeriodMemory());
 
         // Case 1: No entry, B and C should be not relevant
 
@@ -189,6 +183,13 @@ public class FormInputViewModelTest {
         assertTrue(viewModel.isRelevant(fieldC));
     }
 
+    private UserDatabaseMeta database(FormTree formTree) {
+        return new UserDatabaseMeta.Builder()
+            .setDatabaseId(formTree.getRootFormClass().getDatabaseId())
+            .setOwner(true)
+            .build();
+    }
+
 
     @Test
     public void testSurveyEdit() {
@@ -198,12 +199,14 @@ public class FormInputViewModelTest {
 
         RecordRef recordRef = survey.getRecordRef(5);
 
-        FormStructure stucture = fetchStructure(recordRef);
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, stucture.getFormTree(), new TestingActivePeriodMemory());
+        FormStructure structure = fetchStructure(recordRef);
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store,
+                structure.getDatabase(),
+                structure.getFormTree(), new TestingActivePeriodMemory());
 
         FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()));
 
-        FormInputViewModel viewModel = builder.build(inputModel, stucture.getExistingRecord());
+        FormInputViewModel viewModel = builder.build(inputModel, structure.getExistingRecord());
 
         assertTrue(viewModel.isValid());
     }
@@ -217,7 +220,9 @@ public class FormInputViewModelTest {
         RecordRef recordRef = survey.getRecordRef(8);
 
         FormStructure structure = fetchStructure(recordRef);
-        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store, structure.getFormTree(), new TestingActivePeriodMemory());
+        FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store,
+                structure.getDatabase(),
+                structure.getFormTree(), new TestingActivePeriodMemory());
 
         FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()));
 
@@ -506,7 +511,7 @@ public class FormInputViewModelTest {
 
         ClinicForm clinicForm = setup.getCatalog().getClinicForm();
 
-        ResourceId databaseId = ResourceId.valueOf("db1");
+        ResourceId databaseId = ResourceId.valueOf("d0000000001");
 
         setup.describeDatabase(new UserDatabaseMeta.Builder()
             .setDatabaseId(databaseId)
@@ -519,12 +524,12 @@ public class FormInputViewModelTest {
                         .setLabel(clinicForm.getFormClass().getLabel())
                         .setType(ResourceType.FORM)
                         .build())
-            .addResource(new Resource.Builder()
-                        .setId(clinicForm.getSubForm().getFormId())
-                        .setParentId(clinicForm.getFormId())
-                        .setLabel(clinicForm.getSubForm().getFormClass().getLabel())
-                        .setType(ResourceType.FORM)
-                        .build())
+//            .addResource(new Resource.Builder()
+//                        .setId(clinicForm.getSubForm().getFormId())
+//                        .setParentId(clinicForm.getFormId())
+//                        .setLabel(clinicForm.getSubForm().getFormClass().getLabel())
+//                        .setType(ResourceType.FORM)
+//                        .build())
             .addLock(new RecordLock.Builder()
                         .setId(ResourceId.valueOf("lock1"))
                         .setLabel("Archived")
@@ -585,7 +590,10 @@ public class FormInputViewModelTest {
         FormStore formStore = EasyMock.createMock(FormStore.class);
         EasyMock.replay(formStore);
 
-        FormInputViewModelBuilder viewModelBuilder = new FormInputViewModelBuilder(formStore, formTree, new TestingActivePeriodMemory());
+        FormInputViewModelBuilder viewModelBuilder = new FormInputViewModelBuilder(formStore,
+                database(formTree),
+                formTree,
+                new TestingActivePeriodMemory());
 
         FormInputViewModel viewModel = viewModelBuilder.build(
                 new FormInputModel(new RecordRef(parentForm.getId(), ResourceId.valueOf("R1"))));
@@ -596,11 +604,13 @@ public class FormInputViewModelTest {
 
 
     private FormInputViewModelBuilder builderFor(TestForm survey) {
-        return new FormInputViewModelBuilder(setup.getFormStore(), fetchStructure(survey.getFormId()).getFormTree(), new TestingActivePeriodMemory());
+        return builderFor(fetchStructure(survey.getFormId()));
     }
 
     private FormInputViewModelBuilder builderFor(FormStructure structure) {
-        return new FormInputViewModelBuilder(setup.getFormStore(), structure.getFormTree(), new TestingActivePeriodMemory());
+        return new FormInputViewModelBuilder(setup.getFormStore(),
+                structure.getDatabase(),
+                structure.getFormTree(), new TestingActivePeriodMemory());
     }
 
     private FormStructure fetchStructure(ResourceId formId) {

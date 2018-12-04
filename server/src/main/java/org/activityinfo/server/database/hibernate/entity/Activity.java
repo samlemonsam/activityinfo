@@ -113,6 +113,13 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
         return this.id;
     }
 
+
+    @Transient
+    public ResourceId getResourceId() {
+        return CuidAdapter.activityFormClass(getId());
+    }
+
+
     public void setId(int id) {
         this.id = id;
     }

@@ -36,7 +36,7 @@
 
 
   <userLogin userId="1" name="Alex" email="user1@user.com"
-             locale="fr" emailnotification="1" organization="" jobtitle=""/>
+             locale="fr" emailnotification="1" organization="" jobtitle="" trialEndDate="2999-01-01"/>
 
   <userLogin userId="2" name="Bavon" email="bavon@nrc.org"
              locale="fr" emailnotification="1" organization="" jobtitle=""/>

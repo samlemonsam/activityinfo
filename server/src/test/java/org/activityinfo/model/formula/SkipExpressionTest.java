@@ -18,7 +18,6 @@
  */
 package org.activityinfo.model.formula;
 
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormField;
@@ -53,10 +52,9 @@ public class SkipExpressionTest {
 
     @Before
     public void setUp() {
-        LocaleProxy.initialize();
-
         formClass = createFormClass();
     }
+
 
     @Test
     public void enumType() {

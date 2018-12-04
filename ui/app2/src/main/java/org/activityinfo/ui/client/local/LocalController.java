@@ -108,8 +108,8 @@ public class LocalController extends AbstractDispatcher {
     }
 
     public void synchronize() {
-        if (activeStrategy instanceof OfflineStrategy) {
-            ((OfflineStrategy) activeStrategy).synchronize();
+        if (activeStrategy instanceof LocalStrategy) {
+            ((LocalStrategy) activeStrategy).synchronize();
         }
     }
 
@@ -257,7 +257,7 @@ public class LocalController extends AbstractDispatcher {
 
                         @Override
                         public void onSuccess(Void result) {
-                            activateStrategy(new OfflineStrategy(gateway));
+                            activateStrategy(new LocalStrategy(gateway));
                         }
                     });
                 }
@@ -321,7 +321,7 @@ public class LocalController extends AbstractDispatcher {
 
                         @Override
                         public void onSuccess(Void result) {
-                            activateStrategy(new OfflineStrategy(gateway));
+                            activateStrategy(new LocalStrategy(gateway));
                             doDispatch(pendingRequests);
                         }
                     });
@@ -352,10 +352,10 @@ public class LocalController extends AbstractDispatcher {
      * to handle commands locally if possible. When unsupported commands are
      * encountered, we offer the user the chance to connect.
      */
-    private final class OfflineStrategy extends Strategy {
+    private final class LocalStrategy extends Strategy {
         private Synchronizer localManager;
 
-        private OfflineStrategy(Synchronizer localManager) {
+        private LocalStrategy(Synchronizer localManager) {
             this.localManager = localManager;
         }
 
@@ -368,7 +368,7 @@ public class LocalController extends AbstractDispatcher {
         }
 
         @Override
-        public OfflineStrategy activate() {
+        public LocalStrategy activate() {
 
             // ensure that's the user's authentication is persisted across sessions!
             ClientSideAuthProvider.persistAuthentication();

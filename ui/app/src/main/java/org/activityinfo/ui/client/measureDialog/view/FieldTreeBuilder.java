@@ -59,6 +59,9 @@ public class FieldTreeBuilder {
             if(childNode.isReference() && !childNode.isSubForm()) {
                 addReferencedForms(tree, childNode.getChildren());
                 for (ResourceId referencedFormId : childNode.getRange()) {
+                    if (!tree.getFormMetadata(referencedFormId).isAccessible()) {
+                        continue;
+                    }
                     FormClass referencedForm = tree.getFormClass(referencedFormId);
                     addReferencedForm(referencedForm);
                 }

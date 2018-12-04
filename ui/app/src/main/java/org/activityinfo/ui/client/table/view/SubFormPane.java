@@ -18,6 +18,10 @@
  */
 package org.activityinfo.ui.client.table.view;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.widget.core.client.TabItemConfig;
 import com.sencha.gxt.widget.core.client.TabPanel;
 import org.activityinfo.analysis.table.TableViewModel;
@@ -39,11 +43,41 @@ public class SubFormPane extends TabPanel {
     private TableViewModel viewModel;
     private Subscription subscription;
 
+    private SubFormGrid activeGrid = null;
+
     private final Map<ResourceId, TabItemConfig> tabs = new HashMap<>();
 
     public SubFormPane(TableViewModel viewModel, FormTree formTree) {
         this.viewModel = viewModel;
         updateTabs(formTree);
+        addSelectionHandler(new SelectionHandler<Widget>() {
+            @Override
+            public void onSelection(SelectionEvent<Widget> event) {
+
+                SubFormGrid newlyActiveGrid = (SubFormGrid) event.getSelectedItem();
+
+                if(activeGrid != newlyActiveGrid) {
+                    if(activeGrid != null) {
+                        activeGrid.setActive(false);
+                        activeGrid = null;
+                    }
+                }
+
+                // If there is an update to the ColumnSet while the grid is not visible
+                // (for example, when the parent selection changes)
+                // The LiveGridView's DOM measurements get screwed up, and the updates are not
+                // properly "painted".
+                // To work around this, we need to force the LiveGridView to refresh when a new
+                // tab is selected.
+                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+                    @Override
+                    public void execute() {
+                        newlyActiveGrid.setActive(true);
+                        activeGrid = newlyActiveGrid;
+                    }
+                });
+            }
+        });
     }
 
     @Override
@@ -79,8 +113,17 @@ public class SubFormPane extends TabPanel {
             SubFormReferenceType subFormType = (SubFormReferenceType) node.getType();
             FormClass subForm = formTree.getFormClass(subFormType.getClassId());
             TabItemConfig config = new TabItemConfig(subForm.getLabel());
+
+            SubFormGrid subFormGrid = new SubFormGrid(viewModel, subForm.getId());
+
+            if(tabs.isEmpty()) {
+                // First tab is by default active
+                subFormGrid.setActive(true);
+                this.activeGrid = subFormGrid;
+            }
+
             tabs.put(node.getFieldId(), config);
-            add(new SubFormGrid(viewModel, subForm.getId()), config);
+            add(subFormGrid, config);
         }
     }
 

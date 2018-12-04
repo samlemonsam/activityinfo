@@ -21,6 +21,7 @@ dependencies {
     compile project(':io:xform')
     compile project(':io:match')
     compile project(':io:xlsform')
+    compile project(':io:csv')
     compile project(':analysis')
 
     compile project(':store:mysql')
@@ -71,8 +72,7 @@ dependencies {
     compile libraries.google.apiClient
 
     compile libraries.gwt.i18nServer
-
-    compile libraries.appcache.server
+    compile libraries.rebar.appcache
 
     compile libraries.appengine.apiLabs
     compile libraries.appengine.trace

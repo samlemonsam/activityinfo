@@ -56,6 +56,8 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
 
     public static final String ENTITY_NAME = "UserDatabase";
 
+    private boolean suspended;
+
     public UserDatabaseDTO() {
     }
 
@@ -186,6 +188,23 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         return folders;
     }
 
+
+    public String getBillingAccountName() {
+        return get("billingAccountName");
+    }
+
+    public void setBillingAccountName(String name) {
+        set("billingAccountName", name);
+    }
+
+    public String getAccountEndDate() {
+        return get("accountEndDate");
+    }
+
+    public void setAccountEndDate(String dateString) {
+        set("accountEndDate", dateString);
+    }
+
     /**
      * Sets the list of Partners who belong to this UserDatabase
      */
@@ -259,6 +278,14 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     @Override
     public String getEntityName() {
         return ENTITY_NAME;
+    }
+
+    public boolean isSuspended() {
+        return suspended;
+    }
+
+    public void setSuspended(boolean suspended) {
+        this.suspended = suspended;
     }
 
     /**

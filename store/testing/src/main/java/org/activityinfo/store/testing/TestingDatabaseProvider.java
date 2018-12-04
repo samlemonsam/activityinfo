@@ -36,6 +36,7 @@ public class TestingDatabaseProvider implements DatabaseProvider {
 
     public void add(UserDatabaseMeta database) {
         databaseMap.put(database.getDatabaseId(), database);
+        resourceMap.put(database.getDatabaseId(), database);
         for (Resource resource : database.getResources()) {
             resourceMap.put(resource.getId(), database);
         }

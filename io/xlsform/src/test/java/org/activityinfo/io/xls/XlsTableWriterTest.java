@@ -19,7 +19,6 @@
 package org.activityinfo.io.xls;
 
 import com.google.common.io.Resources;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.analysis.table.EffectiveTableModel;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.model.analysis.ImmutableTableModel;
@@ -50,8 +49,6 @@ public class XlsTableWriterTest {
 
     @Before
     public void setup() {
-        LocaleProxy.initialize();
-
         catalog = new TestingStorageProvider();
         databaseProvider = catalog.getDatabaseProvider();
         formSource = new FormSourceSyncImpl(catalog, databaseProvider, 1);

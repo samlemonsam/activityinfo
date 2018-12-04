@@ -17,6 +17,10 @@ public class UsageTracker {
         track(userId, action, null, null);
     }
 
+    public static void track(int userId, String action, ResourceId databaseId) {
+        track(userId, action, databaseId, null);
+    }
+
     public static void track(int userId, String action, FormClass formSchema) {
         track(userId, action, formSchema.getDatabaseId(), formSchema.getId());
     }

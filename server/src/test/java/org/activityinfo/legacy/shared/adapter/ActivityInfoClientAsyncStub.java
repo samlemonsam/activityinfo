@@ -19,6 +19,7 @@
 package org.activityinfo.legacy.shared.adapter;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
@@ -112,6 +113,10 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
         return Promise.resolved(treeBuilder.queryTree(formId));
     }
 
+    @Override
+    public Promise<List<FormMetadata>> getFormTreeList(ResourceId formId) {
+        return getFormTree(formId).then(tree -> Lists.newArrayList(tree.getForms()));
+    }
 
     @Override
     public Promise<Void> updateFormSchema(String formId, FormClass updatedSchema) {

@@ -18,27 +18,24 @@
  */
 package org.activityinfo.ui.client;
 
+import com.bedatadriven.rebar.appcache.client.AppCache;
+import com.bedatadriven.rebar.appcache.client.AppCacheFactory;
+import com.bedatadriven.rebar.appcache.client.events.UpdateReadyEventHandler;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.event.MessageBoxEvent;
 import com.extjs.gxt.ui.client.widget.Dialog;
 import com.extjs.gxt.ui.client.widget.MessageBox;
 import com.google.gwt.user.client.Window;
 import org.activityinfo.i18n.shared.I18N;
-import org.realityforge.gwt.appcache.client.ApplicationCache;
-import org.realityforge.gwt.appcache.client.event.UpdateReadyEvent;
-
-import javax.annotation.Nonnull;
 
 public class AppCacheMonitor {
 
     public static void start() {
-        ApplicationCache applicationCache = ApplicationCache.getApplicationCacheIfSupported();
-        if(applicationCache == null) {
-            return;
-        }
-        applicationCache.addUpdateReadyHandler(new UpdateReadyEvent.Handler() {
+        AppCache appCache = AppCacheFactory.get();
+        appCache.addUpdateReadyHandler(new UpdateReadyEventHandler() {
+
             @Override
-            public void onUpdateReadyEvent(@Nonnull UpdateReadyEvent event) {
+            public void onAppCacheUpdateReady() {
                 MessageBox.confirm(I18N.MESSAGES.newVersion(ClientContext.getAppTitle()),
                         I18N.CONSTANTS.newVersionChoice(),
                         new Listener<MessageBoxEvent>() {

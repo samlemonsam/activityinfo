@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.activityinfo.server.endpoint.rest;
+package org.activityinfo.io.csv;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -29,16 +29,23 @@ public class CsvWriter implements AutoCloseable {
      */
     public static final char BYTEORDER_MARK = '\ufeff';
 
+    public static final String DELIMITER = ",";
+    public static final String DOUBLE_QUOTE = "\"";
+    public static final String CARRIAGE_RETURN = "\r";
+    public static final String LINE_ENDING = "\n";
+
+    public static final String ESCAPED_DOUBLE_QUOTE = "\"\"";
+
     private Writer writer;
 
     public CsvWriter() throws IOException {
         this.writer = new StringWriter();
-        writer.append(BYTEORDER_MARK);
+        writeByteOrderMark();
     }
 
     public CsvWriter(Writer writer) throws IOException {
         this.writer = writer;
-        this.writer.append(BYTEORDER_MARK);
+        writeByteOrderMark();
     }
     
     private void writeByteOrderMark() throws IOException {
@@ -46,22 +53,29 @@ public class CsvWriter implements AutoCloseable {
     }
 
     public void writeLine(Object... columns) throws IOException {
-
         for (int i = 0; i != columns.length; ++i) {
             if (i > 0) {
-                writer.append(",");
+                writer.append(DELIMITER);
             }
             Object val = columns[i];
             if (val != null) {
                 if (val instanceof String) {
-                    String escaped = ((String) val).replace("\"", "\"\"");
-                    writer.append("\"").append(escaped).append("\"");
+                    String escaped = escape((String) val);
+                    writer.append(enquote(escaped));
                 } else {
                     writer.append(val.toString());
                 }
             }
         }
-        writer.append("\n");
+        writer.append(LINE_ENDING);
+    }
+
+    private String escape(String data) {
+        return data.replace(DOUBLE_QUOTE, ESCAPED_DOUBLE_QUOTE);
+    }
+
+    private String enquote(String data) {
+        return DOUBLE_QUOTE + data + DOUBLE_QUOTE;
     }
 
     @Override

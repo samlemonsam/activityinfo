@@ -46,6 +46,8 @@ public interface ApiBackend {
 
     ColumnSetBuilder newQueryBuilder();
 
+    BatchingFormTreeBuilder newBatchingTreeBuilder();
+
     RecordHistoryProvider getRecordHistoryProvider();
 
     DatabaseProvider getDatabaseProvider();

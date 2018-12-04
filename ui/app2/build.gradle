@@ -31,10 +31,7 @@ dependencies {
     compile libraries.gwt.guava
 
     compile libraries.rebar.style
-
-    compile libraries.appcache.client
-    compile libraries.appcache.linker
-
+    compile libraries.rebar.appcache
 
     compile 'com.allen-sauer.gwt.dnd:gwt-dnd:3.3.0'
     compile 'com.googlecode.gwtquery:gwtquery:1.5-beta1'
@@ -73,7 +70,7 @@ task compileApp(type: JavaExec) {
     jvmArgs "-Dgwt.persistentunitcachedir=${buildDir}/gwtCache"
 
     args '-logLevel', 'INFO'
-    args '-localWorkers', Integer.toString(Runtime.runtime.availableProcessors())
+    args '-localWorkers', Integer.toString(Runtime.runtime.availableProcessors() - 2)
 
     // Disable class metadata -- Class.getName() will not
     // be available to compiled code, but we save ~150k
@@ -91,8 +88,11 @@ task compileApp(type: JavaExec) {
     }
     if ("dev".equals(project.property("gwtMode"))) {
         args 'org.activityinfo.ui.ActivityInfoDev'
+    } else if ("safari".equals(project.property("gwtMode"))) {
+        args 'org.activityinfo.ui.ActivityInfoSafariTest'
     } else {
         args 'org.activityinfo.ui.ActivityInfoRelease'
+        args 'org.activityinfo.ui.ActivityInfoReleaseLogging'
     }
 }
 

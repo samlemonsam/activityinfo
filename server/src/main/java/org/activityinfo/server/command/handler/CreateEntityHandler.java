@@ -32,6 +32,7 @@ import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.command.handler.crud.UserDatabasePolicy;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.query.UsageTracker;
 
 import javax.persistence.EntityManager;
 import javax.persistence.QueryTimeoutException;
@@ -72,10 +73,10 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
                 return createActivity(user, propertyMap);
 
             case AttributeGroupDTO.ENTITY_NAME:
-                return createAttributeGroup(properties);
+                return createAttributeGroup(user, properties);
 
             case AttributeDTO.ENTITY_NAME:
-                return createAttribute(properties);
+                return createAttribute(user, properties);
 
             case IndicatorDTO.ENTITY_NAME:
                 return createIndicator(user, properties);
@@ -118,10 +119,12 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
 
         entityManager().persist(folder);
 
+        UsageTracker.track(user.getId(), "create_folder", database.getResourceId());
+
         return new CreateResult(folder.getId());
     }
 
-    private CommandResult createAttributeGroup(Map<String, Object> properties) {
+    private CommandResult createAttributeGroup(User user, Map<String, Object> properties) {
         Activity activity = entityManager().find(Activity.class, properties.get("activityId"));
 
         AttributeGroup group = new AttributeGroup();
@@ -136,11 +139,12 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         activity.incrementSchemaVersion();
         activity.getDatabase().setLastSchemaUpdate(new Date());
 
+        trackUpdate(user, activity);
 
         return new CreateResult(group.getId());
     }
 
-    private CommandResult createAttribute(Map<String, Object> properties) {
+    private CommandResult createAttribute(User user, Map<String, Object> properties) {
         Attribute attribute = new Attribute();
         attribute.setId(generator.generateInt());
         AttributeGroup ag = entityManager().getReference(AttributeGroup.class, properties.get("attributeGroupId"));
@@ -159,6 +163,8 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         activity.incrementSchemaVersion();
         activity.getDatabase().setLastSchemaUpdate(new Date());
 
+        trackUpdate(user, activity);
+
         return new CreateResult(attribute.getId());
     }
 
@@ -173,7 +179,7 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         indicator.setActivity(activity);
 
         assertEditFormRights(user, activity);
-        
+
         updateIndicatorProperties(indicator, properties);
         
         if(indicator.getSortOrder() == 0) {
@@ -184,6 +190,8 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         
         activity.incrementSchemaVersion();
         activity.getDatabase().setLastSchemaUpdate(new Date());
+
+        trackUpdate(user, activity);
 
         return new CreateResult(indicator.getId());
     }
@@ -221,4 +229,5 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
         }
     
     }
+
 }

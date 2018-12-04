@@ -18,71 +18,76 @@
  */
 package org.activityinfo.model.formTree;
 
+import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
-import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.resource.ResourceId;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.activityinfo.json.Json.createObject;
 
 /**
  * Serializes/deserializes a FormTree to JSON
  */
 public class JsonFormTreeBuilder {
 
-    public static JsonValue toJson(FormTree tree)  {
+    private static final int LATEST_VERSION = 4001;
 
-        ResourceId rootFormClassId = tree.getRootFormId();
+    public static JsonValue toJson(FormTree formTree) {
+        return toJson(LATEST_VERSION, formTree);
+    }
 
-        JsonValue forms = createObject();
-        collectForms(forms, tree.getRootFields());
+    public static JsonValue toJson(int clientVersion, FormTree formTree) {
 
-        JsonValue object = createObject();
-        object.put("root", rootFormClassId.asString());
+        JsonValue forms = Json.createObject();
+        for (FormMetadata formMetadata : formTree.getForms()) {
+            if(clientVersion >= LATEST_VERSION) {
+                forms.put(formMetadata.getId().asString(), formMetadata.toJson());
+            } else {
+                // Older clients are expecting only the form schema, not the full metadata
+                if(formMetadata.isVisible()) {
+                    forms.put(formMetadata.getId().asString(), formMetadata.getSchema().toJson());
+                }
+            }
+        }
+
+        JsonValue object = Json.createObject();
+        object.put("root", formTree.getRootFormId().asString());
         object.put("forms", forms);
 
         return object;
     }
-    
-    public static FormTree fromJson(JsonValue object) {
-       
-        ResourceId rootFormClassId = ResourceId.valueOf(object.get("root").asString());
-       
-        JsonValue forms = object.get("forms");
-        final Map<ResourceId, FormClass> formMap = new HashMap<>();
-        for (String key : forms.keys()) {
-            JsonValue value = forms.get(key);
-            FormClass formClass = FormClass.fromJson(value);
-            formMap.put(formClass.getId(), formClass);
-        }
 
-        FormClassProvider provider = new FormClassProvider() {
+    public static List<FormMetadata> fromJsonAsList(JsonValue object) {
+        JsonValue formObject = object.get("forms");
+        List<FormMetadata> forms = new ArrayList<>();
+        for (Map.Entry<String, JsonValue> form : formObject.entrySet()) {
+            forms.add(FormMetadata.fromJson(form.getValue()));
+        }
+        return forms;
+    }
+
+    public static FormTree fromJson(JsonValue object) {
+        Map<ResourceId, FormMetadata> map = new HashMap<>();
+        for (FormMetadata formMetadata : fromJsonAsList(object)) {
+            map.put(formMetadata.getId(), formMetadata);
+        }
+        FormMetadataProvider provider = new FormMetadataProvider() {
             @Override
-            public FormClass getFormClass(ResourceId formId) {
-                FormClass formClass = formMap.get(formId);
-                assert formClass != null : "FormClass " + formId + " was referenced but not include in the " +
-                        "list of forms";
-                return formClass;
+            public FormMetadata getFormMetadata(ResourceId formId) {
+                FormMetadata form = map.get(formId);
+                if(form == null) {
+                    return FormMetadata.notFound(formId);
+                } else {
+                    return form;
+                }
             }
         };
         FormTreeBuilder builder = new FormTreeBuilder(provider);
-        return builder.queryTree(rootFormClassId);
+        ResourceId rootFormId = ResourceId.valueOf(object.getString("root"));
+        return builder.queryTree(rootFormId);
     }
-
-    private static void collectForms(JsonValue forms, List<FormTree.Node> nodes) {
-        for (FormTree.Node node : nodes) {
-            FormClass formClass = node.getDefiningFormClass();
-            if(!forms.hasKey(formClass.getId().asString())) {
-                forms.put(formClass.getId().asString(), formClass.toJson());
-            }
-            if(node.hasChildren()) {
-                collectForms(forms, node.getChildren());
-            }
-        }
-    }
-
 
 }

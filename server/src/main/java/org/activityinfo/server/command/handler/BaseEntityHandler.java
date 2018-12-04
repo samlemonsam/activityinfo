@@ -36,6 +36,7 @@ import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.query.UsageTracker;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -57,7 +58,8 @@ public class BaseEntityHandler {
     protected final EntityManager em;
     protected final DatabaseProvider databaseProvider;
 
-    public BaseEntityHandler(EntityManager em, DatabaseProvider databaseProvider) {
+    public BaseEntityHandler(EntityManager em,
+                             DatabaseProvider databaseProvider) {
         this.em = em;
         this.databaseProvider = databaseProvider;
     }
@@ -317,4 +319,7 @@ public class BaseEntityHandler {
         return em;
     }
 
+    protected void trackUpdate(User user, Activity activity) {
+        UsageTracker.track(user.getId(), "update_activity", activity.getDatabase().getResourceId(), activity.getResourceId());
+    }
 }

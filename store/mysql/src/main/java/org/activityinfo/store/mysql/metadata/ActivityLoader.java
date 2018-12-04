@@ -273,7 +273,8 @@ public class ActivityLoader {
                             "d.ownerUserId, " +               // (18)
                             "A.classicView, " +               // (19)
                             "A.hrd, " +                       // (20)
-                            "L.nullary " +                    // (21)
+                            "L.nullary, " +                    // (21)
+                            "A.folderId " +                 // (22)
                             "FROM activity A " +    
                             "LEFT JOIN locationtype L on (A.locationtypeid=L.locationtypeid) " +
                             "LEFT JOIN userdatabase d on (A.databaseId=d.DatabaseId) " +
@@ -331,6 +332,8 @@ public class ActivityLoader {
                     if (!activity.hasLocationType()) {
                         loadCountryInstance(activity.getLocationTypeId());
                     }
+
+                    activity.folderId = rs.getInt(22);
 
                     activityMap.put(activity.getId(), activity);
                 }

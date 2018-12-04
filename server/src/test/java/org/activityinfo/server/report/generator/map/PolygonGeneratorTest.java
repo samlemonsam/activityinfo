@@ -20,7 +20,6 @@ package org.activityinfo.server.report.generator.map;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.TestOutput;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.GenerateElement;
@@ -35,7 +34,6 @@ import org.activityinfo.server.geo.TestGeometry;
 import org.activityinfo.server.report.Reports;
 import org.activityinfo.server.report.generator.MapGenerator;
 import org.activityinfo.server.report.renderer.itext.PdfReportRenderer;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -50,11 +48,6 @@ public class PolygonGeneratorTest extends CommandTestCase2 {
 
     public static final String MAP_ICON_PATH = "";
 
-    @BeforeClass
-    public static void initLocale() {
-        LocaleProxy.initialize();
-    }
-    
     @Inject
     private MapGenerator generator;
 

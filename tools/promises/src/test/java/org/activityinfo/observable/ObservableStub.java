@@ -18,8 +18,6 @@
  */
 package org.activityinfo.observable;
 
-import com.google.common.base.Function;
-
 public class ObservableStub<T> extends Observable<T> {
     
     private boolean loading = true;
@@ -60,10 +58,6 @@ public class ObservableStub<T> extends Observable<T> {
     @Override
     public boolean isLoading() {
         return loading;
-    }
-
-    public boolean isConnected() {
-        return connected;
     }
 
     @Override

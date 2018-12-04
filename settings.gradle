@@ -27,6 +27,7 @@ include 'analysis'
 include 'io:xform'
 include 'io:match'
 include 'io:xlsform'
+include 'io:csv'
 
 include 'ui:icons'
 include 'ui:app'

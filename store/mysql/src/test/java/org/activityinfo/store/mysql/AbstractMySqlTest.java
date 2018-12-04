@@ -24,7 +24,6 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.io.Resources;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.util.Closeable;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
@@ -38,7 +37,6 @@ import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.testing.MockDatabaseProvider;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 
 import java.util.List;
 
@@ -65,11 +63,6 @@ public abstract class AbstractMySqlTest {
 
     protected FormScanCache cache = new NullFormScanCache();
 
-    @BeforeClass
-    public static void initLocale() throws Throwable {
-        System.out.println("Initializing Locale...");
-        LocaleProxy.initialize();
-    }
 
     @Before
     public void setUp() {

@@ -40,6 +40,7 @@ public class Activity implements Serializable {
     int databaseId;
     String databaseName;
     int reportingFrequency;
+    int folderId;
 
     int sortOrder;
 
@@ -312,6 +313,15 @@ public class Activity implements Serializable {
 
     public FormClass getSerializedFormClass() {
         return serializedFormClass.value;
+    }
+
+    public int getFolderId() {
+        assert inFolder();
+        return folderId;
+    }
+
+    public boolean inFolder() {
+        return folderId != 0;
     }
 
     /**

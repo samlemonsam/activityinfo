@@ -26,11 +26,15 @@
     <set-configuration-property name="CssResource.style" value="obf"/>
 
     <!-- Turn off logging -->
-    <set-property name="gwt.logging.enabled" value="FALSE"/>
+    <!--<set-property name="gwt.logging.enabled" value="TRUE"/>-->
 
     <!-- Limit to supported browsers -->
     <set-property name="gxt.user.agent" value="safari5,chrome,ie9,ie10,ie11,gecko1_9"/>
 
-    <collapse-property name="user.agent" values="ie9,ie10" />
+    <!-- Generate AppCache manifests -->
+    <define-linker name="std" class="com.bedatadriven.rebar.appcache.linker.AppCacheIFrameLinker"/>
+    <add-linker name="std"/>
+
+
 
 </module>

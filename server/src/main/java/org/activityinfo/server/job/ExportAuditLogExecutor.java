@@ -21,13 +21,13 @@ package org.activityinfo.server.job;
 import com.google.common.base.Charsets;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.activityinfo.io.csv.CsvWriter;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.ActivityDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.model.job.ExportAuditLog;
 import org.activityinfo.model.job.ExportResult;
 import org.activityinfo.server.command.DispatcherSync;
-import org.activityinfo.server.endpoint.rest.CsvWriter;
 import org.activityinfo.server.generated.GeneratedResource;
 import org.activityinfo.server.generated.StorageProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
@@ -61,7 +61,7 @@ public class ExportAuditLogExecutor implements JobExecutor<ExportAuditLog, Expor
         GeneratedResource export = storageProvider.create("text/csv;charset=UTF-8",
                 String.format("AuditLog_%d_%s.csv", db.getId(), Filenames.timestamp()));
 
-        try(CsvWriter  writer = new CsvWriter(new OutputStreamWriter(export.openOutputStream(), Charsets.UTF_8))) {
+        try(CsvWriter writer = new CsvWriter(new OutputStreamWriter(export.openOutputStream(), Charsets.UTF_8))) {
             AuditLogWriter logWriter = new AuditLogWriter(entityManager.get(), db, writer);
             for (ActivityDTO activityDTO : db.getActivities()) {
                 logWriter.writeForm(catalog, activityDTO.getFormId());

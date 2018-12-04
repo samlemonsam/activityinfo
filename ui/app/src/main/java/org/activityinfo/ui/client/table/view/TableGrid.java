@@ -195,10 +195,8 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
 
 
     private void updateColumnView(Observable<ColumnSet> columnSet) {
-        if(columnSet.isLoaded()) {
-            if(!proxy.push(columnSet.get())) {
-                loader.load();
-            }
+        if(!proxy.push(columnSet)) {
+            loader.load();
         }
     }
 
@@ -211,4 +209,5 @@ public class TableGrid implements IsWidget, SelectionChangedEvent.HasSelectionCh
     public HandlerRegistration addSelectionChangedHandler(SelectionChangedEvent.SelectionChangedHandler<RecordRef> handler) {
         return eventBus.addHandler(SelectionChangedEvent.getType(), handler);
     }
+
 }

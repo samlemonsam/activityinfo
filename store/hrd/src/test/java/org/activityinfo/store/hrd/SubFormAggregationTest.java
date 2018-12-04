@@ -23,7 +23,6 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.base.Optional;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.util.Closeable;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.SubFormKind;
@@ -42,7 +41,6 @@ import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.TypedRecordUpdate;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -63,11 +61,6 @@ public class SubFormAggregationTest {
     public void setUp() {
         helper.setUp();
         objectify = ObjectifyService.begin();
-    }
-
-    @BeforeClass
-    public static void setUpLocale() {
-        LocaleProxy.initialize();
     }
 
     @After

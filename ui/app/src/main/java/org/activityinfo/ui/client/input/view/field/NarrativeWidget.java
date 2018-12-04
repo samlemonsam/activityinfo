@@ -33,6 +33,11 @@ import org.activityinfo.ui.client.input.model.FieldInput;
  */
 public class NarrativeWidget implements FieldWidget {
 
+    /**
+     * In px, as that is how the Sencha {@link TextAreaInputCell} demands we set the height...
+     */
+    private static final int INIT_HEIGHT = 150;
+
     private class NarrativeTextArea extends TextArea {
 
         private final FieldUpdater updater;
@@ -59,11 +64,14 @@ public class NarrativeWidget implements FieldWidget {
     }
 
     public NarrativeWidget(TextAreaInputCell.TextAreaAppearance appearance, FieldUpdater updater) {
-        textArea = new NarrativeTextArea(new TextAreaInputCell(appearance), updater);
+        TextAreaInputCell cell = new TextAreaInputCell(appearance);
+        cell.setHeight(INIT_HEIGHT);
+        textArea = new NarrativeTextArea(cell, updater);
         textArea.addKeyUpHandler(event -> updater.update(input()));
         textArea.addValueChangeHandler(event -> updater.update(input()));
         textArea.addBlurHandler(event -> updater.touch());
         textArea.setWidth(-1);
+        textArea.setResizable(TextAreaInputCell.Resizable.VERTICAL);
     }
 
     private FieldInput input() {

@@ -21,7 +21,6 @@ package org.activityinfo.analysis.pivot.viewModel;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.*;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.analysis.pivot.*;
 import org.activityinfo.model.form.FormClass;
@@ -50,7 +49,9 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -71,8 +72,6 @@ public class AnalysisViewModelTest {
 
     @Before
     public void setup() {
-        LocaleProxy.initialize();
-
         formStore = new TestingFormStore();
         survey = formStore.getCatalog().getSurvey();
         intakeForm = formStore.getCatalog().getIntakeForm();

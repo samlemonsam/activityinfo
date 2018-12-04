@@ -74,4 +74,5 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liqui
   <include file="org/activityinfo/database/changelog/db.changelog-049-db-transfer.xml"/>
   <include file="org/activityinfo/database/changelog/db.changelog-050-bounced-users.xml"/>
   <include file="org/activityinfo/database/changelog/db.changelog-051-billing-accounts.xml"/>
+  <include file="org/activityinfo/database/changelog/db.changelog-052-expected-payment-date.xml"/>
 </databaseChangeLog>

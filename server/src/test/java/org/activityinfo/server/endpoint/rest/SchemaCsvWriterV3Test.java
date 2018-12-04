@@ -21,7 +21,6 @@ package org.activityinfo.server.endpoint.rest;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -63,8 +62,6 @@ public class SchemaCsvWriterV3Test {
 
     @Before
     public void setup() throws IOException {
-
-        LocaleProxy.initialize();
 
         database = new UserDatabaseDTO(1, "Survey DB");
         formClassProvider = new TestBatchFormClassProvider();

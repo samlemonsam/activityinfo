@@ -20,7 +20,6 @@ package org.activityinfo.ui.client.component.importDialog;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
@@ -32,7 +31,6 @@ import org.activityinfo.ui.client.component.importDialog.model.source.PastedTabl
 import org.activityinfo.ui.client.component.importDialog.model.strategy.FieldImportStrategies;
 import org.activityinfo.ui.client.component.importDialog.model.validation.ValidatedRowTable;
 import org.hamcrest.Matchers;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -47,11 +45,6 @@ import static org.junit.Assert.assertThat;
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/somalia-admin.db.xml")
 public class ImportGeoTest extends AbstractImporterTest {
-
-    @Before
-    public void setupLocale() {
-        LocaleProxy.initialize();
-    }
 
     @Test
     public void test() throws IOException {

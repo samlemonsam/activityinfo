@@ -152,6 +152,8 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
         assertEditFormRights(user, indicator.getActivity());
 
         updateIndicatorProperties(indicator, changes);
+
+        trackUpdate(user, indicator.getActivity());
     }
 
     private void updateLockedPeriod(User user, UpdateEntity cmd, Map<String, Object> changes) {
@@ -160,6 +162,7 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
         assertLockRecordsRights(user, lockedPeriod);
 
         updateLockedPeriodProperties(lockedPeriod, changes);
+
     }
 
     private void updateAttribute(User user, UpdateEntity cmd, Map<String, Object> changes) {
@@ -172,6 +175,8 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
         Activity activity = ag.getActivities().iterator().next(); // Assume only one activity for the attr group
         activity.incrementSchemaVersion();
         activity.getDatabase().setLastSchemaUpdate(new Date());
+
+        trackUpdate(user, activity);
     }
 
     private void updateAttributeGroup(User user, UpdateEntity cmd, Map<String, Object> changes) {
@@ -184,6 +189,8 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
         Activity activity = group.getActivities().iterator().next(); // Assume only one activity for the attr group
         activity.incrementSchemaVersion();
         activity.getDatabase().setLastSchemaUpdate(new Date());
+
+        trackUpdate(user, activity);
     }
 
     private void updateTarget(User user, UpdateEntity cmd, Map<String, Object> changes) {

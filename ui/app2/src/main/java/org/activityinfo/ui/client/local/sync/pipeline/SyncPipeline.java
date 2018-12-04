@@ -20,14 +20,16 @@ package org.activityinfo.ui.client.local.sync.pipeline;
 
 import com.bedatadriven.rebar.async.AsyncPipeline;
 import com.google.inject.Inject;
+import org.activityinfo.ui.client.local.sync.AppCacheSynchronizer;
 import org.activityinfo.ui.client.local.sync.DownSynchronizer;
 import org.activityinfo.ui.client.local.sync.UpdateSynchronizer;
 
 public class SyncPipeline extends AsyncPipeline {
 
     @Inject
-    public SyncPipeline(UpdateSynchronizer updateSynchronizer,
+    public SyncPipeline(AppCacheSynchronizer appCacheSynchronizer,
+                        UpdateSynchronizer updateSynchronizer,
                         DownSynchronizer downSychronizer) {
-        super(updateSynchronizer, downSychronizer);
+        super(appCacheSynchronizer, updateSynchronizer, downSychronizer);
     }
 }

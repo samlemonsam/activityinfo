@@ -124,6 +124,10 @@ public class JobResource {
     }
 
     private JobStatus buildStatus(JobEntity job) {
-        return new JobStatus(JobStore.getWebSafeKeyString(job), job.parseDescriptor(), job.getState(), job.parseResult());
+        return new JobStatus(JobStore.getWebSafeKeyString(job),
+                job.parseDescriptor(),
+                job.getState(),
+                job.parseResult(),
+                job.parseError());
     }
 }

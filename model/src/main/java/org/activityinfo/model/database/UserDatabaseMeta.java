@@ -49,6 +49,7 @@ public class UserDatabaseMeta implements JsonSerializable {
     private boolean published = false;
     private boolean pendingTransfer;
     private String version;
+    private boolean suspended;
 
     private final Map<ResourceId, Resource.Node> resourceNodeMap = new HashMap<>();
     private final Map<ResourceId, Resource> resources = new HashMap<>();
@@ -81,6 +82,10 @@ public class UserDatabaseMeta implements JsonSerializable {
 
     public boolean isPublished() {
         return published;
+    }
+
+    public boolean isSuspended() {
+        return suspended;
     }
 
     public Collection<Resource> getResources() {
@@ -127,6 +132,10 @@ public class UserDatabaseMeta implements JsonSerializable {
         } while(true);
 
         return new RecordLockSet(effective);
+    }
+
+    public Resource getResource(ResourceId resourceId) {
+        return resources.get(resourceId);
     }
 
     public String getVersion() {
@@ -221,6 +230,7 @@ public class UserDatabaseMeta implements JsonSerializable {
         object.put("resources", Json.toJsonArray(resources.values()));
         object.put("locks", Json.toJsonArray(locks.values()));
         object.put("grants", Json.toJsonArray(grants.values()));
+        object.put("suspended", suspended);
         return object;
     }
 
@@ -232,6 +242,7 @@ public class UserDatabaseMeta implements JsonSerializable {
         meta.label = object.getString("label");
         meta.visible = object.getBoolean("visible");
         meta.owner = object.getBoolean("owner");
+        meta.suspended = object.getBoolean("suspended");
         if (meta.owner) {
             meta.pendingTransfer = object.getBoolean("pendingTransfer");
         }
@@ -299,6 +310,11 @@ public class UserDatabaseMeta implements JsonSerializable {
 
         public Builder setPublished(boolean published) {
             meta.published = published;
+            return this;
+        }
+
+        public Builder setSuspended(boolean suspended) {
+            meta.suspended = suspended;
             return this;
         }
 

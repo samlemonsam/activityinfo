@@ -30,6 +30,7 @@
 
   <super-source path="jre"/>
 
+  <source path="api"/>
   <source path="account"/>
   <source path="analysis"/>
   <source path="database"/>
@@ -44,4 +45,5 @@
   <source path="resource"/>
   <source path="type"/>
   <source path="util"/>
+  <source path="error"/>
 </module>
