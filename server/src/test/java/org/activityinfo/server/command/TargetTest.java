@@ -28,7 +28,6 @@ import org.activityinfo.legacy.shared.model.TargetDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.server.database.OnDataSet;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -41,7 +40,6 @@ import static junit.framework.Assert.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-@Ignore
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/schema1.db.xml")
 public class TargetTest extends CommandTestCase {
