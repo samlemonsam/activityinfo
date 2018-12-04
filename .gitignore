@@ -1,6 +1,13 @@
 /out
+/*/out
+
+/build
+/*/build
+/*/*/build
+
 target
-build
+
+
 classes
 .gradle
 phantomjsdriver.log
