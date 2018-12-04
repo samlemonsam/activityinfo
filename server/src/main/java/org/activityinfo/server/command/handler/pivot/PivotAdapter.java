@@ -62,7 +62,6 @@ import org.activityinfo.store.mysql.metadata.LinkedActivity;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.shared.FormScanBatch;
-import org.activityinfo.store.spi.BatchingFormTreeBuilder;
 import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.Slot;
