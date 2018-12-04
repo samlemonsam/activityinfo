@@ -1,4 +1,4 @@
-package org.activityinfo.server.database;
+package org.activityinfo.server.database.hibernate;
 
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -12,7 +12,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.server.database.hibernate.HibernateDatabaseGrantProvider;
+import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
 import org.junit.After;
 import org.junit.Before;
@@ -109,9 +109,9 @@ public class HibernateDatabaseGrantProviderTest {
         UserPermission userPermission = queryUserPermission(userId,dbId);
         DatabaseGrant databaseGrant = databaseGrantProvider.getDatabaseGrant(userId, databaseId(dbId));
 
-        // User has been removed and should have no permissions/grants
-        assertNull(userPermission);
-        assertNull(databaseGrant);
+        // User has been removed, but the UserPermission record still exists.
+        // However, the record should have no rights, and should be reflected in our DatabaseGrant
+        match(userPermission, databaseGrant);
     }
 
     @Test
@@ -155,8 +155,7 @@ public class HibernateDatabaseGrantProviderTest {
             return entityManager.get().createQuery("SELECT up " +
                     "FROM UserPermission up " +
                     "WHERE up.user.id=:userId " +
-                    "AND up.database.id=:databaseId " +
-                    "AND up.allowView = TRUE", UserPermission.class)
+                    "AND up.database.id=:databaseId", UserPermission.class)
                     .setParameter("userId", userId)
                     .setParameter("databaseId", databaseId)
                     .getSingleResult();

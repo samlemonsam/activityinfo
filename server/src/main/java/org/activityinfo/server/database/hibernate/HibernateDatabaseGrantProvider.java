@@ -127,8 +127,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
             return entityManager.get().createQuery("SELECT up.version " +
                     "FROM UserPermission up " +
                     "WHERE up.user.id=:userId " +
-                    "AND up.database.id=:databaseId " +
-                    "AND up.allowView = TRUE", Long.class)
+                    "AND up.database.id=:databaseId", Long.class)
                     .setParameter("userId", userId)
                     .setParameter("databaseId", CuidAdapter.getLegacyIdFromCuid(databaseId))
                     .getSingleResult();
@@ -198,12 +197,12 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
     }
 
     private Map<ResourceId,DatabaseGrant> loadFromDb(int userId, Set<ResourceId> databaseIds) {
+        LOGGER.info(() -> String.format("Fetching %d DatabaseGrant(s) from MySqlDatabase", databaseIds.size()));
         Set<Integer> legacyIds = databaseIds.stream().map(CuidAdapter::getLegacyIdFromCuid).collect(Collectors.toSet());
         return entityManager.get().createQuery("SELECT up " +
                 "FROM UserPermission up " +
                 "WHERE up.user.id=:userId " +
-                "AND up.database.id IN :databaseIds " +
-                "AND up.allowView = TRUE", UserPermission.class)
+                "AND up.database.id IN :databaseIds", UserPermission.class)
                 .setParameter("userId", userId)
                 .setParameter("databaseIds", legacyIds)
                 .getResultList().stream()
@@ -212,11 +211,11 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
     }
 
     private Map<Integer,DatabaseGrant> loadFromDb(ResourceId databaseId, Set<Integer> userIds) {
+        LOGGER.info(() -> String.format("Fetching %d DatabaseGrant(s) from MySqlDatabase", userIds.size()));
         return entityManager.get().createQuery("SELECT up " +
                 "FROM UserPermission up " +
                 "WHERE up.user.id IN :userIds " +
-                "AND up.database.id=:databaseId " +
-                "AND up.allowView = TRUE", UserPermission.class)
+                "AND up.database.id=:databaseId", UserPermission.class)
                 .setParameter("userIds", userIds)
                 .setParameter("databaseId", CuidAdapter.getLegacyIdFromCuid(databaseId))
                 .getResultList().stream()
