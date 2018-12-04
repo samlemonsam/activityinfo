@@ -1,10 +1,6 @@
 package org.activityinfo.gcloud
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
-import com.google.api.client.json.jackson2.JacksonFactory
-import com.google.api.services.sqladmin.SQLAdmin
-import com.google.api.services.sqladmin.model.SslCertsInsertRequest
+import groovy.json.JsonSlurper
 import org.activityinfo.store.mysql.MySqlServer
 import org.bouncycastle.openssl.PEMReader
 import org.gradle.api.DefaultTask
@@ -57,41 +53,50 @@ class FetchCloudSqlConfiguration extends DefaultTask {
     public File getKeyStoreFile() {
         return new File(getProjectDir(), "keystore")
     }
+
+    private gcloud(String... args) {
+
+        def command = new ArrayList()
+        command.add 'gcloud'
+        command.add "--project=${projectId}"
+        command.add '--format=json'
+        command.addAll args
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream()
+        project.exec {
+            commandLine command
+            standardOutput = outputStream
+        }
+        return new JsonSlurper().parseText(outputStream.toString());
+    }
     
     @TaskAction
     def fetch() {
-        def httpTransport =  GoogleNetHttpTransport.newTrustedTransport()
-        def jsonFactory = new JacksonFactory()
-        def credentials = GoogleCredential
-                .fromStream(openJsonCredentials())
-                .createScoped([
-                    'https://www.googleapis.com/auth/sqlservice.admin', 
-                    'https://www.googleapis.com/auth/cloud-platform' ])
-        
-        def client = new SQLAdmin.Builder(httpTransport, jsonFactory, credentials)
-                .setApplicationName("ActivityInfo")
-                .build();
-        
-        def instance = client.instances().get(projectId, instanceId).execute();
-        
+
+        def instance = gcloud('sql', 'instances', 'describe', 'activityinfo')
+
         projectDir.mkdirs()
-        
-        serverCertFile.write instance.getServerCaCert().getCert()
-        
+        serverCertFile.write instance.serverCaCert.cert
+
         // Create a client certificate if necessary
-        if(!clientKeyFile.exists()) {
-            def cert = client.sslCerts()
-                    .insert(projectId, instanceId, new SslCertsInsertRequest(commonName: certificateName))
-                    .execute()
-            
-            clientKeyFile.write cert.getClientCert().getCertPrivateKey()
-            clientCertFile.write cert.getClientCert().getCertInfo().getCert()
+        if(!clientKeyFile.exists() || !clientCertFile.exists()) {
+            clientKeyFile.parentFile.mkdirs()
+            clientKeyFile.delete()
+            logger.info("Requesting client certificate at ${clientKeyFile.absolutePath}")
+            def response = gcloud('sql', 'ssl', 'client-certs', 'create',
+                        certificateName,
+                        clientKeyFile.absolutePath,
+                        '--instance=activityinfo')
+
+            clientCertFile.write response.cert
         }
+
+        // Prepare a key store for our SSL connection
         writeJavaKeyStore()
         
         project.environment.database.name = 'activityinfo'
         project.environment.database.server = new MySqlServer(
-                host: instance.getIpAddresses().first().getIpAddress(),
+                host: instance.ipAddresses[0].ipAddress,
                 username: 'root',
                 password: 'root',
                 keyStore: keyStoreFile)
@@ -131,23 +136,5 @@ class FetchCloudSqlConfiguration extends DefaultTask {
         PEMReader reader = new PEMReader(new StringReader(key))
         def keyPair = reader.readObject() as KeyPair
         return keyPair.getPrivate()
-    }
-
-    InputStream openJsonCredentials() {
-        
-        if(System.getenv("SERVICE_KEY")) {
-            return new FileInputStream(System.getenv("SERVICE_KEY"))
-        }
-        
-        File homeDir = new File(project.gradle.gradleUserHomeDir, "serviceKeys")
-        if(homeDir.exists() && homeDir.listFiles()) {
-            for (File file : homeDir.listFiles()) {
-                if (file.name.startsWith(projectId) && file.name.endsWith('.json')) {
-                    return file.newInputStream()
-                }
-            }
-        }
-        throw new RuntimeException("No service key found for ${projectId}: create and download a" +
-                " service key from the Google console and copy it to ${homeDir.absolutePath}")
     }
 }

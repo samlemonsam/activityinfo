@@ -21,14 +21,28 @@ PROJECT=$1
 
 echo "Creating staging environment $PROJECT..."
 
+# Configuration
+ORGANIZATION=1003558959091
+BILLING=00D8A9-A726AA-0E429C
+JENKINS=135288259907-7v3lrtkjp1fs6anotbo3e9ebcq3jto32@developer.gserviceaccount.com
+
+
 # Create the project
 
-gcloud projects create $PROJECT --organization=1003558959091 --set-as-default --enable-cloud-apis
-gcloud alpha billing projects link $PROJECT --billing-account=00D8A9-A726AA-0E429C
+gcloud projects create $PROJECT --organization=$ORGANIZATION --set-as-default --enable-cloud-apis
+gcloud alpha billing projects link $PROJECT --billing-account=$BILLING
 
 # Create the AppEngine instance
 
 gcloud app create --region=europe-west
+
+# Grant Jenkins the permissions to deploy apps here
+gcloud services enable appengine.googleapis.com
+
+gcloud projects add-iam-policy-binding $PROJECT \
+    --member serviceAccount:$JENKINS \
+    --role roles/appengine.deployer
+
 
 # Create the MySQL database
 
@@ -38,9 +52,16 @@ gcloud sql instances create activityinfo \
     --follow-gae-app=$PROJECT \
     --authorized-gae-apps=$PROJECT \
     --region=europe-west1 \
+    --assign-ip \
+    --authorized-networks=0.0.0.0/0 \
+    --require-ssl \
     --tier=D2
 
 gcloud sql databases create activityinfo --instance=activityinfo --charset=utf8mb4
+
+# Create a login we can use to run liquibase
+gcloud sql users create root --instance=activityinfo --host="%" --password=root
+
 
 # Create the initial database schema dump file
 ./gradlew setupTestDatabase
@@ -66,3 +87,4 @@ hibernate.connection.url=jdbc:google:mysql://$PROJECT:activityinfo/activityinfo?
 END_OF_CONFIG
 
 gsutil cp /tmp/config.properties gs://$PROJECT.appspot.com
+
