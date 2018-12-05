@@ -74,11 +74,11 @@ public class UserDatabaseProvider {
         if (databaseMeta.getOwnerId() == userId) {
             return buildOwnedUserDatabaseMeta(databaseMeta);
         }
-        DatabaseGrant databaseGrant = grantProvider.getDatabaseGrant(userId, databaseMeta.getDatabaseId());
-        if (databaseGrant == null) {
+        Optional<DatabaseGrant> databaseGrant = grantProvider.getDatabaseGrant(userId, databaseMeta.getDatabaseId());
+        if (!databaseGrant.isPresent()) {
             return buildGrantlessUserDatabaseMeta(databaseMeta, userId);
         }
-        return buildUserDatabaseMeta(databaseGrant, databaseMeta);
+        return buildUserDatabaseMeta(databaseGrant.get(), databaseMeta);
     }
 
     private Stream<UserDatabaseMeta> fetchAssignedUserDatabaseMeta(int userId) {

@@ -41,23 +41,26 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
     }
 
     @Override
-    public @Nullable DatabaseGrant getDatabaseGrant(int userId, @NotNull ResourceId databaseId) {
+    public Optional<DatabaseGrant> getDatabaseGrant(int userId, @NotNull ResourceId databaseId) {
         Map<ResourceId,Long> grantVersion = queryGrantVersions(userId, Collections.singleton(databaseId));
         if (grantVersion.isEmpty()) {
-            return null;
+            return Optional.empty();
         }
         Map<ResourceId,DatabaseGrant> loaded = loadFromCache(userId, grantVersion);
         if (!loaded.isEmpty()) {
-            return loaded.get(databaseId);
+            return Optional.of(loaded.get(databaseId));
         }
         loaded = loadFromDb(userId, grantVersion.keySet());
         cacheToMemcache(loaded.values());
-        return loaded.get(databaseId);
+        return Optional.of(loaded.get(databaseId));
     }
 
     @Override
     public List<DatabaseGrant> getAllDatabaseGrantsForUser(int userId) {
         Set<ResourceId> grantedDatabases = queryGrantedDatabases(userId);
+        if (grantedDatabases.isEmpty()) {
+            return Collections.emptyList();
+        }
         Map<ResourceId,Long> grantVersions = queryGrantVersions(userId, grantedDatabases);
         Map<ResourceId,DatabaseGrant> loaded = loadFromCache(userId, grantVersions);
         if (loaded.size() == grantVersions.size()) {
@@ -74,7 +77,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
     public List<DatabaseGrant> getAllDatabaseGrantsForDatabase(@NotNull ResourceId databaseId) {
         Set<Integer> users = queryGrantedUsers(databaseId);
         if (users.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
         Map<Integer,Long> grantVersions = queryGrantVersions(users, databaseId);
         Map<Integer,DatabaseGrant> loaded = loadFromCache(databaseId, grantVersions);

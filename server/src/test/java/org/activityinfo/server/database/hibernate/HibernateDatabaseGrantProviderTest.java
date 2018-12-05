@@ -23,6 +23,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -63,10 +64,10 @@ public class HibernateDatabaseGrantProviderTest {
         int userId = 3;
         int dbId = 1;
         UserPermission userPermission = queryUserPermission(userId,dbId);
-        DatabaseGrant databaseGrant = databaseGrantProvider.getDatabaseGrant(userId, databaseId(dbId));
+        Optional<DatabaseGrant> databaseGrant = databaseGrantProvider.getDatabaseGrant(userId, databaseId(dbId));
         assertNotNull(userPermission);
-        assertNotNull(databaseGrant);
-        match(userPermission, databaseGrant);
+        assertTrue(databaseGrant.isPresent());
+        match(userPermission, databaseGrant.get());
     }
 
     private static void match(UserPermission userPermission, DatabaseGrant databaseGrant) {
@@ -95,11 +96,11 @@ public class HibernateDatabaseGrantProviderTest {
         int userId = 66666;
         int dbId = 1;
         UserPermission userPermission = queryUserPermission(userId,dbId);
-        DatabaseGrant databaseGrant = databaseGrantProvider.getDatabaseGrant(userId, databaseId(dbId));
+        Optional<DatabaseGrant> databaseGrant = databaseGrantProvider.getDatabaseGrant(userId, databaseId(dbId));
 
         // Database exists but users permission should not
         assertNull(userPermission);
-        assertNull(databaseGrant);
+        assertFalse(databaseGrant.isPresent());
     }
 
     @Test
@@ -107,21 +108,23 @@ public class HibernateDatabaseGrantProviderTest {
         int userId = 5;
         int dbId = 1;
         UserPermission userPermission = queryUserPermission(userId,dbId);
-        DatabaseGrant databaseGrant = databaseGrantProvider.getDatabaseGrant(userId, databaseId(dbId));
+        Optional<DatabaseGrant> databaseGrant = databaseGrantProvider.getDatabaseGrant(userId, databaseId(dbId));
 
         // User has been removed, but the UserPermission record still exists.
         // However, the record should have no rights, and should be reflected in our DatabaseGrant
-        match(userPermission, databaseGrant);
+        assertNotNull(userPermission);
+        assertTrue(databaseGrant.isPresent());
+        match(userPermission, databaseGrant.get());
     }
 
     @Test
     public void databaseGrantForOwner() {
         UserPermission userPermission = queryUserPermission(1,1);
-        DatabaseGrant databaseGrant = databaseGrantProvider.getDatabaseGrant(1, databaseId(1));
+        Optional<DatabaseGrant> databaseGrant = databaseGrantProvider.getDatabaseGrant(1, databaseId(1));
 
         // Neither should exist
         assertNull(userPermission);
-        assertNull(databaseGrant);
+        assertFalse(databaseGrant.isPresent());
     }
 
     @Test
