@@ -39,24 +39,30 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
     }
 
     @Override
-    public @Nullable DatabaseMeta getDatabaseMeta(@NotNull ResourceId databaseId) {
+    public Optional<DatabaseMeta> getDatabaseMeta(@NotNull ResourceId databaseId) {
         Long databaseVersion = queryDatabaseVersion(databaseId);
         if (databaseVersion == null) {
-            return null;
+            return Optional.empty();
         }
         Map<ResourceId,DatabaseMeta> loaded = loadFromMemcache(Collections.singletonMap(databaseId,databaseVersion));
         if (!loaded.isEmpty()) {
-            return loaded.get(databaseId);
+            return Optional.of(loaded.get(databaseId));
         }
         Map<ResourceId,DatabaseMeta> loadedFromDb = loadFromDb(Collections.singleton(databaseId));
         cacheToMemcache(loadedFromDb.values());
-        return loadedFromDb.get(databaseId);
+        return Optional.of(loadedFromDb.get(databaseId));
     }
 
     @Override
     public Map<ResourceId,DatabaseMeta> getDatabaseMeta(@NotNull Set<ResourceId> databases) {
-        Map<ResourceId,DatabaseMeta> loaded = new HashMap<>(databases.size());
+        if (databases.isEmpty()) {
+            return Collections.emptyMap();
+        }
         Map<ResourceId,Long> toFetch = queryDatabaseVersions(databases);
+        if (toFetch.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<ResourceId,DatabaseMeta> loaded = new HashMap<>(databases.size());
         loaded.putAll(loadFromMemcache(toFetch));
         if (loaded.size() == toFetch.size()) {
             return loaded;
@@ -71,11 +77,14 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
     @Override
     public Map<ResourceId, DatabaseMeta> getOwnedDatabaseMeta(int ownerId) {
         Set<ResourceId> ownedDatabases = queryOwnedDatabaseIds(ownerId);
+        if (ownedDatabases.isEmpty()) {
+            return Collections.emptyMap();
+        }
         return getDatabaseMeta(ownedDatabases);
     }
 
     @Override
-    public @Nullable DatabaseMeta getDatabaseMetaForResource(@NotNull ResourceId resourceId) {
+    public Optional<DatabaseMeta> getDatabaseMetaForResource(@NotNull ResourceId resourceId) {
         switch(resourceId.getDomain()) {
             case CuidAdapter.DATABASE_DOMAIN:
                 return getDatabaseMeta(resourceId);
@@ -91,7 +100,6 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
     }
 
     private Map<ResourceId,Long> queryDatabaseVersions(@NotNull Set<ResourceId> databaseIds) {
-        LOGGER.info(() -> String.format("Querying %d DatabaseMeta Versions from MySqlDatabase", databaseIds.size()));
         Map<ResourceId,Long> versions = databaseIds.stream()
                 .collect(Collectors.toMap(
                         dbId -> dbId,
@@ -175,7 +183,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         return String.format("%s:%d", databaseId.asString(), databaseVersion);
     }
 
-    private Long queryDatabaseVersion(ResourceId databaseId) {
+    private @Nullable Long queryDatabaseVersion(ResourceId databaseId) {
         try {
             return entityManager.get().createQuery("SELECT db.version " +
                     "FROM Database db " +
@@ -213,7 +221,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         }
     }
 
-    private @Nullable DatabaseMeta buildMeta(@Nullable  Database database) {
+    private @Nullable DatabaseMeta buildMeta(@Nullable Database database) {
         if (database == null) {
             return null;
         }

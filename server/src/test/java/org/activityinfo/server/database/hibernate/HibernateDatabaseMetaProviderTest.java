@@ -21,6 +21,7 @@ import org.junit.runner.RunWith;
 import javax.persistence.EntityManager;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -59,17 +60,17 @@ public class HibernateDatabaseMetaProviderTest {
     @Test
     public void getDatabase() {
         Database database = entityManager.get().find(Database.class, 1);
-        DatabaseMeta databaseMeta = databaseMetaProvider.getDatabaseMeta(databaseId(1));
-        assertNotNull(databaseMeta);
-        match(databaseMeta, database);
+        Optional<DatabaseMeta> databaseMeta = databaseMetaProvider.getDatabaseMeta(databaseId(1));
+        assertTrue(databaseMeta.isPresent());
+        match(databaseMeta.get(), database);
     }
 
     @Test
     public void getMissingDatabase() {
         Database database = entityManager.get().find(Database.class, 66666);
-        DatabaseMeta databaseMeta = databaseMetaProvider.getDatabaseMeta(databaseId(66666));
+        Optional<DatabaseMeta> databaseMeta = databaseMetaProvider.getDatabaseMeta(databaseId(66666));
         assertNull(database);
-        assertNull(databaseMeta);
+        assertFalse(databaseMeta.isPresent());
     }
 
     private void match(DatabaseMeta databaseMeta, Database database) {
@@ -87,6 +88,7 @@ public class HibernateDatabaseMetaProviderTest {
                 CuidAdapter.databaseId(4));
 
         Map<ResourceId,DatabaseMeta> databaseMeta = databaseMetaProvider.getDatabaseMeta(databaseIds);
+        assertFalse(databaseMeta.isEmpty());
         for (DatabaseMeta meta : databaseMeta.values()) {
             assertNotNull(meta);
             Database database = entityManager.get().find(Database.class, CuidAdapter.getLegacyIdFromCuid(meta.getDatabaseId()));
@@ -106,9 +108,9 @@ public class HibernateDatabaseMetaProviderTest {
         // Activity 2 is in Database 1
         ResourceId formId = CuidAdapter.activityFormClass(2);
         Database database = entityManager.get().find(Database.class, 1);
-        DatabaseMeta databaseMeta = databaseMetaProvider.getDatabaseMetaForResource(formId);
-        assertNotNull(databaseMeta);
-        match(databaseMeta, database);
+        Optional<DatabaseMeta> databaseMeta = databaseMetaProvider.getDatabaseMetaForResource(formId);
+        assertTrue(databaseMeta.isPresent());
+        match(databaseMeta.get(), database);
     }
 
 }

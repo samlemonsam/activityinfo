@@ -24,6 +24,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.DatabaseGrantProvider;
 import org.activityinfo.store.spi.DatabaseMetaProvider;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -52,25 +53,23 @@ public class UserDatabaseProvider {
                 .collect(Collectors.toList());
     }
 
-    public UserDatabaseMeta queryDatabaseMeta(ResourceId databaseId, int userId) {
-        DatabaseMeta databaseMeta = metaProvider.getDatabaseMeta(databaseId);
-        if (databaseMeta == null) {
-            LOGGER.severe(String.format("Database %s requested by User %d does not exist", databaseId.asString(), userId));
-            throw new IllegalArgumentException();
+    public UserDatabaseMeta queryDatabaseMeta(@NotNull ResourceId databaseId, int userId) {
+        Optional<DatabaseMeta> databaseMeta = metaProvider.getDatabaseMeta(databaseId);
+        if (!databaseMeta.isPresent()) {
+            return null;
         }
-        return findGrantAndBuildMeta(databaseMeta, userId);
+        return findGrantAndBuildMeta(databaseMeta.get(), userId);
     }
 
-    public UserDatabaseMeta queryUserDatabaseMetaByResource(ResourceId resourceId, int userId) {
-        DatabaseMeta databaseMeta = metaProvider.getDatabaseMetaForResource(resourceId);
-        if (databaseMeta == null) {
-            LOGGER.severe(String.format("Database with Resource %s requested by User %d does not exist", resourceId.asString(), userId));
-            throw new IllegalArgumentException();
+    public UserDatabaseMeta queryUserDatabaseMetaByResource(@NotNull ResourceId resourceId, int userId) {
+        Optional<DatabaseMeta> databaseMeta = metaProvider.getDatabaseMetaForResource(resourceId);
+        if (!databaseMeta.isPresent()) {
+            return null;
         }
-        return findGrantAndBuildMeta(databaseMeta, userId);
+        return findGrantAndBuildMeta(databaseMeta.get(), userId);
     }
 
-    private UserDatabaseMeta findGrantAndBuildMeta(DatabaseMeta databaseMeta, int userId) {
+    private UserDatabaseMeta findGrantAndBuildMeta(@NotNull DatabaseMeta databaseMeta, int userId) {
         if (databaseMeta.getOwnerId() == userId) {
             return buildOwnedUserDatabaseMeta(databaseMeta);
         }
@@ -83,17 +82,26 @@ public class UserDatabaseProvider {
 
     private Stream<UserDatabaseMeta> fetchAssignedUserDatabaseMeta(int userId) {
         List<DatabaseGrant> databaseGrants = grantProvider.getAllDatabaseGrantsForUser(userId);
+        if (databaseGrants.isEmpty()) {
+            return Stream.empty();
+        }
         Set<ResourceId> assignedDatabaseIds = databaseGrants.stream().map(DatabaseGrant::getDatabaseId).collect(Collectors.toSet());
         Map<ResourceId,DatabaseMeta> databaseMeta = metaProvider.getDatabaseMeta(assignedDatabaseIds);
+        if (databaseMeta.isEmpty()) {
+            return Stream.empty();
+        }
         return databaseGrants.stream().map(grant -> buildUserDatabaseMeta(grant, databaseMeta.get(grant.getDatabaseId())));
     }
 
-    private Stream <UserDatabaseMeta> fetchOwnedUserDatabaseMeta(int userId) {
-        return metaProvider.getOwnedDatabaseMeta(userId).values().stream()
-                .map(UserDatabaseProvider::buildOwnedUserDatabaseMeta);
+    private Stream<UserDatabaseMeta> fetchOwnedUserDatabaseMeta(int userId) {
+        Map<ResourceId,DatabaseMeta> ownedDatabaseMeta = metaProvider.getOwnedDatabaseMeta(userId);
+        if (ownedDatabaseMeta.isEmpty()) {
+            return Stream.empty();
+        }
+        return ownedDatabaseMeta.values().stream().map(UserDatabaseProvider::buildOwnedUserDatabaseMeta);
     }
 
-    private static UserDatabaseMeta buildOwnedUserDatabaseMeta(DatabaseMeta databaseMeta) {
+    private static UserDatabaseMeta buildOwnedUserDatabaseMeta(@NotNull DatabaseMeta databaseMeta) {
         return new UserDatabaseMeta.Builder()
                 .setDatabaseId(databaseMeta.getDatabaseId())
                 .setUserId(databaseMeta.getOwnerId())
@@ -107,7 +115,7 @@ public class UserDatabaseProvider {
                 .build();
     }
 
-    private static UserDatabaseMeta buildUserDatabaseMeta(DatabaseGrant databaseGrant, DatabaseMeta databaseMeta) {
+    private static UserDatabaseMeta buildUserDatabaseMeta(@NotNull DatabaseGrant databaseGrant, @NotNull DatabaseMeta databaseMeta) {
         return new UserDatabaseMeta.Builder()
                 .setDatabaseId(databaseMeta.getDatabaseId())
                 .setUserId(databaseGrant.getUserId())
@@ -121,7 +129,7 @@ public class UserDatabaseProvider {
                 .build();
     }
 
-    private static UserDatabaseMeta buildGrantlessUserDatabaseMeta(DatabaseMeta databaseMeta, int userId) {
+    private static UserDatabaseMeta buildGrantlessUserDatabaseMeta(@NotNull DatabaseMeta databaseMeta, int userId) {
         return new UserDatabaseMeta.Builder()
                 .setDatabaseId(databaseMeta.getDatabaseId())
                 .setUserId(userId)
