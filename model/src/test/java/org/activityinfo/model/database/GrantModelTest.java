@@ -1,6 +1,5 @@
 package org.activityinfo.model.database;
 
-import com.google.common.base.Optional;
 import org.activityinfo.json.JsonParser;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.legacy.CuidAdapter;
@@ -8,6 +7,8 @@ import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.resource.ResourceId;
 import org.junit.Test;
+
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -32,7 +33,7 @@ public class GrantModelTest {
         assertThat(model.getOperations(), containsInAnyOrder(Operation.VIEW, Operation.EDIT_RECORD, Operation.MANAGE_USERS));
         assertThat(model.getFilter(Operation.VIEW), equalTo(Optional.of(partnerFilter())));
         assertThat(model.getFilter(Operation.EDIT_RECORD), equalTo(Optional.of(partnerFilter())));
-        assertThat(model.getFilter(Operation.MANAGE_USERS), equalTo(Optional.absent()));
+        assertThat(model.getFilter(Operation.MANAGE_USERS), equalTo(Optional.empty()));
     }
 
     @Test

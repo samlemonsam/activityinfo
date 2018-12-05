@@ -96,9 +96,8 @@ public class UserDatabaseMeta implements JsonSerializable {
         return resources.containsKey(resourceId);
     }
 
-    public Resource getResource(ResourceId resourceId) {
-        assert hasResource(resourceId) : "No resource found for given resourceId";
-        return resources.get(resourceId);
+    public Optional<Resource> getResource(ResourceId resourceId) {
+        return Optional.ofNullable(resources.get(resourceId));
     }
 
     public List<Resource> getRootResources() {
@@ -111,9 +110,8 @@ public class UserDatabaseMeta implements JsonSerializable {
         return grants.containsKey(resourceId);
     }
 
-    public GrantModel getGrant(ResourceId resourceId) {
-        assert hasGrant(resourceId) : "No grant found for given resourceId";
-        return grants.get(resourceId);
+    public Optional<GrantModel> getGrant(ResourceId resourceId) {
+        return Optional.ofNullable(grants.get(resourceId));
     }
 
     public Collection<RecordLock> getLocks() {

@@ -1,11 +1,11 @@
 package org.activityinfo.model.permission;
 
-import com.google.common.base.Optional;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 /**
  * <p>Response from a {@link PermissionQuery}. Specifies whether the operation requested is permitted.</p>
@@ -51,7 +51,7 @@ public class Permission implements JsonSerializable {
     }
 
     public @Nullable String getFilter() {
-        return filter.orNull();
+        return filter.orElse(null);
     }
 
     public void setFilter(Optional<String> filter) {
@@ -75,7 +75,7 @@ public class Permission implements JsonSerializable {
         Permission permission = new Permission();
         permission.operation = Operation.valueOf(object.get("operation").asString());
         permission.permitted = object.get("permitted").asBoolean();
-        permission.filter = Optional.fromNullable(object.get("filter").asString());
+        permission.filter = Optional.ofNullable(object.get("filter").asString());
         return permission;
     }
 }

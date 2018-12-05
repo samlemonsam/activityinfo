@@ -18,7 +18,6 @@
  */
 package org.activityinfo.model.permission;
 
-import com.google.common.base.Optional;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
@@ -28,6 +27,7 @@ import org.activityinfo.model.resource.ResourceId;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -107,7 +107,7 @@ public class GrantModel implements JsonSerializable {
             for (int i=0; i<opArray.length(); i++) {
                 JsonValue opObject = opArray.get(i);
                 Operation operation = Operation.valueOf(opObject.get("operation").asString());
-                Optional<String> filter = Optional.fromNullable(opObject.get("filter").asString());
+                Optional<String> filter = Optional.ofNullable(opObject.get("filter").asString());
                 grant.operations.put(operation, filter);
             }
         }
@@ -132,7 +132,7 @@ public class GrantModel implements JsonSerializable {
          * Adds a permitted {@link Operation} to this grant.
          */
         public Builder addOperation(Operation operation) {
-            model.operations.put(operation, Optional.absent());
+            model.operations.put(operation, Optional.empty());
             return this;
         }
 

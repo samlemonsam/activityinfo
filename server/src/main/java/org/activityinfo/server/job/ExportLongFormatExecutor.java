@@ -2,7 +2,6 @@ package org.activityinfo.server.job;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import org.activityinfo.analysis.pivot.LongFormatTableBuilder;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.GetSchema;
@@ -22,17 +21,14 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.server.command.DispatcherSync;
-import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
-import org.activityinfo.server.endpoint.rest.DatabaseProviderImpl;
 import org.activityinfo.server.generated.StorageProvider;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.store.spi.DatabaseProvider;
 
-import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -101,7 +97,8 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
                 .map(FormClass::getId)
                 .map(ExportLongFormatExecutor::monthlyToParentFormId)
                 .map(databaseMeta::getResource)
-                .filter(Objects::nonNull)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toMap(
                         Resource::getId,
                         resource -> getParentLabel(databaseMeta, resource)));
@@ -127,14 +124,11 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
     }
 
     private String getParentLabel(UserDatabaseMeta databaseMeta, Resource child) {
-        if (child.getParentId().getDomain() == CuidAdapter.DATABASE_DOMAIN) {
-            return "";
+        Optional<Resource> parent = databaseMeta.getResource(child.getParentId());
+        if (!parent.isPresent()) {
+            return parent.get().getLabel();
         }
-        Resource parent = databaseMeta.getResource(child.getParentId());
-        if (parent == null) {
-            return "";
-        }
-        return parent.getLabel();
+        return "";
     }
 
     private List<FormTree> getFormScope(UserDatabaseDTO database) {

@@ -1,6 +1,5 @@
 package org.activityinfo.model.permission;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.database.Resource;
@@ -17,6 +16,8 @@ import org.activityinfo.model.formula.functions.EqualFunction;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
+
+import java.util.Optional;
 
 public class PermissionOracle {
 
@@ -52,7 +53,7 @@ public class PermissionOracle {
      * Allow the owner of a database full permissions with no record filters
      */
     private static Permission allowOwner(Operation operation) {
-        return new Permission(operation, true, Optional.absent());
+        return new Permission(operation, true, Optional.empty());
     }
 
     /**
@@ -69,7 +70,7 @@ public class PermissionOracle {
      * Allow permission outright for the specified operation, with no filter
      */
     private static Permission allow(Operation operation) {
-        return new Permission(operation, true, Optional.absent());
+        return new Permission(operation, true, Optional.empty());
     }
 
 
@@ -77,7 +78,7 @@ public class PermissionOracle {
      * Deny permission outright for the specified operation
      */
     private static Permission deny(Operation operation) {
-        return new Permission(operation, false, Optional.absent());
+        return new Permission(operation, false, Optional.empty());
     }
 
     /**
@@ -105,7 +106,9 @@ public class PermissionOracle {
      */
     private static boolean operationPermitted(Operation operation, ResourceId resourceId, UserDatabaseMeta db) {
         if (isDatabase(resourceId)) {
-            return db.getDatabaseId().equals(resourceId) && db.hasGrant(resourceId) && db.getGrant(resourceId).hasOperation(operation);
+            return db.getDatabaseId().equals(resourceId)
+                    && db.hasGrant(resourceId)
+                    && db.getGrant(resourceId).get().hasOperation(operation);
         } else if (isPartnerForm(resourceId)) {
             return allowedPartnerOperation(operation, db);
         } else if (isProjectForm(resourceId)) {
@@ -113,7 +116,8 @@ public class PermissionOracle {
         } else if (isAdminLevelForm(resourceId)) {
             return allowedAdminLevelOperation(operation, db);
         } else {
-            return db.hasResource(resourceId) && granted(operation, db.getResource(resourceId), db);
+            return db.hasResource(resourceId)
+                    && granted(operation, db.getResource(resourceId).get(), db);
         }
     }
 
@@ -154,12 +158,12 @@ public class PermissionOracle {
 
     private static Optional<GrantModel> findDatabaseGrantIfPresent(UserDatabaseMeta db) {
         if (!db.isVisible()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         if (!db.hasGrant(db.getDatabaseId())) {
-            return Optional.absent();
+            return Optional.empty();
         }
-        return Optional.of(db.getGrant(db.getDatabaseId()));
+        return db.getGrant(db.getDatabaseId());
     }
 
     private static boolean allowedAdminLevelOperation(Operation operation, UserDatabaseMeta db) {
@@ -173,7 +177,7 @@ public class PermissionOracle {
     private static boolean granted(Operation operation, Resource resource, UserDatabaseMeta db) {
         // If there is an explicit grant, check whether the operation is granted at this level
         if (db.hasGrant(resource.getId())) {
-            return db.getGrant(resource.getId()).hasOperation(operation);
+            return db.getGrant(resource.getId()).get().hasOperation(operation);
         }
 
         // If there is no explicit grant:
@@ -188,10 +192,11 @@ public class PermissionOracle {
         // 3. Check further up the Resource tree:
         // -> If the parent of this resource is the root database, then check whether operation exists on database grant
         if (isDatabase(resource.getParentId())) {
-            return db.hasGrant(resource.getParentId()) && db.getGrant(resource.getParentId()).hasOperation(operation);
+            return db.hasGrant(resource.getParentId())
+                    && db.getGrant(resource.getParentId()).get().hasOperation(operation);
         }
         // -> Otherwise, we climb the resource tree to determine whether the operation is granted there
-        return granted(operation, db.getResource(resource.getParentId()), db);
+        return granted(operation, db.getResource(resource.getParentId()).get(), db);
     }
 
     private static Optional<String> operationFilter(Operation operation, ResourceId resourceId, UserDatabaseMeta db) {
@@ -200,11 +205,11 @@ public class PermissionOracle {
         } else if (isPartnerForm(resourceId)) {
             return getFilter(Operation.MANAGE_USERS, db.getDatabaseId(), db);
         } else if (isProjectForm(resourceId)) {
-            return Optional.absent();
+            return Optional.empty();
         } else if (isAdminLevelForm(resourceId)) {
-            return Optional.absent();
+            return Optional.empty();
         } else {
-            return collectFilters(operation, db.getResource(resourceId), db);
+            return collectFilters(operation, db.getResource(resourceId).get(), db);
         }
     }
 
@@ -225,20 +230,20 @@ public class PermissionOracle {
             Optional<String> dbFilter = getFilter(operation, resource.getParentId(), db);
             return and(filter, dbFilter);
         }
-        return and(filter, collectFilters(operation, db.getResource(resource.getParentId()), db));
+        return and(filter, collectFilters(operation, db.getResource(resource.getParentId()).get(), db));
     }
 
     private static Optional<String> getFilter(Operation operation, ResourceId resourceId, UserDatabaseMeta db) {
-        Optional<String> filter = Optional.absent();
-        if (db.hasGrant(resourceId) && db.getGrant(resourceId).hasOperation(operation)) {
-            filter = db.getGrant(resourceId).getFilter(operation);
+        Optional<String> filter = Optional.empty();
+        if (db.hasGrant(resourceId) && db.getGrant(resourceId).get().hasOperation(operation)) {
+            filter = db.getGrant(resourceId).get().getFilter(operation);
         }
         return filter;
     }
 
     private static Optional<String> and(Optional<String> filter1, Optional<String> filter2) {
         if (!filter1.isPresent() && !filter2.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         } else if (!filter1.isPresent()) {
             return filter2;
         } else if (!filter2.isPresent()) {
@@ -289,7 +294,7 @@ public class PermissionOracle {
         if (!db.hasResource(formId)) {
             return FormPermissions.none();
         }
-        if (ResourceType.FORM != db.getResource(formId).getType()) {
+        if (ResourceType.FORM != db.getResource(formId).get().getType()) {
             return FormPermissions.none();
         }
         return computeFormPermissions(formId, db);
