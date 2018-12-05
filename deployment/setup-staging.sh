@@ -42,7 +42,7 @@ gcloud services enable appengine.googleapis.com
 
 gcloud projects add-iam-policy-binding $PROJECT \
     --member serviceAccount:$JENKINS \
-    --role roles/appengine.deployer
+    --role roles/appengine.appAdmin
 
 gcloud projects add-iam-policy-binding $PROJECT \
     --member serviceAccount:$JENKINS \
@@ -83,15 +83,22 @@ gsutil cp /tmp/init.sql.gz gs://staging.$PROJECT.appspot.com
 gcloud --quiet sql import sql activityinfo gs://staging.$PROJECT.appspot.com/init.sql.gz \
     --database=activityinfo
 
+# Create a bucket for attachment fields
+ATTACHMENT_BUCKET=$PROJECT-attachments
+gsutil mb -p $PROJECT -l europe-west4 gs://$ATTACHMENT_BUCKET
+
 # Create configuration file
 
 cat > /tmp/config.properties <<- END_OF_CONFIG
 hibernate.connection.driver_class=com.mysql.jdbc.GoogleDriver
 hibernate.connection.url=jdbc:google:mysql://$PROJECT:activityinfo/activityinfo?useUnicode=true&characterEncoding=utf8&user=root&zeroDateTimeBehavior=convertToNull
+blobservice.gcs.bucket.name=$ATTACHMENT_BUCKET
 END_OF_CONFIG
 
 gsutil cat gs://ai-config/postmark.properties >> /tmp/config.properties
 gsutil cat gs://ai-config/mailchimp.properties >> /tmp/config.properties
 
 gsutil cp /tmp/config.properties gs://$PROJECT.appspot.com
+
+rm /tmp/config.properties
 
