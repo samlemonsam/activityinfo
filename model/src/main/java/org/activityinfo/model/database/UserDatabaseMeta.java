@@ -149,7 +149,6 @@ public class UserDatabaseMeta implements JsonSerializable {
     }
 
     public boolean isPendingTransfer() {
-        assert isOwner() : "User is not the owner of the database.";
         return pendingTransfer;
     }
 
