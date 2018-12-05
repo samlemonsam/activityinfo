@@ -42,11 +42,10 @@ gcloud services enable appengine.googleapis.com
 
 gcloud projects add-iam-policy-binding $PROJECT \
     --member serviceAccount:$JENKINS \
-    --role roles/appengine.appAdmin
-
-gcloud projects add-iam-policy-binding $PROJECT \
-    --member serviceAccount:$JENKINS \
-    --role roles/cloudsql.admin
+    --role roles/appengine.appAdmin \
+    --role roles/datastore.indexAdmin \
+    --role roles/cloudsql.admin \
+    --role roles/cloudtasks.queueAdmin
 
 # Create the MySQL database
 
