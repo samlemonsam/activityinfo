@@ -64,8 +64,6 @@ public class FormMetadata implements JsonSerializable {
 
     private boolean visible = true;
 
-    private RecordLockSet locks = RecordLockSet.EMPTY;
-
     private boolean suspended;
 
     public static FormMetadata notFound(ResourceId formId) {
@@ -110,10 +108,6 @@ public class FormMetadata implements JsonSerializable {
 
     public FormPermissions getPermissions() {
         return permissions;
-    }
-
-    public RecordLockSet getLocks() {
-        return locks;
     }
 
     public boolean isVisible() {
@@ -164,9 +158,6 @@ public class FormMetadata implements JsonSerializable {
         if(schema != null) {
             object.put("schema", schema.toJson());
         }
-        if(!locks.isEmpty()) {
-            object.put("locks", locks.toJson());
-        }
         if(visible) {
             object.put("version", version);
             object.put("schemaVersion", schemaVersion);
@@ -200,9 +191,6 @@ public class FormMetadata implements JsonSerializable {
         if(object.hasKey("deleted")) {
             metadata.deleted = object.get("deleted").asBoolean();
         }
-        if(object.hasKey("locks")) {
-            metadata.locks = RecordLockSet.fromJson(object.get("locks"));
-        }
         if(object.hasKey("suspended")) {
             metadata.suspended = object.getBoolean("suspended");
         }
@@ -226,11 +214,6 @@ public class FormMetadata implements JsonSerializable {
 
         public Builder setPermissions(FormPermissions permissions) {
             meta.permissions = permissions;
-            return this;
-        }
-
-        public Builder setLocks(RecordLockSet locks) {
-            meta.locks = locks;
             return this;
         }
 
