@@ -55,6 +55,10 @@ task compileApp(type: JavaExec) {
 
     dependsOn compileJava
 
+    // Ensure that we don't run this compilation in parallel with
+    // the new app, because both task use all available cores
+    mustRunAfter ':ui:app:compileApp'
+
     outputs.dir outputDir
     inputs.dir sourceSets.main.allSource.srcDirs
 
