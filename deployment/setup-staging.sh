@@ -37,12 +37,16 @@ gcloud alpha billing projects link $PROJECT --billing-account=$BILLING
 gcloud app create --region=europe-west
 
 # Grant Jenkins the permissions to deploy apps here
+
 gcloud services enable appengine.googleapis.com
 
 gcloud projects add-iam-policy-binding $PROJECT \
     --member serviceAccount:$JENKINS \
     --role roles/appengine.deployer
 
+gcloud projects add-iam-policy-binding $PROJECT \
+    --member serviceAccount:$JENKINS \
+    --role roles/cloudsql.admin
 
 # Create the MySQL database
 
@@ -85,6 +89,9 @@ cat > /tmp/config.properties <<- END_OF_CONFIG
 hibernate.connection.driver_class=com.mysql.jdbc.GoogleDriver
 hibernate.connection.url=jdbc:google:mysql://$PROJECT:activityinfo/activityinfo?useUnicode=true&characterEncoding=utf8&user=root&zeroDateTimeBehavior=convertToNull
 END_OF_CONFIG
+
+gsutil cat gs://ai-config/postmark.properties >> /tmp/config.properties
+gsutil cat gs://ai-config/mailchimp.properties >> /tmp/config.properties
 
 gsutil cp /tmp/config.properties gs://$PROJECT.appspot.com
 
