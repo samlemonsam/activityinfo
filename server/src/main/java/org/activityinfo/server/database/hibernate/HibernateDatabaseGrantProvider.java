@@ -246,6 +246,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         }
         GrantModel rootGrant = buildRootGrant(CuidAdapter.databaseId(userPermission.getDatabase().getId()), userPermission);
         if (userPermission.getModel() == null) {
+            grants.add(rootGrant);
             return grants;
         }
         JsonValue modelObject = Json.parse(userPermission.getModel());
