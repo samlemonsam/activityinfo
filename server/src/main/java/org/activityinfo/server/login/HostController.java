@@ -41,8 +41,8 @@ public class HostController {
     public static final String ENDPOINT = "/app";
 
     private final ServerSideAuthProvider authProvider;
-    private Provider<EntityManager> entityManager;
-    private ContentSecurityPolicy contentSecurityPolicy;
+    private final Provider<EntityManager> entityManager;
+    private final ContentSecurityPolicy contentSecurityPolicy = new ContentSecurityPolicy();
 
     @Inject
     public HostController(ServerSideAuthProvider authProvider,

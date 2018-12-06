@@ -27,7 +27,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
-import org.activityinfo.server.csp.ContentSecurityPolicy;
 import org.activityinfo.server.database.hibernate.entity.Authentication;
 
 import javax.persistence.EntityManager;
@@ -57,7 +56,6 @@ public class AuthenticationFilter implements Filter {
     private final Provider<EntityManager> entityManager;
     private final ServerSideAuthProvider authProvider;
     private final BasicAuthentication basicAuthenticator;
-    private final ContentSecurityPolicy contentSecurityPolicy = new ContentSecurityPolicy();
 
     private final LoadingCache<String, AuthenticatedUser> authTokenCache;
 
