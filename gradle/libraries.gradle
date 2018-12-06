@@ -88,7 +88,7 @@ ext {
         ],
 
         hibernate: [
-            entitymanager:  'org.hibernate:hibernate-entitymanager:4.2.8.Final',
+            entitymanager:  'org.hibernate:hibernate-entitymanager:4.2.21.Final',
             spatial:        'org.hibernate:hibernate-spatial:4.0',
             validator:      'org.hibernate:hibernate-validator:4.3.2.Final'
         ],
@@ -186,6 +186,11 @@ subprojects {
                     details.useVersion '1.23.0'
                 } else if(details.requested.group == 'com.google.guava') {
                     details.useVersion guavaVersion
+                }
+
+                // Avoid vulnerability CVE-2018-1000632 if dom4j is transitive dependency
+                if(details.requested.group == 'dom4j' && details.requested.name == 'dom4j') {
+                    details.useTarget 'org.dom4j:dom4j:2.1.1'
                 }
             }
         }
