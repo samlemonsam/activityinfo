@@ -56,9 +56,9 @@ public class HibernateModule extends ServletModule {
         bind(HibernateSessionScope.class).toInstance(sessionScope);
         
         bind(EntityManager.class).toProvider(EntityManagerProvider.class).in(HibernateSessionScoped.class);
-        bind(FormStorageProvider.class).toProvider(HibernateCatalogProvider.class).in(HibernateSessionScoped.class);
         bind(MySqlStorageProvider.class).toProvider(HibernateCatalogProvider.class).in(HibernateSessionScoped.class);
 
+        bind(FormStorageProvider.class).toProvider(HibernateCatalogProvider.class);
         bind(DatabaseMetaProvider.class).to(HibernateDatabaseMetaProvider.class);
         bind(DatabaseGrantProvider.class).to(HibernateDatabaseGrantProvider.class);
 
@@ -106,8 +106,9 @@ public class HibernateModule extends ServletModule {
     }
 
     @Provides
-    protected HibernateDatabaseMetaProvider provideHibernateDatabaseMetaProvider(Provider<EntityManager> entityManager) {
-        return new HibernateDatabaseMetaProvider(entityManager, MemcacheServiceFactory.getMemcacheService());
+    protected HibernateDatabaseMetaProvider provideHibernateDatabaseMetaProvider(Provider<EntityManager> entityManager,
+                                                                                 FormStorageProvider formStorageProvider) {
+        return new HibernateDatabaseMetaProvider(entityManager, formStorageProvider, MemcacheServiceFactory.getMemcacheService());
     }
 
     @Provides

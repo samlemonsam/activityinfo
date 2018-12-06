@@ -106,8 +106,9 @@ public class TestHibernateModule extends AbstractModule {
     }
 
     @Provides
-    protected HibernateDatabaseMetaProvider provideHibernateDatabaseMetaProvider(Provider<EntityManager> entityManager) {
-        return new HibernateDatabaseMetaProvider(entityManager, MemcacheServiceFactory.getMemcacheService());
+    protected HibernateDatabaseMetaProvider provideHibernateDatabaseMetaProvider(Provider<EntityManager> entityManager,
+                                                                                 FormStorageProvider formStorageProvider) {
+        return new HibernateDatabaseMetaProvider(entityManager, formStorageProvider, MemcacheServiceFactory.getMemcacheService());
     }
 
     @Provides

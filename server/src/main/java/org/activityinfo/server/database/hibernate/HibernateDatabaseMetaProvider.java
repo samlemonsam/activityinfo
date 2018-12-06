@@ -7,13 +7,18 @@ import org.activityinfo.json.Json;
 import org.activityinfo.model.database.DatabaseMeta;
 import org.activityinfo.model.database.RecordLock;
 import org.activityinfo.model.database.Resource;
+import org.activityinfo.model.database.ResourceType;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Folder;
 import org.activityinfo.server.database.hibernate.entity.LockedPeriod;
 import org.activityinfo.store.spi.DatabaseMetaProvider;
+import org.activityinfo.store.spi.FormStorageProvider;
 
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
@@ -29,12 +34,15 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
     private final Logger LOGGER = Logger.getLogger(HibernateDatabaseGrantProvider.class.getName());
 
     private final Provider<EntityManager> entityManager;
+    private final FormStorageProvider formStorageProvider;
     private final MemcacheService memcacheService;
 
     @Inject
     public HibernateDatabaseMetaProvider(Provider<EntityManager> entityManager,
+                                         FormStorageProvider formStorageProvider,
                                          MemcacheService memcacheService) {
         this.entityManager = entityManager;
+        this.formStorageProvider = formStorageProvider;
         this.memcacheService = memcacheService;
     }
 
@@ -114,7 +122,8 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
     private Set<ResourceId> queryOwnedDatabaseIds(int ownerId) {
         return entityManager.get().createQuery("SELECT db.id " +
                 "FROM Database db " +
-                "WHERE db.owner.id=:ownerId", Integer.class)
+                "WHERE db.owner.id=:ownerId " +
+                "AND db.dateDeleted IS NULL", Integer.class)
                 .setParameter("ownerId", ownerId)
                 .getResultList().stream()
                 .map(CuidAdapter::databaseId)
@@ -156,7 +165,8 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
                 .collect(Collectors.toList());
         return entityManager.get().createQuery("SELECT db " +
                 "FROM Database db " +
-                "WHERE db.id IN :databaseIds", Database.class)
+                "WHERE db.id IN :databaseIds " +
+                "AND db.dateDeleted IS NULL", Database.class)
                 .setParameter("databaseIds", legacysIds)
                 .getResultList().stream()
                 .map(this::buildMeta)
@@ -187,7 +197,8 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         try {
             return entityManager.get().createQuery("SELECT db.version " +
                     "FROM Database db " +
-                    "WHERE db.id=:dbId", Long.class)
+                    "WHERE db.id=:dbId " +
+                    "AND db.dateDeleted IS NULL", Long.class)
                     .setParameter("dbId", CuidAdapter.getLegacyIdFromCuid(databaseId))
                     .getSingleResult();
         } catch (NoResultException noDatabase) {
@@ -199,7 +210,8 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         try {
             int dbId = entityManager.get().createQuery("select form.database.id " +
                     "from Activity form " +
-                    "where form.id = :formId", Integer.class)
+                    "where form.id = :formId " +
+                    "and form.dateDeleted is null", Integer.class)
                     .setParameter("formId", CuidAdapter.getLegacyIdFromCuid(formId))
                     .getSingleResult();
             return CuidAdapter.databaseId(dbId);
@@ -238,24 +250,66 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
     }
 
     private List<Resource> fetchResources(@NotNull Database database) {
-        Stream<Resource> formResources = fetchForms(database);
-        Stream<Resource> folderResources = fetchFolders(database);
-        return Stream.concat(formResources, folderResources).collect(Collectors.toList());
+        List<Resource> resources = new ArrayList<>();
+
+        List<Resource> formResources = fetchForms(database);
+        List<Resource> subFormResources = fetchSubForms(formResources);
+        List<Resource> folderResources = fetchFolders(database);
+
+        resources.addAll(formResources);
+        resources.addAll(subFormResources);
+        resources.addAll(folderResources);
+
+        return resources;
     }
 
-    private Stream<Resource> fetchForms(@NotNull Database database) {
+    private List<Resource> fetchForms(@NotNull Database database) {
         return database.getActivities().stream()
                 .filter(a -> !a.isDeleted())
-                .map(Activity::asResource);
+                .map(Activity::asResource)
+                .collect(Collectors.toList());
     }
 
-    private Stream<Resource> fetchFolders(@NotNull Database database) {
+    private List<Resource> fetchSubForms(List<Resource> formResources) {
+        return formResources.stream()
+                .flatMap(this::extractSubFormResources)
+                .collect(Collectors.toList());
+    }
+
+    private Stream<Resource> extractSubFormResources(@NotNull Resource formResource) {
+        return formStorageProvider.getForm(formResource.getId())
+                .transform(form -> extractSubFormReferenceFields(form.getFormClass())
+                        .map(sf -> buildSubFormResource(formResource, sf)))
+                .or(Stream::empty);
+    }
+
+    private static Stream<FormField> extractSubFormReferenceFields(FormClass formClass) {
+        return formClass.getFields().stream()
+                .filter(field -> field.getType() instanceof SubFormReferenceType);
+    }
+
+    private static Resource buildSubFormResource(Resource parentFormResource, FormField subFormReferenceField) {
+        return new Resource.Builder()
+                .setId(subFormId(subFormReferenceField))
+                .setParentId(parentFormResource.getId())
+                .setLabel(subFormReferenceField.getLabel())
+                .setVisibility(parentFormResource.getVisibility())
+                .setType(ResourceType.FORM)
+                .build();
+    }
+
+    private static ResourceId subFormId(@NotNull FormField subFormField) {
+        return ((SubFormReferenceType) subFormField.getType()).getClassId();
+    }
+
+    private List<Resource> fetchFolders(@NotNull Database database) {
         return entityManager.get().createQuery("SELECT f " +
                 "FROM Folder f " +
                 "WHERE f.database=:database", Folder.class)
                 .setParameter("database", database)
                 .getResultList().stream()
-                .map(Folder::asResource);
+                .map(Folder::asResource)
+                .collect(Collectors.toList());
     }
 
     private List<RecordLock> fetchLocks(@NotNull Database database) {
