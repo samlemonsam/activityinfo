@@ -6,7 +6,7 @@
 
 ext {
 
-    guavaVersion = '23.0'
+    guavaVersion = '24.1.1-jre'
     rebarVersion = '2.5.31'
     gwtVersion = '2.8.0-bdd4'
     jerseyVersion = '1.19.4'
@@ -184,6 +184,8 @@ subprojects {
                     details.useVersion jerseyVersion
                 } else if(details.requested.group == 'com.google.http-client') {
                     details.useVersion '1.23.0'
+                } else if(details.requested.group == 'com.google.guava') {
+                    details.useVersion guavaVersion
                 }
             }
         }
