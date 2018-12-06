@@ -244,12 +244,16 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         if(!userPermission.isAllowView()) {
             return grants;
         }
-        grants.add(buildRootGrant(CuidAdapter.databaseId(userPermission.getDatabase().getId()), userPermission));
+        GrantModel rootGrant = buildRootGrant(CuidAdapter.databaseId(userPermission.getDatabase().getId()), userPermission);
         if (userPermission.getModel() == null) {
             return grants;
         }
         JsonValue modelObject = Json.parse(userPermission.getModel());
-        grants.addAll(buildGrantsFromModel(modelObject));
+        grants.addAll(buildGrantsFromModel(modelObject, rootGrant));
+        // We only add a "root" grant if and only if the user has no specified grants
+        if (grants.isEmpty()) {
+            grants.add(rootGrant);
+        }
         return grants;
     }
 
@@ -260,17 +264,33 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         return databaseGrant.build();
     }
 
-    private static List<GrantModel> buildGrantsFromModel(@NotNull JsonValue modelObject) {
+    private static List<GrantModel> buildGrantsFromModel(@NotNull JsonValue modelObject, @NotNull GrantModel rootGrant) {
         if (!modelObject.hasKey("grants")) {
             LOGGER.severe(() -> "Could not parse permissions model: " + modelObject);
             throw new UnsupportedOperationException("Unsupported model");
         }
         List<GrantModel> grants = new ArrayList<>();
         for (JsonValue grant : modelObject.get("grants").values()) {
-            GrantModel grantModel = GrantModel.fromJson(grant);
+            GrantModel grantModel = buildGrantModel(grant, rootGrant);
             grants.add(grantModel);
         }
         return grants;
+    }
+
+    // Legacy Model only specifies folderIds user is limited to,
+    // and we need to duplicate the operations of the root grant for each
+    private static GrantModel buildGrantModel(@NotNull JsonValue object, @NotNull GrantModel rootGrant) {
+        GrantModel.Builder builder = new GrantModel.Builder();
+        JsonValue resourceId = object.hasKey("folderId") ? object.get("folderId") : object.get("resourceId");
+        builder.setResourceId(ResourceId.valueOf(resourceId.asString()));
+        for (Operation operation : rootGrant.getOperations()) {
+            if (rootGrant.getFilter(operation).isPresent()) {
+                builder.addOperation(operation, rootGrant.getFilter(operation).get());
+            } else {
+                builder.addOperation(operation);
+            }
+        }
+        return builder.build();
     }
 
     private static void setOperations(@NotNull GrantModel.Builder grantModel, @NotNull UserPermission userPermission) {
