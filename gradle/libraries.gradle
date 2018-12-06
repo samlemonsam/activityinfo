@@ -22,7 +22,7 @@ ext {
             all:            "com.google.appengine:appengine:${gaeVersion}",
             api:            "com.google.appengine:appengine-api-1.0-sdk:${gaeVersion}",
             apiLabs:        "com.google.appengine:appengine-api-labs:${gaeVersion}",
-            trace:          "com.google.cloud.trace:appengine-standard-service:0.3.0",
+            trace:          "com.google.cloud.trace:appengine-standard-service:0.7.0",
             sdk:            "com.google.appengine:appengine-java-sdk:${gaeVersion}",
             sdkTools:       "com.google.appengine:appengine-tools-sdk:${gaeVersion}",
             gcs:            "com.google.appengine.tools:appengine-gcs-client:0.6",
