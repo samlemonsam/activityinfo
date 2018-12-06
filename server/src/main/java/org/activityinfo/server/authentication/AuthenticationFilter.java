@@ -87,7 +87,6 @@ public class AuthenticationFilter implements Filter {
                          FilterChain filterChain) throws IOException, ServletException {
 
         allowCrossOriginRequests((HttpServletResponse) response);
-        contentSecurityPolicy.applyTo((HttpServletResponse) response);
 
         authProvider.clear();
 
