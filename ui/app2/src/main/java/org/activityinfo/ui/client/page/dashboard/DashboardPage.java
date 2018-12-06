@@ -32,7 +32,6 @@ import org.activityinfo.ui.client.page.Page;
 import org.activityinfo.ui.client.page.PageId;
 import org.activityinfo.ui.client.page.PageState;
 import org.activityinfo.ui.client.page.dashboard.portlets.ChooseReportsPortlet;
-import org.activityinfo.ui.client.page.dashboard.portlets.GoogleEarthPortlet;
 import org.activityinfo.ui.client.page.dashboard.portlets.NewsPortlet;
 import org.activityinfo.ui.client.page.dashboard.portlets.ReportPortlet;
 
@@ -56,7 +55,6 @@ public class DashboardPage extends Portal implements Page {
         setColumnWidth(1, .33);
 
         add(new NewsPortlet(), 1);
-        add(new GoogleEarthPortlet(), 1);
 
         loadDashboard();
 
