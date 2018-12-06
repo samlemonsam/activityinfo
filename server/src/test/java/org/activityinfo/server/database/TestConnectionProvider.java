@@ -18,7 +18,7 @@
  */
 package org.activityinfo.server.database;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.common.base.Strings;
 import com.google.inject.Provider;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import liquibase.Contexts;

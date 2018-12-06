@@ -18,7 +18,7 @@
  */
 package org.activityinfo.server.login;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.sun.jersey.api.view.Viewable;

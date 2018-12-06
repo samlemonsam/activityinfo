@@ -183,7 +183,7 @@ subprojects {
                 } else if(details.requested.group == 'com.sun.jersey') {
                     details.useVersion jerseyVersion
                 } else if(details.requested.group == 'com.google.http-client') {
-                    details.useVersion '1.23.0'
+                    details.useVersion '1.27.0'
                 } else if(details.requested.group == 'com.google.guava') {
                     details.useVersion guavaVersion
                 }

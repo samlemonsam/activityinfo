@@ -18,7 +18,7 @@
  */
 package org.activityinfo.server.endpoint.rest.usage;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.common.base.Strings;
 import com.google.gson.stream.JsonWriter;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
