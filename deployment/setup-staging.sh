@@ -86,12 +86,18 @@ gcloud --quiet sql import sql activityinfo gs://staging.$PROJECT.appspot.com/ini
 ATTACHMENT_BUCKET=$PROJECT-attachments
 gsutil mb -p $PROJECT -l europe-west4 gs://$ATTACHMENT_BUCKET
 
+# Create a bucket for temporary generated files
+GENERATED_BUCKET=$PROJECT-generated
+gsutil mb -p $PROJECT -l eu --retention 14d gs://$GENERATED_BUCKET
+
+
 # Create configuration file
 
 cat > /tmp/config.properties <<- END_OF_CONFIG
 hibernate.connection.driver_class=com.mysql.jdbc.GoogleDriver
 hibernate.connection.url=jdbc:google:mysql://$PROJECT:activityinfo/activityinfo?useUnicode=true&characterEncoding=utf8&user=root&zeroDateTimeBehavior=convertToNull
 blobservice.gcs.bucket.name=$ATTACHMENT_BUCKET
+generated.resources.bucket=$GENERATED_BUCKET
 END_OF_CONFIG
 
 gsutil cat gs://ai-config/postmark.properties >> /tmp/config.properties
