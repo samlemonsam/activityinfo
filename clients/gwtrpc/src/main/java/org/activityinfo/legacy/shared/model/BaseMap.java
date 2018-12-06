@@ -24,22 +24,6 @@ package org.activityinfo.legacy.shared.model;
  */
 public abstract class BaseMap implements DTO {
 
-    public static TileBaseMap createNullMap(String baseMapId) {
-        TileBaseMap result = new TileBaseMap();
-
-        result.setId(baseMapId);
-        result.setMinZoom(0);
-        result.setMaxZoom(16);
-        result.setName("Default map");
-        result.setTileUrlPattern("http://google.com");
-
-        return result;
-    }
-
-    public static String getDefaultMapId() {
-        return "admin";
-    }
-
     public abstract String getId();
 
     /**

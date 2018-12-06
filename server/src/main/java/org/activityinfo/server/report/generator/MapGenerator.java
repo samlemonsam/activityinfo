@@ -200,13 +200,6 @@ public class MapGenerator extends ListGenerator<MapReportElement> {
     }
 
     private String defaultBaseMap(Collection<Indicator> indicators) {
-        Set<Country> countries = queryCountries(indicators);
-        if (countries.size() == 1) {
-            Country country = countries.iterator().next();
-            if ("CD".equals(country.getCodeISO())) {
-                return "admin";
-            }
-        }
         return GoogleBaseMap.ROADMAP.getId();
     }
 
@@ -227,6 +220,6 @@ public class MapGenerator extends ListGenerator<MapReportElement> {
         }
         LOGGER.log(Level.SEVERE, "Could not find base map id=" + baseMapId);
 
-        return TileBaseMap.createNullMap(baseMapId);
+        return GoogleBaseMap.ROADMAP;
     }
 }
