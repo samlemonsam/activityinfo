@@ -96,7 +96,7 @@ ext {
         hibernate: [
             entitymanager:  'org.hibernate:hibernate-entitymanager:4.2.8.Final',
             spatial:        'org.hibernate:hibernate-spatial:4.0',
-            validator:      'org.hibernate:hibernate-validator:4.3.1.Final'
+            validator:      'org.hibernate:hibernate-validator:4.3.2.Final'
         ],
         liquibase:          'org.liquibase:liquibase-core:3.4.2',
 
