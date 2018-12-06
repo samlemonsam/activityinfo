@@ -28,7 +28,6 @@ public class ContentSecurityModule extends ServletModule {
     @Override
     protected void configureServlets() {
         if(!DeploymentEnvironment.isAppEngineDevelopment()) {
-            filter("/*").through(ContentSecurityFilter.class);
             serve("/csp-violation").with(ContentSecurityServlet.class);
         }
     }

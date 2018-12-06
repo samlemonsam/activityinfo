@@ -23,6 +23,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.sun.jersey.api.view.Viewable;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
+import org.activityinfo.server.csp.ContentSecurityPolicy;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.model.HostPageModel;
 
@@ -41,6 +42,7 @@ public class HostController {
 
     private final ServerSideAuthProvider authProvider;
     private Provider<EntityManager> entityManager;
+    private ContentSecurityPolicy contentSecurityPolicy;
 
     @Inject
     public HostController(ServerSideAuthProvider authProvider,
@@ -104,11 +106,15 @@ public class HostController {
             model.setBootstrapScript(String.format("/%s/%s.js", module, locale));
             model.setAppCacheManifest(String.format("/%s/%s.appcache", module, locale));
         }
-        
-        return Response.ok(model.asViewable())
-                       .type(MediaType.TEXT_HTML)
-                       .cacheControl(CacheControl.valueOf("no-cache"))
-                       .build();
+
+        Response.ResponseBuilder response = Response
+                .ok(model.asViewable())
+                .type(MediaType.TEXT_HTML)
+                .cacheControl(CacheControl.valueOf("no-cache"));
+
+        contentSecurityPolicy.applyTo(response);
+
+        return response.build();
     }
 
     /**

@@ -18,7 +18,9 @@
  */
 package org.activityinfo.server.csp;
 
-import javax.servlet.http.HttpServletResponse;
+import org.activityinfo.server.DeploymentEnvironment;
+
+import javax.ws.rs.core.Response;
 
 /**
  * Defines and applies a Content Security Policy to responses that limit the 
@@ -42,7 +44,7 @@ public class ContentSecurityPolicy {
     private static final String MAPBOX_TILES = "*.tiles.mapbox.com";
 
     private static final String MAPBOX_API = "https://api.mapbox.com";
-    
+
     private final String policy;
 
     public ContentSecurityPolicy() {
@@ -91,7 +93,7 @@ public class ContentSecurityPolicy {
             MAPBOX_API
         );
         
-        append(sb, "connect-src", SELF);
+        append(sb, "connect-src", SELF, GOOGLE_ANALYTICS);
         
         append(sb, "object-src", SELF);
         
@@ -102,15 +104,8 @@ public class ContentSecurityPolicy {
         
         // Only allow iframes containing content from this domain
         append(sb, "child-src", SELF);
-        
-        
-        append(sb, "form-action", SELF,
-                
-            // We ask the client to upload files directly to
-            // Google Cloud Storage
-            GOOGLE_STORAGE
-        );
-        
+
+
         // Do not allow the application to be hosted in frame
         // on another domain
         append(sb, "frame-ancestors", SELF);
@@ -132,15 +127,20 @@ public class ContentSecurityPolicy {
         sb.append(';');
         sb.append(' ');
     }
-    
-    public void applyTo(HttpServletResponse response) {
-        // Do not yet block resources- we need to time to evaluate the policy
-        // and make sure we do not block resources that are required for the application
-        response.setHeader("Content-Security-Policy-Report-Only", policy);
-        
+
+    public void applyTo(Response.ResponseBuilder response) {
+
+        // Do not apply when running the development server as it will
+        // block the GWT codeserver and other development tools
+        if(DeploymentEnvironment.isAppEngineDevelopment()) {
+            return;
+        }
+
+        response.header("Content-Security-Policy", policy);
+
         // For older browsers, make sure that this site can't be embedded in 
         // a third party site for the purposes of click jacking
         // https://www.owasp.org/index.php/Clickjacking_Defense_Cheat_Sheet
-        response.setHeader("X-Frame-Options", "SAMEORIGIN");
+        response.header("X-Frame-Options", "SAMEORIGIN");
     }
 }
