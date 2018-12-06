@@ -2,8 +2,8 @@
 dependencies {
 
 
-    compile 'org.apache.poi:poi-ooxml:3.12-beta1'
-    compile 'org.apache.poi:poi:3.12-beta1'
+    compile 'org.apache.poi:poi-ooxml:4.0.1'
+    compile 'org.apache.poi:poi:4.0.1'
     
     compile libraries.hamcrest
     compile libraries.junit
@@ -15,12 +15,11 @@ dependencies {
 
     compile libraries.jsr305
 
-    compile 'org.seleniumhq.selenium:selenium-java:2.43.0'
-    compile 'com.saucelabs:sauce_junit:2.1.13'
+    compile 'org.seleniumhq.selenium:selenium-java:3.141.59'
+    compile 'com.saucelabs:sauce_junit:2.1.25'
     compile 'org.yaml:snakeyaml:1.14'
     compile 'org.apache.commons:commons-pool2:2.0'
     compile 'joda-time:joda-time:2.5'
-    compile 'org.littleshoot:littleproxy:1.0.0-beta7'
     compile 'org.apache.commons:commons-csv:1.1'
     compile 'io.airlift:airline:0.7'
     
