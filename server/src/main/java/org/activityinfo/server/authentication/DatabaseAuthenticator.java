@@ -22,7 +22,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.server.DeploymentEnvironment;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.mindrot.bcrypt.BCrypt;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.persistence.EntityManager;
 

@@ -20,7 +20,7 @@ package org.activityinfo.server.database.hibernate.entity;
 
 import com.google.common.base.Strings;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
-import org.mindrot.bcrypt.BCrypt;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.persistence.*;
 import java.util.Date;
