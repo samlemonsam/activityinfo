@@ -162,7 +162,6 @@ public class UserDatabaseMeta implements JsonSerializable {
         }
         // Return the catalog entries for the this nodes _direct_ children
         return parentNode.getChildNodes().stream()
-                .map(Resource.Node::getResource)
                 .map(UserDatabaseMeta::buildCatalogEntry)
                 .collect(Collectors.toList());
     }
@@ -182,8 +181,12 @@ public class UserDatabaseMeta implements JsonSerializable {
                 .collect(Collectors.toList());
     }
 
-    private static CatalogEntry buildCatalogEntry (Resource resource) {
-        return new CatalogEntry(resource.getId().asString(), resource.getLabel(), catalogType(resource.getType()));
+    private static CatalogEntry buildCatalogEntry(Resource.Node node) {
+        CatalogEntry entry = new CatalogEntry(node.getResource().getId().asString(),
+                node.getResource().getLabel(),
+                catalogType(node.getResource().getType()));
+        entry.setLeaf(node.isLeaf());
+        return entry;
     }
 
     private static CatalogEntryType catalogType(ResourceType type) {
