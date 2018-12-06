@@ -241,10 +241,13 @@ public class SiteExporter {
                 // create a merged cell on the top row spanning all members
                 // of the group
                 createHeaderCell(headerRow1, column, group.getName());
-                sheet.addMergedRegion(new CellRangeAddress(0,
-                        0,
-                        column,
-                        column + group.getIndicators().size() - 1));
+
+                if(group.getIndicators().size() > 1) {
+                    sheet.addMergedRegion(new CellRangeAddress(0,
+                            0,
+                            column,
+                            column + group.getIndicators().size() - 1));
+                }
             }
             for (IndicatorDTO indicator : group.getIndicators()) {
                 indicators.put(indicator.getId(), indicator);
