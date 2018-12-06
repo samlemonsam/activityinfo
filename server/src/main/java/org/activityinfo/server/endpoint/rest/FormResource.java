@@ -26,14 +26,11 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.activityinfo.io.xlsform.XlsFormBuilder;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.api.ClientVersions;
 import org.activityinfo.model.database.RecordLock;
-import org.activityinfo.model.database.RecordLockSet;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
@@ -70,7 +67,6 @@ import java.util.logging.Logger;
 import static java.lang.String.format;
 import static org.activityinfo.model.resource.ResourceId.valueOf;
 
-@Tag(name = "forms")
 @Path("/resource/form/{formId}")
 public class FormResource {
 
@@ -106,7 +102,6 @@ public class FormResource {
     @GET
     @NoCache
     @Path("schema")
-    @Operation(summary = "Get a form's schema")
     @Produces(JSON_CONTENT_TYPE)
     public FormClass getFormSchema() {
         return assertVisible(formId).getFormClass();
@@ -114,7 +109,6 @@ public class FormResource {
 
     @POST
     @Path("schema")
-    @Operation(summary = "Update a form's schema")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response postUpdatedFormSchema(FormClass updatedFormClass) {
 
@@ -145,7 +139,6 @@ public class FormResource {
     @NoCache
     @Path("record/{recordId}")
     @Produces(JSON_CONTENT_TYPE)
-    @Operation(summary = "Get a single record")
     public FormRecord getRecord(@PathParam("recordId") String recordId) {
 
         FormStorage form = assertVisible(formId);
@@ -170,7 +163,6 @@ public class FormResource {
     @NoCache
     @Path("locks")
     @Produces(JSON_CONTENT_TYPE)
-    @Operation(summary = "Get the locks that apply to this form")
     public List<RecordLock> getLocks() {
         throw new UnsupportedOperationException();
     }
@@ -178,7 +170,6 @@ public class FormResource {
     @GET
     @NoCache
     @Path("records/versionRange")
-    @Operation(summary = "Get the records that have changed between two versions of this form")
     public FormSyncSet getVersionRange(
             @QueryParam("localVersion") long localVersion,
             @QueryParam("version") long version,
@@ -296,7 +287,6 @@ public class FormResource {
     @NoCache
     @Path("record/{recordId}/history")
     @Produces(JSON_CONTENT_TYPE)
-    @Operation(summary = "Get the history of changes to a single record")
     public RecordHistory getRecordHistory(@PathParam("recordId") String recordId) throws SQLException {
 
         assertVisible(formId);
@@ -308,7 +298,6 @@ public class FormResource {
     @NoCache
     @Path("records")
     @Produces(JSON_CONTENT_TYPE)
-    @Operation(summary = "Get all the records in this sub-form that belong to a given parent record")
     public FormRecordSet getRecords(@QueryParam("parentId") String parentId) {
         return new FormRecordSet(formId.asString(),
                 assertVisible(formId).getSubRecords(ResourceId.valueOf(parentId)));
@@ -317,7 +306,6 @@ public class FormResource {
     @POST
     @Path("records")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Create a new record")
     public Response createRecord(JsonValue jsonObject) {
 
         try {
@@ -333,7 +321,6 @@ public class FormResource {
     @Path("record/{recordId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Update an existing record")
     public Response updateRecord(@PathParam("recordId") String recordId, JsonValue jsonObject) {
 
         try {
@@ -355,7 +342,6 @@ public class FormResource {
     @GET
     @NoCache
     @Path("form.xls")
-    @Operation(summary = "Get a form's schema as an XLSForm")
     public Response getXlsForm() {
         assertVisible(formId);
 

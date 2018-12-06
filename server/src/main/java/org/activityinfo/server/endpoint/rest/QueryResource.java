@@ -19,7 +19,6 @@
 package org.activityinfo.server.endpoint.rest;
 
 import com.google.common.base.Charsets;
-import io.swagger.v3.oas.annotations.Operation;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
@@ -47,7 +46,6 @@ public class QueryResource {
     @Path("columns")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Executes a query over a set of forms in columnar format")
     public Response queryColumns(QueryModel model) {
 
         ColumnSetBuilder builder = backend.newQueryBuilder();
@@ -67,7 +65,6 @@ public class QueryResource {
     @Path("rows")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Executes a query over a set of forms in row format")
     public Response queryRows(QueryModel model) {
 
         ColumnSetBuilder builder = backend.newQueryBuilder();

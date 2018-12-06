@@ -19,7 +19,7 @@ sourceSets {
 
 dependencies {
     generatorCompile libraries.guava
-    generatorCompile 'io.swagger:swagger-parser:1.0.19'
+    generatorCompile 'io.swagger:swagger-parser:1.0.40'
     generatorCompile 'org.pegdown:pegdown:1.6.0'
     generatorCompile libraries.freemarker
     generatorCompile project(':model')
