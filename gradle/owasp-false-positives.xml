@@ -127,6 +127,17 @@
         <cve>CVE-2018-3258</cve>
     </suppress>
 
+    <suppress>
+        <notes>This library is only used at compile time and so is not exposed to untrusted input.</notes>
+        <gav regex="true">^com\.kitfox\.svg:svg-salamander:.*$</gav>
+        <cve>CVE-2017-5617</cve>
+    </suppress>
 
+    <suppress>
+        <notes>This vulnerability affects messages with a size over 2GB, which is far beyond the limit
+        allowed by the Google APIs for which protobuf is used.</notes>
+        <gav regex="true">^com\.google\.protobuf:protobuf-java:.*$</gav>
+        <cpe>cpe:/a:google:protobuf</cpe>
+    </suppress>
 
 </suppressions>
