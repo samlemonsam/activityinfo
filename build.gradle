@@ -16,10 +16,10 @@ buildscript {
     classpath "com.moowork.gradle:gradle-node-plugin:0.12"
     classpath "gradle.plugin.org.kravemir.gradle.sass:plugin:1.2.3"
     classpath "net.ltgt.gradle:gradle-apt-plugin:0.15"
-    classpath "net.ltgt.gradle:gradle-apt-plugin:0.15"
     classpath "gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.14.0"
     classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.2"
     classpath 'com.google.cloud.tools:appengine-gradle-plugin:1.3.5'
+    classpath "org.owasp:dependency-check-gradle:4.0.0.1"
   }
 }
 
@@ -33,6 +33,15 @@ allprojects {
   }
 }
 
+apply plugin: 'org.owasp.dependencycheck'
+dependencyCheck {
+  suppressionFile = rootProject.file("gradle/owasp-false-positives.xml")
+  skipConfigurations = ['gwtSdk', 'devServer', 'closureCompiler']
+}
+
+subprojects {
+  task allDeps(type: DependencyReportTask) {}
+}
 
 // Define common configuration properties and
 // apply cross-project processes.
