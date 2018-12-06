@@ -24,6 +24,8 @@ import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,13 +48,17 @@ public class Resource implements JsonSerializable {
         PRIVATE
     }
 
-    static class Node {
+    public static class Node {
 
         private Node parentNode;
         private Resource resource;
         private List<Node> childNodes = new ArrayList<>(0);
 
-        public Node(Node parentNode, Resource resource) {
+        public Node(@NotNull Resource resource) {
+            this.resource = resource;
+        }
+
+        public Node(@Nullable Node parentNode, @NotNull Resource resource) {
             this.parentNode = parentNode;
             this.resource = resource;
         }
@@ -73,11 +79,15 @@ public class Resource implements JsonSerializable {
             childNodes.addAll(children);
         }
 
-        public Node getParentNode() {
+        public @Nullable Node getParentNode() {
             return parentNode;
         }
 
-        public Resource getResource() {
+        public void setParentNode(Node parentNode) {
+            this.parentNode = parentNode;
+        }
+
+        public @NotNull Resource getResource() {
             return resource;
         }
 

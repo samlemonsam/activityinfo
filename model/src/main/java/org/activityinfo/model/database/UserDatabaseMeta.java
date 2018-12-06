@@ -364,15 +364,22 @@ public class UserDatabaseMeta implements JsonSerializable {
             if (meta.resources.isEmpty()) {
                 return;
             }
-            meta.resources.values().forEach(this::constructNode);
+            meta.resources.values().forEach(this::buildNode);
+            meta.resources.values().forEach(this::mapNode);
         }
 
-        private void constructNode(Resource resource) {
-            Resource.Node node = new Resource.Node(meta.resourceNodeMap.get(resource.getParentId()), resource);
+        private void buildNode(Resource resource) {
+            // Parent and Child Nodes will be set during mapNodes()
+            Resource.Node node = new Resource.Node(resource);
+            meta.resourceNodeMap.put(resource.getId(), node);
+        }
+
+        private void mapNode(Resource resource) {
+            Resource.Node node = meta.resourceNodeMap.get(resource.getId());
+            node.setParentNode(meta.resourceNodeMap.get(resource.getParentId()));
             if (!node.isRoot()) {
                 node.getParentNode().addChildNode(node);
             }
-            meta.resourceNodeMap.put(resource.getId(), node);
         }
 
         public UserDatabaseMeta build() {
