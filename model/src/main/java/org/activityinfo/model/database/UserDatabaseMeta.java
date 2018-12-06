@@ -160,7 +160,11 @@ public class UserDatabaseMeta implements JsonSerializable {
         if (parentNode.isLeaf()) {
             return Collections.emptyList();
         }
-        return collectCatalogEntries(parentNode.getChildNodes(), Lists.newArrayList());
+        // Return the catalog entries for the this nodes _direct_ children
+        return parentNode.getChildNodes().stream()
+                .map(Resource.Node::getResource)
+                .map(UserDatabaseMeta::buildCatalogEntry)
+                .collect(Collectors.toList());
     }
 
     private Resource.Node getParentNode(ResourceId parentId) {
@@ -178,23 +182,11 @@ public class UserDatabaseMeta implements JsonSerializable {
                 .collect(Collectors.toList());
     }
 
-    private List<CatalogEntry> collectCatalogEntries(List<Resource.Node> nodes, ArrayList<CatalogEntry> entries) {
-        for (Resource.Node node : nodes) {
-            Resource resource = node.getResource();
-            CatalogEntry entry = buildCatalogEntry(resource);
-            entries.add(entry);
-            if (!node.isLeaf()) {
-                collectCatalogEntries(node.getChildNodes(), entries);
-            }
-        }
-        return entries;
-    }
-
-    private CatalogEntry buildCatalogEntry (Resource resource) {
+    private static CatalogEntry buildCatalogEntry (Resource resource) {
         return new CatalogEntry(resource.getId().asString(), resource.getLabel(), catalogType(resource.getType()));
     }
 
-    private CatalogEntryType catalogType(ResourceType type) {
+    private static CatalogEntryType catalogType(ResourceType type) {
         switch (type) {
             case DATABASE:
             case FOLDER:
