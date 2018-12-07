@@ -1,5 +1,7 @@
 package org.activityinfo.server.database.hibernate;
 
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.collect.Sets;
@@ -111,6 +113,29 @@ public class HibernateDatabaseMetaProviderTest {
         Optional<DatabaseMeta> databaseMeta = databaseMetaProvider.getDatabaseMetaForResource(formId);
         assertTrue(databaseMeta.isPresent());
         match(databaseMeta.get(), database);
+    }
+
+    @Test
+    public void caching() {
+        // Clear cache
+        MemcacheService memcacheService = MemcacheServiceFactory.getMemcacheService();
+        memcacheService.clearAll();
+        assert memcacheService.getStatistics().getItemCount() == 0;
+        assert memcacheService.getStatistics().getHitCount() == 0;
+
+        // Fetch a database - should be cached once retrieved
+        Optional<DatabaseMeta> dbMeta = databaseMetaProvider.getDatabaseMeta(databaseId(1));
+        assert dbMeta.isPresent();
+        assert memcacheService.getStatistics().getItemCount() > 0;
+        assert memcacheService.getStatistics().getHitCount() == 0;
+        assert memcacheService.contains(HibernateDatabaseMetaProvider.memcacheKey(dbMeta.get().getDatabaseId(), dbMeta.get().getVersion()));
+
+        // Fetch the same database again - should be retrieved from cache
+        Optional<DatabaseMeta> cachedDbMeta = databaseMetaProvider.getDatabaseMeta(databaseId(1));
+        assert cachedDbMeta.isPresent();
+        assert memcacheService.getStatistics().getItemCount() > 0;
+        assert memcacheService.getStatistics().getHitCount() > 0;
+        assert memcacheService.contains(HibernateDatabaseMetaProvider.memcacheKey(cachedDbMeta.get().getDatabaseId(), cachedDbMeta.get().getVersion()));
     }
 
 }

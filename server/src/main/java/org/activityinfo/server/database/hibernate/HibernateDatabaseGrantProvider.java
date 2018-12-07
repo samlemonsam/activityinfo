@@ -18,7 +18,6 @@ import org.activityinfo.model.util.Pair;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
 import org.activityinfo.store.spi.DatabaseGrantProvider;
 
-import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.validation.constraints.NotNull;
@@ -195,7 +194,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         }
     }
 
-    private static String memcacheKey(int userId, ResourceId databaseId, long grantVersion) {
+    static String memcacheKey(int userId, ResourceId databaseId, long grantVersion) {
         return String.format("%d:%s:%d", userId, databaseId.asString(), grantVersion);
     }
 

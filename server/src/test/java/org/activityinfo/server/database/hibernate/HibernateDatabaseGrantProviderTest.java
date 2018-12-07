@@ -1,5 +1,7 @@
 package org.activityinfo.server.database.hibernate;
 
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.inject.Inject;
@@ -151,6 +153,32 @@ public class HibernateDatabaseGrantProviderTest {
             assertTrue(databaseGrantMap.containsKey(databaseId(userPermission.getDatabase().getId())));
             match(userPermission, databaseGrantMap.get(databaseId(userPermission.getDatabase().getId())));
         }
+    }
+
+    @Test
+    public void caching() {
+        int userId = 3;
+        int dbId = 1;
+
+        // Clear cache
+        MemcacheService memcacheService = MemcacheServiceFactory.getMemcacheService();
+        memcacheService.clearAll();
+        assert memcacheService.getStatistics().getItemCount() == 0;
+        assert memcacheService.getStatistics().getHitCount() == 0;
+
+        // Fetch a database grant - should be cached once retrieved
+        Optional<DatabaseGrant> dbGrant = databaseGrantProvider.getDatabaseGrant(userId, databaseId(dbId));
+        assert dbGrant.isPresent();
+        assert memcacheService.getStatistics().getItemCount() > 0;
+        assert memcacheService.getStatistics().getHitCount() == 0;
+        assert memcacheService.contains(HibernateDatabaseGrantProvider.memcacheKey(userId, databaseId(dbId), dbGrant.get().getVersion()));
+
+        // Fetch the same database grant again - should be retrieved from cache
+        Optional<DatabaseGrant> cachedDbGrant = databaseGrantProvider.getDatabaseGrant(userId, databaseId(dbId));
+        assert cachedDbGrant.isPresent();
+        assert memcacheService.getStatistics().getItemCount() > 0;
+        assert memcacheService.getStatistics().getHitCount() > 0;
+        assert memcacheService.contains(HibernateDatabaseGrantProvider.memcacheKey(userId, databaseId(dbId), dbGrant.get().getVersion()));
     }
 
     private UserPermission queryUserPermission(int userId, int databaseId) {
