@@ -97,11 +97,11 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
             case CuidAdapter.DATABASE_DOMAIN:
                 return getDatabaseMeta(resourceId);
             case CuidAdapter.ACTIVITY_DOMAIN:
-                ResourceId activityDatabaseId = queryDatabaseIdForForm(resourceId);
-                return getDatabaseMeta(activityDatabaseId);
+                Optional<ResourceId> activityDatabaseId = Optional.ofNullable(queryDatabaseIdForForm(resourceId));
+                return activityDatabaseId.isPresent() ? getDatabaseMeta(activityDatabaseId.get()) : Optional.empty();
             case CuidAdapter.FOLDER_DOMAIN:
-                ResourceId folderDatabaseId = queryDatabaseIdForFolder(resourceId);
-                return getDatabaseMeta(folderDatabaseId);
+                Optional<ResourceId> folderDatabaseId = Optional.ofNullable(queryDatabaseIdForFolder(resourceId));
+                return folderDatabaseId.isPresent() ? getDatabaseMeta(folderDatabaseId.get()) : Optional.empty();
             default:
                 throw new IllegalArgumentException("Cannot fetch UserDatabaseMeta for Resource: " + resourceId.toString());
         }
