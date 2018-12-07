@@ -48,7 +48,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
     private JpaBatchBuilder batch;
     private Database database;
-    private UserDatabaseMeta databaseMeta;
+    private Optional<UserDatabaseMeta> databaseMeta;
 
     @Inject
     public DbUpdateBuilder(EntityManager entityManager,
@@ -64,19 +64,16 @@ public class DbUpdateBuilder implements UpdateBuilder {
         // otherwise they will be excluded
 
         this.database = entityManager.find(Database.class, request.getRegionId());
-        Optional<UserDatabaseMeta> dbMeta = provider.getDatabaseMetadata(CuidAdapter.databaseId(request.getRegionId()), user.getId());
+        this.databaseMeta = provider.getDatabaseMetadata(CuidAdapter.databaseId(request.getRegionId()), user.getId());
 
         Preconditions.checkNotNull(database, "Failed to fetch database by id:" +
                 request.getRegionId() + ", region: " + request);
-        Preconditions.checkArgument(dbMeta.isPresent(), "Failed to fetch database by id:" +
-                request.getRegionId() + ", region: " + request);
-
-        this.databaseMeta = dbMeta.get();
 
         // This database's version is a function of both the database's version
         // and our permission own version, which determines whether we can see the database or not
         long localVersion = request.getLocalVersion() == null ? 0 : Long.parseLong(request.getLocalVersion());
-        long serverVersion = Math.max(MINIMUM_DB_VERSION, Math.max(database.getVersion(), databaseMeta.getUserVersion()));
+        long dbMetaVersion = databaseMeta.map(UserDatabaseMeta::getUserVersion).orElse(0L);
+        long serverVersion = Math.max(MINIMUM_DB_VERSION, Math.max(database.getVersion(), dbMetaVersion));
 
         LOGGER.info("Schema versions: local = " + localVersion + ", server = " + serverVersion);
      
@@ -85,12 +82,12 @@ public class DbUpdateBuilder implements UpdateBuilder {
         batch.setComplete(true);
         
         if (localVersion < serverVersion) {
-            queryUpdates();
+            queryUpdates(user.getId());
         }
         return batch.buildUpdate();
     }
 
-    private void queryUpdates() throws IOException {
+    private void queryUpdates(int userId) throws IOException {
 
         delete(Database.class, inDatabase());
         insert(Database.class, inDatabase());
@@ -132,7 +129,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
         insert(Tables.PARTNER_IN_DATABASE, inDatabase());
 
         insert(User.class, "userId = " + database.getOwner().getId());
-        insert(UserPermission.class, "userId = " + databaseMeta.getUserId());
+        insert(UserPermission.class, "userId = " + userId);
     }
 
     private void insertIndicators() {
@@ -227,14 +224,14 @@ public class DbUpdateBuilder implements UpdateBuilder {
     }
 
     private void insert(Class<?> entityClass, String criteria) {
-        if(PermissionOracle.canView(databaseMeta) && !database.isDeleted()) {
+        if(!database.isDeleted() && databaseMeta.isPresent() && PermissionOracle.canView(databaseMeta.get())) {
             LOGGER.fine(() -> entityClass.getName() + " Criteria: " + criteria.toLowerCase());
             batch.insert(entityClass, criteria.toLowerCase());
         }
     }
 
     private void insert(String tableName, String criteria) {
-        if(PermissionOracle.canView(databaseMeta) && !database.isDeleted()) {
+        if(!database.isDeleted() && databaseMeta.isPresent() && PermissionOracle.canView(databaseMeta.get())) {
             SqlQuery query = SqlQuery.selectAll().from(tableName).whereTrue(criteria.toLowerCase());
             LOGGER.fine(query.sql());
             batch.insert()
