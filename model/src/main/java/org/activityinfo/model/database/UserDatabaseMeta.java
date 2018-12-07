@@ -195,6 +195,7 @@ public class UserDatabaseMeta implements JsonSerializable {
             case FOLDER:
                 return CatalogEntryType.FOLDER;
             case FORM:
+            case SUB_FORM:
             default:
                 return CatalogEntryType.FORM;
         }

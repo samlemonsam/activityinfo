@@ -294,7 +294,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
                 .setParentId(parentFormResource.getId())
                 .setLabel(subFormReferenceField.getLabel())
                 .setVisibility(parentFormResource.getVisibility())
-                .setType(ResourceType.FORM)
+                .setType(ResourceType.SUB_FORM)
                 .build();
     }
 

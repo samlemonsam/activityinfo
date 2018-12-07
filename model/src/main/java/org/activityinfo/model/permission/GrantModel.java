@@ -52,7 +52,7 @@ public class GrantModel implements JsonSerializable {
 
     /**
      * @return The id of the {@link Resource} to which this grant applies. The {@code Resource} may be a
-     * {@link ResourceType#FORM}, {@link ResourceType#FOLDER}, or {@link ResourceType#DATABASE}
+     * {@link ResourceType#FORM}, {@link ResourceType#SUB_FORM}, {@link ResourceType#FOLDER}, or {@link ResourceType#DATABASE}
      */
     public ResourceId getResourceId() {
         return resourceId;
@@ -121,7 +121,7 @@ public class GrantModel implements JsonSerializable {
 
         /**
          * Sets the {@link Resource} to which this grant applies. This can be the id of a
-         * {@link ResourceType#FORM}, {@link ResourceType#FOLDER} or {@link ResourceType#DATABASE}.
+         * {@link ResourceType#FORM}, {@link ResourceType#SUB_FORM}, {@link ResourceType#FOLDER} or {@link ResourceType#DATABASE}.
          */
         public Builder setResourceId(ResourceId resourceId) {
             model.resourceId = resourceId;

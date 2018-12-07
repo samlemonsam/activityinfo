@@ -21,5 +21,6 @@ package org.activityinfo.model.database;
 public enum  ResourceType {
     DATABASE,
     FOLDER,
-    FORM
+    FORM,
+    SUB_FORM
 }

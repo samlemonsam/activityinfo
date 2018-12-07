@@ -294,10 +294,20 @@ public class PermissionOracle {
         if (!db.hasResource(formId)) {
             return FormPermissions.none();
         }
-        if (ResourceType.FORM != db.getResource(formId).get().getType()) {
+        if (!isFormOrSubFormResource(db.getResource(formId).get())) {
             return FormPermissions.none();
         }
         return computeFormPermissions(formId, db);
+    }
+
+    private static boolean isFormOrSubFormResource(Resource resource) {
+        switch(resource.getType()) {
+            case FORM:
+            case SUB_FORM:
+                return true;
+            default:
+                return false;
+        }
     }
 
     private static FormPermissions computeFormPermissions(ResourceId formId, UserDatabaseMeta db) {
