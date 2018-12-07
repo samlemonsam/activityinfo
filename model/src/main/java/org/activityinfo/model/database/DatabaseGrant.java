@@ -38,7 +38,7 @@ public class DatabaseGrant implements JsonSerializable {
         DatabaseGrant databaseGrant = new DatabaseGrant();
         databaseGrant.userId = object.get("userId").asInt();
         databaseGrant.databaseId = ResourceId.valueOf(object.get("databaseId").asString());
-        databaseGrant.version = object.get("version").asLong();
+        databaseGrant.version = Long.valueOf(object.get("version").asString());
         JsonValue grantsArray = object.get("grants");
         for (int i = 0; i < grantsArray.length(); i++) {
             GrantModel grant = GrantModel.fromJson(grantsArray.get(i));
@@ -52,7 +52,7 @@ public class DatabaseGrant implements JsonSerializable {
         JsonValue object = Json.createObject();
         object.put("userId", userId);
         object.put("databaseId", databaseId.asString());
-        object.put("version", version);
+        object.put("version", Long.toString(version));
         object.put("grants", Json.toJsonArray(grants.values()));
         return object;
     }

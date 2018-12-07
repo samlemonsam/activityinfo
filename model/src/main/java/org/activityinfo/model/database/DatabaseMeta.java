@@ -66,7 +66,7 @@ public class DatabaseMeta implements JsonSerializable {
         JsonValue object = Json.createObject();
         object.put("id", databaseId.asString());
         object.put("ownerId", ownerId);
-        object.put("version", version);
+        object.put("version", Long.toString(version));
         object.put("label", label);
         object.put("description", Strings.nullToEmpty(description));
         if (published) {
@@ -84,7 +84,7 @@ public class DatabaseMeta implements JsonSerializable {
         DatabaseMeta meta = new DatabaseMeta();
         meta.databaseId = ResourceId.valueOf(object.getString("id"));
         meta.ownerId = object.get("ownerId").asInt();
-        meta.version = object.get("version").asLong();
+        meta.version = Long.valueOf(object.get("version").asString());
         meta.label = object.getString("label");
         meta.description = object.getString("description");
         if (object.hasKey("published")) {
