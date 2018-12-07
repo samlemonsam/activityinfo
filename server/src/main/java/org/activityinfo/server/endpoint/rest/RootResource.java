@@ -143,7 +143,7 @@ public class RootResource {
     }
 
     @Path("/database/{id}")
-    public DatabaseResource getDatabaseSchema(@PathParam("id") int id) {
+    public DatabaseResource getDatabaseSchema(@PathParam("id") ResourceId id) {
         return new DatabaseResource(catalog,
                 dispatcher,
                 databaseProvider,

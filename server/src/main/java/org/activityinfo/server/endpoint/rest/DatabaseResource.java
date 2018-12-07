@@ -35,6 +35,7 @@ import org.activityinfo.model.database.transfer.TransferAuthorized;
 import org.activityinfo.model.database.transfer.TransferDecision;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.authentication.AuthTokenProvider;
 import org.activityinfo.server.authentication.SecureTokenGenerator;
 import org.activityinfo.server.command.DispatcherSync;
@@ -66,7 +67,7 @@ public class DatabaseResource {
     private final DatabaseProvider databaseProvider;
     private final Provider<EntityManager> entityManagerProvider;
     private final MailSender mailSender;
-    private final int databaseId;
+    private final ResourceId databaseId;
     private static final JsonParser PARSER = new JsonParser();
 
     public DatabaseResource(Provider<FormStorageProvider> catalog,
@@ -74,7 +75,7 @@ public class DatabaseResource {
                             DatabaseProvider databaseProvider,
                             Provider<EntityManager> entityManagerProvider,
                             MailSender mailSender,
-                            int databaseId) {
+                            ResourceId databaseId) {
         this.catalog = catalog;
         this.dispatcher = dispatcher;
         this.databaseProvider = databaseProvider;
@@ -85,12 +86,16 @@ public class DatabaseResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Optional<UserDatabaseMeta> getDatabaseMetadata(@InjectParam AuthenticatedUser user) {
-        return databaseProvider.getDatabaseMetadata(CuidAdapter.databaseId(databaseId), user.getUserId());
+    public UserDatabaseMeta getDatabaseMetadata(@InjectParam AuthenticatedUser user) {
+        Optional<UserDatabaseMeta> db = databaseProvider.getDatabaseMetadata(databaseId, user.getUserId());
+        if (!db.isPresent()) {
+            throw new WebApplicationException(Response.Status.NOT_FOUND);
+        }
+        return db.get();
     }
 
     private UserDatabaseDTOWithForms getSchema() {
-        UserDatabaseDTO db = dispatcher.execute(new GetSchema()).getDatabaseById(databaseId);
+        UserDatabaseDTO db = dispatcher.execute(new GetSchema()).getDatabaseById(CuidAdapter.getLegacyIdFromCuid(databaseId));
         if (db == null) {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
@@ -115,7 +120,7 @@ public class DatabaseResource {
     @Path("schema.csv")
     public Response getDatabaseSchemaCsv() throws IOException {
         SchemaCsvWriter writer = new SchemaCsvWriter(dispatcher);
-        writer.write(databaseId);
+        writer.write(CuidAdapter.getLegacyIdFromCuid(databaseId));
 
         return writeCsv("schema_" + databaseId + ".csv", writer.toString());
     }
@@ -125,7 +130,7 @@ public class DatabaseResource {
     @Path("schema-v3.csv")
     public Response getDatabaseSchemaV3() throws IOException {
 
-        UserDatabaseDTO db = dispatcher.execute(new GetSchema()).getDatabaseById(databaseId);
+        UserDatabaseDTO db = dispatcher.execute(new GetSchema()).getDatabaseById(CuidAdapter.getLegacyIdFromCuid(databaseId));
 
         SchemaCsvWriterV3 writer = new SchemaCsvWriterV3(catalog.get());
         writer.writeForms(db);
@@ -160,7 +165,7 @@ public class DatabaseResource {
         XFormReader builder = new XFormReader(xForm);
         FormClass formClass = builder.build();
         formClass.setId(CuidAdapter.activityFormClass(activityId));
-        formClass.setDatabaseId(CuidAdapter.databaseId(databaseId));
+        formClass.setDatabaseId(databaseId);
 
         MySqlStorageProvider formCatalog = (MySqlStorageProvider) catalog.get();
         formCatalog.createOrUpdateFormSchema(formClass);
@@ -351,7 +356,7 @@ public class DatabaseResource {
             return false;
         } else if (transfer.getProposedOwner() != newOwner.getId()) {
             return false;
-        } else if (transfer.getDatabase() != databaseId) {
+        } else if (!CuidAdapter.databaseId(transfer.getDatabase()).equals(databaseId)) {
             return false;
         } else {
             return true;

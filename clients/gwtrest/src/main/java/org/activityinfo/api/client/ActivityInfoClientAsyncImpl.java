@@ -87,7 +87,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
 
     @Override
     public Promise<UserDatabaseMeta> getDatabase(ResourceId databaseId) {
-        return get(baseUrl + "/database/" + CuidAdapter.getLegacyIdFromCuid(databaseId), UserDatabaseMeta::fromJson);
+        return get(baseUrl + "/database/" + databaseId.asString(), UserDatabaseMeta::fromJson);
     }
 
     /**

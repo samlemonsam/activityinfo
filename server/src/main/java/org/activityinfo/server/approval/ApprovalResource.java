@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.model.database.transfer.TransferAuthorized;
 import org.activityinfo.model.database.transfer.TransferDecision;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.authentication.AuthTokenProvider;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.Database;
@@ -84,7 +85,7 @@ public class ApprovalResource {
                 databaseProvider,
                 entityManager,
                 mailSender,
-                database.getId());
+                CuidAdapter.databaseId(database.getId()));
 
         return resource.startTransfer(uri, authTokenProvider, transfer);
     }
@@ -112,7 +113,7 @@ public class ApprovalResource {
                 databaseProvider,
                 entityManager,
                 mailSender,
-                database.getId());
+                CuidAdapter.databaseId(database.getId()));
 
         return resource.cancelTransfer(proposedOwner.asAuthenticatedUser(), TransferDecision.rejected());
     }
