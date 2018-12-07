@@ -125,10 +125,7 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
 
     private String getParentLabel(UserDatabaseMeta databaseMeta, Resource child) {
         Optional<Resource> parent = databaseMeta.getResource(child.getParentId());
-        if (!parent.isPresent()) {
-            return parent.get().getLabel();
-        }
-        return "";
+        return parent.map(Resource::getLabel).orElse("");
     }
 
     private List<FormTree> getFormScope(UserDatabaseDTO database) {
