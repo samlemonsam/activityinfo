@@ -53,20 +53,14 @@ public class UserDatabaseProvider {
                 .collect(Collectors.toList());
     }
 
-    public UserDatabaseMeta queryDatabaseMeta(@NotNull ResourceId databaseId, int userId) {
+    public Optional<UserDatabaseMeta> queryDatabaseMeta(@NotNull ResourceId databaseId, int userId) {
         Optional<DatabaseMeta> databaseMeta = metaProvider.getDatabaseMeta(databaseId);
-        if (!databaseMeta.isPresent()) {
-            return null;
-        }
-        return findGrantAndBuildMeta(databaseMeta.get(), userId);
+        return databaseMeta.map(dbMeta -> findGrantAndBuildMeta(dbMeta, userId));
     }
 
-    public UserDatabaseMeta queryUserDatabaseMetaByResource(@NotNull ResourceId resourceId, int userId) {
+    public Optional<UserDatabaseMeta> queryUserDatabaseMetaByResource(@NotNull ResourceId resourceId, int userId) {
         Optional<DatabaseMeta> databaseMeta = metaProvider.getDatabaseMetaForResource(resourceId);
-        if (!databaseMeta.isPresent()) {
-            return null;
-        }
-        return findGrantAndBuildMeta(databaseMeta.get(), userId);
+        return databaseMeta.map(dbMeta -> findGrantAndBuildMeta(dbMeta, userId));
     }
 
     private UserDatabaseMeta findGrantAndBuildMeta(@NotNull DatabaseMeta databaseMeta, int userId) {

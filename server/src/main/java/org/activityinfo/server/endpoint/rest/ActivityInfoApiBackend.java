@@ -37,6 +37,7 @@ import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.FormSupervisor;
 import org.activityinfo.store.spi.*;
 
+import java.util.Optional;
 import java.util.logging.Logger;
 
 public class ActivityInfoApiBackend implements ApiBackend {
@@ -84,7 +85,7 @@ public class ActivityInfoApiBackend implements ApiBackend {
         // Check that we have the permission to create in this database
         DatabaseProvider databaseProvider = injector.getInstance(DatabaseProvider.class);
         AuthenticatedUser authenticatedUser = getAuthenticatedUser();
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
                 formClass.getDatabaseId(),
                 authenticatedUser.getUserId());
 
@@ -95,9 +96,13 @@ public class ActivityInfoApiBackend implements ApiBackend {
         UsageTracker.track(getAuthenticatedUserId(), "create_form", formClass);
     }
 
-    private void assertCreateFormRights(UserDatabaseMeta databaseMeta) {
+    private void assertCreateFormRights(Optional<UserDatabaseMeta> dbMeta) {
+        if (!dbMeta.isPresent()) {
+            throw new IllegalArgumentException("Database must exist");
+        }
+        UserDatabaseMeta databaseMeta = dbMeta.get();
         if (!PermissionOracle.canCreateForm(databaseMeta.getDatabaseId(), databaseMeta)) {
-            LOGGER.severe(String.format("User %d does not have "
+            LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.CREATE_FORM.name()
                             + " rights on Database %d",
                     databaseMeta.getUserId(),

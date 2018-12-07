@@ -6,23 +6,24 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.DatabaseProvider;
 
 import java.util.List;
+import java.util.Optional;
 
 public class MockDatabaseProvider implements DatabaseProvider {
 
     @Override
-    public UserDatabaseMeta getDatabaseMetadata(ResourceId databaseId, int userId) {
-        return new UserDatabaseMeta.Builder()
+    public Optional<UserDatabaseMeta> getDatabaseMetadata(ResourceId databaseId, int userId) {
+        return Optional.of(new UserDatabaseMeta.Builder()
                 .setDatabaseId(databaseId)
                 .setUserId(userId)
                 .setLabel("Test Database")
                 .setOwner(true)
                 .setPendingTransfer(false)
                 .setVersion("1")
-                .build();
+                .build());
     }
 
     @Override
-    public UserDatabaseMeta getDatabaseMetadata(int databaseId, int userId) {
+    public Optional<UserDatabaseMeta> getDatabaseMetadata(int databaseId, int userId) {
         return getDatabaseMetadata(CuidAdapter.databaseId(databaseId), userId);
     }
 
@@ -32,7 +33,7 @@ public class MockDatabaseProvider implements DatabaseProvider {
     }
 
     @Override
-    public UserDatabaseMeta getDatabaseMetadataByResource(ResourceId resourceId, int userId) {
+    public Optional<UserDatabaseMeta> getDatabaseMetadataByResource(ResourceId resourceId, int userId) {
         throw new IllegalArgumentException("TODO");
     }
 }

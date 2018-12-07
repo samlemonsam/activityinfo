@@ -33,6 +33,7 @@ import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 public class AddTargetHandler implements CommandHandler<AddTarget> {
@@ -53,7 +54,7 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
 
         TargetDTO form = cmd.getTarget();
         Database db = em.find(Database.class, cmd.getDatabaseId());
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(db.getId()),
                 user.getId());
 
@@ -98,9 +99,13 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
         return new CreateResult(target.getId());
     }
 
-    private void assertManageTargetsRights(UserDatabaseMeta databaseMeta) {
+    private void assertManageTargetsRights(Optional<UserDatabaseMeta> dbMeta) {
+        if (!dbMeta.isPresent()) {
+            throw new IllegalArgumentException("Database must exist");
+        }
+        UserDatabaseMeta databaseMeta = dbMeta.get();
         if (!PermissionOracle.canManageTargets(databaseMeta.getDatabaseId(), databaseMeta)) {
-            LOGGER.severe(String.format("User %d does not have "
+            LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.MANAGE_TARGETS.name()
                             + " rights on Database %d",
                     databaseMeta.getUserId(),

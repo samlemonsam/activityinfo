@@ -77,15 +77,15 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
     public ExportResult execute(ExportLongFormatJob descriptor) throws IOException {
         int databaseId = descriptor.getDatabaseId();
         UserDatabaseDTO database = dispatcher.execute(new GetSchema()).getDatabaseById(databaseId);
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(CuidAdapter.databaseId(databaseId), authenticatedUser.getUserId());
+        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(CuidAdapter.databaseId(databaseId), authenticatedUser.getUserId());
 
-        if (database == null) {
+        if (database == null || !databaseMeta.isPresent()) {
             throw new IllegalStateException("Database " + databaseId + " could not be found");
         }
 
         List<FormTree> formScope = getFormScope(database);
         PivotModel longFormatModel = LongFormatTableBuilder.build(formScope);
-        Map<ResourceId,String> folderMapping = mapFormsToFolderLabels(databaseMeta, formScope);
+        Map<ResourceId,String> folderMapping = mapFormsToFolderLabels(databaseMeta.get(), formScope);
         ExportPivotTableJob exportJob = new ExportPivotTableJob(longFormatModel, true, folderMapping);
         return pivotTableExporter.execute(exportJob);
     }

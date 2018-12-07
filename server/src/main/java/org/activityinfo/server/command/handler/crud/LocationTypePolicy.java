@@ -36,6 +36,7 @@ import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import static org.activityinfo.legacy.shared.model.EntityDTO.DATABASE_ID_PROPERTY;
@@ -59,7 +60,7 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
     public Integer create(User user, PropertyMap properties) {
         int databaseId = properties.get(DATABASE_ID_PROPERTY);
         Database database = em.find(Database.class, databaseId);
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(databaseId),
                 user.getId());
 
@@ -83,7 +84,7 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
     public void update(User user, Object entityId, PropertyMap changes) {
         LocationType locationType = em.find(LocationType.class, entityId);
         int databaseId = locationType.getDatabase().getId();
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(databaseId),
                 user.getId());
 
@@ -94,9 +95,13 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
         locationType.incrementVersion();
     }
 
-    private void assertCreateFormRights(UserDatabaseMeta databaseMeta) {
+    private void assertCreateFormRights(Optional<UserDatabaseMeta> dbMeta) {
+        if (!dbMeta.isPresent()) {
+            throw new IllegalArgumentException("DatabaseMeta must exist.");
+        }
+        UserDatabaseMeta databaseMeta = dbMeta.get();
         if (!PermissionOracle.canCreateForm(databaseMeta.getDatabaseId(), databaseMeta)) {
-            LOGGER.severe(String.format("User %d does not have "
+            LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.CREATE_FORM.name()
                             + " rights on Database %d",
                     databaseMeta.getUserId(),
@@ -106,10 +111,14 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
         }
     }
 
-    private void assertEditFormRights(LocationType locationType, UserDatabaseMeta databaseMeta) {
+    private void assertEditFormRights(LocationType locationType, Optional<UserDatabaseMeta> dbMeta) {
+        if (!dbMeta.isPresent()) {
+            throw new IllegalArgumentException("DatabaseMeta must exist.");
+        }
+        UserDatabaseMeta databaseMeta = dbMeta.get();
         ResourceId locationTypeForm = CuidAdapter.locationFormClass(locationType.getId());
         if (!PermissionOracle.canEditForm(locationTypeForm, databaseMeta)) {
-            LOGGER.severe(String.format("User %d does not have "
+            LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.EDIT_FORM.name()
                             + " rights on Database %d",
                     databaseMeta.getUserId(),

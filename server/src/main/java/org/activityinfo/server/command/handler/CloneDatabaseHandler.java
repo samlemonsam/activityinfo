@@ -101,7 +101,10 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
         this.targetDb = createDatabase(command, user);
         this.sourceDb = em.find(Database.class, command.getSourceDatabaseId());
-        this.sourceDbMeta = databaseProvider.getDatabaseMetadata(command.getSourceDatabaseId(), user.getId());
+        Optional<UserDatabaseMeta> sourceMetadata = databaseProvider.getDatabaseMetadata(command.getSourceDatabaseId(), user.getId());
+
+        assert sourceDb != null && sourceMetadata.isPresent();
+        this.sourceDbMeta = sourceMetadata.get();
 
         createDefaultPartner(user);
 

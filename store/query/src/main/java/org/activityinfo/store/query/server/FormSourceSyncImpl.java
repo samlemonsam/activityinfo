@@ -71,8 +71,11 @@ public class FormSourceSyncImpl implements FormSource {
         }
 
         ResourceId databaseId = storage.get().getFormClass().getDatabaseId();
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, userId);
-        FormPermissions permissions = PermissionOracle.formPermissions(formId, databaseMeta);
+        java.util.Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, userId);
+        if (!databaseMeta.isPresent()) {
+            return FormMetadata.notFound(formId);
+        }
+        FormPermissions permissions = PermissionOracle.formPermissions(formId, databaseMeta.get());
 
         if(!permissions.isVisible()) {
             return FormMetadata.forbidden(formId);

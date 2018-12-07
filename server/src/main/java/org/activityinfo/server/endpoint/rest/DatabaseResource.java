@@ -85,7 +85,7 @@ public class DatabaseResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public UserDatabaseMeta getDatabaseMetadata(@InjectParam AuthenticatedUser user) {
+    public Optional<UserDatabaseMeta> getDatabaseMetadata(@InjectParam AuthenticatedUser user) {
         return databaseProvider.getDatabaseMetadata(CuidAdapter.databaseId(databaseId), user.getUserId());
     }
 

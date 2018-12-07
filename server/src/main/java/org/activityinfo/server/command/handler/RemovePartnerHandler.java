@@ -33,6 +33,7 @@ import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 /**
@@ -55,10 +56,12 @@ public class RemovePartnerHandler implements CommandHandler<RemovePartner> {
     @Override
     public CommandResult execute(RemovePartner cmd, User user) {
         Database db = em.getReference(Database.class, cmd.getDatabaseId());
-        UserDatabaseMeta dbMeta = provider.getDatabaseMetadata(cmd.getDatabaseId(), user.getId());
+        Optional<UserDatabaseMeta> dbMeta = provider.getDatabaseMetadata(cmd.getDatabaseId(), user.getId());
 
-        if (!PermissionOracle.canManagePartner(dbMeta.getDatabaseId(), cmd.getPartnerId(), dbMeta)) {
-            LOGGER.severe(String.format("User %d is not authorized to remove partner %d", dbMeta.getUserId(), cmd.getPartnerId()));
+        assert db != null && dbMeta.isPresent();
+
+        if (!PermissionOracle.canManagePartner(dbMeta.get().getDatabaseId(), cmd.getPartnerId(), dbMeta.get())) {
+            LOGGER.severe(() -> String.format("User %d is not authorized to remove partner %d", dbMeta.get().getUserId(), cmd.getPartnerId()));
             throw new IllegalAccessCommandException();
         }
 

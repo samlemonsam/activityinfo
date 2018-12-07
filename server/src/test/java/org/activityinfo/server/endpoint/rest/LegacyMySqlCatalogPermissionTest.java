@@ -217,7 +217,7 @@ public class LegacyMySqlCatalogPermissionTest {
 
     private FormPermissions fetchFormPermissions() {
         FormStorage formStorage = catalog.getForm(getActivityId()).get();
-        UserDatabaseMeta dbMeta = databaseProvider.getDatabaseMetadata(formStorage.getFormClass().getDatabaseId(), userId);
+        UserDatabaseMeta dbMeta = databaseProvider.getDatabaseMetadata(formStorage.getFormClass().getDatabaseId(), userId).get();
         return PermissionOracle.formPermissions(getActivityId(), dbMeta);
     }
 

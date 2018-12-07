@@ -27,6 +27,8 @@ import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.SchemaElement;
 import org.activityinfo.store.spi.DatabaseProvider;
 
+import java.util.Optional;
+
 /**
  * Checks whether the requesting user is authorized to change the given entity.
  */
@@ -43,9 +45,12 @@ public class DesignAuthorizationHandler implements AuthorizationHandler<SchemaEl
     public boolean isAuthorized(AuthenticatedUser requestingUser, SchemaElement entity) {
         Preconditions.checkNotNull(requestingUser, "requestingUser");
 
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(entity.findOwningDatabase().getId()),
                 requestingUser.getUserId());
-        return PermissionOracle.canDesign(databaseMeta);
+        if (!databaseMeta.isPresent()) {
+            return false;
+        }
+        return PermissionOracle.canDesign(databaseMeta.get());
     }
 }

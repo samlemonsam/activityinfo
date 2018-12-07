@@ -34,6 +34,7 @@ import org.json.JSONObject;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+import java.util.Optional;
 
 @SuppressWarnings("unused")
 public class DeleteSiteHandler implements CommandHandler<DeleteSite> {
@@ -51,11 +52,11 @@ public class DeleteSiteHandler implements CommandHandler<DeleteSite> {
     public VoidResult execute(DeleteSite cmd, User user) throws CommandException {
 
         Site site = entityManager.find(Site.class, cmd.getSiteId());
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(site.getActivity().getDatabase().getId()),
                 user.getId());
 
-        if (!PermissionOracle.canEditSite(site.getActivity().getFormId(), site.getPartner().getId(), databaseMeta)) {
+        if (!databaseMeta.isPresent() || !PermissionOracle.canEditSite(site.getActivity().getFormId(), site.getPartner().getId(), databaseMeta.get())) {
             throw new IllegalAccessCommandException("Not authorized to modify sites");
         }
 

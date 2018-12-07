@@ -420,8 +420,11 @@ public class Updater {
         // Check form-level permissions
         if(enforcePermissions) {
             FormClass formClass = form.getFormClass();
-            UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(formClass.getDatabaseId(), userId);
-            FormPermissions formPermissions = PermissionOracle.formPermissions(formClass.getId(), databaseMeta);
+            java.util.Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(formClass.getDatabaseId(), userId);
+            if (!databaseMeta.isPresent()) {
+                throw new IllegalArgumentException("DatabaseMeta must exist");
+            }
+            FormPermissions formPermissions = PermissionOracle.formPermissions(formClass.getId(), databaseMeta.get());
 
             // Verify that the user has the right to modify the *existing* record
 

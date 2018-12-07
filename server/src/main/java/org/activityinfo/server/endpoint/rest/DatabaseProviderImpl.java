@@ -25,6 +25,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.DatabaseProvider;
 
 import java.util.List;
+import java.util.Optional;
 
 public class DatabaseProviderImpl implements DatabaseProvider {
 
@@ -42,7 +43,7 @@ public class DatabaseProviderImpl implements DatabaseProvider {
     }
 
     @Override
-    public UserDatabaseMeta getDatabaseMetadata(ResourceId databaseId, int userId) {
+    public Optional<UserDatabaseMeta> getDatabaseMetadata(ResourceId databaseId, int userId) {
         if (geoDbProvider.accept(databaseId)) {
             return geoDbProvider.queryGeoDb(userId);
         } else {
@@ -51,7 +52,7 @@ public class DatabaseProviderImpl implements DatabaseProvider {
     }
 
     @Override
-    public UserDatabaseMeta getDatabaseMetadata(int databaseId, int userId) {
+    public Optional<UserDatabaseMeta> getDatabaseMetadata(int databaseId, int userId) {
         return getDatabaseMetadata(CuidAdapter.databaseId(databaseId), userId);
     }
 
@@ -61,7 +62,7 @@ public class DatabaseProviderImpl implements DatabaseProvider {
     }
 
     @Override
-    public UserDatabaseMeta getDatabaseMetadataByResource(ResourceId resourceId, int userId) {
+    public Optional<UserDatabaseMeta> getDatabaseMetadataByResource(ResourceId resourceId, int userId) {
         if (geoDbProvider.accept(resourceId)) {
             return geoDbProvider.queryGeoDb(userId);
         } else {

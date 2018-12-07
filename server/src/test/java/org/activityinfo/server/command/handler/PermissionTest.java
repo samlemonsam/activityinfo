@@ -47,7 +47,7 @@ public class PermissionTest {
     private static final int UNAUTH_USER_ID = 3;
 
     private UserDatabaseMeta getDb(int userId) {
-        return provider.getDatabaseMetadata(CuidAdapter.databaseId(DB_ID), userId);
+        return provider.getDatabaseMetadata(CuidAdapter.databaseId(DB_ID), userId).orElse(null);
     }
 
     @Test

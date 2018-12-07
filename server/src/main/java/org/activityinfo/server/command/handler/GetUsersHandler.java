@@ -46,10 +46,7 @@ import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -74,8 +71,11 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
 
     @Override
     public CommandResult execute(GetUsers cmd, User currentUser) {
-        UserDatabaseMeta dbMeta = provider.getDatabaseMetadata(CuidAdapter.databaseId(cmd.getDatabaseId()), currentUser.getId());
-        Permission manageUsers = PermissionOracle.manageUsers(dbMeta.getDatabaseId(), dbMeta);
+        Optional<UserDatabaseMeta> dbMeta = provider.getDatabaseMetadata(CuidAdapter.databaseId(cmd.getDatabaseId()), currentUser.getId());
+        if (!dbMeta.isPresent()) {
+            throw new IllegalArgumentException("DatabaseMeta must exist");
+        }
+        Permission manageUsers = PermissionOracle.manageUsers(dbMeta.get().getDatabaseId(), dbMeta.get());
 
         if (manageUsers.isForbidden()) {
             throw new IllegalAccessCommandException(String.format(

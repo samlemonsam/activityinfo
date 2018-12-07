@@ -40,6 +40,7 @@ import org.activityinfo.store.spi.DatabaseProvider;
 import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import static org.activityinfo.legacy.shared.model.ActivityDTO.*;
@@ -69,7 +70,7 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
     public Object create(User user, PropertyMap properties) {
 
         Database database = getDatabase(properties);
-        UserDatabaseMeta databaseMeta = getDatabaseMeta(properties, user);
+        Optional<UserDatabaseMeta> databaseMeta = getDatabaseMeta(properties, user);
 
         assertCreateFormRights(databaseMeta);
 
@@ -92,9 +93,13 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         return activity.getId();
     }
 
-    private void assertCreateFormRights(UserDatabaseMeta databaseMeta) {
+    private void assertCreateFormRights(Optional<UserDatabaseMeta> dbMeta) {
+        if (!dbMeta.isPresent()) {
+            throw new IllegalArgumentException("Database must exist");
+        }
+        UserDatabaseMeta databaseMeta = dbMeta.get();
         if (!PermissionOracle.canCreateForm(databaseMeta.getDatabaseId(), databaseMeta)) {
-            LOGGER.severe(String.format("User %d does not have "
+            LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.CREATE_FORM.name()
                             + " rights on Database %d",
                     databaseMeta.getUserId(),
@@ -103,9 +108,13 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         }
     }
 
-    private void assertEditFormRights(ResourceId formId, UserDatabaseMeta databaseMeta) {
+    private void assertEditFormRights(ResourceId formId, Optional<UserDatabaseMeta> dbMeta) {
+        if (!dbMeta.isPresent()) {
+            throw new IllegalArgumentException("Database must exist");
+        }
+        UserDatabaseMeta databaseMeta = dbMeta.get();
         if (!PermissionOracle.canEditForm(formId, databaseMeta)) {
-            LOGGER.severe(String.format("User %d does not have "
+            LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.EDIT_FORM.name()
                             + " rights on Database %d",
                     databaseMeta.getUserId(),
@@ -114,7 +123,7 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         }
     }
 
-    private UserDatabaseMeta getDatabaseMeta(PropertyMap properties, User user) {
+    private Optional<UserDatabaseMeta> getDatabaseMeta(PropertyMap properties, User user) {
         ResourceId databaseId = CuidAdapter.databaseId(properties.getRequiredInt("databaseId"));
         return databaseProvider.getDatabaseMetadata(databaseId, user.getId());
     }
@@ -127,7 +136,7 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
     @Override
     public void update(User user, Object entityId, PropertyMap changes) {
         Activity activity = em.find(Activity.class, entityId);
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(activity.getDatabase().getId()),
                 user.getId());
 

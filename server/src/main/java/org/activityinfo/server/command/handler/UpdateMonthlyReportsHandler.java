@@ -41,6 +41,7 @@ import javax.persistence.EntityManager;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import static org.activityinfo.legacy.shared.model.IndicatorDTO.getPropertyName;
@@ -90,11 +91,11 @@ public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthly
                 throw new CommandException(cmd, "site " + cmd.getSiteId() + " not found for user " + user.getEmail());
             }
 
-            UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+            Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
                     CuidAdapter.databaseId(site.getActivity().getDatabase().getId()),
                     user.getId());
 
-            if (!PermissionOracle.canEditSite(site.getActivity().getFormId(), site.getPartner().getId(), databaseMeta)) {
+            if (!databaseMeta.isPresent() || !PermissionOracle.canEditSite(site.getActivity().getFormId(), site.getPartner().getId(), databaseMeta.get())) {
                 throw new IllegalAccessCommandException("Not authorized to modify sites");
             }
 

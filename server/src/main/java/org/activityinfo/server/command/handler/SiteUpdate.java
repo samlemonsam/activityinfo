@@ -44,6 +44,7 @@ import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 
@@ -138,10 +139,10 @@ public class SiteUpdate {
 
     public void assertEditSiteAllowed(Site site, User user, Partner partner) {
         ResourceId databaseId = CuidAdapter.databaseId(site.getActivity().getDatabase().getId());
-        UserDatabaseMeta databaseMeta = provider.getDatabaseMetadata(databaseId, user.getId());
+        Optional<UserDatabaseMeta> databaseMeta = provider.getDatabaseMetadata(databaseId, user.getId());
         ResourceId activityId = site.getActivity().getFormId();
 
-        if (!PermissionOracle.canEditSite(activityId, partner.getId(), databaseMeta)) {
+        if (!databaseMeta.isPresent() || !PermissionOracle.canEditSite(activityId, partner.getId(), databaseMeta.get())) {
             LOGGER.severe(String.format("User %d does not have permission to edit" +
                     " site %d", user.getId(), site.getId()));
             throw new IllegalAccessCommandException();
@@ -150,9 +151,9 @@ public class SiteUpdate {
 
     private void assertCreateSiteAllowed(User user, Activity activity, Partner partner) {
         ResourceId databaseId = CuidAdapter.databaseId(activity.getDatabase().getId());
-        UserDatabaseMeta databaseMeta = provider.getDatabaseMetadata(databaseId, user.getId());
+        Optional<UserDatabaseMeta> databaseMeta = provider.getDatabaseMetadata(databaseId, user.getId());
 
-        if (!PermissionOracle.canCreateSite(activity.getFormId(), partner.getId(), databaseMeta)) {
+        if (!databaseMeta.isPresent() || !PermissionOracle.canCreateSite(activity.getFormId(), partner.getId(), databaseMeta.get())) {
             LOGGER.severe(String.format("User %d does not have permission to create" +
                     " site on activity %d for partner %d", user.getId(), activity.getId(), partner.getId()));
             throw new IllegalAccessCommandException();

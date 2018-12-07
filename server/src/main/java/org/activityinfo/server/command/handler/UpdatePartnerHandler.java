@@ -34,6 +34,7 @@ import org.activityinfo.store.spi.DatabaseProvider;
 import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -59,14 +60,16 @@ public class UpdatePartnerHandler implements CommandHandler<UpdatePartner> {
     public CommandResult execute(UpdatePartner cmd, User user) {
 
         Database db = em.find(Database.class, cmd.getDatabaseId());
-        UserDatabaseMeta dbMeta = provider.getDatabaseMetadata(cmd.getDatabaseId(), user.getId());
+        Optional<UserDatabaseMeta> dbMeta = provider.getDatabaseMetadata(cmd.getDatabaseId(), user.getId());
+
+        assert db != null && dbMeta.isPresent();
 
         // Does this partner already exist?
         if (cmd.getPartner().hasId()) {
-            assertManagePartnerAllowed(dbMeta, cmd.getPartner().getId());
+            assertManagePartnerAllowed(dbMeta.get(), cmd.getPartner().getId());
             return updatePartner(db, cmd);
         } else {
-            assertManageAllPartnersAllowed(dbMeta);
+            assertManageAllPartnersAllowed(dbMeta.get());
             return addNewPartner(cmd, db);
         }
     }

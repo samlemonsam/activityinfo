@@ -34,6 +34,7 @@ import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPeriod> {
@@ -65,29 +66,30 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
         lockedPeriod.setEnabled(lockedPeriodDTO.isEnabled());
 
         int databaseId;
+        Optional<UserDatabaseMeta> databaseMeta;
         if (cmd.getDatabaseId() != 0) {
             database = em.find(Database.class, cmd.getDatabaseId());
             lockedPeriod.setDatabase(database);
             databaseId = database.getId();
-            UserDatabaseMeta databaseMeta = getDatabaseMeta(databaseId, user.getId());
+            databaseMeta = getDatabaseMeta(databaseId, user.getId());
 
-            assertLockRecordsRights(databaseMeta.getDatabaseId(), databaseMeta);
+            assertLockRecordsRights(databaseMeta);
 
         } else if (cmd.getProjectId() != 0) {
             project = em.find(Project.class, cmd.getProjectId());
             lockedPeriod.setProject(project);
             lockedPeriod.setDatabase(project.getDatabase());
             databaseId = project.getDatabase().getId();
-            UserDatabaseMeta databaseMeta = getDatabaseMeta(databaseId, user.getId());
+            databaseMeta = getDatabaseMeta(databaseId, user.getId());
 
-            assertLockRecordsRights(databaseMeta.getDatabaseId(), databaseMeta);
+            assertLockRecordsRights(databaseMeta);
 
         } else if (cmd.getActivityId() != 0) {
             activity = em.find(Activity.class, cmd.getActivityId());
             lockedPeriod.setActivity(activity);
             lockedPeriod.setDatabase(activity.getDatabase());
             databaseId = activity.getDatabase().getId();
-            UserDatabaseMeta databaseMeta = getDatabaseMeta(databaseId, user.getId());
+            databaseMeta = getDatabaseMeta(databaseId, user.getId());
 
             assertLockRecordsRights(activity.getFormId(), databaseMeta);
 
@@ -96,7 +98,7 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
             lockedPeriod.setFolder(folder);
             lockedPeriod.setDatabase(folder.getDatabase());
             databaseId = folder.getDatabase().getId();
-            UserDatabaseMeta databaseMeta = getDatabaseMeta(databaseId, user.getId());
+            databaseMeta = getDatabaseMeta(databaseId, user.getId());
 
             assertLockRecordsRights(CuidAdapter.folderId(folder.getId()), databaseMeta);
 
@@ -114,14 +116,24 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
         return new CreateResult(lockedPeriod.getId());
     }
 
-    private UserDatabaseMeta getDatabaseMeta(int databaseId, int userId) {
+    private Optional<UserDatabaseMeta> getDatabaseMeta(int databaseId, int userId) {
         return databaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(databaseId),
                 userId);
     }
 
-    void assertLockRecordsRights(ResourceId resourceId, UserDatabaseMeta userDatabaseMeta) {
-        if (!PermissionOracle.canLockRecords(resourceId, userDatabaseMeta)) {
+    void assertLockRecordsRights(Optional<UserDatabaseMeta> userDatabaseMeta) {
+        if (!userDatabaseMeta.isPresent()) {
+            throw new IllegalArgumentException("Database must exist");
+        }
+        assertLockRecordsRights(userDatabaseMeta.get().getDatabaseId(), userDatabaseMeta);
+    }
+
+    void assertLockRecordsRights(ResourceId resourceId, Optional<UserDatabaseMeta> userDatabaseMeta) {
+        if (!userDatabaseMeta.isPresent()) {
+            throw new IllegalArgumentException("Database must exist");
+        }
+        if (!PermissionOracle.canLockRecords(resourceId, userDatabaseMeta.get())) {
             throw new IllegalAccessCommandException();
         }
     }

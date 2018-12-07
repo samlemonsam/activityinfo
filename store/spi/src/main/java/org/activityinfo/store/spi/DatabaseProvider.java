@@ -22,18 +22,19 @@ import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Provides metadata for a database, dependent on user's permissions.
  */
 public interface DatabaseProvider {
 
-  UserDatabaseMeta getDatabaseMetadata(ResourceId databaseId, int userId);
+  Optional<UserDatabaseMeta> getDatabaseMetadata(ResourceId databaseId, int userId);
 
-  UserDatabaseMeta getDatabaseMetadata(int databaseId, int userId);
+  Optional<UserDatabaseMeta> getDatabaseMetadata(int databaseId, int userId);
 
   List<UserDatabaseMeta> getVisibleDatabases(int userId);
 
-  UserDatabaseMeta getDatabaseMetadataByResource(ResourceId resourceId, int userId);
+  Optional<UserDatabaseMeta> getDatabaseMetadataByResource(ResourceId resourceId, int userId);
 
 }

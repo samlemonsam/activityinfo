@@ -42,6 +42,7 @@ import javax.persistence.EntityManager;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.activityinfo.legacy.shared.model.EntityDTO.NAME_PROPERTY;
 import static org.activityinfo.legacy.shared.model.EntityDTO.SORT_ORDER_PROPERTY;
@@ -262,23 +263,23 @@ public class BaseEntityHandler {
 
     void assertCreateFormRights(User user, Database database) {
         ResourceId databaseId = CuidAdapter.databaseId(database.getId());
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, user.getId());
-        if (!PermissionOracle.canCreateForm(databaseId, databaseMeta)) {
+        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, user.getId());
+        if (!databaseMeta.isPresent() || !PermissionOracle.canCreateForm(databaseId, databaseMeta.get())) {
             throw new IllegalAccessCommandException();
         }
     }
 
     void assertCreateFolderRights(User user, Database database) {
         ResourceId databaseId = CuidAdapter.databaseId(database.getId());
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, user.getId());
-        if (!PermissionOracle.canCreateForm(databaseId, databaseMeta)) {
+        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, user.getId());
+        if (!databaseMeta.isPresent() || !PermissionOracle.canCreateForm(databaseId, databaseMeta.get())) {
             throw new IllegalAccessCommandException();
         }
     }
 
     void assertEditFormRights(User user, Activity activity) {
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(activity.getDatabase().getId(), user.getId());
-        if (!PermissionOracle.canEditForm(activity.getFormId(), databaseMeta)) {
+        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(activity.getDatabase().getId(), user.getId());
+        if (!databaseMeta.isPresent() || !PermissionOracle.canEditForm(activity.getFormId(), databaseMeta.get())) {
             throw new IllegalAccessCommandException();
         }
     }
@@ -294,23 +295,23 @@ public class BaseEntityHandler {
 
     void assertEditFolderRights(User user, Folder folder) {
         ResourceId folderId = CuidAdapter.folderId(folder.getId());
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(folder.getDatabase().getId(), user.getId());
-        if (!PermissionOracle.canEditFolder(folderId, databaseMeta)) {
+        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(folder.getDatabase().getId(), user.getId());
+        if (!databaseMeta.isPresent() || !PermissionOracle.canEditFolder(folderId, databaseMeta.get())) {
             throw new IllegalAccessCommandException();
         }
     }
 
     void assertLockRecordsRights(User user, LockedPeriod lockedPeriod) {
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(lockedPeriod.getDatabase().getId(), user.getId());
-        if (!PermissionOracle.canLockRecords(lockedPeriod.getResourceId(), databaseMeta)) {
+        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(lockedPeriod.getDatabase().getId(), user.getId());
+        if (!databaseMeta.isPresent() || !PermissionOracle.canLockRecords(lockedPeriod.getResourceId(), databaseMeta.get())) {
             throw new IllegalAccessCommandException();
         }
     }
 
     void assertManageTargetsRights(User user, Database database) {
         ResourceId databaseId = CuidAdapter.databaseId(database.getId());
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, user.getId());
-        if (!PermissionOracle.canManageTargets(databaseId, databaseMeta)) {
+        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, user.getId());
+        if (!databaseMeta.isPresent() || !PermissionOracle.canManageTargets(databaseId, databaseMeta.get())) {
             throw new IllegalAccessCommandException();
         }
     }

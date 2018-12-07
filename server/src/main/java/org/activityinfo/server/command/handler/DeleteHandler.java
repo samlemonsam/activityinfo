@@ -33,6 +33,7 @@ import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -118,9 +119,12 @@ public class DeleteHandler implements CommandHandler<Delete> {
 
     private void assertDatabaseDeletionAuthorized(Database entity, User user) {
         ResourceId databaseId = CuidAdapter.databaseId(entity.getId());
-        UserDatabaseMeta databaseMeta = provider.getDatabaseMetadata(databaseId, user.getId());
+        Optional<UserDatabaseMeta> databaseMeta = provider.getDatabaseMetadata(databaseId, user.getId());
 
-        if (!PermissionOracle.canDeleteDatabase(databaseMeta)) {
+        if (!databaseMeta.isPresent()) {
+            throw new IllegalArgumentException("DatabaseMeta must exist");
+        }
+        if (!PermissionOracle.canDeleteDatabase(databaseMeta.get())) {
             LOGGER.severe(String.format("User %d is not authorized to delete " +
                     "database %d: it is owned by user %d",
                     user.getId(),
@@ -132,15 +136,18 @@ public class DeleteHandler implements CommandHandler<Delete> {
 
     public void assertDeleteSiteRights(Site site, int user) {
         ResourceId databaseId = CuidAdapter.databaseId(site.getActivity().getDatabase().getId());
-        UserDatabaseMeta databaseMeta = provider.getDatabaseMetadata(databaseId, user);
+        Optional<UserDatabaseMeta> databaseMeta = provider.getDatabaseMetadata(databaseId, user);
         ResourceId activityId = site.getActivity().getFormId();
         int partnerId = site.getPartner().getId();
 
-        if (!PermissionOracle.canDeleteSite(activityId, partnerId, databaseMeta)) {
+        if (!databaseMeta.isPresent()) {
+            throw new IllegalArgumentException("DatabaseMeta must exist");
+        }
+        if (!PermissionOracle.canDeleteSite(activityId, partnerId, databaseMeta.get())) {
             LOGGER.severe(String.format("User %d does not have "
                             + Operation.DELETE_RECORD.name()
                             + " rights on Activity %d",
-                    databaseMeta.getUserId(),
+                    databaseMeta.get().getUserId(),
                     site.getActivity().getId()));
             throw new IllegalAccessCommandException();
         }
@@ -160,14 +167,17 @@ public class DeleteHandler implements CommandHandler<Delete> {
 
     public void assertEditFormRights(Activity activity, int user) {
         ResourceId databaseId = CuidAdapter.databaseId(activity.getDatabase().getId());
-        UserDatabaseMeta databaseMeta = provider.getDatabaseMetadata(databaseId, user);
+        Optional<UserDatabaseMeta> databaseMeta = provider.getDatabaseMetadata(databaseId, user);
         ResourceId activityId = activity.getFormId();
 
-        if (!PermissionOracle.canEditForm(activityId, databaseMeta)) {
+        if (!databaseMeta.isPresent()) {
+            throw new IllegalArgumentException("DatabaseMeta must exist");
+        }
+        if (!PermissionOracle.canEditForm(activityId, databaseMeta.get())) {
             LOGGER.severe(String.format("User %d does not have "
                             + Operation.EDIT_FORM.name()
                             + " rights on Activity %d",
-                    databaseMeta.getUserId(),
+                    databaseMeta.get().getUserId(),
                     activity.getId()));
             throw new IllegalAccessCommandException();
         }
@@ -175,13 +185,16 @@ public class DeleteHandler implements CommandHandler<Delete> {
 
     public void assertDeleteFormRights(Activity activity, int user) {
         ResourceId databaseId = CuidAdapter.databaseId(activity.getDatabase().getId());
-        UserDatabaseMeta databaseMeta = provider.getDatabaseMetadata(databaseId, user);
+        Optional<UserDatabaseMeta> databaseMeta = provider.getDatabaseMetadata(databaseId, user);
 
-        if (!PermissionOracle.canDeleteForm(activity.getFormId(), databaseMeta)) {
+        if (!databaseMeta.isPresent()) {
+            throw new IllegalArgumentException("DatabaseMeta must exist");
+        }
+        if (!PermissionOracle.canDeleteForm(activity.getFormId(), databaseMeta.get())) {
             LOGGER.severe(String.format("User %d does not have "
                             + Operation.DELETE_FORM.name()
                             + " rights on Activity %d",
-                    databaseMeta.getUserId(),
+                    databaseMeta.get().getUserId(),
                     activity.getId()));
             throw new IllegalAccessCommandException();
         }
@@ -189,13 +202,16 @@ public class DeleteHandler implements CommandHandler<Delete> {
 
     public void assertDeleteProjectRights(Database database, int user) {
         ResourceId databaseId = CuidAdapter.databaseId(database.getId());
-        UserDatabaseMeta databaseMeta = provider.getDatabaseMetadata(databaseId, user);
+        Optional<UserDatabaseMeta> databaseMeta = provider.getDatabaseMetadata(databaseId, user);
 
-        if (!PermissionOracle.canDeleteForm(databaseId, databaseMeta)) {
+        if (!databaseMeta.isPresent()) {
+            throw new IllegalArgumentException("DatabaseMeta must exist");
+        }
+        if (!PermissionOracle.canDeleteForm(databaseId, databaseMeta.get())) {
             LOGGER.severe(String.format("User %d does not have "
                             + Operation.DELETE_FORM.name()
                             + " rights on Database %d",
-                    databaseMeta.getUserId(),
+                    databaseMeta.get().getUserId(),
                     database.getId()));
             throw new IllegalAccessCommandException();
         }
@@ -203,13 +219,16 @@ public class DeleteHandler implements CommandHandler<Delete> {
 
     public void assertLockRecordsRights(LockedPeriod lockedPeriod, int user) {
         ResourceId databaseId = CuidAdapter.databaseId(lockedPeriod.getDatabase().getId());
-        UserDatabaseMeta databaseMeta = provider.getDatabaseMetadata(databaseId, user);
+        Optional<UserDatabaseMeta> databaseMeta = provider.getDatabaseMetadata(databaseId, user);
 
-        if (!PermissionOracle.canLockRecords(lockedPeriod.getResourceId(), databaseMeta)) {
+        if (!databaseMeta.isPresent()) {
+            throw new IllegalArgumentException("DatabaseMeta must exist");
+        }
+        if (!PermissionOracle.canLockRecords(lockedPeriod.getResourceId(), databaseMeta.get())) {
             LOGGER.severe(String.format("User %d does not have "
                             + Operation.LOCK_RECORDS.name()
                             + " rights on Resource %s",
-                    databaseMeta.getUserId(),
+                    databaseMeta.get().getUserId(),
                     lockedPeriod.getResourceId().asString()));
             throw new IllegalAccessCommandException();
         }
@@ -217,14 +236,17 @@ public class DeleteHandler implements CommandHandler<Delete> {
 
     public void assertManageTargetsRights(Target target, int user) {
         ResourceId databaseId = CuidAdapter.databaseId(target.getDatabase().getId());
-        UserDatabaseMeta databaseMeta = provider.getDatabaseMetadata(databaseId, user);
+        Optional<UserDatabaseMeta> databaseMeta = provider.getDatabaseMetadata(databaseId, user);
 
-        if (!PermissionOracle.canManageTargets(databaseId, databaseMeta)) {
-            LOGGER.severe(String.format("User %d does not have "
+        if (!databaseMeta.isPresent()) {
+            throw new IllegalArgumentException("DatabaseMeta must exist");
+        }
+        if (!PermissionOracle.canManageTargets(databaseId, databaseMeta.get())) {
+            LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.MANAGE_TARGETS.name()
                             + " rights on Database %d",
-                    databaseMeta.getUserId(),
-                    databaseMeta.getLegacyDatabaseId()));
+                    databaseMeta.get().getUserId(),
+                    databaseMeta.get().getLegacyDatabaseId()));
             throw new IllegalAccessCommandException();
         }
     }
@@ -232,14 +254,17 @@ public class DeleteHandler implements CommandHandler<Delete> {
     public void assertDeleteFormRights(LocationType locationType, int user) {
         ResourceId databaseId = CuidAdapter.databaseId(locationType.getDatabase().getId());
         ResourceId locationTypeForm = CuidAdapter.locationFormClass(locationType.getId());
-        UserDatabaseMeta databaseMeta = provider.getDatabaseMetadata(databaseId, user);
+        Optional<UserDatabaseMeta> databaseMeta = provider.getDatabaseMetadata(databaseId, user);
 
-        if (!PermissionOracle.canDeleteForm(locationTypeForm, databaseMeta)) {
-            LOGGER.severe(String.format("User %d does not have "
+        if (!databaseMeta.isPresent()) {
+            throw new IllegalArgumentException("DatabaseMeta must exist");
+        }
+        if (!PermissionOracle.canDeleteForm(locationTypeForm, databaseMeta.get())) {
+            LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.DELETE_FORM.name()
                             + " rights on Database %d",
-                    databaseMeta.getUserId(),
-                    databaseMeta.getLegacyDatabaseId()));
+                    databaseMeta.get().getUserId(),
+                    databaseMeta.get().getLegacyDatabaseId()));
             throw new IllegalAccessCommandException();
         }
     }
@@ -247,13 +272,16 @@ public class DeleteHandler implements CommandHandler<Delete> {
     public void assertDeleteFolderRights(Folder folder, int user) {
         ResourceId databaseId = CuidAdapter.databaseId(folder.getDatabase().getId());
         ResourceId folderId = CuidAdapter.folderId(folder.getId());
-        UserDatabaseMeta databaseMeta = provider.getDatabaseMetadata(databaseId, user);
+        Optional<UserDatabaseMeta> databaseMeta = provider.getDatabaseMetadata(databaseId, user);
 
-        if (!PermissionOracle.canDeleteFolder(folderId, databaseMeta)) {
+        if (!databaseMeta.isPresent()) {
+            throw new IllegalArgumentException("DatabaseMeta must exist");
+        }
+        if (!PermissionOracle.canDeleteFolder(folderId, databaseMeta.get())) {
             LOGGER.severe(String.format("User %d does not have "
                             + Operation.DELETE_FORM.name()
                             + " rights on Folder %d",
-                    databaseMeta.getUserId(),
+                    databaseMeta.get().getUserId(),
                     folder.getId()));
             throw new IllegalAccessCommandException();
         }

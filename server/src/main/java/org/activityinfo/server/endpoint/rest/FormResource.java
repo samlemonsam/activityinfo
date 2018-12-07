@@ -151,8 +151,11 @@ public class FormResource {
         FormStorage form = assertVisible(formId);
         DatabaseProvider databaseProvider = backend.getDatabaseProvider();
         int userId = backend.getAuthenticatedUserId();
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(form.getFormClass().getDatabaseId(), userId);
-        FormPermissions formPermissions = PermissionOracle.formPermissions(form.getFormClass().getId(), databaseMeta);
+        java.util.Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(form.getFormClass().getDatabaseId(), userId);
+        if (!databaseMeta.isPresent()) {
+            throw new NotFoundException("DatabaseMeta must exist");
+        }
+        FormPermissions formPermissions = PermissionOracle.formPermissions(form.getFormClass().getId(), databaseMeta.get());
 
         Optional<FormRecord> record = form.get(ResourceId.valueOf(recordId));
         if(!record.isPresent()) {

@@ -40,6 +40,7 @@ import org.activityinfo.store.spi.DatabaseProvider;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.Date;
+import java.util.Optional;
 
 import static org.activityinfo.json.Json.parse;
 
@@ -128,8 +129,8 @@ public class AnalysesResource {
 
     private boolean isVisible(AnalysisEntity entity) {
         ResourceId databaseId = ResourceId.valueOf(entity.getParentId());
-        UserDatabaseMeta database = databaseProvider.getDatabaseMetadata(databaseId, userProvider.get().getId());
-        return PermissionOracle.canView(database);
+        Optional<UserDatabaseMeta> database = databaseProvider.getDatabaseMetadata(databaseId, userProvider.get().getId());
+        return database.isPresent() && PermissionOracle.canView(database.get());
     }
 
     private void assertUpdateAuthorized(AnalysisUpdate update) {
@@ -137,8 +138,11 @@ public class AnalysesResource {
         if(databaseId.getDomain() != CuidAdapter.DATABASE_DOMAIN) {
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("No such folder: " + databaseId).build());
         }
-        UserDatabaseMeta database = databaseProvider.getDatabaseMetadata(databaseId, userProvider.get().getId());
-        if (!PermissionOracle.canEditResource(databaseId, database)) {
+        Optional<UserDatabaseMeta> database = databaseProvider.getDatabaseMetadata(databaseId, userProvider.get().getId());
+        if (!database.isPresent()) {
+            throw new IllegalArgumentException("Database must exist");
+        }
+        if (!PermissionOracle.canEditResource(databaseId, database.get())) {
             throw new IllegalAccessCommandException("Not authorized to modify report");
         }
     }

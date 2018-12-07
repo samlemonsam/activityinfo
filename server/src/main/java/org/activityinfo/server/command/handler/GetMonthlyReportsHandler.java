@@ -36,6 +36,7 @@ import org.activityinfo.store.spi.DatabaseProvider;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 /**
@@ -68,11 +69,11 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
                 .getSingleResult();
 
         int databaseId = site.getActivity().getDatabase().getId();
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(databaseId),
                 user.getId());
 
-        if(!PermissionOracle.canViewSite(site.getActivity().getFormId(), site.getPartner().getId(), databaseMeta)) {
+        if(!databaseMeta.isPresent() || !PermissionOracle.canViewSite(site.getActivity().getFormId(), site.getPartner().getId(), databaseMeta.get())) {
             LOGGER.severe(() -> "User " + user.getEmail() + " has no view privs on site " + site.getId() + "," +
                           "partner = " + site.getPartner().getName() + " " + site.getPartner().getId());
             throw new IllegalAccessCommandException();

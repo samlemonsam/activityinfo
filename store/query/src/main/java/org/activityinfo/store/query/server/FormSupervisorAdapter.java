@@ -52,7 +52,10 @@ public class FormSupervisorAdapter implements FormSupervisor {
             throw new IllegalStateException("Invalid form ID");
         }
         ResourceId databaseId = form.get().getFormClass().getDatabaseId();
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, userId);
-        return PermissionOracle.formPermissions(formId, databaseMeta);
+        java.util.Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, userId);
+        if (!databaseMeta.isPresent()) {
+            return FormPermissions.none();
+        }
+        return PermissionOracle.formPermissions(formId, databaseMeta.get());
     }
 }

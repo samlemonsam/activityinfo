@@ -40,6 +40,7 @@ import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 public class UserDatabasePolicy implements EntityPolicy<Database> {
@@ -124,16 +125,20 @@ public class UserDatabasePolicy implements EntityPolicy<Database> {
     @Override
     public void update(User user, Object entityId, PropertyMap changes) {
         Database database = em.find(Database.class, entityId);
-        UserDatabaseMeta databaseMeta = databaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(database.getId()),
                 user.getId());
         assertEditDatabaseRights(databaseMeta);
         applyProperties(database, changes);
     }
 
-    private void assertEditDatabaseRights(UserDatabaseMeta databaseMeta) {
+    private void assertEditDatabaseRights(Optional<UserDatabaseMeta> dbMeta) {
+        if (!dbMeta.isPresent()) {
+            throw new IllegalArgumentException("DatabaseMeta must exist.");
+        }
+        UserDatabaseMeta databaseMeta = dbMeta.get();
         if (!PermissionOracle.canEditDatabase(databaseMeta)) {
-            LOGGER.severe(String.format("User %d does not have edit privileges on database %d",
+            LOGGER.severe(() -> String.format("User %d does not have edit privileges on database %d",
                     databaseMeta.getUserId(),
                     databaseMeta.getLegacyDatabaseId()));
             throw new IllegalAccessCommandException();

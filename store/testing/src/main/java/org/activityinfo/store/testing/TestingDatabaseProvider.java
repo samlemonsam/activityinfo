@@ -51,14 +51,12 @@ public class TestingDatabaseProvider implements DatabaseProvider {
     }
 
     @Override
-    public UserDatabaseMeta getDatabaseMetadata(ResourceId databaseId, int userId) {
-        Optional<UserDatabaseMeta> database = fetchDatabase(databaseId);
-        assert database.isPresent() : "Database was not added to test provider...";
-        return database.get();
+    public Optional<UserDatabaseMeta> getDatabaseMetadata(ResourceId databaseId, int userId) {
+        return fetchDatabase(databaseId);
     }
 
     @Override
-    public UserDatabaseMeta getDatabaseMetadata(int databaseId, int userId) {
+    public Optional<UserDatabaseMeta> getDatabaseMetadata(int databaseId, int userId) {
         return getDatabaseMetadata(CuidAdapter.databaseId(databaseId), userId);
     }
 
@@ -68,7 +66,7 @@ public class TestingDatabaseProvider implements DatabaseProvider {
     }
 
     @Override
-    public UserDatabaseMeta getDatabaseMetadataByResource(ResourceId resourceId, int userId) {
+    public Optional<UserDatabaseMeta> getDatabaseMetadataByResource(ResourceId resourceId, int userId) {
         throw new IllegalArgumentException("TODO");
     }
 }

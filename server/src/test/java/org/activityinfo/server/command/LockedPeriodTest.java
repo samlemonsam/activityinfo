@@ -108,7 +108,7 @@ public class LockedPeriodTest extends CommandTestCase {
 
         // Verify that the new code works too...
         DatabaseProvider provider = injector.getInstance(DatabaseProvider.class);
-        UserDatabaseMeta metadata = provider.getDatabaseMetadata(CuidAdapter.databaseId(1), 1);
+        UserDatabaseMeta metadata = provider.getDatabaseMetadata(CuidAdapter.databaseId(1), 1).get();
 
         ArrayList<RecordLock> folderLocks = Lists.newArrayList(metadata.getEffectiveLocks(CuidAdapter.folderId(1)));
         ArrayList<RecordLock> formLocks = Lists.newArrayList(metadata.getEffectiveLocks(CuidAdapter.activityFormClass(1)));

@@ -33,6 +33,7 @@ import org.json.JSONException;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 public class DbUpdateBuilder implements UpdateBuilder {
@@ -63,10 +64,14 @@ public class DbUpdateBuilder implements UpdateBuilder {
         // otherwise they will be excluded
 
         this.database = entityManager.find(Database.class, request.getRegionId());
-        this.databaseMeta = provider.getDatabaseMetadata(CuidAdapter.databaseId(request.getRegionId()), user.getId());
+        Optional<UserDatabaseMeta> dbMeta = provider.getDatabaseMetadata(CuidAdapter.databaseId(request.getRegionId()), user.getId());
 
         Preconditions.checkNotNull(database, "Failed to fetch database by id:" +
                 request.getRegionId() + ", region: " + request);
+        Preconditions.checkArgument(dbMeta.isPresent(), "Failed to fetch database by id:" +
+                request.getRegionId() + ", region: " + request);
+
+        this.databaseMeta = dbMeta.get();
 
         // This database's version is a function of both the database's version
         // and our permission own version, which determines whether we can see the database or not

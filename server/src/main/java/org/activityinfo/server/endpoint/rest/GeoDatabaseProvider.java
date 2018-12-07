@@ -13,6 +13,7 @@ import org.activityinfo.server.database.hibernate.entity.Country;
 import javax.persistence.EntityManager;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GeoDatabaseProvider {
@@ -40,15 +41,15 @@ public class GeoDatabaseProvider {
         return accept(ResourceId.valueOf(resource));
     }
 
-    public UserDatabaseMeta queryGeoDb(int userId) {
-        return new UserDatabaseMeta.Builder()
+    public Optional<UserDatabaseMeta> queryGeoDb(int userId) {
+        return Optional.of(new UserDatabaseMeta.Builder()
                 .setDatabaseId(GEODB_ID)
                 .setUserId(userId)
                 .setLabel("Geographic Database")
                 .setOwner(false)
                 .setVersion("1")
                 .setPublished(true)
-                .build();
+                .build());
     }
 
     public List<CatalogEntry> findCatalogEntries(String parentId) {
