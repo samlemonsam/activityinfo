@@ -177,7 +177,7 @@ public class DatabaseResource {
     }
 
     private Database getDatabase() {
-        return entityManagerProvider.get().find(Database.class, databaseId);
+        return entityManagerProvider.get().find(Database.class, CuidAdapter.getLegacyIdFromCuid(databaseId));
     }
 
     private Optional<User> getUserByEmail(String userEmail) {
