@@ -15,6 +15,7 @@ import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.database.transfer.RequestTransfer;
 import org.activityinfo.model.database.transfer.TransferAuthorized;
 import org.activityinfo.model.database.transfer.TransferDecision;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.authentication.AuthTokenProvider;
 import org.activityinfo.server.command.CommandTestCase;
 import org.activityinfo.server.command.DispatcherSync;
@@ -82,7 +83,7 @@ public class DatabaseResourceTest extends CommandTestCase {
                 databaseProvider,
                 Providers.of(em),
                 mailSender,
-                databaseId);
+                CuidAdapter.databaseId(databaseId));
         uri = RestMockUtils.mockUriInfo("http://www.activityinfo.org/");
         helper.setUp();
         objectifyCloseable = ObjectifyService.begin();

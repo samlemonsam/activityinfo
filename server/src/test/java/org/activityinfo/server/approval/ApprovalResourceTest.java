@@ -13,6 +13,7 @@ import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.database.transfer.RequestTransfer;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.authentication.AuthTokenProvider;
 import org.activityinfo.server.command.CommandTestCase;
 import org.activityinfo.server.command.DispatcherSync;
@@ -83,7 +84,7 @@ public class ApprovalResourceTest extends CommandTestCase {
                 databaseProvider,
                 Providers.of(em),
                 mailSender,
-                databaseId);
+                CuidAdapter.databaseId(databaseId));
 
         approvalResource = new ApprovalResource(Providers.of(em),
                 dispatcher,
