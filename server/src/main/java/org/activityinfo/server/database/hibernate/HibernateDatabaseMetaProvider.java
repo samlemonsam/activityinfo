@@ -189,7 +189,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         }
     }
 
-    private static String memcacheKey(ResourceId databaseId, long databaseVersion) {
+    static String memcacheKey(ResourceId databaseId, long databaseVersion) {
         return String.format("%s:%d", databaseId.asString(), databaseVersion);
     }
 
@@ -240,6 +240,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         return new DatabaseMeta.Builder()
                 .setDatabaseId(CuidAdapter.databaseId(database.getId()))
                 .setOwnerId(database.getOwner().getId())
+                .setVersion(database.getVersion())
                 .setLabel(database.getName())
                 .setDescription(database.getFullName())
                 .setPublished(false)

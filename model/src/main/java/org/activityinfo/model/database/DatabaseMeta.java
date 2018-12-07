@@ -123,6 +123,11 @@ public class DatabaseMeta implements JsonSerializable {
             return this;
         }
 
+        public Builder setVersion(long verison) {
+            meta.version = verison;
+            return this;
+        }
+
         public Builder setLabel(String label) {
             meta.label = label;
             return this;
