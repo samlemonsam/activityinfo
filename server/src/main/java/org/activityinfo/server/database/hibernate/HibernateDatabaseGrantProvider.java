@@ -29,6 +29,8 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
 
     private static final Logger LOGGER = Logger.getLogger(HibernateDatabaseGrantProvider.class.getName());
 
+    private static final String CACHE_PREFIX = "dbGrant";
+
     private final Provider<EntityManager> entityManager;
     private final MemcacheService memcacheService;
 
@@ -195,7 +197,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
     }
 
     static String memcacheKey(int userId, ResourceId databaseId, long grantVersion) {
-        return String.format("%d:%s:%d", userId, databaseId.asString(), grantVersion);
+        return String.format("%s_%d:%s:%d", CACHE_PREFIX, userId, databaseId.asString(), grantVersion);
     }
 
     private Map<ResourceId,DatabaseGrant> loadFromDb(int userId, Set<ResourceId> databaseIds) {

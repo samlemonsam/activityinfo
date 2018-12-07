@@ -33,6 +33,8 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
 
     private final Logger LOGGER = Logger.getLogger(HibernateDatabaseGrantProvider.class.getName());
 
+    private static final String CACHE_PREFIX = "dbMeta";
+
     private final Provider<EntityManager> entityManager;
     private final FormStorageProvider formStorageProvider;
     private final MemcacheService memcacheService;
@@ -190,7 +192,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
     }
 
     static String memcacheKey(ResourceId databaseId, long databaseVersion) {
-        return String.format("%s:%d", databaseId.asString(), databaseVersion);
+        return String.format("%s_%s:%d", CACHE_PREFIX, databaseId.asString(), databaseVersion);
     }
 
     private @Nullable Long queryDatabaseVersion(ResourceId databaseId) {
