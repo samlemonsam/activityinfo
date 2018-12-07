@@ -36,6 +36,16 @@ gcloud alpha billing projects link $PROJECT --billing-account=$BILLING
 
 gcloud app create --region=europe-west
 
+# Grant Team permissions
+
+gcloud projects add-iam-policy-binding $PROJECT \
+    --member group:activityinfo-ops@bedatadriven.com \
+    --role roles/editor
+
+gcloud projects add-iam-policy-binding $PROJECT \
+    --member group:activityinfo-qa@bedatadriven.com \
+    --role roles/viewer
+
 # Grant Jenkins the permissions to deploy apps here
 
 gcloud services enable appengine.googleapis.com
