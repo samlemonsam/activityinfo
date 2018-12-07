@@ -1,0 +1,9 @@
+dispatch:
+  - url: "*/"
+    service: site
+  - url: "*/about/*"
+    service: site
+  - url: "*/blog/*"
+    service: site
+  - url: "*/video/*"
+    service: site

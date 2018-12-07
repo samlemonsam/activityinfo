@@ -107,3 +107,10 @@ gsutil cp /tmp/config.properties gs://$PROJECT.appspot.com
 
 rm /tmp/config.properties
 
+# Deploy marketing site
+
+# (TODO)
+
+# Update dispatch rules
+
+gcloud --quiet app deploy ./deployment/dispatch.yaml
