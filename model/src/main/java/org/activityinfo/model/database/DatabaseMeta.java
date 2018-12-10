@@ -12,17 +12,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * <p>Collection of metadata for a Database. Provided by a {@code DatabaseMetaProvider}.</p>
+ *
+ * <p>{@code DatabaseMeta} defines the <b>shared metadata of a Database</b> in the system. However a User will never
+ * access a {@code DatabaseMeta} directly as visibility of the data is dependent on the the rights of the User. </p>
+ *
+ * <p>Therefore, a {@code DatabaseMeta} and {@link DatabaseGrant} are provided as input to a {@code DatabaseProvider} to
+ * produce a {@link UserDatabaseMeta}. A {@link UserDatabaseMeta} defines the metadata of a Database <b>visible to the
+ * requesting User.</b></p>
+ */
 public class DatabaseMeta implements JsonSerializable {
 
+    // Basic data, always visible
     private ResourceId databaseId;
     private int ownerId;
+    private long version;
+
+    // Set if database is deleted
+    private boolean deleted = false;
+
+    // Label and Description
     private String label;
     private String description;
-    private boolean published = false;
-    private long version;
-    private Boolean pendingTransfer;
-    private boolean deleted;
 
+    // Flags for:
+    // - "published" system databases
+    // - "pendingTransfer" databases
+    private boolean published = false;
+    private boolean pendingTransfer = false;
+
+    // Resources and Locks present on this database
     private final Map<ResourceId, Resource> resources = new HashMap<>();
     private final Multimap<ResourceId, RecordLock> locks = HashMultimap.create();
 
@@ -32,6 +52,14 @@ public class DatabaseMeta implements JsonSerializable {
 
     public int getOwnerId() {
         return ownerId;
+    }
+
+    public long getVersion() {
+        return version;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
     }
 
     public String getLabel() {
@@ -46,16 +74,8 @@ public class DatabaseMeta implements JsonSerializable {
         return published;
     }
 
-    public long getVersion() {
-        return version;
-    }
-
     public boolean isPendingTransfer() {
         return pendingTransfer;
-    }
-
-    public boolean isDeleted() {
-        return deleted;
     }
 
     public Map<ResourceId, Resource> getResources() {
@@ -69,37 +89,49 @@ public class DatabaseMeta implements JsonSerializable {
     @Override
     public JsonValue toJson() {
         JsonValue object = Json.createObject();
+
         object.put("id", databaseId.asString());
         object.put("ownerId", ownerId);
         object.put("version", Long.toString(version));
-        object.put("label", label);
-        object.put("description", Strings.nullToEmpty(description));
+
         if (deleted) {
             object.put("deleted", deleted);
+            return object;
         }
+
+        object.put("label", label);
+        object.put("description", Strings.nullToEmpty(description));
+
         if (published) {
             object.put("published", published);
         }
-        if (pendingTransfer != null) {
+        if (pendingTransfer) {
             object.put("pendingTransfer", pendingTransfer);
         }
+
         object.put("resources", Json.toJsonArray(resources.values()));
         object.put("locks", Json.toJsonArray(locks.values()));
+
         return object;
     }
 
     public static DatabaseMeta fromJson(JsonValue object) {
         DatabaseMeta meta = new DatabaseMeta();
+
         meta.databaseId = ResourceId.valueOf(object.getString("id"));
         meta.ownerId = object.get("ownerId").asInt();
         meta.version = Long.valueOf(object.get("version").asString());
+
+        if (object.hasKey("deleted") && object.get("deleted").asBoolean()) {
+            meta.deleted = object.get("deleted").asBoolean();
+            return meta;
+        }
+
         meta.label = object.getString("label");
         meta.description = object.getString("description");
-        if (object.hasKey("deleted")) {
-            meta.deleted = object.get("deleted").asBoolean();
-        }
+
         if (object.hasKey("published")) {
-            meta.published = object.getBoolean("published");
+            meta.published = object.get("published").asBoolean();
         }
         if (object.hasKey("pendingTransfer")) {
             meta.pendingTransfer = object.get("pendingTransfer").asBoolean();
@@ -110,7 +142,6 @@ public class DatabaseMeta implements JsonSerializable {
             Resource resource = Resource.fromJson(resourceArray.get(i));
             meta.resources.put(resource.getId(), resource);
         }
-
         JsonValue lockArray = object.get("locks");
         for (int i = 0; i < lockArray.length(); i++) {
             RecordLock lock = RecordLock.fromJson(lockArray.get(i));
@@ -139,6 +170,11 @@ public class DatabaseMeta implements JsonSerializable {
             return this;
         }
 
+        public Builder setDeleted(boolean deleted) {
+            meta.deleted = deleted;
+            return this;
+        }
+
         public Builder setLabel(String label) {
             meta.label = label;
             return this;
@@ -156,11 +192,6 @@ public class DatabaseMeta implements JsonSerializable {
 
         public Builder setPendingTransfer(boolean pendingTransfer) {
             meta.pendingTransfer = pendingTransfer;
-            return this;
-        }
-
-        public Builder setDeleted(boolean deleted) {
-            meta.deleted = deleted;
             return this;
         }
 

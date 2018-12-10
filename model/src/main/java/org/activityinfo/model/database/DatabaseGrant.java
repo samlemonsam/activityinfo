@@ -10,20 +10,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * <p>Collection of metadata for a User's permissions on a Database. Provided by a {@code DatabaseGrantProvider}.</p>
+ *
+ * <p>{@code DatabaseGrant} defines the <b>assigned permissions of a User on a Database</b> in the system. It defines
+ * the Resources visible to the User and the permitted operations on those Resources.</p>
+ *
+ * <p>A {@link DatabaseMeta} and {@code DatabaseGrant} are provided as input to a {@code DatabaseProvider} to
+ * produce a {@link UserDatabaseMeta}. A {@link UserDatabaseMeta} defines the metadata of a Database <b>visible to the
+ * requesting User.</b></p>
+ */
 public class DatabaseGrant implements JsonSerializable {
 
-    private int userId;
+    // Basic data, always visible
     private ResourceId databaseId;
+    private int userId;
     private long version;
 
+    // The set of grants assigned to this User.
     private final Map<ResourceId, GrantModel> grants = new HashMap<>();
-
-    public int getUserId() {
-        return userId;
-    }
 
     public ResourceId getDatabaseId() {
         return databaseId;
+    }
+
+    public int getUserId() {
+        return userId;
     }
 
     public long getVersion() {
@@ -36,24 +48,30 @@ public class DatabaseGrant implements JsonSerializable {
 
     public static DatabaseGrant fromJson(JsonValue object) {
         DatabaseGrant databaseGrant = new DatabaseGrant();
+
         databaseGrant.userId = object.get("userId").asInt();
         databaseGrant.databaseId = ResourceId.valueOf(object.get("databaseId").asString());
         databaseGrant.version = Long.valueOf(object.get("version").asString());
+
         JsonValue grantsArray = object.get("grants");
         for (int i = 0; i < grantsArray.length(); i++) {
             GrantModel grant = GrantModel.fromJson(grantsArray.get(i));
             databaseGrant.grants.put(grant.getResourceId(), grant);
         }
+
         return databaseGrant;
     }
 
     @Override
     public JsonValue toJson() {
         JsonValue object = Json.createObject();
+
         object.put("userId", userId);
         object.put("databaseId", databaseId.asString());
         object.put("version", Long.toString(version));
+
         object.put("grants", Json.toJsonArray(grants.values()));
+
         return object;
     }
 
