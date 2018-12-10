@@ -21,6 +21,7 @@ public class DatabaseMeta implements JsonSerializable {
     private boolean published = false;
     private long version;
     private Boolean pendingTransfer;
+    private boolean deleted;
 
     private final Map<ResourceId, Resource> resources = new HashMap<>();
     private final Multimap<ResourceId, RecordLock> locks = HashMultimap.create();
@@ -53,6 +54,10 @@ public class DatabaseMeta implements JsonSerializable {
         return pendingTransfer;
     }
 
+    public boolean isDeleted() {
+        return deleted;
+    }
+
     public Map<ResourceId, Resource> getResources() {
         return resources;
     }
@@ -69,6 +74,9 @@ public class DatabaseMeta implements JsonSerializable {
         object.put("version", Long.toString(version));
         object.put("label", label);
         object.put("description", Strings.nullToEmpty(description));
+        if (deleted) {
+            object.put("deleted", deleted);
+        }
         if (published) {
             object.put("published", published);
         }
@@ -87,6 +95,9 @@ public class DatabaseMeta implements JsonSerializable {
         meta.version = Long.valueOf(object.get("version").asString());
         meta.label = object.getString("label");
         meta.description = object.getString("description");
+        if (object.hasKey("deleted")) {
+            meta.deleted = object.get("deleted").asBoolean();
+        }
         if (object.hasKey("published")) {
             meta.published = object.getBoolean("published");
         }
@@ -145,6 +156,11 @@ public class DatabaseMeta implements JsonSerializable {
 
         public Builder setPendingTransfer(boolean pendingTransfer) {
             meta.pendingTransfer = pendingTransfer;
+            return this;
+        }
+
+        public Builder setDeleted(boolean deleted) {
+            meta.deleted = deleted;
             return this;
         }
 

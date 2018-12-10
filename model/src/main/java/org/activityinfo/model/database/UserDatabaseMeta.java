@@ -50,6 +50,7 @@ public class UserDatabaseMeta implements JsonSerializable {
     private boolean pendingTransfer;
     private String version;
     private boolean suspended;
+    private boolean deleted = false;
 
     private final Map<ResourceId, Resource.Node> resourceNodeMap = new HashMap<>();
     private final Map<ResourceId, Resource> resources = new HashMap<>();
@@ -201,6 +202,10 @@ public class UserDatabaseMeta implements JsonSerializable {
         }
     }
 
+    public boolean isDeleted() {
+        return deleted;
+    }
+
     @Override
     public JsonValue toJson() {
         JsonValue object = Json.createObject();
@@ -214,6 +219,9 @@ public class UserDatabaseMeta implements JsonSerializable {
         }
         if (published) {
             object.put("published", published);
+        }
+        if (deleted) {
+            object.put("deleted", deleted);
         }
         object.put("userId", userId);
         object.put("resources", Json.toJsonArray(resources.values()));
@@ -237,6 +245,9 @@ public class UserDatabaseMeta implements JsonSerializable {
         }
         if (object.hasKey("published")) {
             meta.published = object.getBoolean("published");
+        }
+        if (object.hasKey("delted")) {
+            meta.deleted = object.get("deleted").asBoolean();
         }
 
         JsonValue resourceArray = object.get("resources");
@@ -312,6 +323,11 @@ public class UserDatabaseMeta implements JsonSerializable {
             return this;
         }
 
+        public Builder setDeleted(boolean deleted) {
+            meta.deleted = deleted;
+            return this;
+        }
+
         public Builder addGrants(Collection<GrantModel> grants) {
             for (GrantModel grant : grants) {
                 assert !meta.grants.containsKey(grant.getResourceId()) : "Cannot define more than 1 Grant for a given Resource.";
@@ -345,6 +361,9 @@ public class UserDatabaseMeta implements JsonSerializable {
         }
 
         private boolean isVisible() {
+            if (meta.deleted) {
+                return false;
+            }
             return meta.owner
                     || meta.published
                     || !meta.grants.isEmpty()
@@ -386,13 +405,23 @@ public class UserDatabaseMeta implements JsonSerializable {
             }
         }
 
+        private void removeNonVisibleData() {
+            // Strip all resources, grants and lock data as well as label and description
+            meta.label = "";
+            meta.resources.clear();
+            meta.grants.clear();
+            meta.locks.clear();
+        }
+
         public UserDatabaseMeta build() {
+            if (meta.deleted) {
+                removeNonVisibleData();
+                return meta;
+            }
             meta.visible = isVisible();
-            // If not visible to current user, strip all resources, grants and lock information before building
+            // If not visible to current user, strip all non-visible data before building
             if (!meta.visible) {
-                meta.resources.clear();
-                meta.grants.clear();
-                meta.locks.clear();
+                removeNonVisibleData();
             }
             // If database is visible to current user, but the user is not the owner and has no explicit grants,
             // then remove any private resources

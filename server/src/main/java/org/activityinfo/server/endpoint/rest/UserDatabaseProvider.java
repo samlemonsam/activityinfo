@@ -64,6 +64,9 @@ public class UserDatabaseProvider {
     }
 
     private UserDatabaseMeta findGrantAndBuildMeta(@NotNull DatabaseMeta databaseMeta, int userId) {
+        if (databaseMeta.isDeleted()) {
+            return buildDeletedUserDatabaseMeta(databaseMeta, userId);
+        }
         if (databaseMeta.getOwnerId() == userId) {
             return buildOwnedUserDatabaseMeta(databaseMeta);
         }
@@ -93,6 +96,16 @@ public class UserDatabaseProvider {
             return Stream.empty();
         }
         return ownedDatabaseMeta.values().stream().map(UserDatabaseProvider::buildOwnedUserDatabaseMeta);
+    }
+
+    private static UserDatabaseMeta buildDeletedUserDatabaseMeta(@NotNull DatabaseMeta databaseMeta, int userId) {
+        return new UserDatabaseMeta.Builder()
+                .setDatabaseId(databaseMeta.getDatabaseId())
+                .setUserId(userId)
+                .setOwner(databaseMeta.getOwnerId() == userId)
+                .setVersion(Long.toString(databaseMeta.getVersion()))
+                .setDeleted(true)
+                .build();
     }
 
     private static UserDatabaseMeta buildOwnedUserDatabaseMeta(@NotNull DatabaseMeta databaseMeta) {

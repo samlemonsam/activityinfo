@@ -167,8 +167,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
                 .collect(Collectors.toList());
         return entityManager.get().createQuery("SELECT db " +
                 "FROM Database db " +
-                "WHERE db.id IN :databaseIds " +
-                "AND db.dateDeleted IS NULL", Database.class)
+                "WHERE db.id IN :databaseIds", Database.class)
                 .setParameter("databaseIds", legacysIds)
                 .getResultList().stream()
                 .map(this::buildMeta)
@@ -199,8 +198,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         try {
             return entityManager.get().createQuery("SELECT db.version " +
                     "FROM Database db " +
-                    "WHERE db.id=:dbId " +
-                    "AND db.dateDeleted IS NULL", Long.class)
+                    "WHERE db.id=:dbId", Long.class)
                     .setParameter("dbId", CuidAdapter.getLegacyIdFromCuid(databaseId))
                     .getSingleResult();
         } catch (NoResultException noDatabase) {
@@ -239,6 +237,9 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         if (database == null) {
             return null;
         }
+        if (database.isDeleted()) {
+            return buildDeletedMeta(database);
+        }
         return new DatabaseMeta.Builder()
                 .setDatabaseId(CuidAdapter.databaseId(database.getId()))
                 .setOwnerId(database.getOwner().getId())
@@ -249,6 +250,15 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
                 .setPendingTransfer(database.hasPendingTransfer())
                 .addResources(fetchResources(database))
                 .addLocks(fetchLocks(database))
+                .build();
+    }
+
+    private @Nullable DatabaseMeta buildDeletedMeta(@NotNull Database database) {
+        return new DatabaseMeta.Builder()
+                .setDatabaseId(CuidAdapter.databaseId(database.getId()))
+                .setOwnerId(database.getOwner().getId())
+                .setVersion(database.getVersion())
+                .setDeleted(true)
                 .build();
     }
 

@@ -25,6 +25,9 @@ public class PermissionOracle {
     }
 
     public static Permission query(PermissionQuery query, UserDatabaseMeta db) {
+        if (db.isDeleted()) {
+            return deny(query.getOperation());
+        }
         if (db.isOwner()) {
             return allowOwner(query.getOperation());
         }
@@ -279,7 +282,7 @@ public class PermissionOracle {
     ///////////////////////////////////////////// FORM PERMISSION METHODS //////////////////////////////////////////////
 
     public static FormPermissions formPermissions(ResourceId formId, UserDatabaseMeta db) {
-        if (!db.isVisible()) {
+        if (!db.isVisible() || db.isDeleted()) {
             return FormPermissions.none();
         }
         if (db.isOwner()) {
