@@ -54,6 +54,9 @@ public class Resource implements JsonSerializable {
         private Resource resource;
         private List<Node> childNodes = new ArrayList<>(0);
 
+        public Node() {
+        }
+
         public Node(@NotNull Resource resource) {
             this.resource = resource;
         }
