@@ -8,6 +8,8 @@ import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.resource.ResourceId;
 
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -155,7 +157,7 @@ public class DatabaseMeta implements JsonSerializable {
 
         private final DatabaseMeta meta = new DatabaseMeta();
 
-        public Builder setDatabaseId(ResourceId databaseId) {
+        public Builder setDatabaseId(@NotNull ResourceId databaseId) {
             meta.databaseId = databaseId;
             return this;
         }
@@ -165,8 +167,8 @@ public class DatabaseMeta implements JsonSerializable {
             return this;
         }
 
-        public Builder setVersion(long verison) {
-            meta.version = verison;
+        public Builder setVersion(long version) {
+            meta.version = version;
             return this;
         }
 
@@ -175,12 +177,12 @@ public class DatabaseMeta implements JsonSerializable {
             return this;
         }
 
-        public Builder setLabel(String label) {
+        public Builder setLabel(@NotNull String label) {
             meta.label = label;
             return this;
         }
 
-        public Builder setDescription(String description) {
+        public Builder setDescription(@Nullable String description) {
             meta.description = description;
             return this;
         }
@@ -202,7 +204,7 @@ public class DatabaseMeta implements JsonSerializable {
             return this;
         }
 
-        public Builder addResource(Resource resource) {
+        public Builder addResource(@NotNull Resource resource) {
             meta.resources.put(resource.getId(), resource);
             return this;
         }
@@ -214,7 +216,7 @@ public class DatabaseMeta implements JsonSerializable {
             return this;
         }
 
-        public Builder addLock(RecordLock lock) {
+        public Builder addLock(@NotNull RecordLock lock) {
             meta.locks.put(lock.getResourceId(), lock);
             return this;
         }

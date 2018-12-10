@@ -6,6 +6,7 @@ import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.resource.ResourceId;
 
+import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +85,7 @@ public class DatabaseGrant implements JsonSerializable {
             return this;
         }
 
-        public Builder setDatabaseId(ResourceId databaseId) {
+        public Builder setDatabaseId(@NotNull ResourceId databaseId) {
             dbGrant.databaseId = databaseId;
             return this;
         }
@@ -101,7 +102,7 @@ public class DatabaseGrant implements JsonSerializable {
             return this;
         }
 
-        public Builder addGrant(GrantModel grant) {
+        public Builder addGrant(@NotNull GrantModel grant) {
             dbGrant.grants.put(grant.getResourceId(), grant);
             return this;
         }
