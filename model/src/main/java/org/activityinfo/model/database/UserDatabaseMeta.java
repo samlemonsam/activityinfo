@@ -447,6 +447,7 @@ public class UserDatabaseMeta implements JsonSerializable {
         private void removeNonVisibleData() {
             // Strip all resources, grants and lock data as well as label and description
             meta.label = "";
+            meta.description = "";
             meta.resources.clear();
             meta.grants.clear();
             meta.locks.clear();
