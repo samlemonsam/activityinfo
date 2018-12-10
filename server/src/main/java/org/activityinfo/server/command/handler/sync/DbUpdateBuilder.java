@@ -20,6 +20,8 @@ package org.activityinfo.server.command.handler.sync;
 
 import com.bedatadriven.rebar.sql.client.query.SqlQuery;
 import com.google.common.base.Preconditions;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
 import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
@@ -40,8 +42,9 @@ public class DbUpdateBuilder implements UpdateBuilder {
     public static final String REGION_TYPE = "db";
 
     private static final Logger LOGGER = Logger.getLogger(DbUpdateBuilder.class.getName());
+    private static final HashFunction HASHER = Hashing.murmur3_128();
     
-    private static final int MINIMUM_DB_VERSION = 1;
+    private static final long MINIMUM_DB_VERSION = 1L;
 
     private final EntityManager entityManager;
     private final DatabaseProvider provider;
@@ -62,28 +65,32 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
         // get the permissions before we apply the filter
         // otherwise they will be excluded
-
         this.database = entityManager.find(Database.class, request.getRegionId());
         this.databaseMeta = provider.getDatabaseMetadata(CuidAdapter.databaseId(request.getRegionId()), user.getId());
 
         Preconditions.checkNotNull(database, "Failed to fetch database by id:" +
                 request.getRegionId() + ", region: " + request);
+        Preconditions.checkArgument(databaseMeta.isPresent(), "Failed to fetch databaseMeta by id:" +
+                request.getRegionId() + ", region: " + request);
 
         // This database's version is a function of both the database's version
         // and our permission own version, which determines whether we can see the database or not
-        long localVersion = request.getLocalVersion() == null ? 0 : Long.parseLong(request.getLocalVersion());
-        long dbMetaVersion = databaseMeta.map(UserDatabaseMeta::getUserVersion).orElse(0L);
-        long serverVersion = Math.max(MINIMUM_DB_VERSION, Math.max(database.getVersion(), dbMetaVersion));
+        long localVersion = request.getLocalVersion() == null ? 0L : Long.parseLong(request.getLocalVersion());
 
-        LOGGER.info("Schema versions: local = " + localVersion + ", server = " + serverVersion);
-     
+        long serverDbVersion = Math.max(databaseMeta.get().getDatabaseVersion(), MINIMUM_DB_VERSION);
+        long serverUserVersion = databaseMeta.get().getUserVersion();
+        long serverVersion = HASHER.hashLong(serverDbVersion + serverUserVersion).asLong();
+
+        LOGGER.info(() -> String.format("Schema versions: local = %d, server = %d", localVersion, serverVersion));
+
         batch = new JpaBatchBuilder(entityManager, request.getRegionPath());
         batch.setVersion(serverVersion);
         batch.setComplete(true);
-        
-        if (localVersion < serverVersion) {
+
+        if (localVersion != serverVersion) {
             queryUpdates(user.getId());
         }
+
         return batch.buildUpdate();
     }
 
