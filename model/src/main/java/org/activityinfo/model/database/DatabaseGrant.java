@@ -31,7 +31,7 @@ public class DatabaseGrant implements JsonSerializable {
     // The set of grants assigned to this User.
     private final Map<ResourceId, GrantModel> grants = new HashMap<>();
 
-    public ResourceId getDatabaseId() {
+    public @NotNull ResourceId getDatabaseId() {
         return databaseId;
     }
 
