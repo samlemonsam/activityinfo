@@ -156,6 +156,10 @@ public class UserDatabaseMeta implements JsonSerializable {
                 .collect(Collectors.toList());
     }
 
+    public Collection<GrantModel> getGrants() {
+        return grants.values();
+    }
+
     public boolean hasGrant(ResourceId resourceId) {
         return grants.containsKey(resourceId);
     }
@@ -314,6 +318,65 @@ public class UserDatabaseMeta implements JsonSerializable {
         }
 
         return meta;
+    }
+
+    public static UserDatabaseMeta buildDeletedUserDatabaseMeta(@NotNull DatabaseMeta databaseMeta, int userId) {
+        return new UserDatabaseMeta.Builder()
+                .setDatabaseId(databaseMeta.getDatabaseId())
+                .setUserId(userId)
+                .setOwner(databaseMeta.getOwnerId() == userId)
+                .setVersion(Long.toString(databaseMeta.getVersion()))
+                .setLabel(databaseMeta.getLabel())
+                .setDescription(databaseMeta.getDescription())
+                .setDeleted(true)
+                .build();
+    }
+
+    public static UserDatabaseMeta buildOwnedUserDatabaseMeta(@NotNull DatabaseMeta databaseMeta) {
+        return new UserDatabaseMeta.Builder()
+                .setDatabaseId(databaseMeta.getDatabaseId())
+                .setUserId(databaseMeta.getOwnerId())
+                .setOwner(true)
+                .setLabel(databaseMeta.getLabel())
+                .setDescription(databaseMeta.getDescription())
+                .setPublished(databaseMeta.isPublished())
+                .setVersion(Long.toString(databaseMeta.getVersion()))
+                .setPendingTransfer(databaseMeta.isPendingTransfer())
+                .addResources(databaseMeta.getResources().values())
+                .addLocks(databaseMeta.getLocks().values())
+                .build();
+    }
+
+    public static UserDatabaseMeta buildUserDatabaseMeta(@NotNull DatabaseGrant databaseGrant, @NotNull DatabaseMeta databaseMeta) {
+        return new UserDatabaseMeta.Builder()
+                .setDatabaseId(databaseMeta.getDatabaseId())
+                .setUserId(databaseGrant.getUserId())
+                .setOwner(databaseGrant.getUserId() == databaseMeta.getOwnerId())
+                .setLabel(databaseMeta.getLabel())
+                .setDescription(databaseMeta.getDescription())
+                .setPublished(databaseMeta.isPublished())
+                .setVersion(version(databaseMeta.getVersion(), databaseGrant.getVersion()))
+                .addResources(databaseMeta.getResources().values())
+                .addLocks(databaseMeta.getLocks().values())
+                .addGrants(databaseGrant.getGrants().values())
+                .build();
+    }
+
+    public static UserDatabaseMeta buildGrantlessUserDatabaseMeta(@NotNull DatabaseMeta databaseMeta, int userId) {
+        return new UserDatabaseMeta.Builder()
+                .setDatabaseId(databaseMeta.getDatabaseId())
+                .setUserId(userId)
+                .setLabel(databaseMeta.getLabel())
+                .setDescription(databaseMeta.getDescription())
+                .setPublished(databaseMeta.isPublished())
+                .setVersion(version(databaseMeta.getVersion(),0))
+                .addResources(databaseMeta.getResources().values())
+                .addLocks(databaseMeta.getLocks().values())
+                .build();
+    }
+
+    private static String version(long databaseVersion, long grantVersion) {
+        return Long.toString(databaseVersion) + UserDatabaseMeta.VERSION_SEP + Long.toString(grantVersion);
     }
 
     public static class Builder {

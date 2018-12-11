@@ -65,16 +65,16 @@ public class UserDatabaseProvider {
 
     private UserDatabaseMeta findGrantAndBuildMeta(@NotNull DatabaseMeta databaseMeta, int userId) {
         if (databaseMeta.isDeleted()) {
-            return buildDeletedUserDatabaseMeta(databaseMeta, userId);
+            return UserDatabaseMeta.buildDeletedUserDatabaseMeta(databaseMeta, userId);
         }
         if (databaseMeta.getOwnerId() == userId) {
-            return buildOwnedUserDatabaseMeta(databaseMeta);
+            return UserDatabaseMeta.buildOwnedUserDatabaseMeta(databaseMeta);
         }
         Optional<DatabaseGrant> databaseGrant = grantProvider.getDatabaseGrant(userId, databaseMeta.getDatabaseId());
         if (!databaseGrant.isPresent()) {
-            return buildGrantlessUserDatabaseMeta(databaseMeta, userId);
+            return UserDatabaseMeta.buildGrantlessUserDatabaseMeta(databaseMeta, userId);
         }
-        return buildUserDatabaseMeta(databaseGrant.get(), databaseMeta);
+        return UserDatabaseMeta.buildUserDatabaseMeta(databaseGrant.get(), databaseMeta);
     }
 
     private Stream<UserDatabaseMeta> fetchAssignedUserDatabaseMeta(int userId) {
@@ -87,7 +87,7 @@ public class UserDatabaseProvider {
         if (databaseMeta.isEmpty()) {
             return Stream.empty();
         }
-        return databaseGrants.stream().map(grant -> buildUserDatabaseMeta(grant, databaseMeta.get(grant.getDatabaseId())));
+        return databaseGrants.stream().map(grant -> UserDatabaseMeta.buildUserDatabaseMeta(grant, databaseMeta.get(grant.getDatabaseId())));
     }
 
     private Stream<UserDatabaseMeta> fetchOwnedUserDatabaseMeta(int userId) {
@@ -95,64 +95,7 @@ public class UserDatabaseProvider {
         if (ownedDatabaseMeta.isEmpty()) {
             return Stream.empty();
         }
-        return ownedDatabaseMeta.values().stream().map(UserDatabaseProvider::buildOwnedUserDatabaseMeta);
-    }
-
-    private static UserDatabaseMeta buildDeletedUserDatabaseMeta(@NotNull DatabaseMeta databaseMeta, int userId) {
-        return new UserDatabaseMeta.Builder()
-                .setDatabaseId(databaseMeta.getDatabaseId())
-                .setUserId(userId)
-                .setOwner(databaseMeta.getOwnerId() == userId)
-                .setVersion(Long.toString(databaseMeta.getVersion()))
-                .setDeleted(true)
-                .build();
-    }
-
-    private static UserDatabaseMeta buildOwnedUserDatabaseMeta(@NotNull DatabaseMeta databaseMeta) {
-        return new UserDatabaseMeta.Builder()
-                .setDatabaseId(databaseMeta.getDatabaseId())
-                .setUserId(databaseMeta.getOwnerId())
-                .setOwner(true)
-                .setLabel(databaseMeta.getLabel())
-                .setDescription(databaseMeta.getDescription())
-                .setPublished(databaseMeta.isPublished())
-                .setVersion(Long.toString(databaseMeta.getVersion()))
-                .setPendingTransfer(databaseMeta.isPendingTransfer())
-                .addResources(databaseMeta.getResources().values())
-                .addLocks(databaseMeta.getLocks().values())
-                .build();
-    }
-
-    private static UserDatabaseMeta buildUserDatabaseMeta(@NotNull DatabaseGrant databaseGrant, @NotNull DatabaseMeta databaseMeta) {
-        return new UserDatabaseMeta.Builder()
-                .setDatabaseId(databaseMeta.getDatabaseId())
-                .setUserId(databaseGrant.getUserId())
-                .setOwner(databaseGrant.getUserId() == databaseMeta.getOwnerId())
-                .setLabel(databaseMeta.getLabel())
-                .setDescription(databaseMeta.getDescription())
-                .setPublished(databaseMeta.isPublished())
-                .setVersion(version(databaseMeta.getVersion(), databaseGrant.getVersion()))
-                .addResources(databaseMeta.getResources().values())
-                .addLocks(databaseMeta.getLocks().values())
-                .addGrants(databaseGrant.getGrants().values())
-                .build();
-    }
-
-    private static UserDatabaseMeta buildGrantlessUserDatabaseMeta(@NotNull DatabaseMeta databaseMeta, int userId) {
-        return new UserDatabaseMeta.Builder()
-                .setDatabaseId(databaseMeta.getDatabaseId())
-                .setUserId(userId)
-                .setLabel(databaseMeta.getLabel())
-                .setDescription(databaseMeta.getDescription())
-                .setPublished(databaseMeta.isPublished())
-                .setVersion(Long.toString(databaseMeta.getVersion()))
-                .addResources(databaseMeta.getResources().values())
-                .addLocks(databaseMeta.getLocks().values())
-                .build();
-    }
-
-    private static String version(long databaseVersion, long grantVersion) {
-        return Long.toString(databaseVersion) + UserDatabaseMeta.VERSION_SEP + Long.toString(grantVersion);
+        return ownedDatabaseMeta.values().stream().map(UserDatabaseMeta::buildOwnedUserDatabaseMeta);
     }
 
 }

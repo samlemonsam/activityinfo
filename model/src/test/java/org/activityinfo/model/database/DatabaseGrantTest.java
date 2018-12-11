@@ -12,7 +12,8 @@ public class DatabaseGrantTest {
     @Test
     public void serialization() {
         serializeAndMatch(RESOURCES.validGrantNoModels());
-        serializeAndMatch(RESOURCES.validGrantWithModels());
+        serializeAndMatch(RESOURCES.validGrantWithRootGrantModel());
+        serializeAndMatch(RESOURCES.validGrantWithFolderGrantModel());
     }
 
     private void serializeAndMatch(DatabaseGrant grant) {

@@ -14,12 +14,12 @@ public class DatabaseMetaTest {
 
     @Test
     public void serialization() {
-        serializeAndMatch(RESOURCES.validUserOwnedDb());
-        serializeAndMatch(RESOURCES.validUserOwnedDbNoDesc());
-        serializeAndMatch(RESOURCES.validUserOwnedDbDeleted());
-        serializeAndMatch(RESOURCES.validUserOwnedDbPendingTransfer());
-        serializeAndMatch(RESOURCES.validUserOwnedDbWithResources());
-        serializeAndMatch(RESOURCES.validUserOwnedDbWithLocks());
+        serializeAndMatch(RESOURCES.validDb());
+        serializeAndMatch(RESOURCES.validDbNoDesc());
+        serializeAndMatch(RESOURCES.validDbDeleted());
+        serializeAndMatch(RESOURCES.validDbPendingTransfer());
+        serializeAndMatch(RESOURCES.validDbWithResources());
+        serializeAndMatch(RESOURCES.validDbWithResourcesAndLocks());
         serializeAndMatch(RESOURCES.validPublishedDb());
     }
 
