@@ -48,7 +48,7 @@ public class DatabaseMeta implements JsonSerializable {
     private final Map<ResourceId, Resource> resources = new HashMap<>();
     private final Multimap<ResourceId, RecordLock> locks = HashMultimap.create();
 
-    public ResourceId getDatabaseId() {
+    public @NotNull ResourceId getDatabaseId() {
         return databaseId;
     }
 
@@ -64,11 +64,11 @@ public class DatabaseMeta implements JsonSerializable {
         return deleted;
     }
 
-    public String getLabel() {
+    public @NotNull String getLabel() {
         return label;
     }
 
-    public String getDescription() {
+    public @Nullable String getDescription() {
         return description;
     }
 
@@ -96,13 +96,15 @@ public class DatabaseMeta implements JsonSerializable {
         object.put("ownerId", ownerId);
         object.put("version", Long.toString(version));
 
+        object.put("label", label);
+        if (description != null) {
+            object.put("description", description);
+        }
+
         if (deleted) {
             object.put("deleted", deleted);
             return object;
         }
-
-        object.put("label", label);
-        object.put("description", Strings.nullToEmpty(description));
 
         if (published) {
             object.put("published", published);
@@ -124,13 +126,15 @@ public class DatabaseMeta implements JsonSerializable {
         meta.ownerId = object.get("ownerId").asInt();
         meta.version = Long.valueOf(object.get("version").asString());
 
+        meta.label = object.getString("label");
+        if (object.hasKey("description")) {
+            meta.description = object.getString("description");
+        }
+
         if (object.hasKey("deleted") && object.get("deleted").asBoolean()) {
             meta.deleted = object.get("deleted").asBoolean();
             return meta;
         }
-
-        meta.label = object.getString("label");
-        meta.description = object.getString("description");
 
         if (object.hasKey("published")) {
             meta.published = object.get("published").asBoolean();
