@@ -24,6 +24,8 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.activityinfo.analysis.FieldReference;
 import org.activityinfo.analysis.FormulaValidator;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.formTree.FormTree;
@@ -34,6 +36,7 @@ import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.formula.functions.AndFunction;
 import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.ReferenceType;
 
 import java.util.*;
 
@@ -71,7 +74,7 @@ public class PermissionFilters {
             FormulaValidator validator = new FormulaValidator(formTree);
             validator.validate(criterium);
             if(validator.isValid()) {
-                Optional<ResourceId> rootField = findUniqueFieldReference(validator.getReferences());
+                Optional<ResourceId> rootField = findUniqueFieldReference(validator.getReferences(), formTree.getRootFormClass());
                 if(rootField.isPresent()) {
                     fieldCriteria.put(rootField.get(), criterium);
                 }
@@ -91,13 +94,14 @@ public class PermissionFilters {
         return Formulas.findBinaryTree(formulaNode, AndFunction.INSTANCE);
     }
 
-    private Optional<ResourceId> findUniqueFieldReference(List<FieldReference> references) {
+    private Optional<ResourceId> findUniqueFieldReference(List<FieldReference> references, FormClass rootFormClass) {
         Set<ResourceId> rootFields = new HashSet<>();
 
         for (FieldReference reference : references) {
             switch (reference.getMatch().getType()) {
                 case RECORD_ID:
-                    return Optional.absent();
+                    findFormReferenceField(reference, rootFormClass).transform(rootFields::add);
+                    break;
                 case FORM_ID:
                     return Optional.absent();
                 case FIELD:
@@ -110,6 +114,19 @@ public class PermissionFilters {
         } else {
             return Optional.absent();
         }
+    }
+
+    private Optional<ResourceId> findFormReferenceField(FieldReference reference, FormClass rootFormClass) {
+        for (FormField field : rootFormClass.getFields()) {
+            if (!(field.getType() instanceof ReferenceType)) {
+                continue;
+            }
+            ReferenceType refType = (ReferenceType) field.getType();
+            if (refType.getRange().contains(reference.getMatch().getFormClass().getId())) {
+                return Optional.of(field.getId());
+            }
+        }
+        return Optional.absent();
     }
 
     public boolean isFiltered(ResourceId fieldId) {

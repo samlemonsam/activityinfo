@@ -132,6 +132,10 @@ public class NodeMatch {
         // only return true for unjoined ID types - i.e. root form/record ids
         return (type == Type.RECORD_ID || type == Type.FORM_ID) && joins.isEmpty();
     }
+
+    public boolean isId() {
+        return (type == Type.RECORD_ID || type == Type.FORM_ID);
+    }
     
     public static NodeMatch forId(FormTree.Node parent, FormClass formClass) {
 
