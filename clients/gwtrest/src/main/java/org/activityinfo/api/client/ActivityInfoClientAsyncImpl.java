@@ -331,7 +331,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
     public Promise<Void> requestDatabaseTransfer(String newOwnerEmail, int databaseId) {
         RequestTransfer request = new RequestTransfer(newOwnerEmail);
         return post(RequestBuilder.POST,
-                baseUrl + "/database/" + databaseId + "/transfer/request",
+                baseUrl + "/database/" + CuidAdapter.databaseId(databaseId) + "/transfer/request",
                 request.toJson().toJson());
     }
 
@@ -339,7 +339,7 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
     public Promise<Void> cancelDatabaseTransfer(int databaseId) {
         TransferDecision decision = TransferDecision.cancelled();
         return post(RequestBuilder.POST,
-                baseUrl + "/database/" + databaseId + "/transfer/cancel",
+                baseUrl + "/database/" + CuidAdapter.databaseId(databaseId) + "/transfer/cancel",
                 decision.toJson().toJson());
     }
 
