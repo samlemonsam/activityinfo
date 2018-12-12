@@ -26,6 +26,7 @@ public class DatabaseModelTestResources {
     public final ResourceId ROOT_FORM_DB_PRIVATE_ID = ResourceId.valueOf("FORM_DB_PRIVATE");
     public final ResourceId FOLDER_ID = ResourceId.valueOf("FOLDER");
     public final ResourceId FOLDER_FORM_ID = ResourceId.valueOf("FOLDER_FORM");
+    public final ResourceId SUB_FORM_ID = ResourceId.valueOf("FOLDER_FORM_SUBFORM");
 
     public final ResourceId LOCK_ID = ResourceId.valueOf("LOCK");
 
@@ -79,13 +80,24 @@ public class DatabaseModelTestResources {
                 .build();
     }
 
+    public Resource subFormResource() {
+        return new Resource.Builder()
+                .setId(SUB_FORM_ID)
+                .setParentId(FOLDER_FORM_ID)
+                .setLabel("Test Resource Sub-Form (Folder > Test Resource)")
+                .setType(ResourceType.SUB_FORM)
+                .setVisibility(Resource.Visibility.PRIVATE)
+                .build();
+    }
+
     public List<Resource> resources() {
         return Lists.newArrayList(
                 rootFormResource_dbPrivate(),
                 rootFormResource_public(),
                 rootFormResource_private(),
                 folderResource(),
-                folderFormResource());
+                folderFormResource(),
+                subFormResource());
     }
 
     public List<Resource> publicResources() {
@@ -112,10 +124,29 @@ public class DatabaseModelTestResources {
                 .collect(Collectors.toList());
     }
 
-    public List<Resource> folderResources() {
+    // Resources visible to a user with an assigned grant on the folder
+    public List<Resource> assignedFolderResources() {
         return Lists.newArrayList(
                 folderResource(),
-                folderFormResource());
+                folderFormResource(),
+                subFormResource());
+    }
+
+    // Resources which sit at the root of the database
+    public List<Resource> rootResources() {
+        return Lists.newArrayList(
+                rootFormResource_private(),
+                rootFormResource_dbPrivate(),
+                rootFormResource_public(),
+                folderResource()
+        );
+    }
+
+    // Resources which sit _within_ the folder
+    public List<Resource> folderResources() {
+        return Lists.newArrayList(
+                folderFormResource()
+        );
     }
 
     public RecordLock lock() {

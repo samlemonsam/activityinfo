@@ -121,7 +121,7 @@ public class UserDatabaseMetaConstructionTest {
                 userDbMeta,
                 RESOURCES.USER_ID,
                 true,                      // Database should be visible
-                RESOURCES.folderResources());           // Only Folder and Folder Form should be visible
+                RESOURCES.assignedFolderResources());           // Only Folder and Folder Form should be visible
     }
 
     @Test
@@ -133,7 +133,7 @@ public class UserDatabaseMetaConstructionTest {
         // Folder and Folder Form should be visible, AS WELL AS Database Private Resource in root
         List<Resource> expectedResources = new ArrayList<>();
         expectedResources.addAll(RESOURCES.databasePrivateResources());
-        expectedResources.addAll(RESOURCES.folderResources());
+        expectedResources.addAll(RESOURCES.assignedFolderResources());
 
         matchUserDatabaseMeta(meta,
                 Optional.of(grant),
@@ -153,7 +153,7 @@ public class UserDatabaseMetaConstructionTest {
         List<Resource> expectedResources = new ArrayList<>();
         expectedResources.addAll(RESOURCES.publicResources());
         expectedResources.addAll(RESOURCES.databasePrivateResources());
-        expectedResources.addAll(RESOURCES.folderResources());
+        expectedResources.addAll(RESOURCES.assignedFolderResources());
 
         matchUserDatabaseMeta(meta,
                 Optional.of(grant),
