@@ -80,6 +80,14 @@ public class DatabaseProviderTest {
     }
 
     @Test
+    public void geodb() {
+        Optional<UserDatabaseMeta> geodb = databaseProvider.getDatabaseMetadata(GeoDatabaseProvider.GEODB_ID, ALEX);
+        assertTrue(geodb.isPresent());
+        assertThat(geodb.get().getDatabaseId(), equalTo(GeoDatabaseProvider.GEODB_ID));
+        assertTrue(geodb.get().isPublished());
+    }
+
+    @Test
     public void getDatabaseByResource() {
         // Admin level form
         Optional<UserDatabaseMeta> geodb = databaseProvider.getDatabaseMetadataByResource(PROVINCE_CODE, ALEX);
