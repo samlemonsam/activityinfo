@@ -203,7 +203,7 @@ public class UserDatabaseMetaConstructionTest {
     }
 
     private void matchVisibleResources(UserDatabaseMeta userDbMeta, List<Resource> expected) {
-        assert userDbMeta.getResources().isEmpty() == expected.isEmpty();
+        assert userDbMeta.getResources().size() == expected.size();
         for (Resource expectedResource : expected) {
             assert userDbMeta.hasResource(expectedResource.getId());
         }

@@ -20,6 +20,7 @@ package org.activityinfo.model.database;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
@@ -474,18 +475,84 @@ public class UserDatabaseMeta implements JsonSerializable {
 
         public UserDatabaseMeta build() {
             meta.visible = isVisible();
+
             // If not visible to current user, strip all non-visible data before building
             if (!meta.visible) {
                 removeNonVisibleData();
                 return meta;
             }
-            // If database is visible to current user, but the user is not the owner and has no explicit grants,
-            // then remove any private resources
-            if (!meta.owner && meta.grants.isEmpty()) {
-                removePrivateResources();
+
+            // If database is visible but user is not owner, they will be restricted by their assigned grants (if any)
+            if (!meta.owner) {
+                if (meta.grants.isEmpty()) {
+                    // If user has no explicit grants, then only PUBLIC resources are visible
+                    removePrivateResources();
+                } else {
+                    // If user has explicit grants, then remove any resources which the user has not been granted rights to
+                    removeNonGrantedResources();
+                }
             }
-            constructResourceNodeMap();
+
+            // Construct a resource node map from the remaining resources
+            meta.resourceNodeMap.putAll(constructResourceNodeMap());
+
             return meta;
+        }
+
+        private void removeNonGrantedResources() {
+            Map<ResourceId,Resource.Node> resourceNodeMap = constructResourceNodeMap();
+            Set<ResourceId> grantedResources = new HashSet<>(resourceNodeMap.size());
+
+            addExplicitlyGrantedResources(grantedResources, resourceNodeMap);
+            addPublicResources(grantedResources);
+
+            purgeNonGrantedResources(grantedResources);
+        }
+
+        private void addExplicitlyGrantedResources(Set<ResourceId> grantedResources, Map<ResourceId, Resource.Node> resourceNodeMap) {
+            meta.grants.keySet().forEach(grantedResource -> addGrantedResources(grantedResource, grantedResources, resourceNodeMap));
+        }
+
+        private void addGrantedResources(ResourceId grantedResource,
+                                         Set<ResourceId> grantedResources,
+                                         Map<ResourceId, Resource.Node> resourceNodeMap) {
+
+            // Check for a root database grant
+            if (grantedResource.equals(meta.databaseId)) {
+                // Root database grant - add all resources
+                grantedResources.addAll(resourceNodeMap.values().stream()
+                        .map(Resource.Node::getResource)
+                        .map(Resource::getId)
+                        .collect(Collectors.toSet()));
+                return;
+            }
+
+            // Skip if resource is missing
+            if (!resourceNodeMap.containsKey(grantedResource)) {
+                return;
+            }
+
+            // Add the granted resource
+            Resource.Node grantedResourceNode = resourceNodeMap.get(grantedResource);
+            grantedResources.add(grantedResourceNode.getResource().getId());
+
+            // Add any child resources
+            grantedResourceNode.getChildNodes().stream()
+                    .map(Resource.Node::getResource)
+                    .map(Resource::getId)
+                    .forEach(childId -> addGrantedResources(childId, grantedResources, resourceNodeMap));
+        }
+
+        private void addPublicResources(Set<ResourceId> grantedResources) {
+            // Add any resources which are visible PUBLICLY or to DATABASE_USERS
+            meta.resources.entrySet().stream()
+                    .filter(resource -> resource.getValue().getVisibility() != Resource.Visibility.PRIVATE)
+                    .map(Map.Entry::getKey)
+                    .forEach(grantedResources::add);
+        }
+
+        private void purgeNonGrantedResources(Set<ResourceId> grantedResources) {
+            meta.resources.entrySet().removeIf(resource -> !grantedResources.contains(resource.getKey()));
         }
 
         private boolean isVisible() {
@@ -520,23 +587,25 @@ public class UserDatabaseMeta implements JsonSerializable {
             meta.resources.values().removeIf(resource -> !resource.isPublic());
         }
 
-        private void constructResourceNodeMap() {
+        private Map<ResourceId,Resource.Node> constructResourceNodeMap() {
+            Map<ResourceId,Resource.Node> resourceNodeMap = Maps.newHashMap();
             if (meta.resources.isEmpty()) {
-                return;
+                return resourceNodeMap;
             }
-            meta.resources.values().forEach(this::buildNode);
-            meta.resources.values().forEach(this::mapNode);
+            meta.resources.values().forEach(resource -> buildNode(resource, resourceNodeMap));
+            meta.resources.values().forEach(resource -> mapNode(resource, resourceNodeMap));
+            return resourceNodeMap;
         }
 
-        private void buildNode(Resource resource) {
+        private void buildNode(Resource resource, Map<ResourceId,Resource.Node> resourceNodeMap) {
             // Parent and Child Nodes will be set during mapNodes()
             Resource.Node node = new Resource.Node(resource);
-            meta.resourceNodeMap.put(resource.getId(), node);
+            resourceNodeMap.put(resource.getId(), node);
         }
 
-        private void mapNode(Resource resource) {
-            Resource.Node node = meta.resourceNodeMap.get(resource.getId());
-            node.setParentNode(meta.resourceNodeMap.get(resource.getParentId()));
+        private void mapNode(Resource resource, Map<ResourceId,Resource.Node> resourceNodeMap) {
+            Resource.Node node = resourceNodeMap.get(resource.getId());
+            node.setParentNode(resourceNodeMap.get(resource.getParentId()));
             if (!node.isRoot()) {
                 node.getParentNode().addChildNode(node);
             }
