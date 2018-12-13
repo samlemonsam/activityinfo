@@ -17,6 +17,7 @@ import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Folder;
 import org.activityinfo.server.database.hibernate.entity.LockedPeriod;
+import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.store.spi.DatabaseMetaProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 
@@ -38,14 +39,17 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
     private final Provider<EntityManager> entityManager;
     private final FormStorageProvider formStorageProvider;
     private final MemcacheService memcacheService;
+    private final BillingAccountOracle billingAccountOracle;
 
     @Inject
     public HibernateDatabaseMetaProvider(Provider<EntityManager> entityManager,
                                          FormStorageProvider formStorageProvider,
-                                         MemcacheService memcacheService) {
+                                         MemcacheService memcacheService,
+                                         BillingAccountOracle billingAccountOracle) {
         this.entityManager = entityManager;
         this.formStorageProvider = formStorageProvider;
         this.memcacheService = memcacheService;
+        this.billingAccountOracle = billingAccountOracle;
     }
 
     @Override
