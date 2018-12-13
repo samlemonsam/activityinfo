@@ -60,7 +60,7 @@ public class DatabaseCatalogProviderTest {
 
     // Location Type Forms
     private static final int LOCALITIE = 1;
-    private static final String LOCALITIE_CODE = CuidAdapter.locationFormClass(PROVINCE).asString();
+    private static final String LOCALITIE_CODE = CuidAdapter.locationFormClass(LOCALITIE).asString();
     private static final String LOCALITIE_LABEL = "Localitie";
 
     private static final int COUNTRY = 2;
