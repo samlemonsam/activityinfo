@@ -9,11 +9,10 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
+import org.activityinfo.server.database.hibernate.entity.LocationType;
 
 import javax.persistence.EntityManager;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class GeoDatabaseProvider {
@@ -31,7 +30,8 @@ public class GeoDatabaseProvider {
     public boolean accept(ResourceId resourceId) {
         return resourceId.equals(GEODB_ID)
                 || resourceId.getDomain() == CuidAdapter.COUNTRY_DOMAIN
-                || resourceId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN;
+                || resourceId.getDomain() == CuidAdapter.ADMIN_LEVEL_DOMAIN
+                || resourceId.getDomain() == CuidAdapter.LOCATION_TYPE_DOMAIN;
     }
 
     public boolean accept(String resource) {
@@ -75,6 +75,13 @@ public class GeoDatabaseProvider {
     }
 
     private List<CatalogEntry> queryCountryForms(String countryId) {
+        List<CatalogEntry> countryForms = new ArrayList<>();
+        countryForms.addAll(queryAdminLevels(countryId));
+        countryForms.addAll(queryLocationTypes(countryId));
+        return countryForms;
+    }
+
+    private Collection<CatalogEntry> queryAdminLevels(String countryId) {
         return entityManager.get().createQuery("SELECT al " +
                 "FROM AdminLevel al " +
                 "WHERE al.country.codeISO = :code", AdminLevel.class)
@@ -84,9 +91,27 @@ public class GeoDatabaseProvider {
                 .collect(Collectors.toList());
     }
 
+    private Collection<CatalogEntry> queryLocationTypes(String countryId) {
+        return entityManager.get().createQuery("SELECT lt " +
+                "FROM LocationType lt " +
+                "WHERE lt.boundAdminLevel IS NULL " +
+                "AND lt.database IS NULL " +
+                "AND lt.country.codeISO = :code", LocationType.class)
+                .setParameter("code", countryId)
+                .getResultList().stream()
+                .map(GeoDatabaseProvider::locationFormEntry)
+                .collect(Collectors.toList());
+    }
+
     private static CatalogEntry adminLevelEntry(AdminLevel al) {
         return new CatalogEntry(CuidAdapter.adminLevelFormClass(al.getId()).asString(),
                 al.getName(),
+                CatalogEntryType.FORM);
+    }
+
+    private static CatalogEntry locationFormEntry(LocationType lt) {
+        return new CatalogEntry(CuidAdapter.locationFormClass(lt.getId()).asString(),
+                lt.getName(),
                 CatalogEntryType.FORM);
     }
 
