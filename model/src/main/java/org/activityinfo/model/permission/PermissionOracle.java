@@ -737,4 +737,28 @@ public class PermissionOracle {
         return !managePartner.isFiltered();
     }
 
+    public static Permission importRecords(ResourceId resourceId, UserDatabaseMeta db) {
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                db.getLegacyDatabaseId(),
+                Operation.IMPORT_RECORDS,
+                resourceId);
+        return query(query, db);
+    }
+
+    public static boolean canImportRecords(ResourceId resourceId, UserDatabaseMeta db) {
+        return importRecords(resourceId, db).isPermitted();
+    }
+
+    public static Permission exportRecords(ResourceId resourceId, UserDatabaseMeta db) {
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                db.getLegacyDatabaseId(),
+                Operation.EXPORT_RECORDS,
+                resourceId);
+        return query(query, db);
+    }
+
+    public static boolean canExportRecords(ResourceId resourceId, UserDatabaseMeta db) {
+        return exportRecords(resourceId, db).isPermitted();
+    }
+
 }
