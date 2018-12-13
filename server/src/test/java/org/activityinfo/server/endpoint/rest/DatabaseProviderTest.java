@@ -8,6 +8,7 @@ import org.activityinfo.fixtures.Modules;
 import org.activityinfo.fixtures.TestHibernateModule;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.DatabaseModule;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.store.spi.DatabaseProvider;
@@ -16,7 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -38,6 +39,9 @@ public class DatabaseProviderTest {
     private static final int DELETED_DB = 4;
     private static final int NON_EXISTENT_DB = 999;
 
+    private static final int PROVINCE = 1;
+    private static final ResourceId PROVINCE_CODE = CuidAdapter.adminLevelFormClass(PROVINCE);
+
     private static final int ALEX = 1;
     private static final int BAVON = 2;
     private static final int JOHN = 3;
@@ -52,8 +56,45 @@ public class DatabaseProviderTest {
     }
 
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() {
         helper.tearDown();
+    }
+
+    @Test
+    public void visibleDatabasesTest() {
+        // Alex owns two databases
+        List<UserDatabaseMeta> visibleDatabases = databaseProvider.getVisibleDatabases(ALEX);
+        assertThat(visibleDatabases.size(), equalTo(2));
+
+        // Bavon owns 1 database
+        visibleDatabases = databaseProvider.getVisibleDatabases(BAVON);
+        assertThat(visibleDatabases.size(), equalTo(1));
+
+        // John is assigned to 2 databases
+        visibleDatabases = databaseProvider.getVisibleDatabases(JOHN);
+        assertThat(visibleDatabases.size(), equalTo(2));
+
+        // Jacob has no assigned or owned databases
+        visibleDatabases = databaseProvider.getVisibleDatabases(JACOB);
+        assertThat(visibleDatabases.size(), equalTo(0));
+    }
+
+    @Test
+    public void getDatabaseByResource() {
+        // Admin level form
+        Optional<UserDatabaseMeta> geodb = databaseProvider.getDatabaseMetadataByResource(PROVINCE_CODE, ALEX);
+        assertTrue(geodb.isPresent());
+        assertThat(geodb.get().getDatabaseId(), equalTo(GeoDatabaseProvider.GEODB_ID));
+
+        // Form
+        Optional<UserDatabaseMeta> db = databaseProvider.getDatabaseMetadataByResource(CuidAdapter.activityFormClass(1), ALEX);
+        assertTrue(db.isPresent());
+        assertThat(db.get().getDatabaseId(), equalTo(CuidAdapter.databaseId(1)));
+
+        // Folder
+        db = databaseProvider.getDatabaseMetadataByResource(CuidAdapter.folderId(1), ALEX);
+        assertTrue(db.isPresent());
+        assertThat(db.get().getDatabaseId(), equalTo(CuidAdapter.databaseId(1)));
     }
 
     @Test
