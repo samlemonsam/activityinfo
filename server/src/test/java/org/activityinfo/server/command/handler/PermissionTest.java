@@ -171,48 +171,48 @@ public class PermissionTest {
     @Test
     public void queryCreateFormPermission() {
         // Query for authorized user who can create forms on database
-        PermissionQuery query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.CREATE_FORM, CuidAdapter.databaseId(DB_ID));
+        PermissionQuery query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.CREATE_RESOURCE, CuidAdapter.databaseId(DB_ID));
         Permission permission = PermissionOracle.query(query, getDb(SUPERVISOR_USER_ID));
-        assertThat(permission.getOperation(), equalTo(Operation.CREATE_FORM));
+        assertThat(permission.getOperation(), equalTo(Operation.CREATE_RESOURCE));
         assertTrue(permission.isPermitted());
         assertFalse(permission.isFiltered());
 
         // Query for user on database without permissions to create forms
-        query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.CREATE_FORM, CuidAdapter.databaseId(DB_ID));
+        query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.CREATE_RESOURCE, CuidAdapter.databaseId(DB_ID));
         permission = PermissionOracle.query(query, getDb(AUTH_RESTRICTED_USER_ID));
-        assertThat(permission.getOperation(), equalTo(Operation.CREATE_FORM));
+        assertThat(permission.getOperation(), equalTo(Operation.CREATE_RESOURCE));
         assertFalse(permission.isPermitted());
     }
 
     @Test
     public void queryEditFormPermission() {
         // Query for authorized user who can create forms on database
-        PermissionQuery query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.EDIT_FORM, FORM_ID);
+        PermissionQuery query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.EDIT_RESOURCE, FORM_ID);
         Permission permission = PermissionOracle.query(query, getDb(SUPERVISOR_USER_ID));
-        assertThat(permission.getOperation(), equalTo(Operation.EDIT_FORM));
+        assertThat(permission.getOperation(), equalTo(Operation.EDIT_RESOURCE));
         assertTrue(permission.isPermitted());
         assertFalse(permission.isFiltered());
 
         // Query for user on database without permissions to create forms
-        query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.EDIT_FORM, FORM_ID);
+        query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.EDIT_RESOURCE, FORM_ID);
         permission = PermissionOracle.query(query, getDb(AUTH_RESTRICTED_USER_ID));
-        assertThat(permission.getOperation(), equalTo(Operation.EDIT_FORM));
+        assertThat(permission.getOperation(), equalTo(Operation.EDIT_RESOURCE));
         assertFalse(permission.isPermitted());
     }
 
     @Test
     public void queryDeleteFormPermission() {
         // Query for authorized user who can create forms on database
-        PermissionQuery query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.DELETE_FORM, FORM_ID);
+        PermissionQuery query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.DELETE_RESOURCE, FORM_ID);
         Permission permission = PermissionOracle.query(query, getDb(SUPERVISOR_USER_ID));
-        assertThat(permission.getOperation(), equalTo(Operation.DELETE_FORM));
+        assertThat(permission.getOperation(), equalTo(Operation.DELETE_RESOURCE));
         assertTrue(permission.isPermitted());
         assertFalse(permission.isFiltered());
 
         // Query for user on database without permissions to create forms
-        query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.DELETE_FORM, FORM_ID);
+        query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.DELETE_RESOURCE, FORM_ID);
         permission = PermissionOracle.query(query, getDb(AUTH_RESTRICTED_USER_ID));
-        assertThat(permission.getOperation(), equalTo(Operation.DELETE_FORM));
+        assertThat(permission.getOperation(), equalTo(Operation.DELETE_RESOURCE));
         assertFalse(permission.isPermitted());
     }
 

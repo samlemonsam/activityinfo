@@ -100,7 +100,7 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         UserDatabaseMeta databaseMeta = dbMeta.get();
         if (!PermissionOracle.canCreateForm(databaseMeta.getDatabaseId(), databaseMeta)) {
             LOGGER.severe(() -> String.format("User %d does not have "
-                            + Operation.CREATE_FORM.name()
+                            + Operation.CREATE_RESOURCE.name()
                             + " rights on Database %d",
                     databaseMeta.getUserId(),
                     databaseMeta.getLegacyDatabaseId()));
@@ -115,7 +115,7 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         UserDatabaseMeta databaseMeta = dbMeta.get();
         if (!PermissionOracle.canEditForm(formId, databaseMeta)) {
             LOGGER.severe(() -> String.format("User %d does not have "
-                            + Operation.EDIT_FORM.name()
+                            + Operation.EDIT_RESOURCE.name()
                             + " rights on Database %d",
                     databaseMeta.getUserId(),
                     databaseMeta.getLegacyDatabaseId()));

@@ -50,19 +50,19 @@ public enum Operation {
     MANAGE_USERS,
 
     /**
-     * Create a new form (or folder)
+     * Create a new Resource (Form or Folder)
      */
-    CREATE_FORM,
+    CREATE_RESOURCE,
 
     /**
-     * Delete a new form (or folder)
+     * Delete a Resource (Form or Folder)
      */
-    DELETE_FORM,
+    DELETE_RESOURCE,
 
     /**
-     * Edit a form's structure.
+     * Edit a Resource's schema, structure, attributes or data.
      */
-    EDIT_FORM,
+    EDIT_RESOURCE,
 
     /**
      * Add, modify, or remove locks on records.

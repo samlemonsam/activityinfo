@@ -3,7 +3,6 @@ package org.activityinfo.model.permission;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.activityinfo.model.database.Resource;
-import org.activityinfo.model.database.ResourceType;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormEvalContext;
@@ -533,6 +532,10 @@ public class PermissionOracle {
         return query(query, db);
     }
 
+    public static boolean canCreateRecord(ResourceId formId, UserDatabaseMeta db) {
+        return createRecord(formId,db).isPermitted();
+    }
+
     public static Permission editRecord(ResourceId formId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
                 db.getLegacyDatabaseId(),
@@ -541,12 +544,20 @@ public class PermissionOracle {
         return query(query, db);
     }
 
+    public static boolean canEditRecord(ResourceId formId, UserDatabaseMeta db) {
+        return editRecord(formId,db).isPermitted();
+    }
+
     public static Permission deleteRecord(ResourceId formId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
                 db.getLegacyDatabaseId(),
                 Operation.DELETE_RECORD,
                 formId);
         return query(query, db);
+    }
+
+    public static boolean canDeleteRecord(ResourceId formId, UserDatabaseMeta db) {
+        return deleteRecord(formId,db).isPermitted();
     }
 
     public static boolean canDeleteSite(ResourceId activityId, int partnerId, UserDatabaseMeta db) {
@@ -566,7 +577,7 @@ public class PermissionOracle {
     public static Permission deleteResource(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
                 CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
-                Operation.DELETE_FORM,
+                Operation.DELETE_RESOURCE,
                 resourceId);
         return query(query, db);
     }
@@ -574,7 +585,7 @@ public class PermissionOracle {
     public static Permission editResource(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
                 CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
-                Operation.EDIT_FORM,
+                Operation.EDIT_RESOURCE,
                 resourceId);
         return query(query, db);
     }
@@ -631,31 +642,39 @@ public class PermissionOracle {
         return lockRecords(resourceId,db).isPermitted();
     }
 
-    public static Permission createForm(ResourceId resourceId, UserDatabaseMeta db) {
+    public static Permission createResource(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
                 db.getLegacyDatabaseId(),
-                Operation.CREATE_FORM,
+                Operation.CREATE_RESOURCE,
                 resourceId);
         return query(query, db);
     }
 
-    public static boolean canCreateForm(ResourceId resoruceId, UserDatabaseMeta db) {
-        return createForm(resoruceId,db).isPermitted();
+    public static boolean canCreateForm(ResourceId formId, UserDatabaseMeta db) {
+        return canCreateResource(formId, db);
+    }
+
+    public static boolean canCreateResource(ResourceId resourceId, UserDatabaseMeta db) {
+        return createResource(resourceId,db).isPermitted();
     }
 
     public static boolean canEditForm(ResourceId formId, UserDatabaseMeta db) {
-        return editResource(formId,db).isPermitted();
+        return canEditResource(formId, db);
     }
 
     public static boolean canEditFolder(ResourceId folderId, UserDatabaseMeta db) {
-        return editResource(folderId,db).isPermitted();
+        return canEditResource(folderId, db);
     }
 
     public static boolean canDeleteForm(ResourceId formId, UserDatabaseMeta db) {
-        return deleteResource(formId,db).isPermitted();
+        return canDeleteResource(formId, db);
     }
 
     public static boolean canDeleteFolder(ResourceId folderId, UserDatabaseMeta db) {
+        return canDeleteResource(folderId, db);
+    }
+
+    public static boolean canDeleteResource(ResourceId folderId, UserDatabaseMeta db) {
         return deleteResource(folderId,db).isPermitted();
     }
 
@@ -675,22 +694,22 @@ public class PermissionOracle {
      * This remains solely for the AuthorizationHandler. Should use correct task method instead.
      */
     public static boolean canDesign(UserDatabaseMeta db) {
-        // Legacy Design requires CREATE_FORM, EDIT_FORM and DELETE_FORM permissions on root database
+        // Legacy Design requires CREATE_RESOURCE, EDIT_RESOURCE and DELETE_RESOURCE permissions on root database
         PermissionQuery query = new PermissionQuery(db.getUserId(),
                 db.getLegacyDatabaseId(),
-                Operation.CREATE_FORM,
+                Operation.CREATE_RESOURCE,
                 db.getDatabaseId());
         Permission createForm = PermissionOracle.query(query, db);
 
         query = new PermissionQuery(db.getUserId(),
                 db.getLegacyDatabaseId(),
-                Operation.EDIT_FORM,
+                Operation.EDIT_RESOURCE,
                 db.getDatabaseId());
         Permission editForm = PermissionOracle.query(query, db);
 
         query = new PermissionQuery(db.getUserId(),
                 db.getLegacyDatabaseId(),
-                Operation.DELETE_FORM,
+                Operation.DELETE_RESOURCE,
                 db.getDatabaseId());
         Permission deleteForm = PermissionOracle.query(query, db);
 

@@ -175,7 +175,7 @@ public class DeleteHandler implements CommandHandler<Delete> {
         }
         if (!PermissionOracle.canEditForm(activityId, databaseMeta.get())) {
             LOGGER.severe(String.format("User %d does not have "
-                            + Operation.EDIT_FORM.name()
+                            + Operation.EDIT_RESOURCE.name()
                             + " rights on Activity %d",
                     databaseMeta.get().getUserId(),
                     activity.getId()));
@@ -192,7 +192,7 @@ public class DeleteHandler implements CommandHandler<Delete> {
         }
         if (!PermissionOracle.canDeleteForm(activity.getFormId(), databaseMeta.get())) {
             LOGGER.severe(String.format("User %d does not have "
-                            + Operation.DELETE_FORM.name()
+                            + Operation.DELETE_RESOURCE.name()
                             + " rights on Activity %d",
                     databaseMeta.get().getUserId(),
                     activity.getId()));
@@ -209,7 +209,7 @@ public class DeleteHandler implements CommandHandler<Delete> {
         }
         if (!PermissionOracle.canDeleteForm(databaseId, databaseMeta.get())) {
             LOGGER.severe(String.format("User %d does not have "
-                            + Operation.DELETE_FORM.name()
+                            + Operation.DELETE_RESOURCE.name()
                             + " rights on Database %d",
                     databaseMeta.get().getUserId(),
                     database.getId()));
@@ -261,7 +261,7 @@ public class DeleteHandler implements CommandHandler<Delete> {
         }
         if (!PermissionOracle.canDeleteForm(locationTypeForm, databaseMeta.get())) {
             LOGGER.severe(() -> String.format("User %d does not have "
-                            + Operation.DELETE_FORM.name()
+                            + Operation.DELETE_RESOURCE.name()
                             + " rights on Database %d",
                     databaseMeta.get().getUserId(),
                     databaseMeta.get().getLegacyDatabaseId()));
@@ -279,7 +279,7 @@ public class DeleteHandler implements CommandHandler<Delete> {
         }
         if (!PermissionOracle.canDeleteFolder(folderId, databaseMeta.get())) {
             LOGGER.severe(String.format("User %d does not have "
-                            + Operation.DELETE_FORM.name()
+                            + Operation.DELETE_RESOURCE.name()
                             + " rights on Folder %d",
                     databaseMeta.get().getUserId(),
                     folder.getId()));

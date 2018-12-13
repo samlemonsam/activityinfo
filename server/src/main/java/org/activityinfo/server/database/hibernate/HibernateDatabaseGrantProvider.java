@@ -316,9 +316,9 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
             grantModel.addOperation(Operation.MANAGE_USERS, getPartnerFilter(userPermission));
         }
         if(userPermission.isAllowDesign()) {
-            grantModel.addOperation(Operation.CREATE_FORM);
-            grantModel.addOperation(Operation.EDIT_FORM);
-            grantModel.addOperation(Operation.DELETE_FORM);
+            grantModel.addOperation(Operation.CREATE_RESOURCE);
+            grantModel.addOperation(Operation.EDIT_RESOURCE);
+            grantModel.addOperation(Operation.DELETE_RESOURCE);
             grantModel.addOperation(Operation.LOCK_RECORDS);
             grantModel.addOperation(Operation.MANAGE_TARGETS);
         }
