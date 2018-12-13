@@ -38,6 +38,7 @@
   <userDatabase databaseId="1" name="IRAQ" countryId="1" ownerUserId="1" lastSchemaUpdate="2009-01-01"/>
   <userDatabase databaseId="2" name="SYRIA" countryId="1" ownerUserId="1" lastSchemaUpdate="2009-01-01"/>
   <userDatabase databaseId="3" name="LEBANON" countryId="1" ownerUserId="2" lastSchemaUpdate="2009-01-01"/>
+  <userDatabase databaseId="4" name="deleted" countryId="1" ownerUserId="1" lastSchemaUpdate="2009-01-01" dateDeleted="2018-12-06 00:00:00"/>
 
   <!-- Folders and Forms -->
 
