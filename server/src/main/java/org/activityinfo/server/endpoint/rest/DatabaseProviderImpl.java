@@ -31,15 +31,12 @@ public class DatabaseProviderImpl implements DatabaseProvider {
 
     private final GeoDatabaseProvider geoDbProvider;
     private final UserDatabaseProvider userDbProvider;
-    private final BillingAccountOracle billingOracle;
 
     @Inject
     public DatabaseProviderImpl(GeoDatabaseProvider geoDbProvider,
-                                UserDatabaseProvider userDbProvider,
-                                BillingAccountOracle billingOracle) {
+                                UserDatabaseProvider userDbProvider) {
         this.geoDbProvider = geoDbProvider;
         this.userDbProvider = userDbProvider;
-        this.billingOracle = billingOracle;
     }
 
     @Override
