@@ -32,6 +32,7 @@ import org.activityinfo.server.database.hibernate.HibernateDatabaseGrantProvider
 import org.activityinfo.server.database.hibernate.HibernateDatabaseMetaProvider;
 import org.activityinfo.server.database.hibernate.dao.HibernateDAOModule;
 import org.activityinfo.server.database.hibernate.dao.TransactionModule;
+import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
 import org.activityinfo.store.spi.DatabaseGrantProvider;
 import org.activityinfo.store.spi.DatabaseMetaProvider;
@@ -107,8 +108,12 @@ public class TestHibernateModule extends AbstractModule {
 
     @Provides
     protected HibernateDatabaseMetaProvider provideHibernateDatabaseMetaProvider(Provider<EntityManager> entityManager,
-                                                                                 FormStorageProvider formStorageProvider) {
-        return new HibernateDatabaseMetaProvider(entityManager, formStorageProvider, MemcacheServiceFactory.getMemcacheService());
+                                                                                 FormStorageProvider formStorageProvider,
+                                                                                 BillingAccountOracle billingAccountOracle) {
+        return new HibernateDatabaseMetaProvider(entityManager,
+                formStorageProvider,
+                MemcacheServiceFactory.getMemcacheService(),
+                billingAccountOracle);
     }
 
     @Provides
