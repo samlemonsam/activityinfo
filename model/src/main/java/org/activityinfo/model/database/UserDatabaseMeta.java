@@ -318,6 +318,8 @@ public class UserDatabaseMeta implements JsonSerializable {
             meta.locks.put(lock.getResourceId(), lock);
         }
 
+        meta.resourceNodeMap.putAll(constructResourceNodeMap(meta));
+
         return meta;
     }
 
@@ -378,6 +380,30 @@ public class UserDatabaseMeta implements JsonSerializable {
 
     private static String version(long databaseVersion, long grantVersion) {
         return Long.toString(databaseVersion) + UserDatabaseMeta.VERSION_SEP + Long.toString(grantVersion);
+    }
+
+    private static Map<ResourceId,Resource.Node> constructResourceNodeMap(UserDatabaseMeta meta) {
+        Map<ResourceId,Resource.Node> resourceNodeMap = Maps.newHashMap();
+        if (meta.getResources().isEmpty()) {
+            return resourceNodeMap;
+        }
+        meta.getResources().forEach(resource -> buildNode(resource, resourceNodeMap));
+        meta.getResources().forEach(resource -> mapNode(resource, resourceNodeMap));
+        return resourceNodeMap;
+    }
+
+    private static void buildNode(Resource resource, Map<ResourceId,Resource.Node> resourceNodeMap) {
+        // Parent and Child Nodes will be set during mapNodes()
+        Resource.Node node = new Resource.Node(resource);
+        resourceNodeMap.put(resource.getId(), node);
+    }
+
+    private static void mapNode(Resource resource, Map<ResourceId,Resource.Node> resourceNodeMap) {
+        Resource.Node node = resourceNodeMap.get(resource.getId());
+        node.setParentNode(resourceNodeMap.get(resource.getParentId()));
+        if (!node.isRoot()) {
+            node.getParentNode().addChildNode(node);
+        }
     }
 
     public static class Builder {
@@ -494,13 +520,13 @@ public class UserDatabaseMeta implements JsonSerializable {
             }
 
             // Construct a resource node map from the remaining resources
-            meta.resourceNodeMap.putAll(constructResourceNodeMap());
+            meta.resourceNodeMap.putAll(constructResourceNodeMap(meta));
 
             return meta;
         }
 
         private void removeNonGrantedResources() {
-            Map<ResourceId,Resource.Node> resourceNodeMap = constructResourceNodeMap();
+            Map<ResourceId,Resource.Node> resourceNodeMap = constructResourceNodeMap(meta);
             Set<ResourceId> grantedResources = new HashSet<>(resourceNodeMap.size());
 
             addExplicitlyGrantedResources(grantedResources, resourceNodeMap);
@@ -585,30 +611,6 @@ public class UserDatabaseMeta implements JsonSerializable {
 
         private void removePrivateResources() {
             meta.resources.values().removeIf(resource -> !resource.isPublic());
-        }
-
-        private Map<ResourceId,Resource.Node> constructResourceNodeMap() {
-            Map<ResourceId,Resource.Node> resourceNodeMap = Maps.newHashMap();
-            if (meta.resources.isEmpty()) {
-                return resourceNodeMap;
-            }
-            meta.resources.values().forEach(resource -> buildNode(resource, resourceNodeMap));
-            meta.resources.values().forEach(resource -> mapNode(resource, resourceNodeMap));
-            return resourceNodeMap;
-        }
-
-        private void buildNode(Resource resource, Map<ResourceId,Resource.Node> resourceNodeMap) {
-            // Parent and Child Nodes will be set during mapNodes()
-            Resource.Node node = new Resource.Node(resource);
-            resourceNodeMap.put(resource.getId(), node);
-        }
-
-        private void mapNode(Resource resource, Map<ResourceId,Resource.Node> resourceNodeMap) {
-            Resource.Node node = resourceNodeMap.get(resource.getId());
-            node.setParentNode(resourceNodeMap.get(resource.getParentId()));
-            if (!node.isRoot()) {
-                node.getParentNode().addChildNode(node);
-            }
         }
 
     }
