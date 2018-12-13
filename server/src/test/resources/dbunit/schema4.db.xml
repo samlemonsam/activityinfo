@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<!--
+
+    ActivityInfo
+    Copyright (C) 2009-2013 UNICEF
+    Copyright (C) 2014-2018 BeDataDriven Groep B.V.
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+-->
+<dataset>
+
+  <!-- Country and Admin Location Forms -->
+  <country countryId="1" name="Rdc" ISO2="CD" x1="12" y1="-13" x2="31" y2="5"/>
+  <adminLevel countryId="1" adminLevelId="1" name="Province"/>
+  <locationType locationTypeId="1" countryId="1" name="Localite" reuse="1"/>
+  <locationType locationTypeId="2" countryId="1" name="Country" reuse="1"/>
+  <location locationTypeId="2" locationId="2" name="RDC"/>
+
+  <!-- Users -->
+  <userLogin userId="1" name="Alex" email="user1@user.com" locale="fr" emailnotification="1" organization="" jobtitle="" trialEndDate="2999-01-01"/>
+  <userLogin userId="2" name="Bavon" email="bavon@nrc.org" locale="fr" emailnotification="1" organization="" jobtitle=""/>
+  <userLogin userId="3" name="John" email="john@smith.org" locale="fr" emailnotification="1" organization="" jobtitle=""/>
+  <userLogin userId="4" name="Jacob" email="jacob@user.org" locale="fr" emailnotification="1" organization="" jobtitle=""/>
+
+  <!-- Databases -->
+  <userDatabase databaseId="1" name="IRAQ" countryId="1" ownerUserId="1" lastSchemaUpdate="2009-01-01"/>
+  <userDatabase databaseId="2" name="SYRIA" countryId="1" ownerUserId="1" lastSchemaUpdate="2009-01-01"/>
+  <userDatabase databaseId="3" name="LEBANON" countryId="1" ownerUserId="2" lastSchemaUpdate="2009-01-01"/>
+
+  <!-- Folders and Forms -->
+
+  <!-- Database 1: IRAQ (Owned by Alex: User 1)
+        * Folder 1: Protection
+        ** Form 1: Legal
+        ** Form 2: Community Based Protection
+        * Folder 2: Food Security
+        ** Form 3: Access to Food
+        * Folder 3: Education
+        ** Form 4: Access to Education
+  -->
+  <folder databaseId="1" folderId="1" name="Protection"/>
+  <activity activityId="1" databaseId="1" folderId="1" name="Legal" classicView="1" reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1" published="0"/>
+  <activity activityId="2" databaseId="1" folderId="1" name="Community Based Protection" classicView="1" reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1" published="0"/>
+  <folder databaseId="1" folderId="2" name="Food Security"/>
+  <activity activityId="3" databaseId="1" folderId="2" name="Access to food" classicView="1" reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1" published="0"/>
+  <folder databaseId="1" folderId="3" name="Education"/>
+  <activity activityId="4" databaseId="1" folderId="3" name="Access to education" classicView="1" reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1" published="0"/>
+
+  <!-- Database 2: SYRIA (Owned by Alex: User 1)
+        * Folder 4: Protection
+        ** Form 5: Legal
+        ** Form 6: Community Based Protection
+        * Folder 5: Food Security
+        ** Form 7: Access to Food
+        * Folder 6: Education
+        ** Form 8: Access to Education
+  -->
+  <folder databaseId="2" folderId="4" name="Protection"/>
+  <activity activityId="5" databaseId="2" folderId="4" name="Legal" classicView="1" reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1" published="0"/>
+  <activity activityId="6" databaseId="2" folderId="4" name="Community Based Protection" classicView="1" reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1" published="0"/>
+  <folder databaseId="2" folderId="5" name="Food Security"/>
+  <activity activityId="7" databaseId="2" folderId="5" name="Access to food" classicView="1" reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1" published="0"/>
+  <folder databaseId="2" folderId="6" name="Education"/>
+  <activity activityId="8" databaseId="2" folderId="6" name="Access to education" classicView="1" reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1" published="0"/>
+
+  <!-- Database 3: LEBANON (Owned by Bavon: User 2)
+        * Form 9: Intake Form (PUBLISHED)
+        * Folder 7: Education
+        ** Form 10: Access to Education
+        ** Form 11: Educational Provision
+        * Folder 8: Food Security
+        ** Form 12: Access to Food
+  -->
+  <activity activityId="9" databaseId="3" name="Intake Form" classicView="0" published="1" reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1"
+            formClass='{"id":"a0000000001","schemaVersion":1,"databaseId":"d0000000508","label":"Form",
+            "elements":[{"id":"i0392386002","code":null,"label":"Repeating Sub-Form","description":null,"relevanceCondition":null,"visible":true,"required":false,"type":"subform","typeParameters":{"formId":"cjpcn95rd1"}}]}'/>
+  <folder databaseId="3" folderId="7" name="Education"/>
+  <activity activityId="10" databaseId="3" folderId="7" name="Access to education" classicView="1" reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1" published="0"/>
+  <activity activityId="11" databaseId="3" folderId="7" name="Educational Provision" classicView="1" reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1" published="0"/>
+  <folder databaseId="3" folderId="8" name="Food Security"/>
+  <activity activityId="12" databaseId="3" folderId="8" name="Access to food" classicView="1" reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1" published="0"/>
+
+  <!-- Partners -->
+
+  <partner partnerId="1" name="NRC"/>
+  <partner partnerId="2" name="UNOCHA"/>
+
+  <partnerInDatabase databaseId="1" partnerId="1"/>
+  <partnerInDatabase databaseId="2" partnerId="1"/>
+  <partnerInDatabase databaseId="3" partnerId="1"/>
+
+  <!-- User Permissions -->
+
+  <!-- John has VIEW and EDIT permissions by PARTNER within Protection folder in SYRIA database -->
+  <userPermission userPermissionId="2" databaseId="2"
+                  userId="3" partnerId="1" allowView="1" allowViewAll="0" allowEdit="1"
+                  allowEditAll="0" allowDesign="0" allowManageUsers="0"
+                  allowManageAllUsers="0" lastSchemaUpdate="2009-01-01"
+                  model='{"userId":3,"databaseId":2,"grants":[{"resourceId":"f0000000004","operations":[]}]}'/>
+
+  <!-- John has access VIEW and EDIT permissions by PARTNER within Education folder in LEBANON database -->
+  <userPermission userPermissionId="3" databaseId="3"
+                  userId="3" partnerId="1" allowView="1" allowViewAll="0" allowEdit="1"
+                  allowEditAll="0" allowDesign="0" allowManageUsers="0"
+                  allowManageAllUsers="0" lastSchemaUpdate="2009-01-01"
+                  model='{"userId":3,"databaseId":3,"grants":[{"resourceId":"f0000000007","operations":[]}]}'/>
+
+</dataset>
