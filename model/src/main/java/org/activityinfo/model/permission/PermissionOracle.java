@@ -822,32 +822,4 @@ public class PermissionOracle {
         return manageUsers.isPermitted() && !manageUsers.isFiltered();
     }
 
-    ///////////////////////////////////////////////// LEGACY Methods ///////////////////////////////////////////////////
-
-    /**
-     * This remains solely for the AuthorizationHandler. Should use correct task method instead.
-     */
-    public static boolean canDesign(UserDatabaseMeta db) {
-        // Legacy Design requires CREATE_RESOURCE, EDIT_RESOURCE and DELETE_RESOURCE permissions on root database
-        PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
-                Operation.CREATE_RESOURCE,
-                db.getDatabaseId());
-        Permission createForm = PermissionOracle.query(query, db);
-
-        query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
-                Operation.EDIT_RESOURCE,
-                db.getDatabaseId());
-        Permission editForm = PermissionOracle.query(query, db);
-
-        query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
-                Operation.DELETE_RESOURCE,
-                db.getDatabaseId());
-        Permission deleteForm = PermissionOracle.query(query, db);
-
-        return createForm.isPermitted() && editForm.isPermitted() && deleteForm.isPermitted();
-    }
-
 }
