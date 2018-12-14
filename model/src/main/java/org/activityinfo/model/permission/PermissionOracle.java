@@ -430,7 +430,14 @@ public class PermissionOracle {
 
     /////////////////////////////////////////////////// UTIL METHODS ///////////////////////////////////////////////////
 
-    public static boolean filterContainsPartner(String filter, ResourceId partnerFormId, ResourceId partnerId) {
+    private static boolean filterAllowsPartner(Permission permission, int partnerId, UserDatabaseMeta db) {
+        return !permission.isFiltered()
+                || filterContainsPartner(permission.getFilter(),
+                    CuidAdapter.partnerFormId(db.getLegacyDatabaseId()),
+                    CuidAdapter.partnerRecordId(partnerId));
+    }
+
+    private static boolean filterContainsPartner(String filter, ResourceId partnerFormId, ResourceId partnerId) {
         FormulaNode filterFormula = FormulaParser.parse(filter);
 
         SymbolNode expectedPartnerForm = new SymbolNode(partnerFormId);
@@ -468,31 +475,7 @@ public class PermissionOracle {
         return true;
     }
 
-    /////////////////////////////////////////////////// TASK METHODS ///////////////////////////////////////////////////
-
-    public static boolean canDeleteDatabase(UserDatabaseMeta db) {
-        return db.isOwner();
-    }
-
-    public static boolean canEditDatabase(UserDatabaseMeta db) {
-        return db.isOwner();
-    }
-
-    public static Permission manageUsers(ResourceId resourceId, UserDatabaseMeta db) {
-         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
-                Operation.MANAGE_USERS,
-                resourceId);
-        return query(query, db);
-    }
-
-    public static boolean canManageUsers(UserDatabaseMeta db) {
-        return manageUsers(db.getDatabaseId(),db).isPermitted();
-    }
-
-    public static boolean canManageUsers(ResourceId resourceId, UserDatabaseMeta db) {
-        return manageUsers(resourceId,db).isPermitted();
-    }
+    ///////////////////////////////////////////// BASIC PERMISSION QUERIES /////////////////////////////////////////////
 
     public static Permission view(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
@@ -500,28 +483,6 @@ public class PermissionOracle {
                 Operation.VIEW,
                 resourceId);
         return query(query, db);
-    }
-
-    public static boolean canView(UserDatabaseMeta db) {
-        return view(db.getDatabaseId(),db).isPermitted();
-    }
-
-    public static boolean canView(ResourceId resourceId, UserDatabaseMeta db) {
-        return view(resourceId,db).isPermitted();
-    }
-
-    public static boolean canViewSite(ResourceId activityId, int partnerId, UserDatabaseMeta db) {
-        Permission view = view(activityId, db);
-
-        if (view.isPermitted() && !view.isFiltered()) {
-            return true;
-        } else if (view.isPermitted()){
-            return PermissionOracle.filterContainsPartner(view.getFilter(),
-                    CuidAdapter.partnerFormId(db.getLegacyDatabaseId()),
-                    CuidAdapter.partnerRecordId(partnerId));
-        } else {
-            return false;
-        }
     }
 
     public static Permission createRecord(ResourceId formId, UserDatabaseMeta db) {
@@ -532,8 +493,12 @@ public class PermissionOracle {
         return query(query, db);
     }
 
-    public static boolean canCreateRecord(ResourceId formId, UserDatabaseMeta db) {
-        return createRecord(formId,db).isPermitted();
+    public static Permission deleteRecord(ResourceId formId, UserDatabaseMeta db) {
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                db.getLegacyDatabaseId(),
+                Operation.DELETE_RECORD,
+                formId);
+        return query(query, db);
     }
 
     public static Permission editRecord(ResourceId formId, UserDatabaseMeta db) {
@@ -544,34 +509,20 @@ public class PermissionOracle {
         return query(query, db);
     }
 
-    public static boolean canEditRecord(ResourceId formId, UserDatabaseMeta db) {
-        return editRecord(formId,db).isPermitted();
-    }
-
-    public static Permission deleteRecord(ResourceId formId, UserDatabaseMeta db) {
+    public static Permission manageUsers(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
-                Operation.DELETE_RECORD,
-                formId);
+                CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
+                Operation.MANAGE_USERS,
+                resourceId);
         return query(query, db);
     }
 
-    public static boolean canDeleteRecord(ResourceId formId, UserDatabaseMeta db) {
-        return deleteRecord(formId,db).isPermitted();
-    }
-
-    public static boolean canDeleteSite(ResourceId activityId, int partnerId, UserDatabaseMeta db) {
-        Permission delete = deleteRecord(activityId, db);
-
-        if (delete.isPermitted() && !delete.isFiltered()) {
-            return true;
-        } else if (delete.isPermitted()){
-            return PermissionOracle.filterContainsPartner(delete.getFilter(),
-                    CuidAdapter.partnerFormId(db.getLegacyDatabaseId()),
-                    CuidAdapter.partnerRecordId(partnerId));
-        } else {
-            return false;
-        }
+    public static Permission createResource(ResourceId containerResourceId, UserDatabaseMeta db) {
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                db.getLegacyDatabaseId(),
+                Operation.CREATE_RESOURCE,
+                containerResourceId);
+        return query(query, db);
     }
 
     public static Permission deleteResource(ResourceId resourceId, UserDatabaseMeta db) {
@@ -590,46 +541,6 @@ public class PermissionOracle {
         return query(query, db);
     }
 
-    public static boolean canEditResource(ResourceId resourceId, UserDatabaseMeta db) {
-        return editResource(resourceId,db).isPermitted();
-    }
-
-    public static boolean canEditSite(ResourceId activityId, int partnerId, UserDatabaseMeta db) {
-        PermissionQuery query = new PermissionQuery(db.getUserId(),
-                CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
-                Operation.EDIT_RECORD,
-                activityId);
-        Permission edit = PermissionOracle.query(query, db);
-
-        if (edit.isPermitted() && !edit.isFiltered()) {
-            return true;
-        } else if (edit.isPermitted()){
-            return PermissionOracle.filterContainsPartner(edit.getFilter(),
-                    CuidAdapter.partnerFormId(db.getLegacyDatabaseId()),
-                    CuidAdapter.partnerRecordId(partnerId));
-        } else {
-            return false;
-        }
-    }
-
-    public static boolean canCreateSite(ResourceId activityId, int partnerId, UserDatabaseMeta db) {
-        PermissionQuery query = new PermissionQuery(db.getUserId(),
-                CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
-                Operation.CREATE_RECORD,
-                activityId);
-        Permission create = PermissionOracle.query(query, db);
-
-        if (create.isPermitted() && !create.isFiltered()) {
-            return true;
-        } else if (create.isPermitted()){
-            return PermissionOracle.filterContainsPartner(create.getFilter(),
-                    CuidAdapter.partnerFormId(db.getLegacyDatabaseId()),
-                    CuidAdapter.partnerRecordId(partnerId));
-        } else {
-            return false;
-        }
-    }
-
     public static Permission lockRecords(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
                 db.getLegacyDatabaseId(),
@@ -638,44 +549,20 @@ public class PermissionOracle {
         return query(query, db);
     }
 
-    public static boolean canLockRecords(ResourceId resourceId, UserDatabaseMeta db) {
-        return lockRecords(resourceId,db).isPermitted();
-    }
-
-    public static Permission createResource(ResourceId resourceId, UserDatabaseMeta db) {
+    public static Permission importRecords(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
                 db.getLegacyDatabaseId(),
-                Operation.CREATE_RESOURCE,
+                Operation.IMPORT_RECORDS,
                 resourceId);
         return query(query, db);
     }
 
-    public static boolean canCreateForm(ResourceId formId, UserDatabaseMeta db) {
-        return canCreateResource(formId, db);
-    }
-
-    public static boolean canCreateResource(ResourceId resourceId, UserDatabaseMeta db) {
-        return createResource(resourceId,db).isPermitted();
-    }
-
-    public static boolean canEditForm(ResourceId formId, UserDatabaseMeta db) {
-        return canEditResource(formId, db);
-    }
-
-    public static boolean canEditFolder(ResourceId folderId, UserDatabaseMeta db) {
-        return canEditResource(folderId, db);
-    }
-
-    public static boolean canDeleteForm(ResourceId formId, UserDatabaseMeta db) {
-        return canDeleteResource(formId, db);
-    }
-
-    public static boolean canDeleteFolder(ResourceId folderId, UserDatabaseMeta db) {
-        return canDeleteResource(folderId, db);
-    }
-
-    public static boolean canDeleteResource(ResourceId folderId, UserDatabaseMeta db) {
-        return deleteResource(folderId,db).isPermitted();
+    public static Permission exportRecords(ResourceId resourceId, UserDatabaseMeta db) {
+        PermissionQuery query = new PermissionQuery(db.getUserId(),
+                db.getLegacyDatabaseId(),
+                Operation.EXPORT_RECORDS,
+                resourceId);
+        return query(query, db);
     }
 
     public static Permission manageTargets(ResourceId resourceId, UserDatabaseMeta db) {
@@ -686,9 +573,249 @@ public class PermissionOracle {
         return query(query, db);
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////// TASK METHODS ///////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////////// DATABASE Methods /////////////////////////////////////////////////
+
+    /**
+     * <p>The current User can delete this Database.</p>
+     */
+    public static boolean canDeleteDatabase(UserDatabaseMeta db) {
+        return db.isOwner();
+    }
+
+    /**
+     * <p>The current User can edit this Database's metadata.</p>
+     */
+    public static boolean canEditDatabase(UserDatabaseMeta db) {
+        return db.isOwner();
+    }
+
+    /////////////////////////////////////////////////// VIEW Methods ///////////////////////////////////////////////////
+
+    /**
+     * <p>The current User can view the root Resource(s) in this Database.</p>
+     * <p>Does not account for any filters which may be applied/enforced.</p>
+     */
+    public static boolean canView(UserDatabaseMeta db) {
+        return view(db.getDatabaseId(),db).isPermitted();
+    }
+
+    /**
+     * <p>The current User can view the specified Resource in this Database.</p>
+     * <p>Does not account for any filters which may be applied/enforced.</p>
+     */
+    public static boolean canView(ResourceId resourceId, UserDatabaseMeta db) {
+        return view(resourceId,db).isPermitted();
+    }
+
+    /**
+     * <p>The current User can view a Site, with given Partner Id, on the specified Activity in this Database.</p>
+     * <p>Explicitly checks the filter to ensure that User is permitted to view Sites <b>for this Partner.</b></p>
+     */
+    public static boolean canViewSite(ResourceId activityId, int partnerId, UserDatabaseMeta db) {
+        Permission view = view(activityId, db);
+        return view.isPermitted() && filterAllowsPartner(view, partnerId, db);
+    }
+
+    ////////////////////////////////////////////// CREATE_RECORD Methods ///////////////////////////////////////////////
+
+    /**
+     * <p>The current User can create a Record within the specified Form in this Database.</p>
+     * <p>Does not account for any filters which may be applied/enforced.</p>
+     */
+    public static boolean canCreateRecord(ResourceId formId, UserDatabaseMeta db) {
+        return createRecord(formId,db).isPermitted();
+    }
+
+    /**
+     * <p>The current User can create a Site, with given Partner Id, on the specified Activity in this Database.</p>
+     * <p>Explicitly checks the filter to ensure that User is permitted to create Sites <b>for this Partner.</b></p>
+     */
+    public static boolean canCreateSite(ResourceId activityId, int partnerId, UserDatabaseMeta db) {
+        Permission create = createRecord(activityId, db);
+        return create.isPermitted() && filterAllowsPartner(create, partnerId, db);
+    }
+
+    ////////////////////////////////////////////// DELETE_RECORD Methods ///////////////////////////////////////////////
+
+    /**
+     * <p>The current User can delete a Record within the specified Form in this Database.</p>
+     * <p>Does not account for any filters which may be applied/enforced.</p>
+     */
+    public static boolean canDeleteRecord(ResourceId formId, UserDatabaseMeta db) {
+        return deleteRecord(formId,db).isPermitted();
+    }
+
+    /**
+     * <p>The current User can delete a Site, with given Partner Id, on the specified Activity in this Database.</p>
+     * <p>Explicitly checks the filter to ensure that User is permitted to delete Sites <b>for this Partner.</b></p>
+     */
+    public static boolean canDeleteSite(ResourceId activityId, int partnerId, UserDatabaseMeta db) {
+        Permission delete = deleteRecord(activityId, db);
+        return delete.isPermitted() && filterAllowsPartner(delete, partnerId, db);
+    }
+
+    /////////////////////////////////////////////// EDIT_RECORD Methods ////////////////////////////////////////////////
+
+    /**
+     * <p>The current User can edit a Record within the specified Form in this Database.</p>
+     * <p>Does not account for any filters which may be applied/enforced.</p>
+     */
+    public static boolean canEditRecord(ResourceId formId, UserDatabaseMeta db) {
+        return editRecord(formId,db).isPermitted();
+    }
+
+    /**
+     * <p>The current User can edit a Site, with given Partner Id, on the specified Activity in this Database.</p>
+     * <p>Explicitly checks the filter to ensure that User is permitted to edit Sites <b>for this Partner.</b></p>
+     */
+    public static boolean canEditSite(ResourceId activityId, int partnerId, UserDatabaseMeta db) {
+        Permission edit = editRecord(activityId, db);
+        return edit.isPermitted() && filterAllowsPartner(edit, partnerId, db);
+    }
+
+    ///////////////////////////////////////////// CREATE_RESOURCE Methods //////////////////////////////////////////////
+
+    /**
+     * <p>The current User can create a new Resource <i>within</i> the specified Resource in this Database.</p>
+     */
+    public static boolean canCreateResource(ResourceId containerResourceId, UserDatabaseMeta db) {
+        return createResource(containerResourceId,db).isPermitted();
+    }
+
+    /**
+     * <p>The current User can create a new Form <i>within</i> the specified Resource in this Database.</p>
+     */
+    public static boolean canCreateForm(ResourceId containerResourceId, UserDatabaseMeta db) {
+        return canCreateResource(containerResourceId, db);
+    }
+
+    ///////////////////////////////////////////// DELETE_RESOURCE Methods //////////////////////////////////////////////
+
+    /**
+     * <p>The current User can delete the specified Resource in this Database.</p>
+     */
+    public static boolean canDeleteResource(ResourceId resourceId, UserDatabaseMeta db) {
+        return deleteResource(resourceId,db).isPermitted();
+    }
+
+    /**
+     * <p>The current User can delete the specified Form in this Database.</p>
+     */
+    public static boolean canDeleteForm(ResourceId formId, UserDatabaseMeta db) {
+        return canDeleteResource(formId, db);
+    }
+
+    /**
+     * <p>The current User can delete the specified Folder in this Database.</p>
+     */
+    public static boolean canDeleteFolder(ResourceId folderId, UserDatabaseMeta db) {
+        return canDeleteResource(folderId, db);
+    }
+
+    ////////////////////////////////////////////// EDIT_RESOURCE Methods ///////////////////////////////////////////////
+
+    /**
+     * <p>The current User can edit the specified Resource in this Database.</p>
+     */
+    public static boolean canEditResource(ResourceId resourceId, UserDatabaseMeta db) {
+        return editResource(resourceId,db).isPermitted();
+    }
+
+    /**
+     * <p>The current User can edit the specified Form in this Database.</p>
+     */
+    public static boolean canEditForm(ResourceId formId, UserDatabaseMeta db) {
+        return canEditResource(formId, db);
+    }
+
+    /**
+     * <p>The current User can edit the specified Folder in this Database.</p>
+     */
+    public static boolean canEditFolder(ResourceId folderId, UserDatabaseMeta db) {
+        return canEditResource(folderId, db);
+    }
+
+    ////////////////////////////////////////////// LOCK_RECORDS Methods ////////////////////////////////////////////////
+
+    /**
+     * <p>The current User can lock records on the specified Resource (and all children) in this Database.</p>
+     * <p>Does not account for any filters which may be applied/enforced.</p>
+     */
+    public static boolean canLockRecords(ResourceId resourceId, UserDatabaseMeta db) {
+        return lockRecords(resourceId,db).isPermitted();
+    }
+
+    ///////////////////////////////////////////// IMPORT_RECORDS Methods ///////////////////////////////////////////////
+
+    /**
+     * <p>The current User can import records into the specified Resource in this Database.</p>
+     * <p>Does not account for any filters which may be applied/enforced.</p>
+     */
+    public static boolean canImportRecords(ResourceId resourceId, UserDatabaseMeta db) {
+        return importRecords(resourceId, db).isPermitted();
+    }
+
+    ///////////////////////////////////////////// EXPORT_RECORDS Methods ///////////////////////////////////////////////
+
+    /**
+     * <p>The current User can export records into the specified Resource in this Database.</p>
+     * <p>Does not account for any filters which may be applied/enforced.</p>
+     */
+    public static boolean canExportRecords(ResourceId resourceId, UserDatabaseMeta db) {
+        return exportRecords(resourceId, db).isPermitted();
+    }
+
+    ///////////////////////////////////////////// MANAGE_TARGETS Methods ///////////////////////////////////////////////
+
+    /**
+     * <p>The current User can manage targets on the specified Resource in this Database.</p>
+     * <p>Does not account for any filters which may be applied/enforced.</p>
+     */
     public static boolean canManageTargets(ResourceId resourceId, UserDatabaseMeta db) {
         return manageTargets(resourceId,db).isPermitted();
     }
+
+    ////////////////////////////////////////////// MANAGE_USERS Methods ////////////////////////////////////////////////
+
+    /**
+     * <p>The current User can manage users for any Resource on this Database.</p>
+     * <p>Does not account for any filters which may be applied/enforced.</p>
+     */
+    public static boolean canManageUsers(UserDatabaseMeta db) {
+        return manageUsers(db.getDatabaseId(),db).isPermitted();
+    }
+
+    /**
+     * <p>The current User can manage users on the specified Resource in this Database.</p>
+     * <p>Does not account for any filters which may be applied/enforced.</p>
+     */
+    public static boolean canManageUsers(ResourceId resourceId, UserDatabaseMeta db) {
+        return manageUsers(resourceId,db).isPermitted();
+    }
+
+    /**
+     * <p>The current User can manage users, with given Partner Id, on the specified Resource in this Database.</p>
+     * <p>Explicitly checks the filter to ensure that User is permitted to manage users <b>for this Partner.</b></p>
+     */
+    public static boolean canManagePartner(ResourceId resourceId, int partnerId, UserDatabaseMeta db) {
+        Permission manageUsers = manageUsers(resourceId, db);
+        return manageUsers.isPermitted() && filterAllowsPartner(manageUsers, partnerId, db);
+    }
+
+    /**
+     * <p>The current User can manage users, with <i>any</i> Partner Id, on the specified Resource in this Database.</p>
+     * <p>Explicitly checks to ensure User has <b>no filters</b> associated with this Permission.</p>
+     */
+    public static boolean canManageAllPartners(ResourceId resourceId, UserDatabaseMeta db) {
+        Permission manageUsers = manageUsers(resourceId, db);
+        return manageUsers.isPermitted() && !manageUsers.isFiltered();
+    }
+
+    ///////////////////////////////////////////////// LEGACY Methods ///////////////////////////////////////////////////
 
     /**
      * This remains solely for the AuthorizationHandler. Should use correct task method instead.
@@ -714,51 +841,6 @@ public class PermissionOracle {
         Permission deleteForm = PermissionOracle.query(query, db);
 
         return createForm.isPermitted() && editForm.isPermitted() && deleteForm.isPermitted();
-    }
-
-    public static boolean canManagePartner(ResourceId resourceId, int partnerId, UserDatabaseMeta db) {
-        Permission managePartner = manageUsers(resourceId, db);
-        if (managePartner.isForbidden()) {
-            return false;
-        }
-        if (!managePartner.isFiltered()) {
-            return true;
-        }
-        return filterContainsPartner(managePartner.getFilter(),
-                CuidAdapter.partnerFormId(db.getLegacyDatabaseId()),
-                CuidAdapter.partnerRecordId(partnerId));
-    }
-
-    public static boolean canManageAllPartners(ResourceId resourceId, UserDatabaseMeta db) {
-        Permission managePartner = manageUsers(resourceId, db);
-        if (managePartner.isForbidden()) {
-            return false;
-        }
-        return !managePartner.isFiltered();
-    }
-
-    public static Permission importRecords(ResourceId resourceId, UserDatabaseMeta db) {
-        PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
-                Operation.IMPORT_RECORDS,
-                resourceId);
-        return query(query, db);
-    }
-
-    public static boolean canImportRecords(ResourceId resourceId, UserDatabaseMeta db) {
-        return importRecords(resourceId, db).isPermitted();
-    }
-
-    public static Permission exportRecords(ResourceId resourceId, UserDatabaseMeta db) {
-        PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
-                Operation.EXPORT_RECORDS,
-                resourceId);
-        return query(query, db);
-    }
-
-    public static boolean canExportRecords(ResourceId resourceId, UserDatabaseMeta db) {
-        return exportRecords(resourceId, db).isPermitted();
     }
 
 }
