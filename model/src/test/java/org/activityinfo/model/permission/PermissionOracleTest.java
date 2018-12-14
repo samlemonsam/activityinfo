@@ -216,6 +216,24 @@ public class PermissionOracleTest {
                 .build());
     }
 
+    private static List<GrantModel> folderGrant() {
+        return Collections.singletonList(new GrantModel.Builder()
+                .setResourceId(rootFolderId)
+                .addOperation(Operation.VIEW)
+                .addOperation(Operation.CREATE_RECORD)
+                .addOperation(Operation.DELETE_RECORD)
+                .addOperation(Operation.EDIT_RECORD)
+                .addOperation(Operation.CREATE_RESOURCE)
+                .addOperation(Operation.DELETE_RESOURCE)
+                .addOperation(Operation.EDIT_RESOURCE)
+                .addOperation(Operation.LOCK_RECORDS)
+                .addOperation(Operation.IMPORT_RECORDS)
+                .addOperation(Operation.EXPORT_RECORDS)
+                .addOperation(Operation.MANAGE_TARGETS)
+                .addOperation(Operation.MANAGE_USERS)
+                .build());
+    }
+
     @Test
     public void owner_transferDatabase() {
         UserDatabaseMeta db = ownerDatabase(allResources);
@@ -520,21 +538,21 @@ public class PermissionOracleTest {
     }
 
     @Test
-    public void authUser_transferDatabase() {
+    public void authUser_transferDatabase_rootGrant() {
         // User should NOT have database transfer permissions
         UserDatabaseMeta db = authUserDatabase(allResources, rootDatabaseGrant());
         assertFalse(PermissionOracle.canTransferDatabase(db));
     }
 
     @Test
-    public void authUser_deleteDatabase() {
+    public void authUser_deleteDatabase_rootGrant() {
         // User should NOT have database deletion permissions
         UserDatabaseMeta db = authUserDatabase(allResources, rootDatabaseGrant());
         assertFalse(PermissionOracle.canDeleteDatabase(db));
     }
 
     @Test
-    public void authUser_editDatabase() {
+    public void authUser_editDatabase_rootGrant() {
         // User should NOT have database modification permissions
         UserDatabaseMeta db = authUserDatabase(allResources, rootDatabaseGrant());
         assertFalse(PermissionOracle.canEditDatabase(db));
@@ -663,6 +681,284 @@ public class PermissionOracleTest {
         assertTrue(PermissionOracle.canManageUsers(db));
         for (Resource resource : allResources) {
             assertTrue(PermissionOracle.canManageUsers(resource.getId(), db));
+        }
+    }
+
+    @Test
+    public void authUser_transferDatabase_folderGrant() {
+        // User should NOT have database transfer permissions
+        UserDatabaseMeta db = authUserDatabase(allResources, folderGrant());
+        assertFalse(PermissionOracle.canTransferDatabase(db));
+    }
+
+    @Test
+    public void authUser_deleteDatabase_folderGrant() {
+        // User should NOT have database deletion permissions
+        UserDatabaseMeta db = authUserDatabase(allResources, folderGrant());
+        assertFalse(PermissionOracle.canDeleteDatabase(db));
+    }
+
+    @Test
+    public void authUser_editDatabase_folderGrant() {
+        // User should NOT have database modification permissions
+        UserDatabaseMeta db = authUserDatabase(allResources, folderGrant());
+        assertFalse(PermissionOracle.canEditDatabase(db));
+    }
+
+    @Test
+    public void authUser_view_folderGrant() {
+        UserDatabaseMeta db = authUserDatabase(allResources, folderGrant());
+
+        // First check on private resources
+        // User should have VIEW permissions on folder and all contained resources, but NOT on root database or root form
+        assertFalse(PermissionOracle.canView(db));
+        assertFalse(PermissionOracle.canView(rootFormId, db));
+        assertTrue(PermissionOracle.canView(rootFolderId, db));
+        assertTrue(PermissionOracle.canView(formInFolderId, db));
+        assertTrue(PermissionOracle.canView(folderInFolderId, db));
+
+        // Next check on database-private and public resources
+        // User should have VIEW permissions on all database private and public resources
+        for (Resource publicResource : publicResources) {
+            assertTrue(PermissionOracle.canView(publicResource.getId(), db));
+        }
+        for (Resource dbPrivateResource : dbPrivateResources) {
+            assertTrue(PermissionOracle.canView(dbPrivateResource.getId(), db));
+        }
+    }
+
+    @Test
+    public void authUser_createRecord_folderGrant() {
+        UserDatabaseMeta db = authUserDatabase(allResources, folderGrant());
+
+        // First check on private resources
+        // User should have CREATE_RECORD permissions on folder and all contained resources, but NOT on root form
+        assertFalse(PermissionOracle.canCreateRecord(rootFormId, db));
+        assertTrue(PermissionOracle.canCreateRecord(rootFolderId, db));
+        assertTrue(PermissionOracle.canCreateRecord(formInFolderId, db));
+        assertTrue(PermissionOracle.canCreateRecord(folderInFolderId, db));
+
+        // Next check on database-private and public resources
+        // User should NOT have CREATE_RECORD permissions on any database private and public resources
+        for (Resource publicResource : publicResources) {
+            assertFalse(PermissionOracle.canCreateRecord(publicResource.getId(), db));
+        }
+        for (Resource dbPrivateResource : dbPrivateResources) {
+            assertFalse(PermissionOracle.canCreateRecord(dbPrivateResource.getId(), db));
+        }
+    }
+
+    @Test
+    public void authUser_deleteRecord_folderGrant() {
+        UserDatabaseMeta db = authUserDatabase(allResources, folderGrant());
+
+        // First check on private resources
+        // User should have DELETE_RECORD permissions on folder and all contained resources, but NOT on root form
+        assertFalse(PermissionOracle.canDeleteRecord(rootFormId, db));
+        assertTrue(PermissionOracle.canDeleteRecord(rootFolderId, db));
+        assertTrue(PermissionOracle.canDeleteRecord(formInFolderId, db));
+        assertTrue(PermissionOracle.canDeleteRecord(folderInFolderId, db));
+
+        // Next check on database-private and public resources
+        // User should NOT have DELETE_RECORD permissions on any database private and public resources
+        for (Resource publicResource : publicResources) {
+            assertFalse(PermissionOracle.canDeleteRecord(publicResource.getId(), db));
+        }
+        for (Resource dbPrivateResource : dbPrivateResources) {
+            assertFalse(PermissionOracle.canDeleteRecord(dbPrivateResource.getId(), db));
+        }
+    }
+
+    @Test
+    public void authUser_editRecord_folderGrant() {
+        UserDatabaseMeta db = authUserDatabase(allResources, folderGrant());
+
+        // First check on private resources
+        // User should have EDIT_RECORD permissions on folder and all contained resources, but NOT on root form
+        assertFalse(PermissionOracle.canEditRecord(rootFormId, db));
+        assertTrue(PermissionOracle.canEditRecord(rootFolderId, db));
+        assertTrue(PermissionOracle.canEditRecord(formInFolderId, db));
+        assertTrue(PermissionOracle.canEditRecord(folderInFolderId, db));
+
+        // Next check on database-private and public resources
+        // User should NOT have EDIT_RECORD permissions on any database private and public resources
+        for (Resource publicResource : publicResources) {
+            assertFalse(PermissionOracle.canEditRecord(publicResource.getId(), db));
+        }
+        for (Resource dbPrivateResource : dbPrivateResources) {
+            assertFalse(PermissionOracle.canEditRecord(dbPrivateResource.getId(), db));
+        }
+    }
+
+    @Test
+    public void authUser_createResource_folderGrant() {
+        UserDatabaseMeta db = authUserDatabase(allResources, folderGrant());
+
+        // First check on private resources
+        // User should have CREATE_RESOURCE permissions on folder and all contained resources, but NOT on root database or root form
+        assertFalse(PermissionOracle.canCreateResource(database, db));
+        assertFalse(PermissionOracle.canCreateResource(rootFormId, db));
+        assertTrue(PermissionOracle.canCreateResource(rootFolderId, db));
+        assertTrue(PermissionOracle.canCreateResource(formInFolderId, db));
+        assertTrue(PermissionOracle.canCreateResource(folderInFolderId, db));
+
+        // Next check on database-private and public resources
+        // User should NOT have CREATE_RESOURCE permissions on any database private and public resources
+        for (Resource publicResource : publicResources) {
+            assertFalse(PermissionOracle.canCreateResource(publicResource.getId(), db));
+        }
+        for (Resource dbPrivateResource : dbPrivateResources) {
+            assertFalse(PermissionOracle.canCreateResource(dbPrivateResource.getId(), db));
+        }
+    }
+
+    @Test
+    public void authUser_deleteResource_folderGrant() {
+        UserDatabaseMeta db = authUserDatabase(allResources, folderGrant());
+
+        // First check on private resources
+        // User should have DELETE_RESOURCE permissions on folder and all contained resources, but NOT on root form
+        assertFalse(PermissionOracle.canDeleteResource(rootFormId, db));
+        assertTrue(PermissionOracle.canDeleteResource(rootFolderId, db));
+        assertTrue(PermissionOracle.canDeleteResource(formInFolderId, db));
+        assertTrue(PermissionOracle.canDeleteResource(folderInFolderId, db));
+
+        // Next check on database-private and public resources
+        // User should NOT have DELETE_RESOURCE permissions on any database private and public resources
+        for (Resource publicResource : publicResources) {
+            assertFalse(PermissionOracle.canDeleteResource(publicResource.getId(), db));
+        }
+        for (Resource dbPrivateResource : dbPrivateResources) {
+            assertFalse(PermissionOracle.canDeleteResource(dbPrivateResource.getId(), db));
+        }
+    }
+
+    @Test
+    public void authUser_editResource_folderGrant() {
+        UserDatabaseMeta db = authUserDatabase(allResources, folderGrant());
+
+        // First check on private resources
+        // User should have EDIT_RESOURCE permissions on folder and all contained resources, but NOT on root form
+        assertFalse(PermissionOracle.canEditResource(rootFormId, db));
+        assertTrue(PermissionOracle.canEditResource(rootFolderId, db));
+        assertTrue(PermissionOracle.canEditResource(formInFolderId, db));
+        assertTrue(PermissionOracle.canEditResource(folderInFolderId, db));
+
+        // Next check on database-private and public resources
+        // User should NOT have EDIT_RESOURCE permissions on any database private and public resources
+        for (Resource publicResource : publicResources) {
+            assertFalse(PermissionOracle.canEditResource(publicResource.getId(), db));
+        }
+        for (Resource dbPrivateResource : dbPrivateResources) {
+            assertFalse(PermissionOracle.canEditResource(dbPrivateResource.getId(), db));
+        }
+    }
+
+    @Test
+    public void authUser_lockRecords_folderGrant() {
+        UserDatabaseMeta db = authUserDatabase(allResources, folderGrant());
+
+        // First check on private resources
+        // User should have LOCK_RECORDS permissions on folder and all contained resources, but NOT on root database or root form
+        assertFalse(PermissionOracle.canLockRecords(database, db));
+        assertFalse(PermissionOracle.canLockRecords(rootFormId, db));
+        assertTrue(PermissionOracle.canLockRecords(rootFolderId, db));
+        assertTrue(PermissionOracle.canLockRecords(formInFolderId, db));
+        assertTrue(PermissionOracle.canLockRecords(folderInFolderId, db));
+
+        // Next check on database-private and public resources
+        // User should NOT have LOCK_RECORDS permissions on any database private and public resources
+        for (Resource publicResource : publicResources) {
+            assertFalse(PermissionOracle.canLockRecords(publicResource.getId(), db));
+        }
+        for (Resource dbPrivateResource : dbPrivateResources) {
+            assertFalse(PermissionOracle.canLockRecords(dbPrivateResource.getId(), db));
+        }
+    }
+
+    @Test
+    public void authUser_importRecords_folderGrant() {
+        UserDatabaseMeta db = authUserDatabase(allResources, folderGrant());
+
+        // First check on private resources
+        // User should have IMPORT_RECORDS permissions on folder and all contained resources, but NOT on root form
+        assertFalse(PermissionOracle.canImportRecords(rootFormId, db));
+        assertTrue(PermissionOracle.canImportRecords(rootFolderId, db));
+        assertTrue(PermissionOracle.canImportRecords(formInFolderId, db));
+        assertTrue(PermissionOracle.canImportRecords(folderInFolderId, db));
+
+        // Next check on database-private and public resources
+        // User should NOT have IMPORT_RECORDS permissions on any database private and public resources
+        for (Resource publicResource : publicResources) {
+            assertFalse(PermissionOracle.canImportRecords(publicResource.getId(), db));
+        }
+        for (Resource dbPrivateResource : dbPrivateResources) {
+            assertFalse(PermissionOracle.canImportRecords(dbPrivateResource.getId(), db));
+        }
+    }
+
+    @Test
+    public void authUser_exportRecords_folderGrant() {
+        UserDatabaseMeta db = authUserDatabase(allResources, folderGrant());
+
+        // First check on private resources
+        // User should have EXPORT_RECORDS permissions on folder and all contained resources, but NOT on root form
+        assertFalse(PermissionOracle.canExportRecords(rootFormId, db));
+        assertTrue(PermissionOracle.canExportRecords(rootFolderId, db));
+        assertTrue(PermissionOracle.canExportRecords(formInFolderId, db));
+        assertTrue(PermissionOracle.canExportRecords(folderInFolderId, db));
+
+        // Next check on database-private and public resources
+        // User should NOT have EXPORT_RECORDS permissions on any database private and public resources
+        for (Resource publicResource : publicResources) {
+            assertFalse(PermissionOracle.canExportRecords(publicResource.getId(), db));
+        }
+        for (Resource dbPrivateResource : dbPrivateResources) {
+            assertFalse(PermissionOracle.canExportRecords(dbPrivateResource.getId(), db));
+        }
+    }
+
+    @Test
+    public void authUser_manageTargets_folderGrant() {
+        UserDatabaseMeta db = authUserDatabase(allResources, folderGrant());
+
+        // First check on private resources
+        // User should have MANAGE_TARGETS permissions on folder and all contained resources, but NOT on root database or root form
+        assertFalse(PermissionOracle.canManageTargets(database, db));
+        assertFalse(PermissionOracle.canManageTargets(rootFormId, db));
+        assertTrue(PermissionOracle.canManageTargets(rootFolderId, db));
+        assertTrue(PermissionOracle.canManageTargets(formInFolderId, db));
+        assertTrue(PermissionOracle.canManageTargets(folderInFolderId, db));
+
+        // Next check on database-private and public resources
+        // User should NOT have MANAGE_TARGETS permissions on any database private and public resources
+        for (Resource publicResource : publicResources) {
+            assertFalse(PermissionOracle.canManageTargets(publicResource.getId(), db));
+        }
+        for (Resource dbPrivateResource : dbPrivateResources) {
+            assertFalse(PermissionOracle.canManageTargets(dbPrivateResource.getId(), db));
+        }
+    }
+
+    @Test
+    public void auth_manageUsers_folderGrant() {
+        UserDatabaseMeta db = authUserDatabase(allResources, folderGrant());
+
+        // First check on private resources
+        // User should have MANAGE_USERS permissions on folder and all contained resources, but NOT on root database or root form
+        assertFalse(PermissionOracle.canManageUsers(db));
+        assertFalse(PermissionOracle.canManageUsers(rootFormId, db));
+        assertTrue(PermissionOracle.canManageUsers(rootFolderId, db));
+        assertTrue(PermissionOracle.canManageUsers(formInFolderId, db));
+        assertTrue(PermissionOracle.canManageUsers(folderInFolderId, db));
+
+        // Next check on database-private and public resources
+        // User should NOT have MANAGE_USERS permissions on any database private and public resources
+        for (Resource publicResource : publicResources) {
+            assertFalse(PermissionOracle.canManageUsers(publicResource.getId(), db));
+        }
+        for (Resource dbPrivateResource : dbPrivateResources) {
+            assertFalse(PermissionOracle.canManageUsers(dbPrivateResource.getId(), db));
         }
     }
 
