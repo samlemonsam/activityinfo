@@ -18,12 +18,6 @@
  */
 package org.activityinfo.server.database.hibernate.entity;
 
-import org.activityinfo.server.entity.auth.Authorization;
-import org.activityinfo.server.entity.auth.DesignAuthorizationHandler;
-
-
-
-@Authorization(handler = DesignAuthorizationHandler.class)
 public interface SchemaElement {
 
     Database findOwningDatabase();

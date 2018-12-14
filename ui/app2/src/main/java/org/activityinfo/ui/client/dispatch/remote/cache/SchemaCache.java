@@ -76,7 +76,6 @@ public class SchemaCache implements DispatchListener {
         source.registerListener(CreateEntity.class, cache);
         source.registerListener(UpdatePartner.class, cache);
         source.registerListener(RemovePartner.class, cache);
-        source.registerListener(RequestChange.class, cache);
         source.registerListener(BatchCommand.class, cache);
         source.registerListener(Delete.class, cache);
         source.registerListener(CloneDatabase.class, cache);
@@ -92,9 +91,6 @@ public class SchemaCache implements DispatchListener {
             clearCache();
 
         } else if (command instanceof UpdatePartner || command instanceof RemovePartner) {
-            clearCache();
-
-        } else if (command instanceof RequestChange && isSchemaEntity(((RequestChange) command).getEntityType())) {
             clearCache();
 
         } else if (command instanceof BatchCommand) {

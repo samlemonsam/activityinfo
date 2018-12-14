@@ -22,6 +22,7 @@ import com.extjs.gxt.ui.client.data.RpcMap;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.EntityDTO;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -82,6 +83,14 @@ public class UpdateEntity implements MutatingCommand<VoidResult> {
 
     public void setChanges(RpcMap changes) {
         this.changes = changes;
+    }
+
+    public static UpdateEntity update(EntityDTO model, String... propertiesToChange) {
+        Map<String,Object> map = new HashMap<>();
+        for (String property : propertiesToChange) {
+            map.put(property, model.get(property));
+        }
+        return new UpdateEntity(model, map);
     }
 
 }

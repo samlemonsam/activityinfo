@@ -99,6 +99,10 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
                 updateLocationType(cmd, user, changeMap);
                 break;
 
+            case ProjectDTO.ENTITY_NAME:
+                updateProject(cmd, user, changeMap);
+                break;
+
             default:
                 throw new UnsupportedOperationException("EntityType:" + cmd.getEntityName());
         }
@@ -109,6 +113,22 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
     private void updateLocationType(UpdateEntity cmd, User user, PropertyMap changeMap) {
         LocationTypePolicy policy = injector.getInstance(LocationTypePolicy.class);
         policy.update(user, cmd.getId(), changeMap);
+    }
+
+    private void updateProject(UpdateEntity cmd, User user, PropertyMap changeMap) {
+        Project project = entityManager().find(Project.class, cmd.getId());
+        assertEditProjectRights(user, project);
+        if (changeMap.containsKey("name")) {
+            String newName = changeMap.get("name");
+            if (newName == null) {
+                throw new IllegalArgumentException("Project Name cannot be null");
+            }
+            project.setName(newName);
+        }
+        if (changeMap.containsKey("description")) {
+            String newDescription = changeMap.get("description");
+            project.setDescription(newDescription);
+        }
     }
 
     private void updateActivity(UpdateEntity cmd, User user, PropertyMap changeMap) {

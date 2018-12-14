@@ -18,8 +18,6 @@
  */
 package org.activityinfo.server.database.hibernate.entity;
 
-import org.activityinfo.server.entity.change.AllowUserUpdate;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -56,7 +54,6 @@ public class Project implements SchemaElement, Serializable, Deleteable {
         this.id = id;
     }
 
-    @AllowUserUpdate
     @NotNull
     @Size(max = 255)
     public String getName() {
@@ -72,7 +69,6 @@ public class Project implements SchemaElement, Serializable, Deleteable {
     }
 
     @Lob
-    @AllowUserUpdate
     public String getDescription() {
         return description;
     }

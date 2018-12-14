@@ -301,6 +301,14 @@ public class BaseEntityHandler {
         }
     }
 
+    void assertEditProjectRights(User user, Project project) {
+        ResourceId projectFormId = CuidAdapter.projectFormClass(project.getId());
+        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(project.getDatabase().getId(), user.getId());
+        if (!databaseMeta.isPresent() || !PermissionOracle.canEditResource(projectFormId, databaseMeta.get())) {
+            throw new IllegalAccessCommandException();
+        }
+    }
+
     void assertLockRecordsRights(User user, LockedPeriod lockedPeriod) {
         Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(lockedPeriod.getDatabase().getId(), user.getId());
         if (!databaseMeta.isPresent() || !PermissionOracle.canLockRecords(lockedPeriod.getResourceId(), databaseMeta.get())) {

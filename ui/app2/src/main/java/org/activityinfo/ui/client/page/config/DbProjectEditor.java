@@ -29,7 +29,8 @@ import com.google.inject.ImplementedBy;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.AddProject;
-import org.activityinfo.legacy.shared.command.RequestChange;
+import org.activityinfo.legacy.shared.command.Delete;
+import org.activityinfo.legacy.shared.command.UpdateEntity;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.model.ProjectDTO;
@@ -120,7 +121,7 @@ public class DbProjectEditor extends AbstractGridPresenter<ProjectDTO> implement
 
             @Override
             public void onValidated() {
-                service.execute(RequestChange.update(model, "name", "description"),
+                service.execute(UpdateEntity.update(model, "name", "description"),
                         dialog,
                         new AsyncCallback<VoidResult>() {
 
@@ -155,7 +156,7 @@ public class DbProjectEditor extends AbstractGridPresenter<ProjectDTO> implement
     }
 
     private void delete(ProjectDTO project) {
-        service.execute(RequestChange.delete(project), view.getDeletingMonitor(), new AsyncCallback<VoidResult>() {
+        service.execute(new Delete(project), view.getDeletingMonitor(), new AsyncCallback<VoidResult>() {
             @Override
             public void onFailure(Throwable caught) {
                 MessageBox.alert(I18N.CONSTANTS.error(), I18N.CONSTANTS.errorOnServer(), null);

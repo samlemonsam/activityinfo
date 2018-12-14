@@ -78,7 +78,7 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
         ProjectDTO project = schema.getProjectById(1);
         project.setName("New project name!");
 
-        assertChangeIsSynchronized(RequestChange.update(project, "name"));
+        assertChangeIsSynchronized(UpdateEntity.update(project, "name"));
     }
 
     @Test

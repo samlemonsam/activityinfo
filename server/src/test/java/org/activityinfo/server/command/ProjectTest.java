@@ -48,7 +48,7 @@ public class ProjectTest extends CommandTestCase {
 
         int projectId = 2;
 
-        execute(RequestChange.delete("Project", projectId));
+        execute(new Delete("Project", projectId));
 
         SchemaDTO schema = execute(new GetSchema());
         assertThat(schema.getProjectById(projectId), nullValue());
@@ -86,7 +86,7 @@ public class ProjectTest extends CommandTestCase {
         project.setName("RRMP II");
         project.setDescription("RRMP The Next Generation");
 
-        execute(RequestChange.update(project, "name", "description"));
+        execute(UpdateEntity.update(project, "name", "description"));
 
         schema = execute(new GetSchema());
 
@@ -96,7 +96,7 @@ public class ProjectTest extends CommandTestCase {
         project.setName("RRMP III");
         project.setDescription(null);
 
-        execute(RequestChange.update(project, "name", "description"));
+        execute(UpdateEntity.update(project, "name", "description"));
     }
 
 
@@ -109,7 +109,7 @@ public class ProjectTest extends CommandTestCase {
         ProjectDTO project = schema.getProjectById(2);
         project.setName(null);
 
-        execute(RequestChange.update(project, "name"));
+        execute(UpdateEntity.update(project,"name"));
     }
 
     private long lookupDbVersion(int dbId) {
