@@ -580,6 +580,13 @@ public class PermissionOracle {
     ///////////////////////////////////////////////// DATABASE Methods /////////////////////////////////////////////////
 
     /**
+     * <p>The current User can transfer this Database.</p>
+     */
+    public static boolean canTransferDatabase(UserDatabaseMeta db) {
+        return db.isOwner();
+    }
+
+    /**
      * <p>The current User can delete this Database.</p>
      */
     public static boolean canDeleteDatabase(UserDatabaseMeta db) {
@@ -762,7 +769,7 @@ public class PermissionOracle {
     ///////////////////////////////////////////// EXPORT_RECORDS Methods ///////////////////////////////////////////////
 
     /**
-     * <p>The current User can export records into the specified Resource in this Database.</p>
+     * <p>The current User can export records from the specified Resource in this Database.</p>
      * <p>Does not account for any filters which may be applied/enforced.</p>
      */
     public static boolean canExportRecords(ResourceId resourceId, UserDatabaseMeta db) {

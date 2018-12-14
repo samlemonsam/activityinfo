@@ -107,10 +107,6 @@ public class PermissionOracleTest {
     private static final Resource dbPrivateFormInFolder = resource(dbPrivateFormInFolderId, "Form-In-Folder (Database-Private)", dbPrivateRootFolderId, ResourceType.FORM, Resource.Visibility.DATABASE_USERS);
     private static final Resource dbPrivateFolderInFolder = resource(dbPrivateFolderInFolderId, "Folder-in-Folder (Database-Private)", dbPrivateRootFolderId, ResourceType.FOLDER, Resource.Visibility.DATABASE_USERS);
 
-    private static final List<Resource> allResources = Lists.newArrayList(rootForm,rootFolder,formInFolder,folderInFolder,
-            dbPrivateRootForm,dbPrivateRootFolder,dbPrivateFormInFolder,dbPrivateFolderInFolder,
-            publicForm,publicFolder,publicFormInFolder,publicFolderInFolder);
-
     private static final Predicate<Resource> formResource() {
         return resource -> resource.getType().equals(ResourceType.FORM);
     }
@@ -130,6 +126,17 @@ public class PermissionOracleTest {
     private static final Predicate<Resource> publicResource() {
         return resource -> resource.getVisibility().equals(Resource.Visibility.PUBLIC);
     }
+
+    private static final List<Resource> allResources = Lists.newArrayList(rootForm,rootFolder,formInFolder,folderInFolder,
+            dbPrivateRootForm,dbPrivateRootFolder,dbPrivateFormInFolder,dbPrivateFolderInFolder,
+            publicForm,publicFolder,publicFormInFolder,publicFolderInFolder);
+
+    private static final List<Resource> formResources = allResources.stream().filter(formResource()).collect(Collectors.toList());
+    private static final List<Resource> folderResources = allResources.stream().filter(folderResource()).collect(Collectors.toList());
+
+    private static final List<Resource> privateResources = allResources.stream().filter(privateResource()).collect(Collectors.toList());
+    private static final List<Resource> dbPrivateResources = allResources.stream().filter(databasePrivateResource()).collect(Collectors.toList());
+    private static final List<Resource> publicResources = allResources.stream().filter(publicResource()).collect(Collectors.toList());
 
     // Users:
     // (1) Owner of Database 1
@@ -191,34 +198,72 @@ public class PermissionOracleTest {
     }
 
     @Test
+    public void owner_transferDatabase() {
+        UserDatabaseMeta db = ownerDatabase(allResources);
+        assertTrue(PermissionOracle.canTransferDatabase(db));
+    }
+
+    @Test
+    public void owner_deleteDatabase() {
+        UserDatabaseMeta db = ownerDatabase(allResources);
+        assertTrue(PermissionOracle.canDeleteDatabase(db));
+    }
+
+    @Test
+    public void owner_editDatabase() {
+        UserDatabaseMeta db = ownerDatabase(allResources);
+        assertTrue(PermissionOracle.canEditDatabase(db));
+    }
+
+    @Test
     public void owner_view() {
         UserDatabaseMeta db = ownerDatabase(allResources);
 
-        // User should have VIEW permissions on all resources
+        // User should have VIEW permissions on root database and all resources
+        assertTrue(PermissionOracle.canView(db));
         for (Resource resource : allResources) {
             assertTrue(PermissionOracle.canView(resource.getId(), db));
         }
     }
 
     @Test
+    public void owner_createRecord() {
+        UserDatabaseMeta db = ownerDatabase(allResources);
+
+        // Owner should have CREATE_RECORD permissions on all FORM resources
+        for (Resource resource : formResources) {
+            assertTrue(PermissionOracle.canCreateRecord(resource.getId(), db));
+        }
+    }
+
+    @Test
+    public void owner_deleteRecord() {
+        UserDatabaseMeta db = ownerDatabase(allResources);
+
+        // Owner should have DELETE_RECORD permissions on all FORM resources
+        for (Resource resource : formResources) {
+            assertTrue(PermissionOracle.canDeleteRecord(resource.getId(), db));
+        }
+    }
+
+    @Test
+    public void owner_editRecord() {
+        UserDatabaseMeta db = ownerDatabase(allResources);
+
+        // Owner should have EDIT_RECORD permissions on all FORM resources
+        for (Resource resource : formResources) {
+            assertTrue(PermissionOracle.canEditRecord(resource.getId(), db));
+        }
+    }
+
+    @Test
     public void owner_createResource() {
-        List<Resource> folderResources = allResources.stream().filter(folderResource()).collect(Collectors.toList());
         UserDatabaseMeta db = ownerDatabase(allResources);
 
         // Owner should have CREATE_RESOURCE permissions on root database and all FOLDER resources
         assertTrue(PermissionOracle.canCreateResource(database, db));
         for (Resource resource : folderResources) {
             assertTrue(PermissionOracle.canCreateResource(resource.getId(), db));
-        }
-    }
-
-    @Test
-    public void owner_editResource() {
-        UserDatabaseMeta db = ownerDatabase(allResources);
-
-        // Owner should have EDIT_RESOURCE permissions on all resources
-        for (Resource resource : allResources) {
-            assertTrue(PermissionOracle.canEditResource(resource.getId(), db));
         }
     }
 
@@ -233,62 +278,12 @@ public class PermissionOracleTest {
     }
 
     @Test
-    public void owner_createRecord() {
-        List<Resource> formResources = allResources.stream().filter(formResource()).collect(Collectors.toList());
+    public void owner_editResource() {
         UserDatabaseMeta db = ownerDatabase(allResources);
 
-        // Owner should have CREATE_RECORD permissions on all FORM resources
-        for (Resource resource : formResources) {
-            assertTrue(PermissionOracle.canCreateRecord(resource.getId(), db));
-        }
-    }
-
-    @Test
-    public void owner_editRecord() {
-        List<Resource> formResources = allResources.stream().filter(formResource()).collect(Collectors.toList());
-        UserDatabaseMeta db = ownerDatabase(allResources);
-
-        // Owner should have EDIT_RECORD permissions on all FORM resources
-        for (Resource resource : formResources) {
-            assertTrue(PermissionOracle.canEditRecord(resource.getId(), db));
-        }
-    }
-
-    @Test
-    public void owner_deleteRecord() {
-        List<Resource> formResources = allResources.stream().filter(formResource()).collect(Collectors.toList());
-        UserDatabaseMeta db = ownerDatabase(allResources);
-
-        // Owner should have DELETE_RECORD permissions on all FORM resources
-        for (Resource resource : formResources) {
-            assertTrue(PermissionOracle.canDeleteRecord(resource.getId(), db));
-        }
-    }
-
-    @Test
-    public void owner_deleteDatabase() {
-        UserDatabaseMeta db = ownerDatabase(allResources);
-        assertTrue(PermissionOracle.canDeleteDatabase(db));
-    }
-
-    @Test
-    public void owner_manageUsers() {
-        UserDatabaseMeta db = ownerDatabase(allResources);
-
-        assertTrue(PermissionOracle.canManageUsers(db));
-        // Owner should have MANAGE_USERS permissions on all resources
+        // Owner should have EDIT_RESOURCE permissions on all resources
         for (Resource resource : allResources) {
-            assertTrue(PermissionOracle.canManageUsers(resource.getId(), db));
-        }
-    }
-
-    @Test
-    public void owner_manageTargets() {
-        UserDatabaseMeta db = ownerDatabase(allResources);
-
-        // Owner should have MANAGE_TARGETS permissions on all resources
-        for (Resource resource : allResources) {
-            assertTrue(PermissionOracle.canManageTargets(resource.getId(), db));
+            assertTrue(PermissionOracle.canEditResource(resource.getId(), db));
         }
     }
 
@@ -296,7 +291,8 @@ public class PermissionOracleTest {
     public void owner_lockRecords() {
         UserDatabaseMeta db = ownerDatabase(allResources);
 
-        // Owner should have LOCK_RECORDS permissions on all resources
+        // Owner should have LOCK_RECORDS permissions on root database and all resources
+        assertTrue(PermissionOracle.canLockRecords(database, db));
         for (Resource resource : allResources) {
             assertTrue(PermissionOracle.canLockRecords(resource.getId(), db));
         }
@@ -316,9 +312,188 @@ public class PermissionOracleTest {
     public void owner_exportRecords() {
         UserDatabaseMeta db = ownerDatabase(allResources);
 
-        // Owner should have EXPORT_RECORDS permissions on all resources
+        // Owner should have EXPORT_RECORDS permissions on root database and all resources
+        assertTrue(PermissionOracle.canExportRecords(database, db));
         for (Resource resource : allResources) {
             assertTrue(PermissionOracle.canExportRecords(resource.getId(), db));
+        }
+    }
+
+    @Test
+    public void owner_manageTargets() {
+        UserDatabaseMeta db = ownerDatabase(allResources);
+
+        // Owner should have MANAGE_TARGETS permissions on root database and all resources
+        assertTrue(PermissionOracle.canManageTargets(database, db));
+        for (Resource resource : allResources) {
+            assertTrue(PermissionOracle.canManageTargets(resource.getId(), db));
+        }
+    }
+
+    @Test
+    public void owner_manageUsers() {
+        UserDatabaseMeta db = ownerDatabase(allResources);
+
+        // Owner should have MANAGE_USERS permissions on root database and all resources
+        assertTrue(PermissionOracle.canManageUsers(db));
+        for (Resource resource : allResources) {
+            assertTrue(PermissionOracle.canManageUsers(resource.getId(), db));
+        }
+    }
+
+    @Test
+    public void unauthUser_transferDatabase() {
+        UserDatabaseMeta db = unAuthUserDatabase(allResources);
+        assertFalse(PermissionOracle.canTransferDatabase(db));
+    }
+
+    @Test
+    public void unauthUser_deleteDatabase() {
+        UserDatabaseMeta db = unAuthUserDatabase(allResources);
+        assertFalse(PermissionOracle.canDeleteDatabase(db));
+    }
+
+    @Test
+    public void unauthUser_editDatabase() {
+        UserDatabaseMeta db = unAuthUserDatabase(allResources);
+        assertFalse(PermissionOracle.canEditDatabase(db));
+    }
+
+    @Test
+    public void unauthUser_view() {
+        UserDatabaseMeta db = unAuthUserDatabase(allResources);
+
+        // User should NOT have VIEW permissions on root database
+        assertFalse(PermissionOracle.canView(db));
+
+        // User should NOT have VIEW permissions on any PRIVATE resources
+        for (Resource resource : privateResources) {
+            assertFalse(PermissionOracle.canView(resource.getId(), db));
+        }
+
+        // User should NOT have VIEW permissions on any DATABASE_USERS resources
+        for (Resource resource : dbPrivateResources) {
+            assertFalse(PermissionOracle.canView(resource.getId(), db));
+        }
+
+        // User SHOULD have VIEW permissions on any PUBLIC resources
+        for (Resource resource : publicResources) {
+            assertTrue(PermissionOracle.canView(resource.getId(), db));
+        }
+    }
+
+    @Test
+    public void unauthUser_createRecord() {
+        UserDatabaseMeta db = unAuthUserDatabase(allResources);
+
+        // User should NOT have CREATE_RECORD permissions on any resources
+        for (Resource resource : allResources) {
+            assertFalse(PermissionOracle.canCreateRecord(resource.getId(), db));
+        }
+    }
+
+    @Test
+    public void unauthUser_deleteRecord() {
+        UserDatabaseMeta db = unAuthUserDatabase(allResources);
+
+        // User should NOT have DELETE_RECORD permissions on any resources
+        for (Resource resource : allResources) {
+            assertFalse(PermissionOracle.canDeleteRecord(resource.getId(), db));
+        }
+    }
+
+    @Test
+    public void unauthUser_editRecord() {
+        UserDatabaseMeta db = unAuthUserDatabase(allResources);
+
+        // User should NOT have EDIT_RECORD permissions on any resources
+        for (Resource resource : allResources) {
+            assertFalse(PermissionOracle.canEditRecord(resource.getId(), db));
+        }
+    }
+
+    @Test
+    public void unauthUser_createResource() {
+        UserDatabaseMeta db = unAuthUserDatabase(allResources);
+
+        // User should NOT have CREATE_RESOURCE permissions on root database or any resources
+        assertFalse(PermissionOracle.canCreateResource(database, db));
+        for (Resource resource : allResources) {
+            assertFalse(PermissionOracle.canCreateResource(resource.getId(), db));
+        }
+    }
+
+    @Test
+    public void unauthUser_deleteResource() {
+        UserDatabaseMeta db = unAuthUserDatabase(allResources);
+
+        // User should NOT have DELETE_RESOURCE permissions on any resources
+        for (Resource resource : allResources) {
+            assertFalse(PermissionOracle.canDeleteResource(resource.getId(), db));
+        }
+    }
+
+    @Test
+    public void unauthUser_editResource() {
+        UserDatabaseMeta db = unAuthUserDatabase(allResources);
+
+        // User should NOT have EDIT_RESOURCE permissions on any resources
+        for (Resource resource : allResources) {
+            assertFalse(PermissionOracle.canEditResource(resource.getId(), db));
+        }
+    }
+
+    @Test
+    public void unauthUser_lockRecords() {
+        UserDatabaseMeta db = unAuthUserDatabase(allResources);
+
+        // User should NOT have LOCK_RECORDS permissions on root database or any resources
+        assertFalse(PermissionOracle.canLockRecords(database, db));
+        for (Resource resource : allResources) {
+            assertFalse(PermissionOracle.canLockRecords(resource.getId(), db));
+        }
+    }
+
+    @Test
+    public void unauthUser_importRecords() {
+        UserDatabaseMeta db = unAuthUserDatabase(allResources);
+
+        // User should NOT have IMPORT_RECORDS permissions on any resources
+        for (Resource resource : allResources) {
+            assertFalse(PermissionOracle.canImportRecords(resource.getId(), db));
+        }
+    }
+
+    @Test
+    public void unauthUser_exportRecords() {
+        UserDatabaseMeta db = unAuthUserDatabase(allResources);
+
+        // User should NOT have EXPORT_RECORDS permissions on root database or any resources
+        assertFalse(PermissionOracle.canExportRecords(database, db));
+        for (Resource resource : allResources) {
+            assertFalse(PermissionOracle.canExportRecords(resource.getId(), db));
+        }
+    }
+
+    @Test
+    public void unauthUser_manageTargets() {
+        UserDatabaseMeta db = unAuthUserDatabase(allResources);
+
+        // User should NOT have MANAGE_TARGETS permissions on root database or any resources
+        assertFalse(PermissionOracle.canManageTargets(database, db));
+        for (Resource resource : allResources) {
+            assertFalse(PermissionOracle.canManageTargets(resource.getId(), db));
+        }
+    }
+
+    @Test
+    public void unauth_manageUsers() {
+        UserDatabaseMeta db = unAuthUserDatabase(allResources);
+
+        // User should NOT have MANAGE_USERS permissions on root database or any resources
+        assertFalse(PermissionOracle.canManageUsers(db));
+        for (Resource resource : allResources) {
+            assertFalse(PermissionOracle.canManageUsers(resource.getId(), db));
         }
     }
 
