@@ -16,37 +16,6 @@ import static org.junit.Assert.*;
 
 public class PermissionOracleTest {
 
-    // Owner UserDatabaseMeta (permitted to everything)
-    // UserDatabaseMeta with correct permissions for:
-    // - Record permissions for VIEW, CREATE_RECORD, EDIT_RECORD, DELETE_RECORD, EXPORT_RECORD, IMPORT_RECORD on:
-    //  -- Form in Root (implicit)
-    //  -- Form in Root (explicit)
-    //  -- Form in Folder (implicit)
-    //  -- Form in Folder (explicit)
-    // - Resource permissions for VIEW, CREATE_RESOURCE, EDIT_RESOURCE, DELETE_RESOURCE:
-    //  -- On Root
-    //  -- Form in Root (implicit)
-    //  -- Form in Root (explicit)
-    //  -- Folder in Root (implicit)
-    //  -- Folder in Root (explicit)
-    //  -- Form in Folder (implicit)
-    //  -- Form in Folder (explicit)
-    //  -- Folder in Folder (implicit)
-    //  -- Folder in Folder (explicit)
-    // - Manage targets and locks:
-    //  -- On Root
-    //  -- Form in Root (implicit)
-    //  -- Form in Root (explicit)
-    //  -- Folder in Root (implicit)
-    //  -- Folder in Root (explicit)
-    //  -- Form in Folder (implicit)
-    //  -- Form in Folder (explicit)
-    //  -- Folder in Folder (implicit)
-    //  -- Folder in Folder (explicit)
-    // - Publicly visible resources:
-    //  -- Explicitly granted
-    //  -- Granted to us as we are Database User
-    //  -- Granted to us as it is Public
     // - Special Resources:
     //  -- Project Form
     //  -- Partner Form
@@ -55,15 +24,14 @@ public class PermissionOracleTest {
     // Filter checks:
     // - Correct Operation Filters
     // - Multi-level Operation Filters
-    // Unauthorised Permission Checks (all of the above with unauthorised users)
 
-    // Databases:
-    // (1) Database 1
+    // Databases
     private static final ResourceId database = ResourceId.valueOf("d0000000001");
 
-    // ResourceIds
+    // Resources
     // Private:
     // (a0000000001)  (Root) Root Form
+    // (cxyz123)      (Root) Root Form Sub-Form
     // (f0000000001)  (Root) Root Folder
     // (a0000000002)  (Root Folder) Form-in-Folder
     // (f0000000002)  (Root Folder) Folder-in-Folder
@@ -79,6 +47,7 @@ public class PermissionOracleTest {
     // (f0000000006)  (Root Folder) Folder-in-Folder
 
     private static final ResourceId rootFormId = ResourceId.valueOf("a0000000001");
+    private static final ResourceId rootFormSubFormId = ResourceId.valueOf("cxyz123");
     private static final ResourceId rootFolderId = ResourceId.valueOf("f0000000001");
     private static final ResourceId formInFolderId = ResourceId.valueOf("a0000000002");
     private static final ResourceId folderInFolderId = ResourceId.valueOf("f0000000002");
@@ -94,6 +63,7 @@ public class PermissionOracleTest {
     private static final ResourceId dbPrivateFolderInFolderId = ResourceId.valueOf("f0000000006");
 
     private static final Resource rootForm = resource(rootFormId, "Root Form (Private)", database, ResourceType.FORM, Resource.Visibility.PRIVATE);
+    private static final Resource rootFormSubForm = resource(rootFormSubFormId, "Root Form Sub-Form (Private)", rootFormId, ResourceType.SUB_FORM, Resource.Visibility.PRIVATE);
     private static final Resource rootFolder = resource(rootFolderId, "Root Folder (Private)", database, ResourceType.FOLDER, Resource.Visibility.PRIVATE);
     private static final Resource formInFolder = resource(formInFolderId, "Form-In-Folder (Private)", rootFolderId, ResourceType.FORM, Resource.Visibility.PRIVATE);
     private static final Resource folderInFolder = resource(folderInFolderId, "Folder-in-Folder (Private)", rootFolderId, ResourceType.FOLDER, Resource.Visibility.PRIVATE);
@@ -109,7 +79,7 @@ public class PermissionOracleTest {
     private static final Resource dbPrivateFolderInFolder = resource(dbPrivateFolderInFolderId, "Folder-in-Folder (Database-Private)", dbPrivateRootFolderId, ResourceType.FOLDER, Resource.Visibility.DATABASE_USERS);
 
     private static final Predicate<Resource> formResource() {
-        return resource -> resource.getType().equals(ResourceType.FORM);
+        return resource -> resource.getType().equals(ResourceType.FORM) || resource.getType().equals(ResourceType.SUB_FORM);
     }
 
     private static final Predicate<Resource> folderResource() {
@@ -128,9 +98,22 @@ public class PermissionOracleTest {
         return resource -> resource.getVisibility().equals(Resource.Visibility.PUBLIC);
     }
 
-    private static final List<Resource> allResources = Lists.newArrayList(rootForm,rootFolder,formInFolder,folderInFolder,
-            dbPrivateRootForm,dbPrivateRootFolder,dbPrivateFormInFolder,dbPrivateFolderInFolder,
-            publicForm,publicFolder,publicFormInFolder,publicFolderInFolder);
+    private static final List<Resource> allResources = Lists.newArrayList(
+            rootForm,
+            rootFormSubForm,
+            rootFolder,
+            formInFolder,
+            folderInFolder,
+
+            dbPrivateRootForm,
+            dbPrivateRootFolder,
+            dbPrivateFormInFolder,
+            dbPrivateFolderInFolder,
+
+            publicForm,
+            publicFolder,
+            publicFormInFolder,
+            publicFolderInFolder);
 
     private static final List<Resource> formResources = allResources.stream().filter(formResource()).collect(Collectors.toList());
     private static final List<Resource> folderResources = allResources.stream().filter(folderResource()).collect(Collectors.toList());
