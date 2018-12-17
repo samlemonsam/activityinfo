@@ -1,5 +1,6 @@
 # ActivityInfo Documentation
-This page gives an overview of the ActivityInfo system architecture, and links to documentation within each module of the system.  
+This page gives an overview of the ActivityInfo system architecture, and links to documentation within each module of 
+the system.  
 
 # System Architecture
 The ActivityInfo system is structured into the following modules:
