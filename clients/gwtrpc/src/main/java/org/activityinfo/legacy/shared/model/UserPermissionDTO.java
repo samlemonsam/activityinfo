@@ -51,6 +51,8 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
         setAllowDesign(false);
         setAllowExport(false);
         setAllowExportAll(false);
+        setAllowImport(false);
+        setAllowImportAll(false);
     }
 
     public void setName(String value) {
