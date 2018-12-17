@@ -50,6 +50,10 @@ public class UserPermission implements Serializable {
     private boolean allowDesign;
     private boolean allowManageUsers;
     private boolean allowManageAllUsers;
+    private boolean allowExport;
+    private boolean allowExportAll;
+    private boolean allowImport;
+    private boolean allowImportAll;
     private long version;
     private String model;
 
@@ -277,6 +281,38 @@ public class UserPermission implements Serializable {
 
     public void setAllowManageAllUsers(boolean allowManageAllUsers) {
         this.allowManageAllUsers = allowManageAllUsers;
+    }
+
+    public boolean isAllowExport() {
+        return allowExport;
+    }
+
+    public void setAllowExport(boolean allowExport) {
+        this.allowExport = allowExport;
+    }
+
+    public boolean isAllowExportAll() {
+        return allowExportAll;
+    }
+
+    public void setAllowExportAll(boolean allowExportAll) {
+        this.allowExportAll = allowExportAll;
+    }
+
+    public boolean isAllowImport() {
+        return allowImport;
+    }
+
+    public void setAllowImport(boolean allowImport) {
+        this.allowImport = allowImport;
+    }
+
+    public boolean isAllowImportAll() {
+        return allowImportAll;
+    }
+
+    public void setAllowImportAll(boolean allowImportAll) {
+        this.allowImportAll = allowImportAll;
     }
 
     /**

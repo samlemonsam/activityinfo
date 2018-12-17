@@ -322,6 +322,16 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
             grantModel.addOperation(Operation.LOCK_RECORDS);
             grantModel.addOperation(Operation.MANAGE_TARGETS);
         }
+        if(userPermission.isAllowExportAll()) {
+            grantModel.addOperation(Operation.EXPORT_RECORDS);
+        } else if (userPermission.isAllowExport()) {
+            grantModel.addOperation(Operation.EXPORT_RECORDS, getPartnerFilter(userPermission));
+        }
+        if(userPermission.isAllowImportAll()) {
+            grantModel.addOperation(Operation.IMPORT_RECORDS);
+        } else if (userPermission.isAllowImport()) {
+            grantModel.addOperation(Operation.IMPORT_RECORDS, getPartnerFilter(userPermission));
+        }
     }
 
     private static String getPartnerFilter(@NotNull UserPermission userPermission) {

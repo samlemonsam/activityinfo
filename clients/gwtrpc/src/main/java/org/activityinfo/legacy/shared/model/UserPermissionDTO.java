@@ -49,6 +49,8 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
         setAllowManageUsers(false);
         setAllowManageAllUsers(false);
         setAllowDesign(false);
+        setAllowExport(false);
+        setAllowExportAll(false);
     }
 
     public void setName(String value) {
@@ -167,6 +169,42 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
         set("allowManageAllUsers", allowManageAll);
     }
 
+    public void setAllowExport(boolean value) {
+        set("allowExport", value);
+    }
+
+    @JsonProperty
+    public boolean getAllowExport() {
+        return (Boolean) get("allowExport");
+    }
+
+    public void setAllowExportAll(boolean value) {
+        set("allowExportAll", value);
+    }
+
+    @JsonProperty
+    public boolean getAllowExportAll() {
+        return (Boolean) get("allowExportAll");
+    }
+
+    public void setAllowImport(boolean value) {
+        set("allowImport", value);
+    }
+
+    @JsonProperty
+    public boolean getAllowImport() {
+        return (Boolean) get("allowImport");
+    }
+
+    public void setAllowImportAll(boolean value) {
+        set("allowImportAll", value);
+    }
+
+    @JsonProperty
+    public boolean getAllowImportAll() {
+        return (Boolean) get("allowImportAll");
+    }
+
     @JsonProperty
     public PartnerDTO getPartner() {
         return get("partner");
@@ -214,6 +252,10 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
                 ",editAll=" + getAllowEditAll() +
                 ",manageUsers=" + getAllowManageUsers() +
                 ",manageAllUsers=" + getAllowManageAllUsers() +
+                ",exportRecords=" + getAllowExport() +
+                ",exportAllRecords=" + getAllowExportAll() +
+                ",importRecords=" + getAllowImport() +
+                ",importAllRecords=" + getAllowImportAll() +
                 "}";
     }
 }

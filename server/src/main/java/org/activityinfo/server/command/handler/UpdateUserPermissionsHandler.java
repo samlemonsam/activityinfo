@@ -213,6 +213,10 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
         perm.setAllowView(dto.getAllowView());
         perm.setAllowEdit(dto.getAllowEdit());
         perm.setAllowManageUsers(dto.getAllowManageUsers());
+        perm.setAllowExport(dto.getAllowExport());
+        perm.setAllowExportAll(dto.getAllowExportAll());
+        perm.setAllowImport(dto.getAllowImport());
+        perm.setAllowImportAll(dto.getAllowImportAll());
 
         if(dto.hasFolderLimitation()) {
             perm.setModel(constructModel(perm, dto).toJson().toJson());
