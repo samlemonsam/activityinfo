@@ -76,6 +76,10 @@ public class UserPermission implements Serializable {
         this.allowDesign = sourcePermission.allowDesign;
         this.allowManageUsers = sourcePermission.allowManageUsers;
         this.allowManageAllUsers = sourcePermission.allowManageAllUsers;
+        this.allowExport = sourcePermission.allowExport;
+        this.allowExportAll = sourcePermission.allowExportAll;
+        this.allowImport = sourcePermission.allowImport;
+        this.allowImportAll = sourcePermission.allowImportAll;
         this.version = sourcePermission.version;
         this.model = sourcePermission.model;
     }
@@ -283,6 +287,12 @@ public class UserPermission implements Serializable {
         this.allowManageAllUsers = allowManageAllUsers;
     }
 
+    /**
+     * Gets the permission to export data on this partner.
+     *
+     * @return True if the user is allowed to export data on this partner.
+     */
+    @Column(name = "allowExport", nullable = false)
     public boolean isAllowExport() {
         return allowExport;
     }
@@ -291,6 +301,12 @@ public class UserPermission implements Serializable {
         this.allowExport = allowExport;
     }
 
+    /**
+     * Gets the permission to export data on other partners.
+     *
+     * @return True if the user is allowed to export data on other partners.
+     */
+    @Column(name = "allowExportAll", nullable = false)
     public boolean isAllowExportAll() {
         return allowExportAll;
     }
@@ -299,6 +315,12 @@ public class UserPermission implements Serializable {
         this.allowExportAll = allowExportAll;
     }
 
+    /**
+     * Gets the permission to import data on this partner.
+     *
+     * @return True if the user is allowed to import data on this partner.
+     */
+    @Column(name = "allowImport", nullable = false)
     public boolean isAllowImport() {
         return allowImport;
     }
@@ -307,6 +329,12 @@ public class UserPermission implements Serializable {
         this.allowImport = allowImport;
     }
 
+    /**
+     * Gets the permission to import data on other partners.
+     *
+     * @return True if the user is allowed to import data on other partners.
+     */
+    @Column(name = "allowImportAll", nullable = false)
     public boolean isAllowImportAll() {
         return allowImportAll;
     }
