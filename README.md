@@ -24,6 +24,13 @@ Please read the [Contributor's Guide](CONTRIBUTING.md) to get started developing
 
 Pull requests are welcome!
 
+DOCUMENTATION
+=============
+
+The ActivityInfo User Manual can be found on the [ActivityInfo Help](http://help.activityinfo.org) page. 
+
+Technical documentation on the ActivityInfo System Architecture and Implementation can be found [here](docs/README.md).
+
 
 RUNNING
 =======
