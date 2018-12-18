@@ -21,8 +21,10 @@ package org.activityinfo.model.permission;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.database.DatabaseGrant;
 import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.database.ResourceType;
+import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.resource.ResourceId;
 
 import java.util.HashMap;
@@ -31,8 +33,29 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Grants a user permission to perform specified operations within a given resource,
- * with a set of record filters applied
+ * <p>
+ *     A {@link GrantModel} defines the set of allowed {@link Operation}s (and their optional Record filters) on a
+ *     specific {@link Resource}. A {@code GrantModel} is inherited by any child {@code Resource}s. Any
+ *     {@code Operation}s not defined on a {@code GrantModel} are <strong>not allowed</strong> to be performed by the
+ *     User.
+ * </p>
+ * <p>
+ *     As well as a binary permission (can perform/cannot perform), the Database Owner may set a filter which should be
+ *     applied when performing an {@code Operation}. These filters allow the Database Owner to limit the data the User
+ *     is allowed to view or operate on at a Record level. Filters are composed of {@link FormulaNode}s.
+ * </p>
+ * <p>
+ *      For example, a User may be limited to viewing data which is associated with a specific Partner field. In this
+ *      instance, the User's {@code GrantModel} will include an {@link Operation#VIEW} entry with a <br><br>
+ *          {@code P0000001234 == "p0000004321"}
+ *      <br><br> filter, specifying that they are only allowed to view records which are associated with the Form Record
+ *      {@code p00000043211} in the <i>referenced</i> Form {@code P0000001234}.
+ * </p>
+ * <p>
+ *     A collection of {@code GrantModel}s compose a {@link DatabaseGrant}. A {@code DatabaseGrant} gives the
+ *     full set of allowed {@code Operation}s for a specific User, and their associated filters, across all of the
+ *     {@code Resource}s within a Database.
+ * </p>
  */
 public class GrantModel implements JsonSerializable {
 
