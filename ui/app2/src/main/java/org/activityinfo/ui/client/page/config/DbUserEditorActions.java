@@ -195,9 +195,6 @@ public class DbUserEditorActions {
         model.setAllowManageAllUsers(false);
         model.setAllowManageUsers(false);
         model.setAllowExport(false);
-        model.setAllowExportAll(false);
-        model.setAllowImport(false);
-        model.setAllowImportAll(false);
 
         MessageBox.confirm(
                 I18N.CONSTANTS.removeUser(),

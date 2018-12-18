@@ -25,20 +25,19 @@
 
     <changeSet author="jamiewhths" id="053-01">
         <comment>
-            Add allowExport and allowExportAll to UserPermission table with default 0
+            Add allowExport to UserPermission table with default 0
         </comment>
         <sql>
             ALTER TABLE userpermission
-            ADD COLUMN allowExport bit(1) NOT null DEFAULT 0,
-            ADD COLUMN allowExportAll bit(1) NOT null DEFAULT 0;
+            ADD COLUMN allowExport bit(1) NOT null DEFAULT 0;
         </sql>
     </changeSet>
     <changeSet author="jamiewhths" id="053-02">
         <comment>
-            Set allowExport and allowExportAll equal to allowView/allowViewAll columns
+            Set allowExport equal to allowView column
         </comment>
         <sql>
-            UPDATE userpermission SET allowExport = AllowView, allowExportAll = AllowViewAll;
+            UPDATE userpermission SET allowExport = AllowView;
         </sql>
     </changeSet>
 </databaseChangeLog>

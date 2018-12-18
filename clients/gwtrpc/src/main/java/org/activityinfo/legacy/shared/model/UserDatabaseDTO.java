@@ -482,30 +482,6 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         set("exportAllowed", allowed);
     }
 
-    public boolean isExportAllAllowed() {
-        return get("exportAllAllowed", false);
-    }
-
-    public void setExportAllAllowed(boolean allowed) {
-        set("exportAllAllowed", allowed);
-    }
-
-    public boolean isImportAllowed() {
-        return get("importAllowed", false);
-    }
-
-    public void setImportAllowed(boolean allowed) {
-        set("importAllowed", allowed);
-    }
-
-    public boolean isImportAllAllowed() {
-        return get("importAllAllowed", false);
-    }
-
-    public void setImportAllAllowed(boolean allowed) {
-        set("importAllAllowed", allowed);
-    }
-
     public boolean isAllowedToEdit(SiteDTO site) {
         if (isEditAllAllowed()) {
             return true;
@@ -656,14 +632,11 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
             case MANAGE_USERS:
             case DESIGN:
             case EXPORT_RECORDS:
-            case IMPORT_RECORDS:
                 return isAllowed(permissionType, user);
             // Only allowed to give permissions on all partners, if database user can manage users for all partners
             case VIEW_ALL:
             case EDIT_ALL:
             case MANAGE_ALL_USERS:
-            case EXPORT_ALL_RECORDS:
-            case IMPORT_ALL_RECORDS:
                 return isAllowed(permissionType, user) && isManageAllUsersAllowed();
             default:
                 return false;
@@ -716,12 +689,6 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
                 return isDesignAllowed();
             case EXPORT_RECORDS:
                 return isExportAllowed();
-            case EXPORT_ALL_RECORDS:
-                return isExportAllAllowed();
-            case IMPORT_RECORDS:
-                return isImportAllowed();
-            case IMPORT_ALL_RECORDS:
-                return isImportAllAllowed();
             default:
                 return false;
         }

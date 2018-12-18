@@ -1948,13 +1948,4 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Export Records")
     String exportRecords();
 
-    @DefaultStringValue("Export All Records")
-    String exportAllRecords();
-
-    @DefaultStringValue("Import Records")
-    String importRecords();
-
-    @DefaultStringValue("Import All Records")
-    String importAllRecords();
-
 }

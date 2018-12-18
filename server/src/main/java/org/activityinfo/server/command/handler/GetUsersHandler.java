@@ -128,9 +128,6 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
             dto.setAllowManageUsers(perm.isAllowManageUsers());
             dto.setAllowManageAllUsers(perm.isAllowManageAllUsers());
             dto.setAllowExport(perm.isAllowExport());
-            dto.setAllowExportAll(perm.isAllowExportAll());
-            dto.setAllowImport(perm.isAllowImport());
-            dto.setAllowImportAll(perm.isAllowImportAll());
             dto.setPartner(new PartnerDTO(perm.getPartner().getId(), perm.getPartner().getName()));
             dto.setFolderLimitation(!Strings.isNullOrEmpty(perm.getModel()));
             dto.setFolders(folderList(folderMap, perm));

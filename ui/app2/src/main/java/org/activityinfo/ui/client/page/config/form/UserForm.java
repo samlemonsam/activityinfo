@@ -108,9 +108,6 @@ public class UserForm extends FormPanel {
         permissionsGroup.add(permissionsCheckBox(PermissionType.MANAGE_USERS, I18N.CONSTANTS.allowManageUsers()));
         permissionsGroup.add(permissionsCheckBox(PermissionType.MANAGE_ALL_USERS, I18N.CONSTANTS.allowManageAllUsers()));
         permissionsGroup.add(permissionsCheckBox(PermissionType.EXPORT_RECORDS, I18N.CONSTANTS.exportRecords()));
-        permissionsGroup.add(permissionsCheckBox(PermissionType.EXPORT_ALL_RECORDS, I18N.CONSTANTS.exportAllRecords()));
-        permissionsGroup.add(permissionsCheckBox(PermissionType.IMPORT_RECORDS, I18N.CONSTANTS.importRecords()));
-        permissionsGroup.add(permissionsCheckBox(PermissionType.IMPORT_ALL_RECORDS, I18N.CONSTANTS.importAllRecords()));
         permissionsGroup.add(permissionsCheckBox(PermissionType.DESIGN, I18N.CONSTANTS.allowDesign()));
         this.add(permissionsGroup);
 

@@ -253,9 +253,6 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                     .appendColumn("p.AllowManageAllUsers", "allowManageAllUsers")
                     .appendColumn("p.AllowDesign", "allowDesign")
                     .appendColumn("p.AllowExport", "allowExport")
-                    .appendColumn("p.AllowExportAll", "allowExportAll")
-                    .appendColumn("p.AllowImport", "allowImport")
-                    .appendColumn("p.AllowImportAll", "allowImportAll")
                     .appendColumn("p.PartnerId", "partnerId")
                     .appendColumn("p.model", "permissionsModel")
                     .from("userdatabase d")
@@ -335,9 +332,6 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                             db.setManageAllUsersAllowed(true);
                             db.setDesignAllowed(true);
                             db.setExportAllowed(true);
-                            db.setExportAllAllowed(true);
-                            db.setImportAllowed(true);
-                            db.setImportAllAllowed(true);
 
                         } else if (row.isNull("allowViewAll")) {
 
@@ -350,9 +344,6 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                             db.setManageAllUsersAllowed(false);
                             db.setDesignAllowed(false);
                             db.setExportAllowed(true);
-                            db.setExportAllAllowed(true);
-                            db.setImportAllowed(false);
-                            db.setImportAllAllowed(false);
 
                         } else {
                             db.setViewAllAllowed(row.getBoolean("allowViewAll"));
@@ -362,9 +353,6 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                             db.setManageAllUsersAllowed(row.getBoolean("allowManageAllUsers"));
                             db.setDesignAllowed(row.getBoolean("allowDesign"));
                             db.setExportAllowed(row.getBoolean("allowExport"));
-                            db.setExportAllAllowed(row.getBoolean("allowExportAll"));
-                            db.setImportAllowed(row.getBoolean("allowImport"));
-                            db.setImportAllAllowed(row.getBoolean("allowImportAll"));
                             db.setMyPartnerId(row.getInt("partnerId"));
                         }
 
@@ -637,7 +625,6 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                 }
             });
         }
-
 
         private Promise<Void> execute(SqlQuery query, final RowHandler rowHandler) {
             final Promise<Void> promise = new Promise<>();

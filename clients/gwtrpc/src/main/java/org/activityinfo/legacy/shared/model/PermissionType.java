@@ -27,10 +27,7 @@ public enum PermissionType {
     EDIT_ALL            ("allowEditAll"),
     MANAGE_ALL_USERS    ("allowManageAllUsers"),
     DESIGN              ("allowDesign"),
-    EXPORT_RECORDS      ("allowExport"),
-    EXPORT_ALL_RECORDS  ("allowExportAll"),
-    IMPORT_RECORDS      ("allowImport"),
-    IMPORT_ALL_RECORDS  ("allowImportAll");
+    EXPORT_RECORDS      ("allowExport");
 
     private final String dtoPropertyName;
 
