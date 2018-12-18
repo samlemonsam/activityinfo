@@ -1960,5 +1960,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Delete All")
     String allowDeleteAll();
 
+    @DefaultStringValue("For All Partners")
+    String forAllPartners();
 
 }

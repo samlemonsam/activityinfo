@@ -39,6 +39,93 @@ import org.activityinfo.ui.client.page.entry.form.field.MultilineRenderer;
 
 import java.util.*;
 
+/**
+
+ +---------------------------------------------------------------------------------+
+ | Edit User                                                                       |
+ | +-----------------------------------------------------------------------------+ |
+ | |                                                                             | |
+ | | +-------------------------------------------------------------+           ^ | |
+ | | |                                                    TextField|           | | |
+ | | |              +--------------------------------------------+ |           | | |
+ | | | Name:        |                                            | |           | | |
+ | | |              +--------------------------------------------+ |           | | |
+ | | |                                                             |           | | |
+ | | +-------------------------------------------------------------+           | | |
+ | |                                                                           | | |
+ | | +-------------------------------------------------------------+           | | |
+ | | |                                                    TextField|           | | |
+ | | |              +--------------------------------------------+ |           | | |
+ | | | Email:       |                                            | |           | | |
+ | | |              +--------------------------------------------+ |           | | |
+ | | |                                                             |           | | |
+ | | +-------------------------------------------------------------+           | | |
+ | |                                                                           | | |
+ | | +-------------------------------------------------------------+           | | |
+ | | |                                                     ComboBox|           | | |
+ | | |              +--------------------------------------------+ |           | | |
+ | | | Partner:     |                                            | |           | | |
+ | | |              +--------------------------------------------+ |           | | |
+ | | |                                                             |           | | |
+ | | +-------------------------------------------------------------+           | | |
+ | |                                                                           | | |
+ | | +----------------------------------------------------------------------+  | | |
+ | | |                                                         CheckBoxGroup|  | | |
+ | | |                +----------------------+ +-------------------------+  |  | | |
+ | | | Permissions:   |         CheckBoxGroup| |            CheckBoxGroup|  |  | | |
+ | | |                | +--+                 | | +--+                    |  |  | | |
+ | | |                | |  | View            | | |  | For All Partners   |  |  | | |
+ | | |                | +--+                 | | +--+                    |  |  | | |
+ | | |                |                      | |                         |  |  | | |
+ | | |                | +--+                 | | +--+                    |  |  | | |
+ | | |                | |  | Create          | | |  | For All Partners   |  |  | | |
+ | | |                | +--+                 | | +--+                    |  |  | | |
+ | | |                |                      | |                         |  |  | | |
+ | | |                | +--+                 | | +--+                    |  |  | | |
+ | | |                | |  | Edit            | | |  | For All Partners   |  |  | | |
+ | | |                | +--+                 | | +--+                    |  |  | | |
+ | | |                |                      | |                         |  |  | | |
+ | | |                | +--+                 | | +--+                    |  |  | | |
+ | | |                | |  | Delete          | | |  | For All Partners   |  |  | | |
+ | | |                | +--+                 | | +--+                    |  |  | | |
+ | | |                |                      | |                         |  |  | | |
+ | | |                | +--+                 | | +--+                    |  |  | | |
+ | | |                | |  | Manage Users    | | |  | For All Partners   |  |  | | |
+ | | |                | +--+                 | | +--+                    |  |  | | |
+ | | |                |                      | |                         |  |  | | |
+ | | |                | +--+                 | |                         |  |  | | |
+ | | |                | |  | Export          | |                         |  |  | | |
+ | | |                | +--+                 | |                         |  |  | | |
+ | | |                |                      | |                         |  |  | | |
+ | | |                | +--+                 | |                         |  |  | | |
+ | | |                | |  | Design          | |                         |  |  | | |
+ | | |                | +--+                 | |                         |  |  | | |
+ | | |                |                      | |                         |  |  | | |
+ | | |                +----------------------+ +-------------------------+  |  | | |
+ | | |                                                                      |  | | |
+ | | +----------------------------------------------------------------------+  | | |
+ | |                                                                           | | |
+ | | +---------------------------------------+                                 | | |
+ | | |                          CheckBoxGroup|                                 | | |
+ | | | Folders:          +--+                |                                 | | |
+ | | |                   |  | All            |                                 | | |
+ | | |                   +--+                |     +--+                        | | |
+ | | |                                       |     |  | ---> CheckBox          | | |
+ | | |                   +--+                |     +--+                        | | |
+ | | |                   |  | Folder 1       |                                 | | |
+ | | |                   +--+                |                                 | | |
+ | | |                                       |                                 | | |
+ | | |                   +--+                |                                 | | |
+ | | |                   |  | Folder 2       |                                 | | |
+ | | |                   +--+                |                                 | | |
+ | | |                                       |                                 | | |
+ | | +---------------------------------------+                                 v | |
+ | |                                                                             | |
+ | +-----------------------------------------------------------------------------+ |
+ |                                                                                 |
+ +---------------------------------------------------------------------------------+
+
+ */
 public class UserForm extends FormPanel {
 
     private final CheckBox allFolderCheckbox;
@@ -100,19 +187,24 @@ public class UserForm extends FormPanel {
 
         permissionsGroup = new CheckBoxGroup();
         permissionsGroup.setFieldLabel(I18N.CONSTANTS.permissions());
-        permissionsGroup.setOrientation(Style.Orientation.VERTICAL);
-        permissionsGroup.add(permissionsCheckBox(PermissionType.VIEW, I18N.CONSTANTS.allowView()));
-        permissionsGroup.add(permissionsCheckBox(PermissionType.CREATE, I18N.CONSTANTS.allowCreate()));
-        permissionsGroup.add(permissionsCheckBox(PermissionType.EDIT, I18N.CONSTANTS.allowEdit()));
-        permissionsGroup.add(permissionsCheckBox(PermissionType.DELETE, I18N.CONSTANTS.allowDelete()));
-        permissionsGroup.add(permissionsCheckBox(PermissionType.VIEW_ALL, I18N.CONSTANTS.allowViewAll()));
-        permissionsGroup.add(permissionsCheckBox(PermissionType.CREATE_ALL, I18N.CONSTANTS.allowCreateAll()));
-        permissionsGroup.add(permissionsCheckBox(PermissionType.EDIT_ALL, I18N.CONSTANTS.allowEditAll()));
-        permissionsGroup.add(permissionsCheckBox(PermissionType.DELETE_ALL, I18N.CONSTANTS.allowDeleteAll()));
-        permissionsGroup.add(permissionsCheckBox(PermissionType.MANAGE_USERS, I18N.CONSTANTS.allowManageUsers()));
-        permissionsGroup.add(permissionsCheckBox(PermissionType.MANAGE_ALL_USERS, I18N.CONSTANTS.allowManageAllUsers()));
-        permissionsGroup.add(permissionsCheckBox(PermissionType.EXPORT_RECORDS, I18N.CONSTANTS.allowExport()));
-        permissionsGroup.add(permissionsCheckBox(PermissionType.DESIGN, I18N.CONSTANTS.allowDesign()));
+        permissionsGroup.setOrientation(Style.Orientation.HORIZONTAL);
+
+        CheckBoxGroup operationsGroup = new CheckBoxGroup();
+        operationsGroup.setOrientation(Style.Orientation.VERTICAL);
+
+        CheckBoxGroup partnerGroup = new CheckBoxGroup();
+        partnerGroup.setOrientation(Style.Orientation.VERTICAL);
+
+        addCheckBoxes(PermissionType.VIEW, PermissionType.VIEW_ALL, I18N.CONSTANTS.allowView(), operationsGroup, partnerGroup);
+        addCheckBoxes(PermissionType.CREATE, PermissionType.CREATE_ALL, I18N.CONSTANTS.allowCreate(), operationsGroup, partnerGroup);
+        addCheckBoxes(PermissionType.EDIT, PermissionType.EDIT_ALL, I18N.CONSTANTS.allowEdit(), operationsGroup, partnerGroup);
+        addCheckBoxes(PermissionType.DELETE, PermissionType.DELETE_ALL, I18N.CONSTANTS.allowDelete(), operationsGroup, partnerGroup);
+        addCheckBoxes(PermissionType.MANAGE_USERS, PermissionType.MANAGE_ALL_USERS, I18N.CONSTANTS.allowManageUsers(), operationsGroup, partnerGroup);
+        operationsGroup.add(permissionsCheckBox(PermissionType.EXPORT_RECORDS, I18N.CONSTANTS.allowExport()));
+        operationsGroup.add(permissionsCheckBox(PermissionType.DESIGN, I18N.CONSTANTS.allowDesign()));
+
+        permissionsGroup.add(operationsGroup);
+        permissionsGroup.add(partnerGroup);
         this.add(permissionsGroup);
 
         folderGroup.setFieldLabel(I18N.CONSTANTS.folders());
@@ -149,7 +241,23 @@ public class UserForm extends FormPanel {
         this.add(permissionWarning);
     }
 
-    private Field<?> permissionsCheckBox(PermissionType permissionType, String label) {
+    private void addCheckBoxes(PermissionType permissionType, PermissionType partnerType, String label,
+                               CheckBoxGroup operationsGroup, CheckBoxGroup partnerGroup) {
+        CheckBox permissionCheckBox = permissionsCheckBox(permissionType, label);
+        CheckBox partnerCheckBox = permissionsCheckBox(partnerType, I18N.CONSTANTS.forAllPartners());
+        permissionCheckBox.addListener(Events.Change, change -> {
+            if (permissionCheckBox.getValue() == Boolean.FALSE) {
+                partnerCheckBox.setValue(false);
+                partnerCheckBox.setEnabled(false);
+            } else {
+                partnerCheckBox.setEnabled(true);
+            }
+        });
+        operationsGroup.add(permissionCheckBox);
+        partnerGroup.add(partnerCheckBox);
+    }
+
+    private CheckBox permissionsCheckBox(PermissionType permissionType, String label) {
         CheckBox checkBox = new CheckBox();
         boolean hasPermission = database.canGivePermission(permissionType, null);
 
@@ -203,12 +311,25 @@ public class UserForm extends FormPanel {
 
     private void addEditPermissionsGroup(UserPermissionDTO user) {
         for (Field<?> field : permissionsGroup.getAll()) {
-            CheckBox checkBox = (CheckBox) field;
-            PermissionType permissionType = PermissionType.valueOf(checkBox.getName());
-            Boolean allowed = user.get(permissionType.getDtoPropertyName());
-            checkBox.setValue(allowed == Boolean.TRUE);
-            checkBox.setEnabled(database.canGivePermission(permissionType, user));
+            if (field instanceof CheckBoxGroup) {
+                addEditPermissionsGroup((CheckBoxGroup) field, user);
+            } else if (field instanceof CheckBox) {
+                addEditPermissionsCheckBox((CheckBox) field, user);
+            }
         }
+    }
+
+    private void addEditPermissionsGroup(CheckBoxGroup group, UserPermissionDTO user) {
+        for (CheckBox checkBox : group.getValues()) {
+            addEditPermissionsCheckBox(checkBox, user);
+        }
+    }
+
+    private void addEditPermissionsCheckBox(CheckBox checkBox, UserPermissionDTO user) {
+        PermissionType permissionType = PermissionType.valueOf(checkBox.getName());
+        Boolean allowed = user.get(permissionType.getDtoPropertyName());
+        checkBox.setValue(allowed == Boolean.TRUE);
+        checkBox.setEnabled(database.canGivePermission(permissionType, user));
     }
 
     private void addEditFolderPermissions(UserPermissionDTO user) {
@@ -254,14 +375,12 @@ public class UserForm extends FormPanel {
         user.setName(nameField.getValue());
         user.setPartner(partnerCombo.getValue());
 
-        for (CheckBox checkBox : permissionsGroup.getValues()) {
-            PermissionType permissionType = PermissionType.valueOf(checkBox.getName());
-            Boolean value = checkBox.getValue();
-            if (value == Boolean.TRUE && !database.isAllowed(permissionType, null)) {
-                // if the database user does not have this permission - throw error
-                throw new PermissionAssignmentException(I18N.CONSTANTS.permissionAssignmentErrorMessage());
+        for (Field field : permissionsGroup.getAll()) {
+            if (field instanceof CheckBoxGroup) {
+                getPermissionFromCheckBoxGroup((CheckBoxGroup) field, user);
+            } else if (field instanceof CheckBox) {
+                getPermissionFromCheckBox((CheckBox) field, user);
             }
-            user.set(permissionType.getDtoPropertyName(), checkBox.getValue());
         }
 
         List<FolderDTO> folders = new ArrayList<>();
@@ -290,5 +409,21 @@ public class UserForm extends FormPanel {
         user.setFolderLimitation(true);
         user.setFolders(folders);
         return user;
+    }
+
+    private void getPermissionFromCheckBoxGroup(CheckBoxGroup checkBoxGroup, UserPermissionDTO user) {
+        for (CheckBox checkBox : checkBoxGroup.getValues()) {
+            getPermissionFromCheckBox(checkBox, user);
+        }
+    }
+
+    private void getPermissionFromCheckBox(CheckBox checkBox, UserPermissionDTO user) {
+        PermissionType permissionType = PermissionType.valueOf(checkBox.getName());
+        Boolean value = checkBox.getValue();
+        if (value == Boolean.TRUE && !database.isAllowed(permissionType, null)) {
+            // if the database user does not have this permission - throw error
+            throw new PermissionAssignmentException(I18N.CONSTANTS.permissionAssignmentErrorMessage());
+        }
+        user.set(permissionType.getDtoPropertyName(), checkBox.getValue());
     }
 }
