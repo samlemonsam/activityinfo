@@ -18,8 +18,19 @@
  */
 package org.activityinfo.model.permission;
 
+import org.activityinfo.model.database.Resource;
+import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.formula.FormulaNode;
+
 /**
- * Describes the different operations that can be granted to a user.
+ * <p>
+ *     Defines an operation that can be granted to a User on a specific {@link Resource} via a {@link GrantModel}.
+ * </p>
+ * <p>
+ *     {@code Operation}s define {@code Resource}-level permissions. {@code Operation}s can be combined with filters,
+ *     defined by {@link FormulaNode}s, which allow the Database Owner to specify further {@link FormRecord}-level
+ *     restrictions which must be applied.
+ * </p>
  */
 public enum Operation {
 

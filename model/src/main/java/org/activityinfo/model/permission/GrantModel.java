@@ -24,6 +24,7 @@ import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.database.DatabaseGrant;
 import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.database.ResourceType;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -34,8 +35,8 @@ import java.util.Set;
 
 /**
  * <p>
- *     A {@link GrantModel} defines the set of allowed {@link Operation}s (and their optional Record filters) on a
- *     specific {@link Resource}. A {@code GrantModel} is inherited by any child {@code Resource}s. Any
+ *     A {@link GrantModel} defines the set of allowed {@link Operation}s (and their optional {@link FormRecord} filters)
+ *     on a specific {@link Resource}. A {@code GrantModel} is inherited by any child {@code Resource}s. Any
  *     {@code Operation}s not defined on a {@code GrantModel} are <strong>not allowed</strong> to be performed by the
  *     User.
  * </p>
@@ -48,8 +49,8 @@ import java.util.Set;
  *      For example, a User may be limited to viewing data which is associated with a specific Partner field. In this
  *      instance, the User's {@code GrantModel} will include an {@link Operation#VIEW} entry with a <br><br>
  *          {@code P0000001234 == "p0000004321"}
- *      <br><br> filter, specifying that they are only allowed to view records which are associated with the Form Record
- *      {@code p00000043211} in the <i>referenced</i> Form {@code P0000001234}.
+ *      <br><br> filter, specifying that they are only allowed to view records which are associated with the
+ *      {@code FormRecord p00000043211} in the <i>referenced</i> {@code Form P0000001234}.
  * </p>
  * <p>
  *     A collection of {@code GrantModel}s compose a {@link DatabaseGrant}. A {@code DatabaseGrant} gives the
