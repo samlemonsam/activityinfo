@@ -192,7 +192,6 @@ public class PermissionOracleTest {
                 .addOperation(Operation.DELETE_RESOURCE)
                 .addOperation(Operation.EDIT_RESOURCE)
                 .addOperation(Operation.LOCK_RECORDS)
-                .addOperation(Operation.IMPORT_RECORDS)
                 .addOperation(Operation.EXPORT_RECORDS)
                 .addOperation(Operation.MANAGE_TARGETS)
                 .addOperation(Operation.MANAGE_USERS)
@@ -210,7 +209,6 @@ public class PermissionOracleTest {
                 .addOperation(Operation.DELETE_RESOURCE)
                 .addOperation(Operation.EDIT_RESOURCE)
                 .addOperation(Operation.LOCK_RECORDS)
-                .addOperation(Operation.IMPORT_RECORDS)
                 .addOperation(Operation.EXPORT_RECORDS)
                 .addOperation(Operation.MANAGE_TARGETS)
                 .addOperation(Operation.MANAGE_USERS)
@@ -315,16 +313,6 @@ public class PermissionOracleTest {
         assertTrue(PermissionOracle.canLockRecords(database, db));
         for (Resource resource : allResources) {
             assertTrue(PermissionOracle.canLockRecords(resource.getId(), db));
-        }
-    }
-
-    @Test
-    public void owner_importRecords() {
-        UserDatabaseMeta db = ownerDatabase(allResources);
-
-        // Owner should have IMPORT_RECORDS permissions on all resources
-        for (Resource resource : allResources) {
-            assertTrue(PermissionOracle.canImportRecords(resource.getId(), db));
         }
     }
 
@@ -478,16 +466,6 @@ public class PermissionOracleTest {
     }
 
     @Test
-    public void unauthUser_importRecords() {
-        UserDatabaseMeta db = unAuthUserDatabase(allResources);
-
-        // User should NOT have IMPORT_RECORDS permissions on any resources
-        for (Resource resource : allResources) {
-            assertFalse(PermissionOracle.canImportRecords(resource.getId(), db));
-        }
-    }
-
-    @Test
     public void unauthUser_exportRecords() {
         UserDatabaseMeta db = unAuthUserDatabase(allResources);
 
@@ -621,16 +599,6 @@ public class PermissionOracleTest {
         assertTrue(PermissionOracle.canLockRecords(database, db));
         for (Resource resource : allResources) {
             assertTrue(PermissionOracle.canLockRecords(resource.getId(), db));
-        }
-    }
-
-    @Test
-    public void authUser_importRecords_rootGrant() {
-        UserDatabaseMeta db = authUserDatabase(allResources, rootDatabaseGrant());
-
-        // User should have IMPORT_RECORDS permissions on all resources
-        for (Resource resource : allResources) {
-            assertTrue(PermissionOracle.canImportRecords(resource.getId(), db));
         }
     }
 
@@ -856,27 +824,6 @@ public class PermissionOracleTest {
         }
         for (Resource dbPrivateResource : dbPrivateResources) {
             assertFalse(PermissionOracle.canLockRecords(dbPrivateResource.getId(), db));
-        }
-    }
-
-    @Test
-    public void authUser_importRecords_folderGrant() {
-        UserDatabaseMeta db = authUserDatabase(allResources, folderGrant());
-
-        // First check on private resources
-        // User should have IMPORT_RECORDS permissions on folder and all contained resources, but NOT on root form
-        assertFalse(PermissionOracle.canImportRecords(rootFormId, db));
-        assertTrue(PermissionOracle.canImportRecords(rootFolderId, db));
-        assertTrue(PermissionOracle.canImportRecords(formInFolderId, db));
-        assertTrue(PermissionOracle.canImportRecords(folderInFolderId, db));
-
-        // Next check on database-private and public resources
-        // User should NOT have IMPORT_RECORDS permissions on any database private and public resources
-        for (Resource publicResource : publicResources) {
-            assertFalse(PermissionOracle.canImportRecords(publicResource.getId(), db));
-        }
-        for (Resource dbPrivateResource : dbPrivateResources) {
-            assertFalse(PermissionOracle.canImportRecords(dbPrivateResource.getId(), db));
         }
     }
 

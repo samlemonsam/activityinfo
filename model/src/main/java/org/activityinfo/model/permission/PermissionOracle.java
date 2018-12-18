@@ -133,7 +133,6 @@ public class PermissionOracle {
             case CREATE_RECORD:
             case EDIT_RECORD:
             case DELETE_RECORD:
-            case IMPORT_RECORDS:
             case EXPORT_RECORDS:
                 return databaseGrant.isPresent()
                         && databaseGrant.get().hasOperation(Operation.MANAGE_USERS)
@@ -150,7 +149,6 @@ public class PermissionOracle {
             case CREATE_RECORD:
             case EDIT_RECORD:
             case DELETE_RECORD:
-            case IMPORT_RECORDS:
             case EXPORT_RECORDS:
                 return canEditResource(projectFormId, db);
             default:
@@ -549,14 +547,6 @@ public class PermissionOracle {
         return query(query, db);
     }
 
-    public static Permission importRecords(ResourceId resourceId, UserDatabaseMeta db) {
-        PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
-                Operation.IMPORT_RECORDS,
-                resourceId);
-        return query(query, db);
-    }
-
     public static Permission exportRecords(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
                 db.getLegacyDatabaseId(),
@@ -754,16 +744,6 @@ public class PermissionOracle {
      */
     public static boolean canLockRecords(ResourceId resourceId, UserDatabaseMeta db) {
         return lockRecords(resourceId,db).isPermitted();
-    }
-
-    ///////////////////////////////////////////// IMPORT_RECORDS Methods ///////////////////////////////////////////////
-
-    /**
-     * <p>The current User can import records into the specified Resource in this Database.</p>
-     * <p>Does not account for any filters which may be applied/enforced.</p>
-     */
-    public static boolean canImportRecords(ResourceId resourceId, UserDatabaseMeta db) {
-        return importRecords(resourceId, db).isPermitted();
     }
 
     ///////////////////////////////////////////// EXPORT_RECORDS Methods ///////////////////////////////////////////////
