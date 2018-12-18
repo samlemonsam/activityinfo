@@ -29,9 +29,10 @@
         </comment>
         <sql>
             ALTER TABLE userpermission
-            ADD COLUMN createRecord bit(1) NOT null DEFAULT 0,
-            ADD COLUMN editRecord bit(1) NOT null DEFAULT 0,
-            ADD COLUMN deleteRecord bit(1) NOT null DEFAULT 0;
+            ADD COLUMN allowCreate bit(1) NOT null DEFAULT 0,
+            ADD COLUMN allowCreateAll bit(1) NOT null DEFAULT 0,
+            ADD COLUMN allowDelete bit(1) NOT null DEFAULT 0,
+            ADD COLUMN allowDeleteAll bit(1) NOT null DEFAULT 0;
         </sql>
     </changeSet>
     <changeSet author="jamiewhths" id="054-02">
