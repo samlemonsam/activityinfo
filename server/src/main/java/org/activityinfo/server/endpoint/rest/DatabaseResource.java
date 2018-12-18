@@ -299,8 +299,12 @@ public class DatabaseResource {
         UserPermission userPermission = new UserPermission(database, currentOwner);
         userPermission.setAllowView(true);
         userPermission.setAllowViewAll(false);
+        userPermission.setAllowCreate(false);
+        userPermission.setAllowCreateAll(false);
         userPermission.setAllowEdit(false);
         userPermission.setAllowEditAll(false);
+        userPermission.setAllowDelete(false);
+        userPermission.setAllowDeleteAll(false);
         userPermission.setAllowDesign(false);
         userPermission.setAllowManageUsers(false);
         userPermission.setAllowManageAllUsers(false);

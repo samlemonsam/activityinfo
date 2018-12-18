@@ -301,13 +301,19 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         } else if(userPermission.isAllowView()) {
             grantModel.addOperation(Operation.VIEW, getPartnerFilter(userPermission));
         }
+        if(userPermission.isAllowCreateAll()) {
+            grantModel.addOperation(Operation.CREATE_RECORD);
+        } else if(userPermission.isAllowCreate()) {
+            grantModel.addOperation(Operation.CREATE_RECORD, getPartnerFilter(userPermission));
+        }
         if(userPermission.isAllowEditAll()) {
             grantModel.addOperation(Operation.EDIT_RECORD);
-            grantModel.addOperation(Operation.CREATE_RECORD);
-            grantModel.addOperation(Operation.DELETE_RECORD);
         } else if(userPermission.isAllowEdit()) {
             grantModel.addOperation(Operation.EDIT_RECORD, getPartnerFilter(userPermission));
-            grantModel.addOperation(Operation.CREATE_RECORD, getPartnerFilter(userPermission));
+        }
+        if(userPermission.isAllowDeleteAll()) {
+            grantModel.addOperation(Operation.DELETE_RECORD);
+        } else if(userPermission.isAllowDelete()) {
             grantModel.addOperation(Operation.DELETE_RECORD, getPartnerFilter(userPermission));
         }
         if(userPermission.isAllowManageAllUsers()) {

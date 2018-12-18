@@ -102,12 +102,16 @@ public class UserForm extends FormPanel {
         permissionsGroup.setFieldLabel(I18N.CONSTANTS.permissions());
         permissionsGroup.setOrientation(Style.Orientation.VERTICAL);
         permissionsGroup.add(permissionsCheckBox(PermissionType.VIEW, I18N.CONSTANTS.allowView()));
+        permissionsGroup.add(permissionsCheckBox(PermissionType.CREATE, I18N.CONSTANTS.allowCreate()));
         permissionsGroup.add(permissionsCheckBox(PermissionType.EDIT, I18N.CONSTANTS.allowEdit()));
+        permissionsGroup.add(permissionsCheckBox(PermissionType.DELETE, I18N.CONSTANTS.allowDelete()));
         permissionsGroup.add(permissionsCheckBox(PermissionType.VIEW_ALL, I18N.CONSTANTS.allowViewAll()));
+        permissionsGroup.add(permissionsCheckBox(PermissionType.CREATE_ALL, I18N.CONSTANTS.allowCreateAll()));
         permissionsGroup.add(permissionsCheckBox(PermissionType.EDIT_ALL, I18N.CONSTANTS.allowEditAll()));
+        permissionsGroup.add(permissionsCheckBox(PermissionType.DELETE_ALL, I18N.CONSTANTS.allowDeleteAll()));
         permissionsGroup.add(permissionsCheckBox(PermissionType.MANAGE_USERS, I18N.CONSTANTS.allowManageUsers()));
         permissionsGroup.add(permissionsCheckBox(PermissionType.MANAGE_ALL_USERS, I18N.CONSTANTS.allowManageAllUsers()));
-        permissionsGroup.add(permissionsCheckBox(PermissionType.EXPORT_RECORDS, I18N.CONSTANTS.exportRecords()));
+        permissionsGroup.add(permissionsCheckBox(PermissionType.EXPORT_RECORDS, I18N.CONSTANTS.allowExport()));
         permissionsGroup.add(permissionsCheckBox(PermissionType.DESIGN, I18N.CONSTANTS.allowDesign()));
         this.add(permissionsGroup);
 

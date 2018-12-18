@@ -123,8 +123,12 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
             dto.setAllowDesign(perm.isAllowDesign());
             dto.setAllowView(perm.isAllowView());
             dto.setAllowViewAll(perm.isAllowViewAll());
+            dto.setAllowCreate(perm.isAllowCreate());
+            dto.setAllowCreateAll(perm.isAllowCreateAll());
             dto.setAllowEdit(perm.isAllowEdit());
             dto.setAllowEditAll(perm.isAllowEditAll());
+            dto.setAllowDelete(perm.isAllowDelete());
+            dto.setAllowDeleteAll(perm.isAllowDeleteAll());
             dto.setAllowManageUsers(perm.isAllowManageUsers());
             dto.setAllowManageAllUsers(perm.isAllowManageAllUsers());
             dto.setAllowExport(perm.isAllowExport());

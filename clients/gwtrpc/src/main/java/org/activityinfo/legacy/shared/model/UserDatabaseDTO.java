@@ -384,6 +384,41 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     }
 
     /**
+     * Sets the permission of the current user to create data on behalf of the
+     * Partner in this UserDatabase to which the current user belongs.
+     */
+    public void setCreateAllowed(boolean allowed) {
+        set("createAllowed", allowed);
+    }
+
+    /**
+     * @return true if the client receiving the DTO is authorized to create data
+     * for their Partner in this UserDatabase
+     */
+    @JsonProperty @JsonView(DTOViews.Schema.class)
+    public boolean isCreateAllowed() {
+        return get("createAllowed", false);
+    }
+
+    /**
+     * Sets the permission of the current user to create data in this UserDatabase
+     * on behalf of all partners.
+     */
+    public void setCreateAllAllowed(boolean value) {
+        set("createAllAllowed", value);
+    }
+
+    /**
+     * @return true if the client receiving the DTO is authorized to create data
+     * for all Partners in this UserDatabase
+     */
+    @JsonProperty @JsonView(DTOViews.Schema.class)
+    public boolean isCreateAllAllowed() {
+        return get("createAllAllowed", false);
+    }
+
+
+    /**
      * Sets the permission of the current user to edit data on behalf of the
      * Partner in this UserDatabase to which the current user belongs.
      */
@@ -399,6 +434,58 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     public boolean isEditAllowed() {
         return get("editAllowed", false);
     }
+
+    /**
+     * Sets the permission of the current user to edit data in this UserDatabase
+     * on behalf of all partners.
+     */
+    public void setEditAllAllowed(boolean value) {
+        set("editAllAllowed", value);
+    }
+
+    /**
+     * @return true if the client receiving the DTO is authorized to edit data
+     * for all Partners in this UserDatabase
+     */
+    @JsonProperty @JsonView(DTOViews.Schema.class)
+    public boolean isEditAllAllowed() {
+        return get("editAllAllowed", false);
+    }
+
+    /**
+     * Sets the permission of the current user to delete data on behalf of the
+     * Partner in this UserDatabase to which the current user belongs.
+     */
+    public void setDeleteAllowed(boolean allowed) {
+        set("deleteAllowed", allowed);
+    }
+
+    /**
+     * @return true if the client receiving the DTO is authorized to delete data
+     * for their Partner in this UserDatabase
+     */
+    @JsonProperty @JsonView(DTOViews.Schema.class)
+    public boolean isDeleteAllowed() {
+        return get("deleteAllowed", false);
+    }
+
+    /**
+     * Sets the permission of the current user to delete data in this UserDatabase
+     * on behalf of all partners.
+     */
+    public void setDeleteAllAllowed(boolean value) {
+        set("deleteAllAllowed", value);
+    }
+
+    /**
+     * @return true if the client receiving the DTO is authorized to delete data
+     * for all Partners in this UserDatabase
+     */
+    @JsonProperty @JsonView(DTOViews.Schema.class)
+    public boolean isDeleteAllAllowed() {
+        return get("deleteAllAllowed", false);
+    }
+
 
     /**
      * Sets the permission of the current user to design this UserDatabase.
@@ -422,23 +509,6 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
 
     public void setDatabaseDesignAllowed(boolean value) {
         set("databaseDesignAllowed", value);
-    }
-
-    /**
-     * Sets the permission of the current user to edit data in this UserDatabase
-     * on behalf of all partners.
-     */
-    public void setEditAllAllowed(boolean value) {
-        set("editAllAllowed", value);
-    }
-
-    /**
-     * @return true if the client receiving the DTO is authorized to edit data
-     * for all Partners in this UserDatabase
-     */
-    @JsonProperty @JsonView(DTOViews.Schema.class)
-    public boolean isEditAllAllowed() {
-        return get("editAllAllowed", false);
     }
 
     /**
@@ -628,14 +698,18 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         switch (permissionType) {
             // Always allowed to give permissions on the same partner, provided the database user has them
             case VIEW:
+            case CREATE:
             case EDIT:
+            case DELETE:
             case MANAGE_USERS:
             case DESIGN:
             case EXPORT_RECORDS:
                 return isAllowed(permissionType, user);
             // Only allowed to give permissions on all partners, if database user can manage users for all partners
             case VIEW_ALL:
+            case CREATE_ALL:
             case EDIT_ALL:
+            case DELETE_ALL:
             case MANAGE_ALL_USERS:
                 return isAllowed(permissionType, user) && isManageAllUsersAllowed();
             default:
@@ -677,10 +751,18 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
                 return true;                    // always allowed to view on partner/folder levels
             case VIEW_ALL:
                 return isViewAllAllowed();
+            case CREATE:
+                return isCreateAllowed();
+            case CREATE_ALL:
+                return isCreateAllAllowed();
             case EDIT:
                 return isEditAllowed();
             case EDIT_ALL:
                 return isEditAllAllowed();
+            case DELETE:
+                return isDeleteAllowed();
+            case DELETE_ALL:
+                return isDeleteAllAllowed();
             case MANAGE_USERS:
                 return isManageUsersAllowed();
             case MANAGE_ALL_USERS:

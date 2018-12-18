@@ -45,8 +45,12 @@ public class UserPermission implements Serializable {
     private User user;
     private boolean allowView;
     private boolean allowViewAll;
+    private boolean allowCreate;
+    private boolean allowCreateAll;
     private boolean allowEdit;
     private boolean allowEditAll;
+    private boolean allowDelete;
+    private boolean allowDeleteAll;
     private boolean allowDesign;
     private boolean allowManageUsers;
     private boolean allowManageAllUsers;
@@ -68,8 +72,12 @@ public class UserPermission implements Serializable {
         this.user = sourcePermission.user;
         this.allowView = sourcePermission.allowView;
         this.allowViewAll = sourcePermission.allowViewAll;
+        this.allowCreate = sourcePermission.allowCreate;
+        this.allowCreateAll = sourcePermission.allowCreateAll;
         this.allowEdit = sourcePermission.allowEdit;
         this.allowEditAll = sourcePermission.allowEditAll;
+        this.allowDelete = sourcePermission.allowDelete;
+        this.allowDeleteAll = sourcePermission.allowDeleteAll;
         this.allowDesign = sourcePermission.allowDesign;
         this.allowManageUsers = sourcePermission.allowManageUsers;
         this.allowManageAllUsers = sourcePermission.allowManageAllUsers;
@@ -189,9 +197,52 @@ public class UserPermission implements Serializable {
     }
 
     /**
-     * Gets the permission to create/edit data for the User's partner.
+     * Gets the permission to create data for the User's partner.
      *
-     * @return True if the user is allowed to create/edit data for their own
+     * @return True if the user is allowed to create data for their own
+     * partner.
+     */
+    @Column(name = "allowCreate", nullable = false)
+    public boolean isAllowCreate() {
+        return this.allowCreate;
+    }
+
+    /**
+     * Sets the permission to create data for the User's partner
+     *
+     * @param allowCreate True if the user is allowed to create data for their own
+     *                  partner.
+     */
+    public void setAllowCreate(boolean allowCreate) {
+        this.allowCreate = allowCreate;
+    }
+
+    /**
+     * Gets the permission to create data for other partners.
+     *
+     * @return True if the user is allowed to create data for other
+     * partners.
+     */
+    @Column(name = "allowCreateAll", nullable = false)
+    public boolean isAllowCreateAll() {
+        return this.allowCreateAll;
+    }
+
+    /**
+     * Sets the permission to create data for other partners.
+     *
+     * @param allowCreateAll True if the user is allowed to create data for other
+     *                     partners.
+     */
+    public void setAllowCreateAll(boolean allowCreateAll) {
+        this.allowCreateAll = allowCreateAll;
+    }
+
+
+    /**
+     * Gets the permission to edit data for the User's partner.
+     *
+     * @return True if the user is allowed to edit data for their own
      * partner.
      */
     @Column(name = "AllowEdit", nullable = false)
@@ -200,9 +251,9 @@ public class UserPermission implements Serializable {
     }
 
     /**
-     * Sets the permission to create/edit data for the User's partner
+     * Sets the permission to edit data for the User's partner
      *
-     * @param allowEdit True if the user is allowed to create/edit data for their own
+     * @param allowEdit True if the user is allowed to edit data for their own
      *                  partner.
      */
     public void setAllowEdit(boolean allowEdit) {
@@ -210,9 +261,9 @@ public class UserPermission implements Serializable {
     }
 
     /**
-     * Gets the permission to create/edit data for other partners.
+     * Gets the permission to edit data for other partners.
      *
-     * @return True if the user is allowed to create/edit data for other
+     * @return True if the user is allowed to edit data for other
      * partners.
      */
     @Column(name = "AllowEditAll", nullable = false)
@@ -221,13 +272,55 @@ public class UserPermission implements Serializable {
     }
 
     /**
-     * Sets the permission to create/edit data for other partners.
+     * Sets the permission to edit data for other partners.
      *
-     * @param allowEditAll True if the user is allowed to create/edit data for other
+     * @param allowEditAll True if the user is allowed to edit data for other
      *                     partners.
      */
     public void setAllowEditAll(boolean allowEditAll) {
         this.allowEditAll = allowEditAll;
+    }
+
+    /**
+     * Gets the permission to delete data for the User's partner.
+     *
+     * @return True if the user is allowed to delete data for their own
+     * partner.
+     */
+    @Column(name = "allowDelete", nullable = false)
+    public boolean isAllowDelete() {
+        return this.allowDelete;
+    }
+
+    /**
+     * Sets the permission to delete data for the User's partner
+     *
+     * @param allowDelete True if the user is allowed to delete data for their own
+     *                  partner.
+     */
+    public void setAllowDelete(boolean allowDelete) {
+        this.allowDelete = allowDelete;
+    }
+
+    /**
+     * Gets the permission to delete data for other partners.
+     *
+     * @return True if the user is allowed to delete data for other
+     * partners.
+     */
+    @Column(name = "allowDeleteAll", nullable = false)
+    public boolean isAllowDeleteAll() {
+        return this.allowDeleteAll;
+    }
+
+    /**
+     * Sets the permission to delete data for other partners.
+     *
+     * @param allowDeleteAll True if the user is allowed to delete data for other
+     *                     partners.
+     */
+    public void setAllowDeleteAll(boolean allowDeleteAll) {
+        this.allowDeleteAll = allowDeleteAll;
     }
 
     /**

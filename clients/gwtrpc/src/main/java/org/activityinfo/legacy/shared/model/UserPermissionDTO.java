@@ -44,8 +44,12 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
     public UserPermissionDTO() {
         setAllowView(true);
         setAllowViewAll(false);
+        setAllowCreate(false);
+        setAllowCreateAll(false);
         setAllowEdit(false);
         setAllowEditAll(false);
+        setAllowDelete(false);
+        setAllowDeleteAll(false);
         setAllowManageUsers(false);
         setAllowManageAllUsers(false);
         setAllowDesign(false);
@@ -132,6 +136,24 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
         return (Boolean) get("allowViewAll");
     }
 
+    public void setAllowCreate(boolean value) {
+        set("allowCreate", value);
+    }
+
+    @JsonProperty
+    public boolean getAllowCreate() {
+        return (Boolean) get("allowCreate");
+    }
+
+    public void setAllowCreateAll(boolean value) {
+        set("allowCreateAll", value);
+    }
+
+    @JsonProperty
+    public boolean getAllowCreateAll() {
+        return (Boolean) get("allowCreateAll");
+    }
+
     public void setAllowEdit(boolean value) {
         set("allowEdit", value);
     }
@@ -148,6 +170,24 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
     @JsonProperty
     public boolean getAllowEditAll() {
         return (Boolean) get("allowEditAll");
+    }
+
+    public void setAllowDelete(boolean value) {
+        set("allowDelete", value);
+    }
+
+    @JsonProperty
+    public boolean getAllowDelete() {
+        return (Boolean) get("allowDelete");
+    }
+
+    public void setAllowDeleteAll(boolean value) {
+        set("allowDeleteAll", value);
+    }
+
+    @JsonProperty
+    public boolean getAllowDeleteAll() {
+        return (Boolean) get("allowDeleteAll");
     }
 
     @JsonProperty
@@ -220,8 +260,12 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
                 ",partner=" + getPartner() +
                 ",view=" + getAllowView() +
                 ",viewAll=" + getAllowViewAll() +
+                ",create=" + getAllowCreate() +
+                ",createAll=" + getAllowCreateAll() +
                 ",edit=" + getAllowEdit() +
                 ",editAll=" + getAllowEditAll() +
+                ",delete=" + getAllowDelete() +
+                ",deleteAll=" + getAllowDeleteAll() +
                 ",manageUsers=" + getAllowManageUsers() +
                 ",manageAllUsers=" + getAllowManageAllUsers() +
                 ",exportRecords=" + getAllowExport() +

@@ -21,10 +21,14 @@ package org.activityinfo.legacy.shared.model;
 public enum PermissionType {
 
     VIEW                ("allowView"),
+    CREATE              ("allowCreate"),
     EDIT                ("allowEdit"),
+    DELETE              ("allowDelete"),
     MANAGE_USERS        ("allowManageUsers"),
     VIEW_ALL            ("allowViewAll"),
+    CREATE_ALL          ("allowCreateAll"),
     EDIT_ALL            ("allowEditAll"),
+    DELETE_ALL          ("allowDeleteAll"),
     MANAGE_ALL_USERS    ("allowManageAllUsers"),
     DESIGN              ("allowDesign"),
     EXPORT_RECORDS      ("allowExport");

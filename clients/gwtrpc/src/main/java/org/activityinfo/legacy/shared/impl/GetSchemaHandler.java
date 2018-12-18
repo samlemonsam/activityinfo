@@ -247,8 +247,12 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                     .appendColumn("o.Name", "OwnerName")
                     .appendColumn("o.Email", "OwnerEmail")
                     .appendColumn("p.AllowViewAll", "allowViewAll")
+                    .appendColumn("p.allowCreate", "allowCreate")
+                    .appendColumn("p.allowCreateAll", "allowCreateAll")
                     .appendColumn("p.AllowEdit", "allowEdit")
                     .appendColumn("p.AllowEditAll", "allowEditAll")
+                    .appendColumn("p.allowDelete", "allowDelete")
+                    .appendColumn("p.allowDeleteAll", "allowDeleteAll")
                     .appendColumn("p.AllowManageUsers", "allowManageUsers")
                     .appendColumn("p.AllowManageAllUsers", "allowManageAllUsers")
                     .appendColumn("p.AllowDesign", "allowDesign")
@@ -326,8 +330,12 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
 
                         if (db.getAmOwner()) {
                             db.setViewAllAllowed(true);
+                            db.setCreateAllowed(true);
+                            db.setCreateAllAllowed(true);
                             db.setEditAllowed(true);
                             db.setEditAllAllowed(true);
+                            db.setDeleteAllowed(true);
+                            db.setDeleteAllAllowed(true);
                             db.setManageUsersAllowed(true);
                             db.setManageAllUsersAllowed(true);
                             db.setDesignAllowed(true);
@@ -338,8 +346,12 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                             // when other users see public databases
                             // they will not have a UserPermission record
                             db.setViewAllAllowed(true);
+                            db.setCreateAllowed(false);
+                            db.setCreateAllAllowed(false);
                             db.setEditAllowed(false);
                             db.setEditAllAllowed(false);
+                            db.setDeleteAllowed(false);
+                            db.setDeleteAllAllowed(false);
                             db.setManageUsersAllowed(false);
                             db.setManageAllUsersAllowed(false);
                             db.setDesignAllowed(false);
@@ -347,8 +359,12 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
 
                         } else {
                             db.setViewAllAllowed(row.getBoolean("allowViewAll"));
+                            db.setCreateAllowed(row.getBoolean("allowCreate"));
+                            db.setCreateAllAllowed(row.getBoolean("allowCreateAll"));
                             db.setEditAllowed(row.getBoolean("allowEdit"));
                             db.setEditAllAllowed(row.getBoolean("allowEditAll"));
+                            db.setDeleteAllowed(row.getBoolean("allowDelete"));
+                            db.setDeleteAllAllowed(row.getBoolean("allowDeleteAll"));
                             db.setManageUsersAllowed(row.getBoolean("allowManageUsers"));
                             db.setManageAllUsersAllowed(row.getBoolean("allowManageAllUsers"));
                             db.setDesignAllowed(row.getBoolean("allowDesign"));

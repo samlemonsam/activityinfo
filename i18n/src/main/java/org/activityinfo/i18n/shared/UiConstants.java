@@ -1945,7 +1945,20 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Export Activity as a Form. Choose this option if Activity is greater than 256 columns. <br> <br> Exports to a CSV file. <br> <br> No column export limit.")
     String formExportStructureDescription();
 
-    @DefaultStringValue("Export Records")
-    String exportRecords();
+    @DefaultStringValue("Export")
+    String allowExport();
+
+    @DefaultStringValue("Create")
+    String allowCreate();
+
+    @DefaultStringValue("Create All")
+    String allowCreateAll();
+
+    @DefaultStringValue("Delete")
+    String allowDelete();
+
+    @DefaultStringValue("Delete All")
+    String allowDeleteAll();
+
 
 }

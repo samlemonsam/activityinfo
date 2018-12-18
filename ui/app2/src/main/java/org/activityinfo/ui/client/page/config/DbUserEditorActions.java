@@ -189,8 +189,12 @@ public class DbUserEditorActions {
         final UserPermissionDTO model = grid.getSelectionModel().getSelectedItem();
         model.setAllowView(false);
         model.setAllowViewAll(false);
+        model.setAllowCreate(false);
+        model.setAllowCreateAll(false);
         model.setAllowEdit(false);
         model.setAllowEditAll(false);
+        model.setAllowDelete(false);
+        model.setAllowDeleteAll(false);
         model.setAllowDesign(false);
         model.setAllowManageAllUsers(false);
         model.setAllowManageUsers(false);

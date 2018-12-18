@@ -211,7 +211,9 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
             throw new CommandException("Partner with id " + dto.getPartner().getId() + " does not exist");
         }
         perm.setAllowView(dto.getAllowView());
+        perm.setAllowCreate(dto.getAllowCreate());
         perm.setAllowEdit(dto.getAllowEdit());
+        perm.setAllowDelete(dto.getAllowDelete());
         perm.setAllowManageUsers(dto.getAllowManageUsers());
         perm.setAllowExport(dto.getAllowExport());
 
@@ -241,8 +243,16 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
             perm.setAllowViewAll(dto.getAllowViewAll());
         }
 
+        if (isOwner || executingUserPermissions.isAllowManageAllUsers() || !dto.getAllowCreate()) {
+            perm.setAllowCreateAll(dto.getAllowCreateAll());
+        }
+
         if (isOwner || executingUserPermissions.isAllowManageAllUsers() || !dto.getAllowEdit()) {
             perm.setAllowEditAll(dto.getAllowEditAll());
+        }
+
+        if (isOwner || executingUserPermissions.isAllowManageAllUsers() || !dto.getAllowDelete()) {
+            perm.setAllowDeleteAll(dto.getAllowDeleteAll());
         }
 
         if (isOwner || executingUserPermissions.isAllowManageAllUsers()) {
