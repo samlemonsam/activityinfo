@@ -124,7 +124,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Allow user to edit form submissions of all partners")
     String allowEditAllLong();
 
-    @DefaultStringValue("Allow user to create and edit form submissions")
+    @DefaultStringValue("Allow user to edit form submissions")
     String allowEditLong();
 
     @DefaultStringValue("Manage all users")
@@ -1948,19 +1948,37 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Export")
     String allowExport();
 
+    @DefaultStringValue("Allow user to export form submissions")
+    String allowExportLong();
+
     @DefaultStringValue("Create")
     String allowCreate();
+
+    @DefaultStringValue("Allow user to create form submissions")
+    String allowCreateLong();
 
     @DefaultStringValue("Create All")
     String allowCreateAll();
 
+    @DefaultStringValue("Allow user to create form submissions for all partners")
+    String allowCreateAllLong();
+
     @DefaultStringValue("Delete")
     String allowDelete();
+
+    @DefaultStringValue("Allow user to delete form submissions")
+    String allowDeleteLong();
 
     @DefaultStringValue("Delete All")
     String allowDeleteAll();
 
-    @DefaultStringValue("For All Partners")
+    @DefaultStringValue("Allow user to edit form submissions of all partners")
+    String allowDeleteAllLong();
+
+    @DefaultStringValue("All Partners")
     String forAllPartners();
+
+    @DefaultStringValue("This Partner")
+    String forThisPartner();
 
 }

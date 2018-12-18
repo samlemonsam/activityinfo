@@ -18,6 +18,7 @@
  */
 package org.activityinfo.ui.client.page.config;
 
+import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.core.El;
 import com.extjs.gxt.ui.client.data.*;
 import com.extjs.gxt.ui.client.event.*;
@@ -30,6 +31,7 @@ import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.PagingToolBar;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.activityinfo.i18n.shared.I18N;
@@ -57,6 +59,12 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
 
 
     public static final PageId PAGE_ID = new PageId("dbusers");
+
+    private static final int VIEW_COL_INDEX = 4;
+    private static final int CREATE_COL_INDEX = 6;
+    private static final int EDIT_COL_INDEX = 8;
+    private static final int DELETE_COL_INDEX = 10;
+    private static final int MANAGE_USERS_COL_INDEX = 12;
 
     private static final SafeHtml ALL_CATEGORIES = new SafeHtmlBuilder()
             .appendHtmlConstant("<i>").appendEscaped(I18N.CONSTANTS.all()).appendHtmlConstant("</i>").toSafeHtml();
@@ -170,57 +178,46 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         });
         columns.add(folderColumn);
 
-        PermissionCheckConfig allowView = new PermissionCheckConfig(PermissionType.VIEW.name(),
-                I18N.CONSTANTS.allowView(),
-                75);
-        allowView.setDataIndex(PermissionType.VIEW.getDtoPropertyName());
-        allowView.setToolTip(I18N.CONSTANTS.allowViewLong());
+        PermissionCheckConfig allowView = buildColumn(PermissionType.VIEW, I18N.CONSTANTS.forThisPartner(), I18N.CONSTANTS.allowViewLong());
+        PermissionCheckConfig allowViewAll = buildColumn(PermissionType.VIEW_ALL, I18N.CONSTANTS.forAllPartners(), I18N.CONSTANTS.allowViewAllLong());
+
+        PermissionCheckConfig allowCreate = buildColumn(PermissionType.CREATE, I18N.CONSTANTS.forThisPartner(), I18N.CONSTANTS.allowCreateLong());
+        PermissionCheckConfig allowCreateAll = buildColumn(PermissionType.CREATE_ALL, I18N.CONSTANTS.forAllPartners(), I18N.CONSTANTS.allowCreateAllLong());
+
+        PermissionCheckConfig allowEdit = buildColumn(PermissionType.EDIT, I18N.CONSTANTS.forThisPartner(), I18N.CONSTANTS.allowEditLong());
+        PermissionCheckConfig allowEditAll = buildColumn(PermissionType.EDIT_ALL, I18N.CONSTANTS.forAllPartners(), I18N.CONSTANTS.allowEditAllLong());
+
+        PermissionCheckConfig allowDelete = buildColumn(PermissionType.DELETE, I18N.CONSTANTS.forThisPartner(), I18N.CONSTANTS.allowDeleteLong());
+        PermissionCheckConfig allowDeleteAll = buildColumn(PermissionType.DELETE_ALL, I18N.CONSTANTS.forAllPartners(), I18N.CONSTANTS.allowDeleteAllLong());
+
+        PermissionCheckConfig allowManageUsers = buildColumn(PermissionType.MANAGE_USERS, I18N.CONSTANTS.forThisPartner(), "");
+        PermissionCheckConfig allowManageAllUsers = buildColumn(PermissionType.MANAGE_ALL_USERS, I18N.CONSTANTS.forAllPartners(), "");
+
+        PermissionCheckConfig allowExport = buildColumn(PermissionType.EXPORT_RECORDS, I18N.CONSTANTS.allowExport(), I18N.CONSTANTS.allowExportLong());
+
+        PermissionCheckConfig allowDesign = buildColumn(PermissionType.DESIGN, I18N.CONSTANTS.allowDesign(), I18N.CONSTANTS.allowDesignLong());
+
         columns.add(allowView);
-
-        PermissionCheckConfig allowEdit = new PermissionCheckConfig(PermissionType.EDIT.name(),
-                I18N.CONSTANTS.allowEdit(),
-                75);
-        allowEdit.setDataIndex(PermissionType.EDIT.getDtoPropertyName());
-        allowEdit.setToolTip(I18N.CONSTANTS.allowEditLong());
-        columns.add(allowEdit);
-
-        PermissionCheckConfig allowViewAll = new PermissionCheckConfig(PermissionType.VIEW_ALL.name(),
-                I18N.CONSTANTS.allowViewAll(),
-                75);
-        allowViewAll.setDataIndex(PermissionType.VIEW_ALL.getDtoPropertyName());
-        allowViewAll.setToolTip(I18N.CONSTANTS.allowViewAllLong());
         columns.add(allowViewAll);
-
-        PermissionCheckConfig allowEditAll = new PermissionCheckConfig(PermissionType.EDIT_ALL.name(),
-                I18N.CONSTANTS.allowEditAll(),
-                75);
-        allowEditAll.setDataIndex(PermissionType.EDIT_ALL.getDtoPropertyName());
-        allowEditAll.setToolTip(I18N.CONSTANTS.allowEditAllLong());
+        columns.add(allowCreate);
+        columns.add(allowCreateAll);
+        columns.add(allowEdit);
         columns.add(allowEditAll);
-
-        PermissionCheckConfig allowManageUsers = null;
-        allowManageUsers = new PermissionCheckConfig(PermissionType.MANAGE_USERS.name(),
-                I18N.CONSTANTS.allowManageUsers(),
-                150);
-        allowManageUsers.setDataIndex(PermissionType.MANAGE_USERS.getDtoPropertyName());
+        columns.add(allowDelete);
+        columns.add(allowDeleteAll);
         columns.add(allowManageUsers);
-
-        PermissionCheckConfig allowManageAllUsers = new PermissionCheckConfig(PermissionType.MANAGE_ALL_USERS.name(),
-                I18N.CONSTANTS.manageAllUsers(),
-                150);
-        allowManageAllUsers.setDataIndex(PermissionType.MANAGE_ALL_USERS.getDtoPropertyName());
         columns.add(allowManageAllUsers);
-
-        // only users with the right to design them selves can change the design
-        // attribute
-        PermissionCheckConfig allowDesign = new PermissionCheckConfig(PermissionType.DESIGN.name(),
-                I18N.CONSTANTS.allowDesign(),
-                75);
-        allowDesign.setDataIndex(PermissionType.DESIGN.getDtoPropertyName());
-        allowDesign.setToolTip(I18N.CONSTANTS.allowDesignLong());
+        columns.add(allowExport);
         columns.add(allowDesign);
 
-        grid = new Grid<>(store, new ColumnModel(columns));
+        ColumnModel columnModel = new ColumnModel(columns);
+        addHeader(I18N.CONSTANTS.allowView(), VIEW_COL_INDEX, columnModel);
+        addHeader(I18N.CONSTANTS.allowCreate(), CREATE_COL_INDEX, columnModel);
+        addHeader(I18N.CONSTANTS.allowEdit(), EDIT_COL_INDEX, columnModel);
+        addHeader(I18N.CONSTANTS.allowDelete(), DELETE_COL_INDEX, columnModel);
+        addHeader(I18N.CONSTANTS.allowManageUsers(), MANAGE_USERS_COL_INDEX, columnModel);
+
+        grid = new Grid<>(store, columnModel);
         grid.setLoadMask(true);
         grid.setSelectionModel(new GridSelectionModel<>());
         grid.getSelectionModel().addSelectionChangedListener(new SelectionChangedListener<UserPermissionDTO>() {
@@ -237,13 +234,33 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
                 actions.edit(event.getModel());
             }
         });
-        grid.addPlugin(allowEdit);
         grid.addPlugin(allowViewAll);
+        grid.addPlugin(allowCreate);
+        grid.addPlugin(allowCreateAll);
+        grid.addPlugin(allowEdit);
         grid.addPlugin(allowEditAll);
+        grid.addPlugin(allowDelete);
+        grid.addPlugin(allowDeleteAll);
         grid.addPlugin(allowManageUsers);
         grid.addPlugin(allowManageAllUsers);
+        grid.addPlugin(allowExport);
         grid.addPlugin(allowDesign);
         add(grid);
+    }
+
+    private void addHeader(String header, int colIndex, ColumnModel columnModel) {
+        HeaderGroupConfig headerConfig = new HeaderGroupConfig(SafeHtmlUtils.fromTrustedString(header),1,2);
+        columnModel.addHeaderGroup(0, colIndex, headerConfig);
+    }
+
+    private PermissionCheckConfig buildColumn(PermissionType type, String label, String tooltip) {
+        PermissionCheckConfig column = new PermissionCheckConfig(type.name(),
+                label,
+                75);
+        column.setDataIndex(type.getDtoPropertyName());
+        column.setToolTip(tooltip);
+        column.setAlignment(Style.HorizontalAlignment.CENTER);
+        return column;
     }
 
     private void createPagingToolBar() {
@@ -304,12 +321,32 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         if (!value) {
             // Cascade remove permissions
             if (permissionType == PermissionType.VIEW_ALL) {
+                record.set(PermissionType.CREATE_ALL.getDtoPropertyName(), false);
                 record.set(PermissionType.EDIT_ALL.getDtoPropertyName(), false);
+                record.set(PermissionType.DELETE_ALL.getDtoPropertyName(), false);
+            }
+            if (permissionType == PermissionType.CREATE) {
+                record.set(PermissionType.CREATE_ALL.getDtoPropertyName(), false);
+            }
+            if (permissionType == PermissionType.EDIT) {
+                record.set(PermissionType.EDIT_ALL.getDtoPropertyName(), false);
+            }
+            if (permissionType == PermissionType.DELETE) {
+                record.set(PermissionType.DELETE_ALL.getDtoPropertyName(), false);
+            }
+            if (permissionType == PermissionType.MANAGE_USERS) {
+                record.set(PermissionType.MANAGE_ALL_USERS.getDtoPropertyName(), false);
             }
         } else {
             // cascade add permissions
-            if (permissionType == PermissionType.EDIT_ALL) {
+            if (permissionType == PermissionType.CREATE_ALL) {
+                record.set(PermissionType.CREATE.getDtoPropertyName(), true);
+                record.set(PermissionType.VIEW_ALL.getDtoPropertyName(), true);
+            } else if (permissionType == PermissionType.EDIT_ALL) {
                 record.set(PermissionType.EDIT.getDtoPropertyName(), true);
+                record.set(PermissionType.VIEW_ALL.getDtoPropertyName(), true);
+            } else if (permissionType == PermissionType.DELETE_ALL) {
+                record.set(PermissionType.DELETE.getDtoPropertyName(), true);
                 record.set(PermissionType.VIEW_ALL.getDtoPropertyName(), true);
             } else if (permissionType == PermissionType.MANAGE_ALL_USERS) {
                 record.set(PermissionType.MANAGE_USERS.getDtoPropertyName(), true);

@@ -77,25 +77,7 @@ import java.util.*;
  | | |                | |  | View            | | |  | For All Partners   |  |  | | |
  | | |                | +--+                 | | +--+                    |  |  | | |
  | | |                |                      | |                         |  |  | | |
- | | |                | +--+                 | | +--+                    |  |  | | |
- | | |                | |  | Create          | | |  | For All Partners   |  |  | | |
- | | |                | +--+                 | | +--+                    |  |  | | |
- | | |                |                      | |                         |  |  | | |
- | | |                | +--+                 | | +--+                    |  |  | | |
- | | |                | |  | Edit            | | |  | For All Partners   |  |  | | |
- | | |                | +--+                 | | +--+                    |  |  | | |
- | | |                |                      | |                         |  |  | | |
- | | |                | +--+                 | | +--+                    |  |  | | |
- | | |                | |  | Delete          | | |  | For All Partners   |  |  | | |
- | | |                | +--+                 | | +--+                    |  |  | | |
- | | |                |                      | |                         |  |  | | |
- | | |                | +--+                 | | +--+                    |  |  | | |
- | | |                | |  | Manage Users    | | |  | For All Partners   |  |  | | |
- | | |                | +--+                 | | +--+                    |  |  | | |
- | | |                |                      | |                         |  |  | | |
- | | |                | +--+                 | |                         |  |  | | |
- | | |                | |  | Export          | |                         |  |  | | |
- | | |                | +--+                 | |                         |  |  | | |
+ | | |                |         .....        | |         .....           |  |  | | |
  | | |                |                      | |                         |  |  | | |
  | | |                | +--+                 | |                         |  |  | | |
  | | |                | |  | Design          | |                         |  |  | | |
@@ -115,9 +97,7 @@ import java.util.*;
  | | |                   |  | Folder 1       |                                 | | |
  | | |                   +--+                |                                 | | |
  | | |                                       |                                 | | |
- | | |                   +--+                |                                 | | |
- | | |                   |  | Folder 2       |                                 | | |
- | | |                   +--+                |                                 | | |
+ | | |                   .....               |                                 | | |
  | | |                                       |                                 | | |
  | | +---------------------------------------+                                 v | |
  | |                                                                             | |
@@ -130,6 +110,10 @@ public class UserForm extends FormPanel {
 
     private final CheckBox allFolderCheckbox;
     private final CheckBoxGroup permissionsGroup;
+    private final CheckBoxGroup operationsGroup;
+    private final CheckBoxGroup allPartnersGroup;
+    private final CheckBox viewCheckBox;
+    private final CheckBox viewAllCheckBox;
     private CheckBoxGroup folderGroup = new CheckBoxGroup();
     private WarningBar permissionWarning  = new WarningBar();
 
@@ -189,22 +173,30 @@ public class UserForm extends FormPanel {
         permissionsGroup.setFieldLabel(I18N.CONSTANTS.permissions());
         permissionsGroup.setOrientation(Style.Orientation.HORIZONTAL);
 
-        CheckBoxGroup operationsGroup = new CheckBoxGroup();
+        operationsGroup = new CheckBoxGroup();
+        allPartnersGroup = new CheckBoxGroup();
         operationsGroup.setOrientation(Style.Orientation.VERTICAL);
+        allPartnersGroup.setOrientation(Style.Orientation.VERTICAL);
 
-        CheckBoxGroup partnerGroup = new CheckBoxGroup();
-        partnerGroup.setOrientation(Style.Orientation.VERTICAL);
+        // View check box must always be set to true (and disabling it causes confusion), even if user wants to change it...
+        viewCheckBox = permissionsCheckBox(PermissionType.VIEW, I18N.CONSTANTS.allowView());
+        viewCheckBox.setValue(true);
+        viewCheckBox.addListener(Events.Change, change -> viewCheckBox.setValue(true));
 
-        addCheckBoxes(PermissionType.VIEW, PermissionType.VIEW_ALL, I18N.CONSTANTS.allowView(), operationsGroup, partnerGroup);
-        addCheckBoxes(PermissionType.CREATE, PermissionType.CREATE_ALL, I18N.CONSTANTS.allowCreate(), operationsGroup, partnerGroup);
-        addCheckBoxes(PermissionType.EDIT, PermissionType.EDIT_ALL, I18N.CONSTANTS.allowEdit(), operationsGroup, partnerGroup);
-        addCheckBoxes(PermissionType.DELETE, PermissionType.DELETE_ALL, I18N.CONSTANTS.allowDelete(), operationsGroup, partnerGroup);
-        addCheckBoxes(PermissionType.MANAGE_USERS, PermissionType.MANAGE_ALL_USERS, I18N.CONSTANTS.allowManageUsers(), operationsGroup, partnerGroup);
+        viewAllCheckBox = permissionsCheckBox(PermissionType.VIEW_ALL, I18N.CONSTANTS.forAllPartners());
+
+        operationsGroup.add(viewCheckBox);
+        allPartnersGroup.add(viewAllCheckBox);
+
+        addCheckBoxes(PermissionType.CREATE, PermissionType.CREATE_ALL, I18N.CONSTANTS.allowCreate(), true);
+        addCheckBoxes(PermissionType.EDIT, PermissionType.EDIT_ALL, I18N.CONSTANTS.allowEdit(), true);
+        addCheckBoxes(PermissionType.DELETE, PermissionType.DELETE_ALL, I18N.CONSTANTS.allowDelete(), true);
+        addCheckBoxes(PermissionType.MANAGE_USERS, PermissionType.MANAGE_ALL_USERS, I18N.CONSTANTS.allowManageUsers(), false);
         operationsGroup.add(permissionsCheckBox(PermissionType.EXPORT_RECORDS, I18N.CONSTANTS.allowExport()));
         operationsGroup.add(permissionsCheckBox(PermissionType.DESIGN, I18N.CONSTANTS.allowDesign()));
 
         permissionsGroup.add(operationsGroup);
-        permissionsGroup.add(partnerGroup);
+        permissionsGroup.add(allPartnersGroup);
         this.add(permissionsGroup);
 
         folderGroup.setFieldLabel(I18N.CONSTANTS.folders());
@@ -241,20 +233,35 @@ public class UserForm extends FormPanel {
         this.add(permissionWarning);
     }
 
-    private void addCheckBoxes(PermissionType permissionType, PermissionType partnerType, String label,
-                               CheckBoxGroup operationsGroup, CheckBoxGroup partnerGroup) {
+    private void addCheckBoxes(PermissionType permissionType, PermissionType partnerType, String label, boolean enforceViewAll) {
         CheckBox permissionCheckBox = permissionsCheckBox(permissionType, label);
         CheckBox partnerCheckBox = permissionsCheckBox(partnerType, I18N.CONSTANTS.forAllPartners());
-        permissionCheckBox.addListener(Events.Change, change -> {
-            if (permissionCheckBox.getValue() == Boolean.FALSE) {
-                partnerCheckBox.setValue(false);
-                partnerCheckBox.setEnabled(false);
-            } else {
-                partnerCheckBox.setEnabled(true);
-            }
-        });
+
+        // If we haven't selected the permission, then the "All Partners" option is disabled
+        permissionCheckBox.addListener(Events.Change, change -> allPartnersToggle(permissionCheckBox, partnerCheckBox));
+
+        // If the "All Partners" option depends on the user also having VIEW_ALL permissions, then set it when selected
+        if (enforceViewAll) {
+            partnerCheckBox.addListener(Events.Change, change -> viewAllToggle(partnerCheckBox));
+        }
+
         operationsGroup.add(permissionCheckBox);
-        partnerGroup.add(partnerCheckBox);
+        allPartnersGroup.add(partnerCheckBox);
+    }
+
+    private void allPartnersToggle(CheckBox permissionCheckBox, CheckBox partnerCheckBox) {
+        if (permissionCheckBox.getValue() == Boolean.FALSE) {
+            partnerCheckBox.setValue(false);
+            partnerCheckBox.setEnabled(false);
+        } else {
+            partnerCheckBox.setEnabled(true);
+        }
+    }
+
+    private void viewAllToggle(CheckBox partnerCheckBox) {
+        if (partnerCheckBox.getValue() == Boolean.TRUE) {
+            viewAllCheckBox.setValue(true);
+        }
     }
 
     private CheckBox permissionsCheckBox(PermissionType permissionType, String label) {
