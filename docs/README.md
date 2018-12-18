@@ -17,3 +17,8 @@ The ActivityInfo system is structured into the following modules:
  * [ui](../ui/): Browser-based ActivityInfo User Interface
 
 # System Diagram
+
+# Further Documentation
+Further documentation may be provided in this directory for certain subsystems. 
+
+* [Permissions Subsystem](PERMISSIONS.md)
