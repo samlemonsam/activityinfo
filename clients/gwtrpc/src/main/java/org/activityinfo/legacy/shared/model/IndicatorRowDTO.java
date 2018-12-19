@@ -33,6 +33,7 @@ public final class IndicatorRowDTO extends BaseModelData implements DTO {
     private int siteId;
     private int activityId;
     private int indicatorId;
+    private boolean newlyCreated = false;
 
     /**
      * @return The id of the site to which this row belongs.
@@ -160,5 +161,13 @@ public final class IndicatorRowDTO extends BaseModelData implements DTO {
 
     public static Month monthForProperty(String property) {
         return Month.parseMonth(property.substring(1));
+    }
+
+    public void setNewlyCreated(boolean newlyCreated) {
+        this.newlyCreated = newlyCreated;
+    }
+
+    public boolean isNewlyCreated() {
+        return newlyCreated;
     }
 }
