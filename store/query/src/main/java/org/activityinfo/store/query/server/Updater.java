@@ -436,12 +436,14 @@ public class Updater {
             });
 
             if (existingTypedRecord.isPresent()) {
-                if (!PermissionOracle.canEdit(existingTypedRecord.get(), formPermissions, formClass)) {
-                    throw new InvalidUpdateException("Unauthorized update");
+                if (update.isDeleted()) {
+                    authorizeDelete(existingTypedRecord.get(), formPermissions, formClass);
+                } else {
+                    authorizeEdit(existingTypedRecord.get(), formPermissions, formClass);
+                    authorizeEdit(applyUpdates(existingTypedRecord, update), formPermissions, formClass);
                 }
-            }
-            if (!PermissionOracle.canEdit(applyUpdates(existingTypedRecord, update), formPermissions, formClass)) {
-                throw new InvalidUpdateException("Unauthorized update");
+            } else {
+                authorizeCreate(applyUpdates(existingTypedRecord, update), formPermissions, formClass);
             }
         }
 
@@ -454,6 +456,25 @@ public class Updater {
             }
         }
     }
+
+    private void authorizeCreate(TypedFormRecord record, FormPermissions formPermissions, FormClass formClass) {
+        if (!PermissionOracle.canCreate(record, formPermissions, formClass)) {
+            throw new InvalidUpdateException("Unauthorized creation");
+        }
+    }
+
+    private void authorizeEdit(TypedFormRecord record, FormPermissions formPermissions, FormClass formClass) {
+        if (!PermissionOracle.canEdit(record, formPermissions, formClass)) {
+            throw new InvalidUpdateException("Unauthorized modification");
+        }
+    }
+
+    private void authorizeDelete(TypedFormRecord record, FormPermissions formPermissions, FormClass formClass) {
+        if (!PermissionOracle.canDelete(record, formPermissions, formClass)) {
+            throw new InvalidUpdateException("Unauthorized deletion");
+        }
+    }
+
 
     private TypedFormRecord applyUpdates(Optional<TypedFormRecord> existingRecord, TypedRecordUpdate update) {
         TypedFormRecord updated = new TypedFormRecord(update.getRecordId(), update.getFormId());
