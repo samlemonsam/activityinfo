@@ -59,11 +59,15 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
             @Override
             public Promise<ActivityFormDTO> apply(ActivityFormDTO form) {
                 if (form.getOwnerUserId() == context.getUser().getId()) {
+                    form.setCreateAllowed(true);
+                    form.setCreateAllAllowed(true);
                     form.setEditAllowed(true);
                     form.setEditAllAllowed(true);
+                    form.setDeleteAllowed(true);
+                    form.setDeleteAllAllowed(true);
+                    form.setExportAllowed(true);
                     form.setDesignAllowed(true);
                     return Promise.resolved(form);
-
                 } else {
                     return applyPermissions(context, form);
                 }
@@ -77,8 +81,13 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
         SqlQuery.selectAll()
                 .appendColumn("allowView")
                 .appendColumn("allowViewAll")
+                .appendColumn("allowCreate")
+                .appendColumn("allowCreateAll")
                 .appendColumn("allowEdit")
                 .appendColumn("allowEditAll")
+                .appendColumn("allowDelete")
+                .appendColumn("allowDeleteAll")
+                .appendColumn("allowExport")
                 .appendColumn("allowDesign")
                 .appendColumn("partnerId")
                 .from(Tables.USER_PERMISSION, "p")
@@ -106,8 +115,13 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                             }
                             return;
                         }
+                        form.setCreateAllowed(row.getBoolean("allowCreate"));
+                        form.setCreateAllAllowed(row.getBoolean("allowCreateAll"));
                         form.setEditAllowed(row.getBoolean("allowEdit"));
                         form.setEditAllAllowed(row.getBoolean("allowEditAll"));
+                        form.setDeleteAllowed(row.getBoolean("allowDelete"));
+                        form.setDeleteAllAllowed(row.getBoolean("allowDeleteAll"));
+                        form.setExportAllowed(row.getBoolean("allowExport"));
                         form.setDesignAllowed(row.getBoolean("allowDesign"));
                         form.setCurrentPartnerId(row.getInt("partnerId"));
                         result.resolve(form);
@@ -509,7 +523,7 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
             List<PartnerDTO> allPartners = form.getPartnerRange();
             Set<PartnerDTO> result = Sets.newHashSet();
 
-            if (form.isEditAllAllowed()) {
+            if (form.isCreateAllAllowed() || form.isEditAllAllowed() || form.isDeleteAllAllowed()) {
                 result.addAll(allPartners);
             }
 

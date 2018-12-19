@@ -65,8 +65,13 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, P
     private List<ProjectDTO> projects = Lists.newArrayList();
     private LocationTypeDTO locationType;
 
+    private boolean createAllowed;
+    private boolean createAllAllowed;
     private boolean editAllowed;
     private boolean editAllAllowed;
+    private boolean deleteAllowed;
+    private boolean deleteAllAllowed;
+    private boolean exportAllowed;
     private boolean designAllowed;
     private int currentPartnerId;
 
@@ -413,6 +418,22 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, P
         this.databaseName = databaseName;
     }
 
+    public boolean isCreateAllowed() {
+        return createAllowed;
+    }
+
+    public void setCreateAllowed(boolean createAllowed) {
+        this.createAllowed = createAllowed;
+    }
+
+    public boolean isCreateAllAllowed() {
+        return createAllAllowed;
+    }
+
+    public void setCreateAllAllowed(boolean createAllAllowed) {
+        this.createAllAllowed = createAllAllowed;
+    }
+
     public boolean isEditAllowed() {
         return editAllowed;
     }
@@ -429,6 +450,22 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, P
         this.editAllAllowed = editAllAllowed;
     }
 
+    public boolean isDeleteAllowed() {
+        return deleteAllowed;
+    }
+
+    public void setDeleteAllowed(boolean deleteAllowed) {
+        this.deleteAllowed = deleteAllowed;
+    }
+
+    public boolean isDeleteAllAllowed() {
+        return deleteAllAllowed;
+    }
+
+    public void setDeleteAllAllowed(boolean deleteAllAllowed) {
+        this.deleteAllAllowed = deleteAllAllowed;
+    }
+
     public int getCurrentPartnerId() {
         return currentPartnerId;
     }
@@ -441,6 +478,17 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, P
         return editAllAllowed || (isEditAllowed() && site.getPartnerId() == currentPartnerId);
     }
 
+    public boolean isAllowedToDelete(SiteDTO site) {
+        return deleteAllAllowed || (isDeleteAllowed() && site.getPartnerId() == currentPartnerId);
+    }
+
+    public boolean isExportAllowed() {
+        return exportAllowed;
+    }
+
+    public void setExportAllowed(boolean exportAllowed) {
+        this.exportAllowed = exportAllowed;
+    }
 
     public boolean isDesignAllowed() {
         return designAllowed;
