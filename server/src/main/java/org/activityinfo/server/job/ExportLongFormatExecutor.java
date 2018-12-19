@@ -11,6 +11,9 @@ import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.model.analysis.pivot.PivotModel;
 import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.error.ApiError;
+import org.activityinfo.model.error.ApiErrorType;
+import org.activityinfo.model.error.ApiException;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
@@ -18,6 +21,7 @@ import org.activityinfo.model.job.ExportLongFormatJob;
 import org.activityinfo.model.job.ExportPivotTableJob;
 import org.activityinfo.model.job.ExportResult;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.server.command.DispatcherSync;
@@ -80,7 +84,15 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
         Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(CuidAdapter.databaseId(databaseId), authenticatedUser.getUserId());
 
         if (database == null || !databaseMeta.isPresent()) {
-            throw new IllegalStateException("Database " + databaseId + " could not be found");
+            ApiError error = new ApiError(ApiErrorType.INVALID_REQUEST_ERROR);
+            throw new ApiException(error.toJson().toJson());
+        }
+
+        for (Resource resource : databaseMeta.get().getResources()) {
+            if (!PermissionOracle.canExportRecords(resource.getId(), databaseMeta.get())) {
+                ApiError error = new ApiError(ApiErrorType.AUTHORIZATION_ERROR);
+                throw new ApiException(error.toJson().toJson());
+            }
         }
 
         List<FormTree> formScope = getFormScope(database);
