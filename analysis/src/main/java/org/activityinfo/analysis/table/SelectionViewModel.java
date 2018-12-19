@@ -105,8 +105,9 @@ public class SelectionViewModel {
         TypedFormRecord typedRecord = TypedFormRecord.toTypedFormRecord(form.getSchema(), record.get());
 
         boolean editAllowed = evalPermission(form, typedRecord, Operation.EDIT_RECORD);
+        boolean deleteAllowed = evalPermission(form, typedRecord, Operation.DELETE_RECORD);
 
-        return Optional.of(new SelectionViewModel(typedRecord, editAllowed, editAllowed));
+        return Optional.of(new SelectionViewModel(typedRecord, editAllowed, deleteAllowed));
     }
 
     private static boolean evalPermission(FormMetadata form, TypedFormRecord record, Operation operation) {
