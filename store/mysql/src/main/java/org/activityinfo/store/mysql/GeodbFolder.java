@@ -87,6 +87,7 @@ public class GeodbFolder {
         try(ResultSet rs = executor.query("SELECT locationTypeId, name FROM locationtype WHERE " +
                 "boundAdminLevelId IS NULL AND " +
                 "databaseId IS NULL AND " +
+                "dateDeleted IS NULL AND " +
                 "countryId IN (SELECT countryId FROM country WHERE iso2 = ?)  ", countryId)) {
             while(rs.next()) {
                 String formId = CuidAdapter.locationFormClass(rs.getInt(1)).asString();
