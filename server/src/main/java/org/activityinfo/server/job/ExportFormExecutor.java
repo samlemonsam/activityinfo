@@ -25,36 +25,54 @@ import org.activityinfo.analysis.table.ExportViewModel;
 import org.activityinfo.analysis.table.TableViewModel;
 import org.activityinfo.io.csv.CsvTableWriter;
 import org.activityinfo.io.xls.XlsTableWriter;
+import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.analysis.table.ExportFormat;
 import org.activityinfo.model.analysis.table.UnsupportedExportFormatException;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.error.ApiError;
+import org.activityinfo.model.error.ApiErrorCode;
+import org.activityinfo.model.error.ApiErrorType;
+import org.activityinfo.model.error.ApiException;
 import org.activityinfo.model.job.ExportFormJob;
 import org.activityinfo.model.job.ExportResult;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.query.ColumnSet;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.generated.GeneratedResource;
 import org.activityinfo.server.generated.StorageProvider;
 import org.activityinfo.store.query.shared.FormSource;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Optional;
 
 public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResult> {
 
     private final FormSource formSource;
     private final StorageProvider storageProvider;
-
+    private final DatabaseProvider databaseProvider;
+    private final AuthenticatedUser authUser;
 
     @Inject
-    public ExportFormExecutor(FormSource formSource, StorageProvider storageProvider) {
+    public ExportFormExecutor(FormSource formSource,
+                              StorageProvider storageProvider,
+                              DatabaseProvider databaseProvider,
+                              AuthenticatedUser authUser) {
         this.formSource = formSource;
         this.storageProvider = storageProvider;
+        this.databaseProvider = databaseProvider;
+        this.authUser = authUser;
     }
 
     @Override
     public ExportResult execute(ExportFormJob descriptor) throws IOException {
+
+        authorizeExport(descriptor);
 
         TableModel tableModel = descriptor.getTableModel();
         ExportFormat format = descriptor.getFormat();
@@ -74,6 +92,18 @@ public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResu
                 return xlsExport(effectiveTableModel);
             default:
                 throw new UnsupportedExportFormatException(format.name());
+        }
+    }
+
+    private void authorizeExport(ExportFormJob descriptor) {
+        Optional<UserDatabaseMeta> db = databaseProvider.getDatabaseMetadataByResource(descriptor.getFormId(), authUser.getUserId());
+        if (!db.isPresent()) {
+            ApiError error = new ApiError(ApiErrorType.INVALID_REQUEST_ERROR, ApiErrorCode.DATABASE_NOT_FOUND);
+            throw new ApiException(error.toJson().toJson());
+        }
+        if (!PermissionOracle.canExportRecords(descriptor.getFormId(), db.get())) {
+            ApiError error = new ApiError(ApiErrorType.AUTHORIZATION_ERROR, ApiErrorCode.EXPORT_FORMS_FORBIDDEN);
+            throw new ApiException(error.toJson().toJson());
         }
     }
 
