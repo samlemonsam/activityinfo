@@ -12,6 +12,7 @@ import org.activityinfo.model.analysis.pivot.PivotModel;
 import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.error.ApiError;
+import org.activityinfo.model.error.ApiErrorCode;
 import org.activityinfo.model.error.ApiErrorType;
 import org.activityinfo.model.error.ApiException;
 import org.activityinfo.model.form.FormClass;
@@ -84,13 +85,13 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
         Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(CuidAdapter.databaseId(databaseId), authenticatedUser.getUserId());
 
         if (database == null || !databaseMeta.isPresent()) {
-            ApiError error = new ApiError(ApiErrorType.INVALID_REQUEST_ERROR);
+            ApiError error = new ApiError(ApiErrorType.INVALID_REQUEST_ERROR, ApiErrorCode.DATABASE_NOT_FOUND);
             throw new ApiException(error.toJson().toJson());
         }
 
         for (Resource resource : databaseMeta.get().getResources()) {
             if (!PermissionOracle.canExportRecords(resource.getId(), databaseMeta.get())) {
-                ApiError error = new ApiError(ApiErrorType.AUTHORIZATION_ERROR);
+                ApiError error = new ApiError(ApiErrorType.AUTHORIZATION_ERROR, ApiErrorCode.EXPORT_FORMS_FORBIDDEN);
                 throw new ApiException(error.toJson().toJson());
             }
         }

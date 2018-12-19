@@ -43,6 +43,7 @@ public class ApiError implements JsonSerializable {
     public ApiError(ApiErrorType type, ApiErrorCode code) {
         this.type = type;
         this.code = code;
+        this.message = code.getUserMessage();
     }
 
     public ApiError(ApiErrorType type, ApiErrorCode code, String message) {

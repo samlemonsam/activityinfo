@@ -6,14 +6,19 @@ package org.activityinfo.model.error;
  */
 public enum ApiErrorCode {
 
-    /**
-     * Failed to start the requested job
-     */
-    JOB_START_FAIL,
+    JOB_START_FAIL("Failed to start the requested job"),
+    EXPORT_COLUMN_LIMIT_REACHED("Export has too many columns for given file type"),
+    DATABASE_NOT_FOUND("Database is not available."),
+    EXPORT_FORMS_FORBIDDEN("User does not have rights to Export all Forms in this Database"),
+    EXPORT_ACTIVITIES_FORBIDDEN("User does not have rights to Export all Activities in this Database");
 
-    /**
-     * Export has too many columns for given file type
-     */
-    EXPORT_COLUMN_LIMIT_REACHED
+    private String userMessage;
 
+    ApiErrorCode(String userMessage) {
+        this.userMessage = userMessage;
+    }
+
+    public String getUserMessage() {
+        return userMessage;
+    }
 }
