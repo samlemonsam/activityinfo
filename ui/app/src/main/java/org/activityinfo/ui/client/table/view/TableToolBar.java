@@ -50,6 +50,7 @@ public class TableToolBar extends ToolBar {
     private final TextButton removeButton;
     private final TextButton newButton;
     private final TextButton printButton;
+    private final TextButton exportButton;
 
     private final SubscriptionSet subscriptions = new SubscriptionSet();
     private final TextButton importButton;
@@ -78,7 +79,7 @@ public class TableToolBar extends ToolBar {
         importButton = new TextButton(I18N.CONSTANTS.importText());
         importButton.addSelectHandler(this::onImport);
 
-        TextButton exportButton = new TextButton(I18N.CONSTANTS.export());
+        exportButton = new TextButton(I18N.CONSTANTS.export());
         exportButton.addSelectHandler(this::onExport);
 
         TextButton columnsButton = new TextButton(I18N.CONSTANTS.chooseColumns());
@@ -107,6 +108,7 @@ public class TableToolBar extends ToolBar {
         boolean canCreate = isNewAllowed(tree);
         newButton.setEnabled(canCreate);
         importButton.setEnabled(canCreate);
+        exportButton.setEnabled(isExportAllowed(tree));
     }
 
     private boolean isNewAllowed(Observable<FormTree> tree) {
@@ -114,7 +116,15 @@ public class TableToolBar extends ToolBar {
             return false;
         }
         FormMetadata rootForm = tree.get().getRootMetadata();
-        return tree.get().getRootState() == FormTree.State.VALID && rootForm.getPermissions().isCreateRecordAllowed();
+        return tree.get().getRootState() == FormTree.State.VALID && rootForm.getPermissions().isCreateAllowed();
+    }
+
+    private boolean isExportAllowed(Observable<FormTree> tree) {
+        if (tree.isLoading()) {
+            return false;
+        }
+        FormMetadata rootForm = tree.get().getRootMetadata();
+        return tree.get().getRootState() == FormTree.State.VALID && rootForm.getPermissions().isExportRecordsAllowed();
     }
 
     @Override
