@@ -56,7 +56,7 @@ public class DeleteSiteHandler implements CommandHandler<DeleteSite> {
                 CuidAdapter.databaseId(site.getActivity().getDatabase().getId()),
                 user.getId());
 
-        if (!databaseMeta.isPresent() || !PermissionOracle.canEditSite(site.getActivity().getFormId(), site.getPartner().getId(), databaseMeta.get())) {
+        if (!databaseMeta.isPresent() || !PermissionOracle.canDeleteSite(site.getActivity().getFormId(), site.getPartner().getId(), databaseMeta.get())) {
             throw new IllegalAccessCommandException("Not authorized to modify sites");
         }
 
