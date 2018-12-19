@@ -33,7 +33,7 @@
     <service>warmup</service>
   </inbound-services>
 
-  <instance-class>F4_1G</instance-class>
+  <instance-class>F4</instance-class>
   <automatic-scaling>
     <max-idle-instances>2</max-idle-instances>
     <max-pending-latency>500ms</max-pending-latency>
