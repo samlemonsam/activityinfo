@@ -23,6 +23,8 @@ import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 
+import java.util.Optional;
+
 /**
  * Describes effective form-level permissions for a specific user. The principle permissions include:
  *
@@ -39,19 +41,16 @@ import org.activityinfo.json.JsonValue;
 public final class FormPermissions implements JsonSerializable {
 
     private boolean view;
-
-    /**
-     * True if the user has permission to create new records
-     */
-    private boolean createRecord;
-
-    private boolean updateRecord;
-
-    private boolean deleteRecord;
-
     private String viewFilter;
 
-    private String updateFilter;
+    private boolean createRecord;
+    private String createFilter;
+
+    private boolean editRecord;
+    private String editFilter;
+
+    private boolean deleteRecord;
+    private String deleteFilter;
 
     private boolean updateSchema;
 
@@ -59,6 +58,8 @@ public final class FormPermissions implements JsonSerializable {
      * True if the use has permission to create child folders or forms in this folder.
      */
     private boolean createChildren;
+
+    private boolean exportRecords;
 
     /**
      * 
@@ -72,28 +73,40 @@ public final class FormPermissions implements JsonSerializable {
         return viewFilter;
     }
 
-    public boolean isEditAllowed() {
-        return updateRecord;
-    }
-
-    public boolean isCreateRecordAllowed() {
+    public boolean isCreateAllowed() {
         return createRecord;
     }
 
-    public boolean isCreateChildrenAllowed() {
-        return createChildren;
+    public String getCreateFilter() {
+        return createFilter;
+    }
+
+    public boolean isEditAllowed() {
+        return editRecord;
+    }
+
+    public String getEditFilter() {
+        return editFilter;
     }
 
     public boolean isDeleteAllowed() {
         return deleteRecord;
     }
 
-    public String getUpdateFilter() {
-        return updateFilter;
+    public String getDeleteFilter() {
+        return deleteFilter;
     }
 
     public boolean isSchemaUpdateAllowed() {
         return updateSchema;
+    }
+
+    public boolean isCreateChildrenAllowed() {
+        return createChildren;
+    }
+
+    public boolean isExportRecordsAllowed() {
+        return exportRecords;
     }
 
     public static FormPermissions none() {
@@ -103,6 +116,7 @@ public final class FormPermissions implements JsonSerializable {
     public static FormPermissions readonly() {
         FormPermissions permissions = new FormPermissions();
         permissions.view = true;
+        permissions.exportRecords = true;
         return permissions;
     }
 
@@ -110,8 +124,9 @@ public final class FormPermissions implements JsonSerializable {
         FormPermissions permissions = new FormPermissions();
         permissions.view = true;
         permissions.createRecord = true;
-        permissions.updateRecord = true;
+        permissions.editRecord = true;
         permissions.deleteRecord = true;
+        permissions.exportRecords = true;
         return permissions;
     }
 
@@ -119,32 +134,51 @@ public final class FormPermissions implements JsonSerializable {
         FormPermissions permissions = new FormPermissions();
         permissions.view = true;
         permissions.createRecord = true;
-        permissions.updateRecord = true;
+        permissions.editRecord = true;
         permissions.deleteRecord = true;
         permissions.updateSchema = true;
         permissions.createChildren = true;
+        permissions.exportRecords = true;
         return permissions;
     }
 
     public static FormPermissions fromJson(JsonValue object) {
         FormPermissions permissions = new FormPermissions();
+
         permissions.view = object.getBoolean("view");
-        permissions.createRecord = object.getBoolean("createRecord");
-        permissions.updateRecord = object.getBoolean("updateRecord");
-        permissions.deleteRecord = object.getBoolean("deleteRecord");
         permissions.viewFilter = object.getString("viewFilter");
-        permissions.updateFilter = object.getString("updateFilter");
+
+        permissions.createRecord = object.getBoolean("createRecord");
+        permissions.createFilter = object.getString("createFilter");
+
+        permissions.editRecord = object.getBoolean("editRecord");
+        permissions.editFilter = object.getString("editFilter");
+
+        permissions.deleteRecord = object.getBoolean("deleteRecord");
+        permissions.deleteFilter = object.getString("deleteFilter");
+
+        permissions.exportRecords = object.getBoolean("exportRecords");
+
         return permissions;
     }
 
     public JsonValue toJson() {
         JsonValue object = Json.createObject();
+
         object.put("view", view);
-        object.put("createRecord", createRecord);
-        object.put("updateRecord", updateRecord);
-        object.put("deleteRecord", deleteRecord);
         object.put("viewFilter", viewFilter);
-        object.put("updateFilter", updateFilter);
+
+        object.put("createRecord", createRecord);
+        object.put("createFilter", createFilter);
+
+        object.put("editRecord", editRecord);
+        object.put("editFilter", editFilter);
+
+        object.put("deleteRecord", deleteRecord);
+        object.put("deleteFilter", deleteFilter);
+
+        object.put("exportRecords", exportRecords);
+
         return object;
     }
 
@@ -157,13 +191,30 @@ public final class FormPermissions implements JsonSerializable {
         return "CollectionPermissions{" +
                 "visible=" + view +
                 ", visibilityFilter='" + viewFilter + '\'' +
-                ", editAllowed=" + updateRecord +
-                ", editFilter='" + updateFilter + '\'' +
+                ", createAllowed=" + createRecord +
+                ", createFilter='" + createFilter + '\'' +
+                ", editAllowed=" + editRecord +
+                ", editFilter='" + editFilter + '\'' +
+                ", deleteAllowed=" + deleteRecord +
+                ", deleteFilter='" + deleteFilter + '\'' +
+                ", exportAllowed='" + exportRecords + '\'' +
                 '}';
     }
 
     public boolean hasVisibilityFilter() {
         return !Strings.isNullOrEmpty(viewFilter);
+    }
+
+    public boolean hasCreateFilter() {
+        return !Strings.isNullOrEmpty(createFilter);
+    }
+
+    public boolean hasEditFilter() {
+        return !Strings.isNullOrEmpty(editFilter);
+    }
+
+    public boolean hasDeleteFilter() {
+        return !Strings.isNullOrEmpty(deleteFilter);
     }
 
     public boolean isAllowed(Operation operation) {
@@ -173,9 +224,11 @@ public final class FormPermissions implements JsonSerializable {
             case CREATE_RECORD:
                 return createRecord;
             case EDIT_RECORD:
-                return updateRecord;
+                return editRecord;
             case DELETE_RECORD:
                 return deleteRecord;
+            case EXPORT_RECORDS:
+                return exportRecords;
         }
         throw new IllegalArgumentException("operation: " + operation);
     }
@@ -187,11 +240,14 @@ public final class FormPermissions implements JsonSerializable {
     public boolean isFiltered(Operation operation) {
         switch (operation) {
             case VIEW:
-                return !Strings.isNullOrEmpty(viewFilter);
+            case EXPORT_RECORDS:
+                return hasVisibilityFilter();
             case CREATE_RECORD:
-            case DELETE_RECORD:
+                return hasCreateFilter();
             case EDIT_RECORD:
-                return !Strings.isNullOrEmpty(updateFilter);
+                return hasEditFilter();
+            case DELETE_RECORD:
+                return hasDeleteFilter();
         }
         return false;
     }
@@ -199,11 +255,14 @@ public final class FormPermissions implements JsonSerializable {
     public String getFilter(Operation operation) {
        switch (operation) {
            case VIEW:
+           case EXPORT_RECORDS:
                return viewFilter;
            case CREATE_RECORD:
-           case DELETE_RECORD:
+               return createFilter;
            case EDIT_RECORD:
-               return updateFilter;
+               return editFilter;
+           case DELETE_RECORD:
+               return deleteFilter;
        }
        return null;
     }
@@ -244,30 +303,31 @@ public final class FormPermissions implements JsonSerializable {
             return this;
         }
 
-
         public void allowUnfilteredView() {
             permissions.view = true;
             permissions.viewFilter = null;
         }
 
-        /**
-         * Allows creating, editing, and deleting this form's records. It also implies that the form
-         * is visible.
-         */
-        public Builder allowEdit() {
-            allowView();
-            permissions.updateRecord = true;
+        public Builder allowCreate(Optional<String> filter) {
             permissions.createRecord = true;
-            permissions.deleteRecord = true;
+            permissions.createFilter = filter.orElse(null);
             return this;
         }
 
-        /**
-         * Allows creating, editing, and deleting the form's records which match the given filter.
-         */
-        public Builder allowFilteredEdit(String filter) {
-            allowEdit();
-            permissions.updateFilter = filter;
+        public Builder allowEdit(Optional<String> filter) {
+            permissions.editRecord = true;
+            permissions.editFilter = filter.orElse(null);
+            return this;
+        }
+
+        public Builder allowDelete(Optional<String> filter) {
+            permissions.deleteRecord = true;
+            permissions.deleteFilter = filter.orElse(null);
+            return this;
+        }
+
+        public Builder allowExport() {
+            permissions.exportRecords = true;
             return this;
         }
 

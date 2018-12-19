@@ -24,6 +24,8 @@ import org.activityinfo.store.testing.NfiForm;
 import org.activityinfo.ui.client.store.TestSetup;
 import org.junit.Test;
 
+import java.util.Optional;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
@@ -39,7 +41,7 @@ public class OperationFiltersTest {
 
         FormPermissions permissions = new FormPermissions.Builder()
                 .allowFilteredView(nfiForm.getVillageField().getId() + " == 'g12345'")
-                .allowFilteredEdit(nfiForm.getVillageField().getId() + "=='g12345'")
+                .allowEdit(Optional.of(nfiForm.getVillageField().getId() + "=='g12345'"))
                 .build();
 
         PermissionFilters filters = new PermissionFilters(formTree, permissions);

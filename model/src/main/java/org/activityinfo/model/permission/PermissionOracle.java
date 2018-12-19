@@ -318,6 +318,7 @@ public class PermissionOracle {
         }
         computeEditSchemaFormPermissions(permissionsBuilder, formId, db);
         computeEditRecordFormPermissions(permissionsBuilder, formId, db);
+        computeExportRecordsFormPermissions(permissionsBuilder, formId, db);
         return permissionsBuilder.build();
     }
 
@@ -349,32 +350,34 @@ public class PermissionOracle {
     private static void computeEditRecordFormPermissions(FormPermissions.Builder builder,
                                                          ResourceId formId,
                                                          UserDatabaseMeta db) {
-        // Legacy "Edit" permission requires CREATE_RECORD, EDIT_RECORD, DELETE_RECORD permissions on form
         Permission createRecord = createRecord(formId, db);
         Permission editRecord = editRecord(formId, db);
         Permission deleteRecord = deleteRecord(formId, db);
 
-        if (createRecord.isForbidden() || editRecord.isForbidden() || deleteRecord.isForbidden()) {
+        if (createRecord.isForbidden() && editRecord.isForbidden() && deleteRecord.isForbidden()) {
             return;
         }
 
-        if (createRecord.isFiltered() || editRecord.isFiltered() || deleteRecord.isFiltered()) {
-            Optional<String> filter = and(
-                    and(createRecord.getOptionalFilter(), editRecord.getOptionalFilter()),
-                    deleteRecord.getOptionalFilter());
-            builder.allowFilteredEdit(filter.get());
-        } else {
-            builder.allowEdit();
+        if (createRecord.isPermitted()) {
+            builder.allowCreate(createRecord.getOptionalFilter());
+        }
+        if (editRecord.isPermitted()) {
+            builder.allowEdit(editRecord.getOptionalFilter());
+        }
+        if (deleteRecord.isPermitted()) {
+            builder.allowDelete(deleteRecord.getOptionalFilter());
+        }
+    }
+
+    private static void computeExportRecordsFormPermissions(FormPermissions.Builder builder,
+                                                            ResourceId formId,
+                                                            UserDatabaseMeta db) {
+        if (canExportRecords(formId, db)) {
+            builder.allowExport();
         }
     }
 
     /////////////////////////////////////////////// FORM INSTANCE METHODS ////////////////////////////////////////////////
-
-    public static boolean canEdit(TypedFormRecord record,
-                                  FormPermissions formPermissions,
-                                  FormClass formClass) {
-        return can(record, formPermissions, formClass, Operation.EDIT_RECORD);
-    }
 
     public static boolean canView(TypedFormRecord record,
                                   FormPermissions formPermissions,
@@ -386,6 +389,24 @@ public class PermissionOracle {
                                   FormPermissions formPermissions,
                                   FormClass formClass) {
         return can(record, formPermissions, formClass, Operation.VIEW);
+    }
+
+    public static boolean canCreate(TypedFormRecord record,
+                                  FormPermissions formPermissions,
+                                  FormClass formClass) {
+        return can(record, formPermissions, formClass, Operation.CREATE_RECORD);
+    }
+
+    public static boolean canEdit(TypedFormRecord record,
+                                  FormPermissions formPermissions,
+                                  FormClass formClass) {
+        return can(record, formPermissions, formClass, Operation.EDIT_RECORD);
+    }
+
+    public static boolean canDelete(TypedFormRecord record,
+                                    FormPermissions formPermissions,
+                                    FormClass formClass) {
+        return can(record, formPermissions, formClass, Operation.DELETE_RECORD);
     }
 
     public static boolean can(FormRecord record,

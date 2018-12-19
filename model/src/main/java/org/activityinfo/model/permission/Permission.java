@@ -22,6 +22,7 @@ public class Permission implements JsonSerializable {
 
     public Permission(Operation operation) {
         this.operation = operation;
+        this.filter = Optional.empty();
     }
 
     public Permission(Operation operation, boolean permitted, Optional<String> filter) {
