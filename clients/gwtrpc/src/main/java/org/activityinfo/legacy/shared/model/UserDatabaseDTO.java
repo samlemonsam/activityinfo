@@ -662,18 +662,31 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
      * Will return false if the user has any one permission the database user doesn't, and return true otherwise
      */
     public boolean hasGreaterPermissions(UserPermissionDTO user) {
+        if (user.getAllowCreate() == Boolean.TRUE && !isCreateAllowed()) {
+            return false;
+        }
         if (user.getAllowEdit() == Boolean.TRUE && !isEditAllowed()) {
+            return false;
+        }
+        if (user.getAllowDelete() == Boolean.TRUE && !isDeleteAllowed()) {
             return false;
         }
         if (user.getAllowViewAll() == Boolean.TRUE && !isViewAllAllowed()) {
             return false;
         }
-
+        if (user.getAllowCreateAll() == Boolean.TRUE && !isCreateAllAllowed()) {
+            return false;
+        }
         if (user.getAllowEditAll() == Boolean.TRUE && !isEditAllAllowed()) {
             return false;
         }
-
+        if (user.getAllowDeleteAll() == Boolean.TRUE && !isDeleteAllAllowed()) {
+            return false;
+        }
         if (user.getAllowDesign() == Boolean.TRUE && !isDesignAllowed()) {
+            return false;
+        }
+        if (user.getAllowExport() == Boolean.TRUE && !isExportAllowed()) {
             return false;
         }
         if (user.getAllowManageUsers() == Boolean.TRUE && !isManageUsersAllowed()) {
@@ -688,6 +701,11 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
     public boolean canGivePermission(PermissionType permissionType, UserPermissionDTO user) {
         if (permissionType == null) {
             return false;
+        }
+
+        // Owners should be able to give permissions of any type to any user
+        if (getAmOwner()) {
+            return true;
         }
 
         // Check the database user has an identical or greater permission set than user
