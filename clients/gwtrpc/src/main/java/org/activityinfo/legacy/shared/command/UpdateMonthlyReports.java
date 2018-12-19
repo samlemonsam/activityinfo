@@ -27,9 +27,17 @@ import java.util.ArrayList;
 public class UpdateMonthlyReports implements MutatingCommand<VoidResult> {
 
     public static class Change implements Serializable {
+
+        public enum Type {
+            CREATE,
+            EDIT,
+            DELETE;
+        }
+
         private Month month;
         private int indicatorId;
         private Double value;
+        private Type changeType;
 
         public Change() {
 
@@ -39,6 +47,14 @@ public class UpdateMonthlyReports implements MutatingCommand<VoidResult> {
             this.indicatorId = indicatorId;
             this.setMonth(month);
             this.setValue(value);
+            this.changeType = Type.EDIT;
+        }
+
+        public Change(int indicatorId, Month month, Double value, Type changeType) {
+            this.indicatorId = indicatorId;
+            this.setMonth(month);
+            this.setValue(value);
+            this.changeType = changeType;
         }
 
         public void setMonth(Month month) {
@@ -65,6 +81,13 @@ public class UpdateMonthlyReports implements MutatingCommand<VoidResult> {
             return value;
         }
 
+        public void setChangeType(Type changeType) {
+            this.changeType = changeType;
+        }
+
+        public Type getChangeType() {
+            return changeType;
+        }
     }
 
     private int siteId;
