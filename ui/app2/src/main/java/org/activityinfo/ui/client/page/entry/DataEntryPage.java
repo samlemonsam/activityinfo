@@ -241,9 +241,8 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     private void updateSelection(ActivityFormDTO activity, SiteDTO site) {
 
-        boolean permissionToEdit = activity.isAllowedToEdit(site);
-        toolBar.setActionEnabled(UIActions.EDIT, permissionToEdit && !site.isLinked());
-        toolBar.setActionEnabled(UIActions.DELETE, permissionToEdit && !site.isLinked());
+        toolBar.setActionEnabled(UIActions.EDIT, activity.isAllowedToEdit(site) && !site.isLinked());
+        toolBar.setActionEnabled(UIActions.DELETE, activity.isAllowedToDelete(site) && !site.isLinked());
         toolBar.setActionEnabled(UIActions.OPEN_TABLE, site != null);
 
         detailTab.setSite(site);
@@ -251,7 +250,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         attachmentsTab.setEnabled(activity.getClassicView());
         if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_MONTHLY) {
             monthlyPanel.load(site);
-            monthlyPanel.setReadOnly(!permissionToEdit);
+            monthlyPanel.setReadOnly(!activity.isCreateAllowed() && !activity.isAllowedToEdit(site) && !activity.isAllowedToDelete(site));
             monthlyTab.setEnabled(true);
         } else {
             monthlyTab.setEnabled(false);
@@ -376,6 +375,8 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         toolBar.setActionEnabled(UIActions.PRINT, currentPlace.isSingleActivity());
         toolBar.setActionEnabled(UIActions.IMPORT, false);
         toolBar.setActionEnabled(UIActions.ADD, false);
+        toolBar.setActionEnabled(UIActions.EDIT, false);
+        toolBar.setActionEnabled(UIActions.DELETE, false);
 
         final DataEntryPlace place = currentPlace;
 
@@ -403,9 +404,9 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     private void enableToolbarButtons(ActivityFormDTO activity) {
         toolBar.enable();
-        boolean isAllowed = activity.isEditAllowed();
-        toolBar.setActionEnabled(UIActions.ADD, isAllowed);
-        toolBar.setActionEnabled(UIActions.IMPORT, isAllowed);
+        toolBar.setActionEnabled(UIActions.ADD, activity.isCreateAllowed());
+        toolBar.setActionEnabled(UIActions.IMPORT, activity.isCreateAllowed());
+        toolBar.setActionEnabled(UIActions.EXPORT, activity.isExportAllowed());
         toolBar.setActionEnabled(UIActions.PRINT, true);
     }
 
