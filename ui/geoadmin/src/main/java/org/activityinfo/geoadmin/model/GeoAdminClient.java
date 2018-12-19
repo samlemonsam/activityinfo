@@ -21,12 +21,10 @@ package org.activityinfo.geoadmin.model;
 import com.bedatadriven.geojson.GeoJsonModule;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.GenericType;
-import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.*;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.client.filter.ClientFilter;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.json.JSONConfiguration;
 import com.vividsolutions.jts.geom.Geometry;
@@ -37,6 +35,7 @@ import org.activityinfo.client.ActivityInfoClient;
 import org.activityinfo.geoadmin.source.FeatureSourceStorageProvider;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.api.ClientVersions;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.formTree.FormTree;
@@ -110,6 +109,13 @@ public class GeoAdminClient implements FormClassProvider {
         clientConfig.getClasses().add(ObjectMapperProvider.class);
         client = Client.create(clientConfig);
         client.addFilter(new HTTPBasicAuthFilter(username, password));
+        client.addFilter(new ClientFilter() {
+            @Override
+            public ClientResponse handle(ClientRequest cr) throws ClientHandlerException {
+                cr.getHeaders().add(ClientVersions.CLIENT_VERSION_HEADER, ClientVersions.CLIENT_VERSION);
+                return getNext().handle(cr);
+            }
+        });
 
         root = UriBuilder.fromUri(endpoint).build();
 
