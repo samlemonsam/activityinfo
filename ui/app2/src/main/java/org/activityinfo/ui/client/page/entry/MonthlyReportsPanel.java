@@ -210,10 +210,25 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
         monthCombo.setMappedValue(currentMonth);
         grid.setLockedPredicate(createLockPredicate(new LockedPeriodSet(schema)));
         grid.updateMonthColumns(currentMonth);
-        grid.setReadOnly(currentActivity.isAllowedToEdit(site));
+        setAllowedOperations(grid, site);
         proxy.setStartMonth(currentMonth);
         proxy.setSiteId(site.getId());
         loadIfActive();
+    }
+
+    private void setAllowedOperations(MonthlyGrid grid, SiteDTO site) {
+        boolean allowCreate = currentActivity.isAllowedToCreate(site);
+        boolean allowEdit = currentActivity.isAllowedToEdit(site);
+        boolean allowDelete = currentActivity.isAllowedToDelete(site);
+
+        if (!allowCreate && !allowEdit && !allowDelete) {
+            grid.setReadOnly(true);
+        } else {
+            grid.setReadOnly(false);
+            grid.setCreateAllowed(allowCreate);
+            grid.setEditAllowed(allowEdit);
+            grid.setDeleteAllowed(allowDelete);
+        }
     }
 
     public void setActive(boolean active) {
@@ -271,6 +286,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
                 change.setIndicatorId(report.getIndicatorId());
                 change.setMonth(IndicatorRowDTO.monthForProperty(property));
                 change.setValue(report.get(property));
+                change.setChangeType(determineType(report, property));
                 changes.add(change);
             }
         }
@@ -292,6 +308,17 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
                     }
                 });
         return promise;
+    }
+
+    private UpdateMonthlyReports.Change.Type determineType(IndicatorRowDTO indicatorRowDTO, String property) {
+        if (indicatorRowDTO.isNewlyCreated()) {
+            return UpdateMonthlyReports.Change.Type.CREATE;
+        }
+        Double value = indicatorRowDTO.get(property);
+        if (value == null || value == Double.NaN) {
+            return UpdateMonthlyReports.Change.Type.DELETE;
+        }
+        return UpdateMonthlyReports.Change.Type.EDIT;
     }
 
     public void setReadOnly(boolean readOnly) {
