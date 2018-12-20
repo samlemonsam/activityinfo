@@ -105,6 +105,10 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
             case CuidAdapter.ACTIVITY_DOMAIN:
                 Optional<ResourceId> activityDatabaseId = Optional.ofNullable(queryDatabaseIdForForm(resourceId));
                 return activityDatabaseId.isPresent() ? getDatabaseMeta(activityDatabaseId.get()) : Optional.empty();
+            case CuidAdapter.MONTHLY_REPORT_FORM_CLASS:
+                ResourceId activityFormId = CuidAdapter.activityFormClass(CuidAdapter.getLegacyIdFromCuid(resourceId));
+                Optional<ResourceId> monthlyActivityDatabaseId = Optional.ofNullable(queryDatabaseIdForForm(activityFormId));
+                return monthlyActivityDatabaseId.isPresent() ? getDatabaseMeta(monthlyActivityDatabaseId.get()) : Optional.empty();
             case CuidAdapter.FOLDER_DOMAIN:
                 Optional<ResourceId> folderDatabaseId = Optional.ofNullable(queryDatabaseIdForFolder(resourceId));
                 return folderDatabaseId.isPresent() ? getDatabaseMeta(folderDatabaseId.get()) : Optional.empty();
