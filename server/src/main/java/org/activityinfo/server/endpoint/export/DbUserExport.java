@@ -78,10 +78,15 @@ public class DbUserExport extends Exporter {
         createHeaderCell(headerRow, column++, I18N.CONSTANTS.allowView(), CellStyle.ALIGN_RIGHT);
         createHeaderCell(headerRow, column++, I18N.CONSTANTS.allowViewAll(), CellStyle.ALIGN_RIGHT);
         createHeaderCell(headerRow, column++, I18N.CONSTANTS.allowDesign(), CellStyle.ALIGN_RIGHT);
+        createHeaderCell(headerRow, column++, I18N.CONSTANTS.allowCreate(), CellStyle.ALIGN_RIGHT);
+        createHeaderCell(headerRow, column++, I18N.CONSTANTS.allowCreateAll(), CellStyle.ALIGN_RIGHT);
         createHeaderCell(headerRow, column++, I18N.CONSTANTS.allowEdit(), CellStyle.ALIGN_RIGHT);
         createHeaderCell(headerRow, column++, I18N.CONSTANTS.allowEditAll(), CellStyle.ALIGN_RIGHT);
+        createHeaderCell(headerRow, column++, I18N.CONSTANTS.allowDelete(), CellStyle.ALIGN_RIGHT);
+        createHeaderCell(headerRow, column++, I18N.CONSTANTS.allowDeleteAll(), CellStyle.ALIGN_RIGHT);
         createHeaderCell(headerRow, column++, I18N.CONSTANTS.allowManageUsers(), CellStyle.ALIGN_RIGHT);
         createHeaderCell(headerRow, column++, I18N.CONSTANTS.allowManageAllUsers(), CellStyle.ALIGN_RIGHT);
+        createHeaderCell(headerRow, column++, I18N.CONSTANTS.allowExport(), CellStyle.ALIGN_RIGHT);
 
         sheet.setColumnWidth(column, 12 * 256);
         sheet.setColumnWidth(column + 1, 12 * 256);
@@ -102,10 +107,15 @@ public class DbUserExport extends Exporter {
             createCell(row, column++, String.valueOf(user.getAllowView()));
             createCell(row, column++, String.valueOf(user.getAllowViewAll()));
             createCell(row, column++, String.valueOf(user.getAllowDesign()));
+            createCell(row, column++, String.valueOf(user.getAllowCreate()));
+            createCell(row, column++, String.valueOf(user.getAllowCreateAll()));
             createCell(row, column++, String.valueOf(user.getAllowEdit()));
             createCell(row, column++, String.valueOf(user.getAllowEditAll()));
+            createCell(row, column++, String.valueOf(user.getAllowDelete()));
+            createCell(row, column++, String.valueOf(user.getAllowDeleteAll()));
             createCell(row, column++, String.valueOf(user.getAllowManageUsers()));
             createCell(row, column++, String.valueOf(user.getAllowManageAllUsers()));
+            createCell(row, column++, String.valueOf(user.getAllowExport()));
         }
     }
 
