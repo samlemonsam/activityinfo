@@ -259,6 +259,7 @@ public class DatabaseResource {
         startTransaction();
         try {
             removeUserPermissions(database, newOwner);
+            removeUserPermissions(database, currentOwner);
             transferDatabase(database, newOwner);
             clearTransferToken(database);
             addUserPermissions(database, currentOwner);
