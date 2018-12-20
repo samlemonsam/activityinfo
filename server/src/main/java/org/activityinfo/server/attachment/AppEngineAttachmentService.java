@@ -32,6 +32,7 @@ import com.google.inject.Inject;
 import org.activityinfo.server.DeploymentConfiguration;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
+import org.apache.commons.fileupload.FileItemHeaders;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -107,6 +108,7 @@ public class AppEngineAttachmentService implements AttachmentService {
         private String fieldName;
         private String contentType;
         private String fileName;
+        private FileItemHeaders headers;
 
         public InMemoryFileItem(String fieldName, String contentType, boolean isFormField, String fileName) {
             this.fieldName = fieldName;
@@ -190,5 +192,14 @@ public class AppEngineAttachmentService implements AttachmentService {
             return baos;
         }
 
+        @Override
+        public FileItemHeaders getHeaders() {
+            throw new UnsupportedOperationException("TODO");
+        }
+
+        @Override
+        public void setHeaders(FileItemHeaders headers) {
+            throw new UnsupportedOperationException("TODO");
+        }
     }
 }

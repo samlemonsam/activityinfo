@@ -19,7 +19,7 @@
 package org.activityinfo.server.command.handler.binding.dim;
 
 import com.extjs.gxt.ui.client.data.BaseModelData;
-import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.common.base.Strings;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.reports.content.DimensionCategory;
 import org.activityinfo.legacy.shared.reports.content.EntityCategory;

@@ -18,7 +18,7 @@
  */
 package org.activityinfo.server.endpoint.jsonrpc;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.common.base.Strings;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.codehaus.jackson.JsonNode;

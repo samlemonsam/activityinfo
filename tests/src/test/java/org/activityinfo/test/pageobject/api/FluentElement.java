@@ -66,9 +66,9 @@ public class FluentElement {
     public void clickWhenReady() {
         FluentWait<FluentElement> wait = new FluentWait<>(this);
         wait.ignoring(WebDriverException.class);
-        wait.until(new Predicate<FluentElement>() {
+        wait.until(new java.util.function.Function<FluentElement, Boolean>() {
             @Override
-            public boolean apply(FluentElement input) {
+            public Boolean apply(FluentElement input) {
                 input.click();
                 return true;
             }
@@ -102,7 +102,12 @@ public class FluentElement {
     public void waitUntil(Predicate<WebDriver> predicate, int timeInSeconds) {
         WebDriverWait wait = new WebDriverWait(webDriver, timeInSeconds);
         wait.ignoring(StaleElementReferenceException.class);
-        wait.until(predicate);
+        wait.until(new java.util.function.Function<WebDriver, Boolean>() {
+            @Override
+            public Boolean apply(WebDriver webDriver) {
+                return predicate.apply(webDriver);
+            }
+        });
     }
 
     public void waitUntil(Predicate<WebDriver> predicate) {

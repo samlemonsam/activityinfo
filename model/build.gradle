@@ -13,7 +13,6 @@ dependencies {
     compile libraries.jsr305
     compile libraries.jackson.core
 
-    compile libraries.swagger.annotations
     compile libraries.fastutil
 }
 

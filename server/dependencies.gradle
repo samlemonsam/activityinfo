@@ -27,9 +27,6 @@ dependencies {
     compile project(':store:mysql')
     compile project(':store:hrd')
 
-    compile libraries.swagger.annotations
-    toolCompile libraries.swagger.jaxrs
-
     testCompile project(':model').sourceSets.test.output
 
     // AppEngine
@@ -81,7 +78,9 @@ dependencies {
 
     // Report Rendering
     compile libraries.poi
-    compile libraries.appengine.export.itext
+    compile(libraries.appengine.export.itext) {
+        exclude group: 'bouncycastle'
+    }
     compile libraries.appengine.export.awt
     compile libraries.appengine.export.jcharts
     compile libraries.appengine.export.emf

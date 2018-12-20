@@ -27,11 +27,11 @@ import org.activityinfo.server.login.model.PageModel;
 import org.activityinfo.server.util.TemplateModule;
 import org.activityinfo.server.util.jaxrs.Domain;
 import org.activityinfo.server.util.jaxrs.FreemarkerViewProcessor;
-import org.bouncycastle.util.Strings;
 import org.junit.BeforeClass;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 /**
@@ -56,7 +56,7 @@ public abstract class ViewTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         processor.writeTo(template, model.asViewable(), baos);
 
-        return Strings.fromUTF8ByteArray(baos.toByteArray());
+        return new String(baos.toByteArray(), StandardCharsets.UTF_8);
     }
 
     protected void assertProcessable(PageModel model) {

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.2.xsd">
+
+    <!-- The following suppressions are related to mis-identifed artifacts -->
+
+    <suppress>
+        <gav regex="true">^activityinfo\.store:mysql:.*$</gav>
+        <cpe>cpe:/a:mysql:mysql</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^org\.codehaus\.jettison:jettison:.*$</gav>
+        <cpe>cpe:/a:st_project:st</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^org\.codehaus\.jackson:jackson-jaxrs:.*$</gav>
+        <cpe>cpe:/a:content_project:content</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^com\.google\..*$</gav>
+        <cpe>cpe:/a:app_project:app</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^com\.bedatadriven\..*$</gav>
+        <cpe>cpe:/a:app_project:app</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^com\.google\.gwt:.*$</gav>
+        <cpe>cpe:/a:google:protobuf</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^com\.bedatadriven.*$</gav>
+        <cpe>cpe:/a:app_project:app</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^org\.geotools:.*$</gav>
+        <cpe>cpe:/a:first_project:first</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^org\.geotools:.*$</gav>
+        <cpe>cpe:/a:widgets_project:widgets</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^org\.mindrot\.bcrypt:bcrypt:.*$</gav>
+        <cpe>cpe:/a:openbsd:openbsd</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^com\.googlecode\.objectify:objectify:.*$</gav>
+        <cpe>cpe:/a:app_project:app</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^org\.littleshoot:littleproxy:.*$</gav>
+        <cpe>cpe:/a:netty_project:netty</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^com\.google\.gwt\.inject:gin:.*$</gav>
+        <cpe>cpe:/a:google:web_toolkit</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^io\.airlift:airline:.*$</gav>
+        <cpe>cpe:/a:git_project:git</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^io\.airlift:airline:.*$</gav>
+        <cpe>cpe:/a:git:git</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^org\.geotools:gt-coverage:.*$</gav>
+        <cpe>cpe:/a:image_processing_software:image_processing_software</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^com\.jhlabs:filters:.*$</gav>
+        <cpe>cpe:/a:image_processing_software:image_processing_software</cpe>
+    </suppress>
+
+    <suppress>
+        <gav regex="true">^com\.google\.javascript:closure-compiler:.*$</gav>
+        <cpe>cpe:/a:google:google_apps</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^com\.google\.javascript:closure-compiler:.*$</gav>
+        <cpe>cpe:/a:google:gmail</cpe>
+    </suppress>
+
+    <!-- The CPE refers to the server, not our client library -->
+    <suppress>
+        <gav regex="true">^mysql:mysql-connector-java:.*$</gav>
+        <cpe>cpe:/a:oracle:mysql</cpe>
+    </suppress>
+
+    <!-- The CPE refers to the server, not the client library being used -->
+    <suppress>
+        <gav regex="true">^io\.netty:netty-tcnative-boringssl-static:.*$</gav>
+        <cpe>cpe:/a:netty_project:netty</cpe>
+    </suppress>
+
+    <!-- The CPE refers to the web browser itself, not the web driver client -->
+    <suppress>
+        <gav regex="true">^org\.seleniumhq\.selenium:selenium-opera-driver:.*$</gav>
+        <cpe>cpe:/a:opera:opera</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^org\.seleniumhq\.selenium:selenium-opera-driver:.*$</gav>
+        <cpe>cpe:/a:opera_software:opera</cpe>
+    </suppress>
+
+
+    <!-- Applies to the C++ library, not our Java dependency -->
+    <suppress>
+        <gav regex="true">^com\.google\.typography:sfntly:.*$</gav>
+        <cpe>cpe:/a:google:sfntly</cpe>
+    </suppress>
+    <suppress>
+        <gav regex="true">^fr\.opensagres\.xdocreport\.sfntly:sfntly:.*$</gav>
+        <cpe>cpe:/a:google:sfntly</cpe>
+    </suppress>
+
+    <!-- openconsensus-contrib-grpc-metrics != grpc -->
+    <suppress>
+        <gav regex="true">^io\.opencensus:opencensus-contrib-grpc-metrics:.*$</gav>
+        <cpe>cpe:/a:grpc:grpc</cpe>
+    </suppress>
+
+    <suppress>
+        <notes>The MySQL connector is only used for integration tests and development, the Google Cloud SQL Driver
+        is used in production.</notes>
+        <gav regex="true">^mysql:mysql-connector-java:.*$</gav>
+        <cve>CVE-2018-3258</cve>
+    </suppress>
+
+    <suppress>
+        <notes>This library is only used at compile time and so is not exposed to untrusted input.</notes>
+        <gav regex="true">^com\.kitfox\.svg:svg-salamander:.*$</gav>
+        <cve>CVE-2017-5617</cve>
+    </suppress>
+
+    <suppress>
+        <notes>This vulnerability affects messages with a size over 2GB, which is far beyond the limit
+        allowed by the Google APIs for which protobuf is used.</notes>
+        <gav regex="true">^com\.google\.protobuf:protobuf-java:.*$</gav>
+        <cpe>cpe:/a:google:protobuf</cpe>
+    </suppress>
+
+</suppressions>

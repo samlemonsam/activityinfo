@@ -139,14 +139,14 @@ public class XlsTableWriter {
     private void declareStyles() {
 
         Font headerFont = book.createFont();
-        headerFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        headerFont.setBold(true);
 
         Font smallFont = book.createFont();
         smallFont.setFontHeightInPoints(FONT_SIZE);
 
         Font titleFont = book.createFont();
         titleFont.setFontHeightInPoints(TITLE_FONT_SIZE);
-        titleFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        titleFont.setBold(true);
 
         titleStyle = book.createCellStyle();
         titleStyle.setFont(titleFont);
