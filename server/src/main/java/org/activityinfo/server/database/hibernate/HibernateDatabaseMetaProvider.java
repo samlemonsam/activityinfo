@@ -4,6 +4,7 @@ import com.google.appengine.api.memcache.MemcacheService;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.json.Json;
+import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.model.database.DatabaseMeta;
 import org.activityinfo.model.database.RecordLock;
 import org.activityinfo.model.database.Resource;
@@ -274,10 +275,12 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         List<Resource> resources = new ArrayList<>();
 
         List<Resource> formResources = fetchForms(database);
+        List<Resource> monthlyReportingResources = fetchMonthlyReportingSubForms(database);
         List<Resource> subFormResources = fetchSubForms(formResources);
         List<Resource> folderResources = fetchFolders(database);
 
         resources.addAll(formResources);
+        resources.addAll(monthlyReportingResources);
         resources.addAll(subFormResources);
         resources.addAll(folderResources);
 
@@ -289,6 +292,25 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
                 .filter(a -> !a.isDeleted())
                 .map(Activity::asResource)
                 .collect(Collectors.toList());
+    }
+
+    private List<Resource> fetchMonthlyReportingSubForms(Database database) {
+        return database.getActivities().stream()
+                .filter(a -> !a.isDeleted())
+                .filter(Activity::isClassicView)
+                .filter(a -> a.getReportingFrequency() == ActivityFormDTO.REPORT_MONTHLY)
+                .map(HibernateDatabaseMetaProvider::buildMonthlyReportResource)
+                .collect(Collectors.toList());
+    }
+
+    private static Resource buildMonthlyReportResource(Activity monthlyActivity) {
+        return new Resource.Builder()
+                .setId(CuidAdapter.reportingPeriodFormClass(monthlyActivity.getId()))
+                .setParentId(monthlyActivity.getFormId())
+                .setLabel(monthlyActivity.getName() + " Monthly Reports")
+                .setVisibility(monthlyActivity.resourceVisibility())
+                .setType(ResourceType.SUB_FORM)
+                .build();
     }
 
     private List<Resource> fetchSubForms(List<Resource> formResources) {
