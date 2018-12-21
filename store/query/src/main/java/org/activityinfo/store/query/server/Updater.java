@@ -458,23 +458,34 @@ public class Updater {
     }
 
     private void authorizeCreate(TypedFormRecord record, FormPermissions formPermissions, FormClass formClass) {
-        if (!PermissionOracle.canCreate(record, formPermissions, formClass)) {
+        if (formClass.isSubForm()){
+            if (!formPermissions.isCreateAllowed()) {
+                throw new InvalidUpdateException("Unauthorized creation");
+            }
+        } else if (!PermissionOracle.canCreate(record, formPermissions, formClass)) {
             throw new InvalidUpdateException("Unauthorized creation");
         }
     }
 
     private void authorizeEdit(TypedFormRecord record, FormPermissions formPermissions, FormClass formClass) {
-        if (!PermissionOracle.canEdit(record, formPermissions, formClass)) {
+        if (formClass.isSubForm()){
+            if (!formPermissions.isEditAllowed()) {
+                throw new InvalidUpdateException("Unauthorized modification");
+            }
+        } else if (!PermissionOracle.canEdit(record, formPermissions, formClass)) {
             throw new InvalidUpdateException("Unauthorized modification");
         }
     }
 
     private void authorizeDelete(TypedFormRecord record, FormPermissions formPermissions, FormClass formClass) {
-        if (!PermissionOracle.canDelete(record, formPermissions, formClass)) {
+        if (formClass.isSubForm()){
+            if (!formPermissions.isDeleteAllowed()) {
+                throw new InvalidUpdateException("Unauthorized deletion");
+            }
+        } else if (!PermissionOracle.canDelete(record, formPermissions, formClass)) {
             throw new InvalidUpdateException("Unauthorized deletion");
         }
     }
-
 
     private TypedFormRecord applyUpdates(Optional<TypedFormRecord> existingRecord, TypedRecordUpdate update) {
         TypedFormRecord updated = new TypedFormRecord(update.getRecordId(), update.getFormId());
