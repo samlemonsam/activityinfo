@@ -210,7 +210,7 @@ public class MonthlyReportsPanel extends ContentPanel implements ActionListener 
         monthCombo.setMappedValue(currentMonth);
         grid.setLockedPredicate(createLockPredicate(new LockedPeriodSet(schema)));
         grid.updateMonthColumns(currentMonth);
-        grid.setReadOnly(currentActivity.isAllowedToEdit(site));
+        grid.setReadOnly(!currentActivity.isAllowedToEdit(site));
         proxy.setStartMonth(currentMonth);
         proxy.setSiteId(site.getId());
         loadIfActive();
