@@ -329,6 +329,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
                 record.set(PermissionType.CREATE_ALL.getDtoPropertyName(), false);
             } else if (permissionType == PermissionType.EDIT) {
                 record.set(PermissionType.CREATE.getDtoPropertyName(), false);
+                record.set(PermissionType.CREATE_ALL.getDtoPropertyName(), false);
                 record.set(PermissionType.EDIT_ALL.getDtoPropertyName(), false);
             } else if (permissionType == PermissionType.EDIT_ALL) {
                 record.set(PermissionType.CREATE_ALL.getDtoPropertyName(), false);
