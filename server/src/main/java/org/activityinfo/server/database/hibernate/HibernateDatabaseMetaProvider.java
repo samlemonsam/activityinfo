@@ -279,12 +279,25 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         List<Resource> subFormResources = fetchSubForms(formResources);
         List<Resource> folderResources = fetchFolders(database);
 
+        Resource partnerResource = partnerFormResource(database);
+
         resources.addAll(formResources);
         resources.addAll(monthlyReportingResources);
         resources.addAll(subFormResources);
         resources.addAll(folderResources);
+        resources.add(partnerResource);
 
         return resources;
+    }
+
+    private Resource partnerFormResource(Database database) {
+        return new Resource.Builder()
+                .setId(CuidAdapter.partnerFormId(database.getId()))
+                .setParentId(database.getResourceId())
+                .setLabel("Parent Form")
+                .setVisibleToDatabaseUser()
+                .setType(ResourceType.FORM)
+                .build();
     }
 
     private List<Resource> fetchForms(@NotNull Database database) {

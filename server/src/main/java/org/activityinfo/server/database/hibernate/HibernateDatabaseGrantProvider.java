@@ -246,6 +246,8 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
             return grants;
         }
         GrantModel rootGrant = buildRootGrant(CuidAdapter.databaseId(userPermission.getDatabase().getId()), userPermission);
+        GrantModel partnerFormGrant = buildPartnerFormGrant(userPermission);
+        grants.add(partnerFormGrant);
         if (userPermission.getModel() == null) {
             grants.add(rootGrant);
             return grants;
@@ -264,6 +266,32 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         databaseGrant.setResourceId(databaseId);
         setOperations(databaseGrant, userPermission);
         return databaseGrant.build();
+    }
+
+    private static GrantModel buildPartnerFormGrant(UserPermission userPermission) {
+        GrantModel.Builder partnerFormGrant = new GrantModel.Builder();
+        partnerFormGrant.setResourceId(CuidAdapter.partnerFormId(userPermission.getDatabase().getId()));
+        setPartnerOperations(partnerFormGrant, userPermission);
+        return partnerFormGrant.build();
+    }
+
+    private static void setPartnerOperations(GrantModel.Builder partnerFormGrant, UserPermission userPermission) {
+        if (userPermission.isAllowViewAll()) {
+            partnerFormGrant.addOperation(Operation.VIEW);
+        } else {
+            partnerFormGrant.addOperation(Operation.VIEW, getPartnerFilter(userPermission));
+        }
+        if (userPermission.isAllowManageAllUsers()) {
+            partnerFormGrant.addOperation(Operation.CREATE_RECORD);
+            partnerFormGrant.addOperation(Operation.EDIT_RECORD);
+            partnerFormGrant.addOperation(Operation.DELETE_RECORD);
+            partnerFormGrant.addOperation(Operation.EXPORT_RECORDS);
+        } else if (userPermission.isAllowManageUsers()) {
+            partnerFormGrant.addOperation(Operation.CREATE_RECORD, getPartnerFilter(userPermission));
+            partnerFormGrant.addOperation(Operation.EDIT_RECORD, getPartnerFilter(userPermission));
+            partnerFormGrant.addOperation(Operation.DELETE_RECORD, getPartnerFilter(userPermission));
+            partnerFormGrant.addOperation(Operation.EXPORT_RECORDS, getPartnerFilter(userPermission));
+        }
     }
 
     private static List<GrantModel> buildGrantsFromModel(@NotNull JsonValue modelObject, @NotNull GrantModel rootGrant) {

@@ -46,7 +46,6 @@ public class PermissionOracle {
 
     private static boolean isSpecialResource(ResourceId resourceId) {
         return isDatabase(resourceId)
-                || isPartnerForm(resourceId)
                 || isProjectForm(resourceId)
                 || isAdminLevelForm(resourceId);
     }
@@ -111,8 +110,6 @@ public class PermissionOracle {
             return db.getDatabaseId().equals(resourceId)
                     && db.hasGrant(resourceId)
                     && db.getGrant(resourceId).get().hasOperation(operation);
-        } else if (isPartnerForm(resourceId)) {
-            return allowedPartnerOperation(operation, db);
         } else if (isProjectForm(resourceId)) {
             return allowedProjectOperation(resourceId, operation, db);
         } else if (isAdminLevelForm(resourceId)) {
@@ -120,25 +117,6 @@ public class PermissionOracle {
         } else {
             return db.hasResource(resourceId)
                     && granted(operation, db.getResource(resourceId).get(), db);
-        }
-    }
-
-    private static boolean allowedPartnerOperation(Operation operation, UserDatabaseMeta db) {
-        Optional<GrantModel> databaseGrant = findDatabaseGrantIfPresent(db);
-        switch(operation) {
-            case VIEW:
-                return db.isVisible();
-            case MANAGE_USERS:
-                return databaseGrant.isPresent() && databaseGrant.get().hasOperation(operation);
-            case CREATE_RECORD:
-            case EDIT_RECORD:
-            case DELETE_RECORD:
-            case EXPORT_RECORDS:
-                return databaseGrant.isPresent()
-                        && databaseGrant.get().hasOperation(Operation.MANAGE_USERS)
-                        && databaseGrant.get().hasOperation(operation);
-            default:
-                return false;
         }
     }
 
@@ -154,16 +132,6 @@ public class PermissionOracle {
             default:
                 return false;
         }
-    }
-
-    private static Optional<GrantModel> findDatabaseGrantIfPresent(UserDatabaseMeta db) {
-        if (!db.isVisible()) {
-            return Optional.empty();
-        }
-        if (!db.hasGrant(db.getDatabaseId())) {
-            return Optional.empty();
-        }
-        return db.getGrant(db.getDatabaseId());
     }
 
     private static boolean allowedAdminLevelOperation(Operation operation, UserDatabaseMeta db) {
@@ -202,8 +170,6 @@ public class PermissionOracle {
     private static Optional<String> operationFilter(Operation operation, ResourceId resourceId, UserDatabaseMeta db) {
         if (isDatabase(resourceId)) {
             return getFilter(operation, resourceId, db);
-        } else if (isPartnerForm(resourceId)) {
-            return getFilter(Operation.MANAGE_USERS, db.getDatabaseId(), db);
         } else if (isProjectForm(resourceId)) {
             return Optional.empty();
         } else if (isAdminLevelForm(resourceId)) {
@@ -264,10 +230,6 @@ public class PermissionOracle {
         return resourceId.getDomain() == CuidAdapter.DATABASE_DOMAIN;
     }
 
-    private static boolean isPartnerForm(ResourceId resourceId) {
-        return resourceId.getDomain() == CuidAdapter.PARTNER_FORM_CLASS_DOMAIN;
-    }
-
     private static boolean isProjectForm(ResourceId resourceId) {
         return resourceId.getDomain() == CuidAdapter.PROJECT_CLASS_DOMAIN;
     }
@@ -288,7 +250,7 @@ public class PermissionOracle {
         if (db.isPublished()) {
             return FormPermissions.readWrite();
         }
-        if (isPartnerForm(formId) || isProjectForm(formId)) {
+        if (isProjectForm(formId)) {
             return computeFormPermissions(formId, db);
         }
         if (!db.hasResource(formId)) {

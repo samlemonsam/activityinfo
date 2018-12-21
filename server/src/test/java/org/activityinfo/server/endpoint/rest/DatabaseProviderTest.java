@@ -132,18 +132,20 @@ public class DatabaseProviderTest {
 
         // IRAQ: Should have a returned UserDatabaseMeta which is entirely visible. Owner has no grants.
         // Database has 7 resources in total
+        // Partner Form is also visible, bringing total visible resources to 8
         assertTrue(iraqDb.isPresent());
         assertTrue(iraqDb.get().isVisible());
         assertTrue(iraqDb.get().isOwner());
-        assertThat(iraqDb.get().getResources().size(), equalTo(7));
+        assertThat(iraqDb.get().getResources().size(), equalTo(8));
         assertTrue(iraqDb.get().getGrants().isEmpty());
 
         // SYRIA: Should have a returned UserDatabaseMeta which is entirely visible. Owner has no grants.
         // Database has 7 resources in total
+        // Partner Form is also visible, bringing total visible resources to 8
         assertTrue(syriaDb.isPresent());
         assertTrue(syriaDb.get().isVisible());
         assertTrue(syriaDb.get().isOwner());
-        assertThat(syriaDb.get().getResources().size(), equalTo(7));
+        assertThat(syriaDb.get().getResources().size(), equalTo(8));
         assertTrue(syriaDb.get().getGrants().isEmpty());
     }
 
@@ -167,10 +169,11 @@ public class DatabaseProviderTest {
 
         // LEBANON: Should have a returned UserDatabaseMeta which is entirely visible. Owner has no grants.
         // Database has 7 resources in total
+        // Partner Form is also visible, bringing total visible resources to 8
         assertTrue(lebanonDb.isPresent());
         assertTrue(lebanonDb.get().isVisible());
         assertTrue(lebanonDb.get().isOwner());
-        assertThat(lebanonDb.get().getResources().size(), equalTo(7));
+        assertThat(lebanonDb.get().getResources().size(), equalTo(8));
         assertTrue(lebanonDb.get().getGrants().isEmpty());
     }
 
@@ -187,19 +190,20 @@ public class DatabaseProviderTest {
         assertTrue(iraqDb.get().getGrants().isEmpty());
 
         // SYRIA: Should have a returned UserDatabaseMeta which is visible. User has grant on Folder 4, with associated resources visible (3).
+        // Partner Form is also visible, bringing total visible resources to 4
         assertTrue(syriaDb.isPresent());
         assertTrue(syriaDb.get().isVisible());
-        assertThat(syriaDb.get().getGrants().size(), equalTo(1));
+        assertThat(syriaDb.get().getGrants().size(), equalTo(2));
         assertTrue(syriaDb.get().hasGrant(CuidAdapter.folderId(4)));
-        assertThat(syriaDb.get().getResources().size(), equalTo(3));
+        assertThat(syriaDb.get().getResources().size(), equalTo(4));
 
         // LEBANON: Should have a returned UserDatabaseMeta which is visible. User has grant on Folder 7, with associated resources visible (3).
-        // Public INTAKE FORM and SUBFORM resources are also visible, bringing total visible resources to 5.
+        // Public INTAKE FORM and SUBFORM resources are also visible, as well as Partner Form Resource, bringing total visible resources to 6.
         assertTrue(lebanonDb.isPresent());
         assertTrue(lebanonDb.get().isVisible());
-        assertThat(lebanonDb.get().getGrants().size(), equalTo(1));
+        assertThat(lebanonDb.get().getGrants().size(), equalTo(2));
         assertTrue(lebanonDb.get().hasGrant(CuidAdapter.folderId(7)));
-        assertThat(lebanonDb.get().getResources().size(), equalTo(5));
+        assertThat(lebanonDb.get().getResources().size(), equalTo(6));
     }
 
     @Test

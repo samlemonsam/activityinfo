@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -74,7 +75,7 @@ public class DatabaseCatalogProviderTest {
     }
 
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() {
         helper.tearDown();
     }
 
@@ -125,12 +126,20 @@ public class DatabaseCatalogProviderTest {
         matchEntries(databases, expectedEntries, CatalogEntryType.FOLDER, false);
 
         // IRAQ Database
-        List<CatalogEntry> iraqFolders = catalog.getChildren(CuidAdapter.databaseId(IRAQ_DB).asString(), ALEX);
+        List<CatalogEntry> iraqEntries = catalog.getChildren(CuidAdapter.databaseId(IRAQ_DB).asString(), ALEX);
+        List<CatalogEntry> iraqFolders = iraqEntries.stream().filter(entry -> entry.getType() == CatalogEntryType.FOLDER).collect(Collectors.toList());
+        List<CatalogEntry> iraqForms = iraqEntries.stream().filter(entry -> entry.getType() == CatalogEntryType.FORM).collect(Collectors.toList());
+
+        // For root folders
         expectedEntries = Lists.newArrayList(
                 CuidAdapter.folderId(1).asString(),
                 CuidAdapter.folderId(2).asString(),
                 CuidAdapter.folderId(3).asString());
         matchEntries(iraqFolders, expectedEntries, CatalogEntryType.FOLDER, false);
+
+        // For root forms (should only be partner form)
+        expectedEntries = Collections.singletonList(CuidAdapter.partnerFormId(IRAQ_DB).asString());
+        matchEntries(iraqForms, expectedEntries, CatalogEntryType.FORM, true);
 
         List<CatalogEntry> folderForms = catalog.getChildren(CuidAdapter.folderId(1).asString(), ALEX);
         expectedEntries = Lists.newArrayList(
@@ -164,10 +173,17 @@ public class DatabaseCatalogProviderTest {
                 CuidAdapter.folderId(8).asString());
         matchEntries(folders, expectedEntries, CatalogEntryType.FOLDER, false);
 
-        // Intake Form has a Sub-Form, so shouldn't be a leaf
+        // Should have two forms, Intake Form and the Partner Form
         List<CatalogEntry> forms = lebanonResources.stream().filter(entry -> entry.getType().equals(CatalogEntryType.FORM)).collect(Collectors.toList());
+        assert forms.size() == 2;
+        List<CatalogEntry> intakeForm = forms.stream().filter(entry -> entry.getId().equals(INTAKE_PARENT_FORM.asString())).collect(Collectors.toList());
+        List<CatalogEntry> partnerForm = forms.stream().filter(entry -> entry.getId().equals(CuidAdapter.partnerFormId(LEBANON_DB).asString())).collect(Collectors.toList());
+
         expectedEntries = Lists.newArrayList(INTAKE_PARENT_FORM.asString());
-        matchEntries(forms, expectedEntries, CatalogEntryType.FORM, false);
+        matchEntries(intakeForm, expectedEntries, CatalogEntryType.FORM, false);
+
+        expectedEntries = Lists.newArrayList(CuidAdapter.partnerFormId(LEBANON_DB).asString());
+        matchEntries(partnerForm, expectedEntries, CatalogEntryType.FORM, true);
 
         List<CatalogEntry> intakeFormResources = catalog.getChildren(INTAKE_PARENT_FORM.asString(), BAVON);
         expectedEntries = Lists.newArrayList(INTAKE_SUB_FORM.asString());
@@ -183,10 +199,18 @@ public class DatabaseCatalogProviderTest {
                 CuidAdapter.databaseId(LEBANON_DB).asString());
         matchEntries(databases, expectedEntries, CatalogEntryType.FOLDER, false);
 
-        // On SYRIA database, John should only be able to see folder 4 and its contained resources
-        List<CatalogEntry> syriaFolders = catalog.getChildren(CuidAdapter.databaseId(SYRIA_DB).asString(), JOHN);
+        // On SYRIA database, John should only be able to see folder 4 and its contained resources, as well as the Partner Form
+        List<CatalogEntry> syriaEntries = catalog.getChildren(CuidAdapter.databaseId(SYRIA_DB).asString(), JOHN);
+        List<CatalogEntry> syriaFolders = syriaEntries.stream().filter(entry -> entry.getType().equals(CatalogEntryType.FOLDER)).collect(Collectors.toList());
+        List<CatalogEntry> syriaForms = syriaEntries.stream().filter(entry -> entry.getType().equals(CatalogEntryType.FORM)).collect(Collectors.toList());
+
+        // For syria folders
         expectedEntries = Lists.newArrayList(CuidAdapter.folderId(4).asString());
         matchEntries(syriaFolders, expectedEntries, CatalogEntryType.FOLDER, false);
+
+        // for syria forms
+        expectedEntries = Lists.newArrayList(CuidAdapter.partnerFormId(SYRIA_DB).asString());
+        matchEntries(syriaForms, expectedEntries, CatalogEntryType.FORM, true);
 
         List<CatalogEntry> syriaFolderForms = catalog.getChildren(CuidAdapter.folderId(4).asString(), JOHN);
         expectedEntries = Lists.newArrayList(
@@ -195,13 +219,19 @@ public class DatabaseCatalogProviderTest {
         matchEntries(syriaFolderForms, expectedEntries, CatalogEntryType.FORM, true);
 
         // On LEBANON database, John should have assigned permissions to view folder 7
-        // but should also be able to see Form 9 as it is published
+        // but should also be able to see Form 9 as it is published and the Partner Form
         List<CatalogEntry> lebanonResources = catalog.getChildren(CuidAdapter.databaseId(LEBANON_DB).asString(), JOHN);
 
         // Published form should be visible (but is not leaf as it has a subform)
         List<CatalogEntry> lebanonForms = lebanonResources.stream().filter(entry -> entry.getType().equals(CatalogEntryType.FORM)).collect(Collectors.toList());
+        List<CatalogEntry> intakeForm = lebanonForms.stream().filter(entry -> entry.getId().equals(INTAKE_PARENT_FORM.asString())).collect(Collectors.toList());
+        List<CatalogEntry> partnerForm = lebanonForms.stream().filter(entry -> entry.getId().equals(CuidAdapter.partnerFormId(LEBANON_DB).asString())).collect(Collectors.toList());
+
         expectedEntries = Lists.newArrayList(INTAKE_PARENT_FORM.asString());
-        matchEntries(lebanonForms, expectedEntries, CatalogEntryType.FORM, false);
+        matchEntries(intakeForm, expectedEntries, CatalogEntryType.FORM, false);
+
+        expectedEntries = Lists.newArrayList(CuidAdapter.partnerFormId(LEBANON_DB).asString());
+        matchEntries(partnerForm, expectedEntries, CatalogEntryType.FORM, true);
 
         // Folder 7 should be only one visible
         List<CatalogEntry> lebanonFolders = lebanonResources.stream().filter(entry -> entry.getType().equals(CatalogEntryType.FOLDER)).collect(Collectors.toList());
