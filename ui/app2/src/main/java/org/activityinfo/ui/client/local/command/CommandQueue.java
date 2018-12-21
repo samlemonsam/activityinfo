@@ -245,7 +245,6 @@ public class CommandQueue {
             changeObject.addProperty("month", change.getMonth().getMonth());
             changeObject.addProperty("indicatorId", change.getIndicatorId());
             changeObject.addProperty("value", change.getValue());
-            changeObject.addProperty("changeType", change.getChangeType().name());
             changeArray.add(changeObject);
         }
 
@@ -287,8 +286,7 @@ public class CommandQueue {
             if(changeObject.get("value").isJsonPrimitive()) {
                 value = changeObject.get("value").getAsDouble();
             }
-            UpdateMonthlyReports.Change.Type type = UpdateMonthlyReports.Change.Type.valueOf(changeObject.get("changeType").getAsString());
-            changes.add(new Change(indicatorId, month, value, type));
+            changes.add(new Change(indicatorId, month, value));
         }
         return new UpdateMonthlyReports(siteId, changes);
 
