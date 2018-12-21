@@ -51,9 +51,6 @@ class MonthlyGrid extends EditorGrid<IndicatorRowDTO> {
     private static final int ROW_HEADER_WIDTH = 150;
     private static final int MONTH_COLUMN_WIDTH = 75;
     private boolean readOnly = true;
-    private boolean createAllowed = false;
-    private boolean editAllowed = false;
-    private boolean deleteAllowed = false;
     private Predicate<Month> locked;
     private final DateTimeFormat monthFormat = DateTimeFormat.getFormat("MMM yy");
 
@@ -74,29 +71,6 @@ class MonthlyGrid extends EditorGrid<IndicatorRowDTO> {
                 Month month = IndicatorRowDTO.monthForProperty(property);
                 if (locked.apply(month)) {
                     event.setCancelled(true);
-                }
-                IndicatorRowDTO entry = (IndicatorRowDTO) event.getModel();
-                Double currentValue = entry.get(property);
-                if (currentValue == null || currentValue == Double.NaN) {
-                    if (!createAllowed) {
-                        event.setCancelled(true);
-                    } else {
-                        // Set entry as a new record
-                        entry.setNewlyCreated(true);
-                    }
-                } else if (!editAllowed && !deleteAllowed) {
-                    event.setCancelled(true);
-                }
-            }
-        });
-        addListener(Events.ValidateEdit, new Listener<GridEvent>() {
-            @Override
-            public void handleEvent(GridEvent event) {
-                Double newValue = (Double) event.getValue();
-                if (newValue == null || newValue == Double.NaN) {
-                    if (!deleteAllowed) {
-                        event.setCancelled(true);
-                    }
                 }
             }
         });
@@ -149,18 +123,6 @@ class MonthlyGrid extends EditorGrid<IndicatorRowDTO> {
 
     public void setReadOnly(boolean readOnly) {
         this.readOnly = readOnly;
-    }
-
-    public void setCreateAllowed(boolean createAllowed) {
-        this.createAllowed = createAllowed;
-    }
-
-    public void setEditAllowed(boolean editAllowed) {
-        this.editAllowed = editAllowed;
-    }
-
-    public void setDeleteAllowed(boolean deleteAllowed) {
-        this.deleteAllowed = deleteAllowed;
     }
 
     public void setLockedPredicate(Predicate<Month> locked) {
