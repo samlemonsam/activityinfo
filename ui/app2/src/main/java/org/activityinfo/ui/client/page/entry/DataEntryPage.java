@@ -250,7 +250,7 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
         attachmentsTab.setEnabled(activity.getClassicView());
         if (activity.getReportingFrequency() == ActivityFormDTO.REPORT_MONTHLY) {
             monthlyPanel.load(site);
-            monthlyPanel.setReadOnly(!activity.isCreateAllowed() && !activity.isAllowedToEdit(site) && !activity.isAllowedToDelete(site));
+            monthlyPanel.setReadOnly(activity.isAllowedToEdit(site));
             monthlyTab.setEnabled(true);
         } else {
             monthlyTab.setEnabled(false);
