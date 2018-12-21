@@ -38,6 +38,7 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.GetUsers;
 import org.activityinfo.legacy.shared.command.result.UserResult;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.model.permission.Permission;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
@@ -324,23 +325,25 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
                 record.set(PermissionType.CREATE_ALL.getDtoPropertyName(), false);
                 record.set(PermissionType.EDIT_ALL.getDtoPropertyName(), false);
                 record.set(PermissionType.DELETE_ALL.getDtoPropertyName(), false);
-            }
-            if (permissionType == PermissionType.CREATE) {
+            } else if (permissionType == PermissionType.CREATE) {
                 record.set(PermissionType.CREATE_ALL.getDtoPropertyName(), false);
-            }
-            if (permissionType == PermissionType.EDIT) {
+            } else if (permissionType == PermissionType.EDIT) {
+                record.set(PermissionType.CREATE.getDtoPropertyName(), false);
                 record.set(PermissionType.EDIT_ALL.getDtoPropertyName(), false);
-            }
-            if (permissionType == PermissionType.DELETE) {
+            } else if (permissionType == PermissionType.EDIT_ALL) {
+                record.set(PermissionType.CREATE_ALL.getDtoPropertyName(), false);
+            } else if (permissionType == PermissionType.DELETE) {
                 record.set(PermissionType.DELETE_ALL.getDtoPropertyName(), false);
-            }
-            if (permissionType == PermissionType.MANAGE_USERS) {
+            } else if (permissionType == PermissionType.MANAGE_USERS) {
                 record.set(PermissionType.MANAGE_ALL_USERS.getDtoPropertyName(), false);
             }
         } else {
             // cascade add permissions
-            if (permissionType == PermissionType.CREATE_ALL) {
+            if (permissionType == PermissionType.CREATE) {
+                record.set(PermissionType.EDIT.getDtoPropertyName(), true);
+            } else if (permissionType == PermissionType.CREATE_ALL) {
                 record.set(PermissionType.CREATE.getDtoPropertyName(), true);
+                record.set(PermissionType.EDIT_ALL.getDtoPropertyName(), true);
                 record.set(PermissionType.VIEW_ALL.getDtoPropertyName(), true);
             } else if (permissionType == PermissionType.EDIT_ALL) {
                 record.set(PermissionType.EDIT.getDtoPropertyName(), true);

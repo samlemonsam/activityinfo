@@ -178,25 +178,58 @@ public class UserForm extends FormPanel {
         operationsGroup.setOrientation(Style.Orientation.VERTICAL);
         allPartnersGroup.setOrientation(Style.Orientation.VERTICAL);
 
-        // View check box must always be set to true (and disabling it causes confusion), even if user wants to change it...
         viewCheckBox = permissionsCheckBox(PermissionType.VIEW, I18N.CONSTANTS.allowView());
         viewCheckBox.setValue(true);
+        // View check box must always be set to true (and disabling it causes confusion), even if user wants to change it...
         viewCheckBox.addListener(Events.Change, change -> viewCheckBox.setValue(true));
-
         viewAllCheckBox = permissionsCheckBox(PermissionType.VIEW_ALL, I18N.CONSTANTS.forAllPartners());
 
-        operationsGroup.add(viewCheckBox);
-        allPartnersGroup.add(viewAllCheckBox);
+        CheckBox createCheckBox = permissionsCheckBox(PermissionType.CREATE, I18N.CONSTANTS.allowCreate());
+        CheckBox createAllCheckBox = permissionsCheckBox(PermissionType.CREATE_ALL, I18N.CONSTANTS.forAllPartners());
+        toggleAllPermission(createCheckBox, createAllCheckBox);
+        toggleViewAllPermission(createAllCheckBox);
 
-        addCheckBoxes(PermissionType.CREATE, PermissionType.CREATE_ALL, I18N.CONSTANTS.allowCreate(), true);
-        addCheckBoxes(PermissionType.EDIT, PermissionType.EDIT_ALL, I18N.CONSTANTS.allowEdit(), true);
-        addCheckBoxes(PermissionType.DELETE, PermissionType.DELETE_ALL, I18N.CONSTANTS.allowDelete(), true);
-        addCheckBoxes(PermissionType.MANAGE_USERS, PermissionType.MANAGE_ALL_USERS, I18N.CONSTANTS.allowManageUsers(), false);
-        operationsGroup.add(permissionsCheckBox(PermissionType.EXPORT_RECORDS, I18N.CONSTANTS.allowExport()));
-        operationsGroup.add(permissionsCheckBox(PermissionType.DESIGN, I18N.CONSTANTS.allowDesign()));
+        CheckBox editCheckBox = permissionsCheckBox(PermissionType.EDIT, I18N.CONSTANTS.allowEdit());
+        CheckBox editAllCheckBox = permissionsCheckBox(PermissionType.EDIT_ALL, I18N.CONSTANTS.forAllPartners());
+        toggleAllPermission(editCheckBox, editAllCheckBox);
+        toggleViewAllPermission(editAllCheckBox);
+
+        // CREATE and CREATE_ALL permissions require the corresponding EDIT permissions, but *not* vice versa.
+        // This avoids confusion when a user can create a record, but not edit any mistakes. It also allows for an
+        // administrator to remove the ability to create records where needed but maintain the ability to edit.
+        createCheckBox.addListener(Events.Change, change -> setIfChangedToValue(createCheckBox, editCheckBox, Boolean.TRUE));
+        createAllCheckBox.addListener(Events.Change, change -> setIfChangedToValue(createAllCheckBox, editAllCheckBox, Boolean.TRUE));
+        editCheckBox.addListener(Events.Change, change -> setIfChangedToValue(editCheckBox, createCheckBox, Boolean.FALSE));
+        editAllCheckBox.addListener(Events.Change, change -> setIfChangedToValue(editAllCheckBox, createAllCheckBox, Boolean.FALSE));
+
+        CheckBox deleteCheckBox = permissionsCheckBox(PermissionType.DELETE, I18N.CONSTANTS.allowDelete());
+        CheckBox deleteAllCheckBox = permissionsCheckBox(PermissionType.DELETE_ALL, I18N.CONSTANTS.forAllPartners());
+        toggleAllPermission(deleteCheckBox, deleteAllCheckBox);
+        toggleViewAllPermission(deleteAllCheckBox);
+
+        CheckBox manageUsersCheckBox = permissionsCheckBox(PermissionType.MANAGE_USERS, I18N.CONSTANTS.allowManageUsers());
+        CheckBox manageAllUsersCheckBox = permissionsCheckBox(PermissionType.MANAGE_ALL_USERS, I18N.CONSTANTS.forAllPartners());
+        toggleAllPermission(manageUsersCheckBox, manageAllUsersCheckBox);
+
+        CheckBox exportCheckBox = permissionsCheckBox(PermissionType.EXPORT_RECORDS, I18N.CONSTANTS.allowExport());
+        CheckBox designCheckBox = permissionsCheckBox(PermissionType.DESIGN, I18N.CONSTANTS.allowDesign());
+
+        operationsGroup.add(viewCheckBox);
+        operationsGroup.add(createCheckBox);
+        operationsGroup.add(editCheckBox);
+        operationsGroup.add(deleteCheckBox);
+        operationsGroup.add(manageUsersCheckBox);
+        operationsGroup.add(exportCheckBox);
+        operationsGroup.add(designCheckBox);
+        allPartnersGroup.add(viewAllCheckBox);
+        allPartnersGroup.add(createAllCheckBox);
+        allPartnersGroup.add(editAllCheckBox);
+        allPartnersGroup.add(deleteAllCheckBox);
+        allPartnersGroup.add(manageAllUsersCheckBox);
 
         permissionsGroup.add(operationsGroup);
         permissionsGroup.add(allPartnersGroup);
+
         this.add(permissionsGroup);
 
         folderGroup.setFieldLabel(I18N.CONSTANTS.folders());
@@ -233,20 +266,21 @@ public class UserForm extends FormPanel {
         this.add(permissionWarning);
     }
 
-    private void addCheckBoxes(PermissionType permissionType, PermissionType partnerType, String label, boolean enforceViewAll) {
-        CheckBox permissionCheckBox = permissionsCheckBox(permissionType, label);
-        CheckBox partnerCheckBox = permissionsCheckBox(partnerType, I18N.CONSTANTS.forAllPartners());
+    private void setIfChangedToValue(CheckBox changedValue, CheckBox toSet, Boolean value) {
+        // If the changed value now equals the given value, then we need to update "toSet" to the same value
+        if (changedValue.getValue() == value) {
+            toSet.setValue(value);
+        }
+    }
 
+    private void toggleAllPermission(CheckBox permissionCheckBox, CheckBox partnerCheckBox) {
         // If we haven't selected the permission, then the "All Partners" option is disabled
         permissionCheckBox.addListener(Events.Change, change -> allPartnersToggle(permissionCheckBox, partnerCheckBox));
+    }
 
+    private void toggleViewAllPermission(CheckBox partnerCheckBox) {
         // If the "All Partners" option depends on the user also having VIEW_ALL permissions, then set it when selected
-        if (enforceViewAll) {
-            partnerCheckBox.addListener(Events.Change, change -> viewAllToggle(partnerCheckBox));
-        }
-
-        operationsGroup.add(permissionCheckBox);
-        allPartnersGroup.add(partnerCheckBox);
+        partnerCheckBox.addListener(Events.Change, change -> viewAllToggle(partnerCheckBox));
     }
 
     private void allPartnersToggle(CheckBox permissionCheckBox, CheckBox partnerCheckBox) {
