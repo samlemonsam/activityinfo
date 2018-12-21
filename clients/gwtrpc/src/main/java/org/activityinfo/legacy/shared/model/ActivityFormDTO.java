@@ -474,10 +474,6 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, P
         this.currentPartnerId = currentPartnerId;
     }
 
-    public boolean isAllowedToCreate(SiteDTO site) {
-        return createAllAllowed || (isCreateAllowed() && site.getPartnerId() == currentPartnerId);
-    }
-
     public boolean isAllowedToEdit(SiteDTO site) {
         return editAllAllowed || (isEditAllowed() && site.getPartnerId() == currentPartnerId);
     }
