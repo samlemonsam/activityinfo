@@ -95,14 +95,13 @@ public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthly
                     CuidAdapter.databaseId(site.getActivity().getDatabase().getId()),
                     user.getId());
 
-            if (!databaseMeta.isPresent()) {
-                throw new IllegalArgumentException("No database present");
+            if (!databaseMeta.isPresent() || !PermissionOracle.canEditSite(site.getActivity().getFormId(), site.getPartner().getId(), databaseMeta.get())) {
+                throw new IllegalAccessCommandException("Not authorized to modify sites");
             }
+
             if (site.isDeleted()) {
                 throw new CommandException(cmd, "site " + cmd.getSiteId() + " has been deleted");
             }
-
-            checkAuthorization(cmd, site, databaseMeta.get());
 
             UsageTracker.track(user.getId(), "update_monthly",
                     CuidAdapter.databaseId(site.getActivity().getDatabase().getId()),
@@ -110,6 +109,7 @@ public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthly
 
             Map<Month, ReportingPeriod> periods = Maps.newHashMap();
             Map<String, Object> siteHistoryChangeMap = createChangeMap();
+
 
             for (ReportingPeriod period : site.getReportingPeriods()) {
                 periods.put(HandlerUtil.monthFromRange(period.getDate1(), period.getDate2()), period);
@@ -163,29 +163,6 @@ public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthly
         }
 
         return new VoidResult();
-    }
-
-    private void checkAuthorization(UpdateMonthlyReports cmd, Site site, UserDatabaseMeta databaseMeta) {
-        boolean creatingReports = numReportsOfType(cmd, UpdateMonthlyReports.Change.Type.CREATE) > 0;
-        boolean editingReports = numReportsOfType(cmd, UpdateMonthlyReports.Change.Type.EDIT) > 0;
-        boolean deletingReports = numReportsOfType(cmd, UpdateMonthlyReports.Change.Type.DELETE) > 0;
-
-        if (creatingReports && !PermissionOracle.canCreateSite(site.getActivity().getFormId(), site.getPartner().getId(), databaseMeta)) {
-            throw new IllegalAccessCommandException("Not authorized to create sites");
-        }
-        if (editingReports && !PermissionOracle.canEditSite(site.getActivity().getFormId(), site.getPartner().getId(), databaseMeta)) {
-            throw new IllegalAccessCommandException("Not authorized to modify sites");
-        }
-        if (deletingReports && !PermissionOracle.canDeleteSite(site.getActivity().getFormId(), site.getPartner().getId(), databaseMeta)) {
-            throw new IllegalAccessCommandException("Not authorized to delete sites");
-        }
-    }
-
-    private long numReportsOfType(UpdateMonthlyReports cmd, UpdateMonthlyReports.Change.Type type) {
-        return cmd.getChanges().stream()
-                .map(UpdateMonthlyReports.Change::getChangeType)
-                .filter(type::equals)
-                .count();
     }
 
     /**
