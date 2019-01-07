@@ -105,18 +105,22 @@ class ActivityForm extends AbstractDesignForm {
         binding.addFieldBinding(new MappingComboBoxBinding(frequencyCombo, "reportingFrequency"));
         this.add(frequencyCombo);
 
-        MappingComboBox publishedCombo = new MappingComboBox();
+        final MappingComboBox publishedCombo = new MappingComboBox();
         publishedCombo.setAllowBlank(false);
-        publishedCombo.setFieldLabel(I18N.CONSTANTS.published());
-        publishedCombo.add(Published.NOT_PUBLISHED.getIndex(), I18N.CONSTANTS.notPublished());
-        publishedCombo.add(Published.ALL_ARE_PUBLISHED.getIndex(), I18N.CONSTANTS.allArePublished());
+        publishedCombo.setFieldLabel(I18N.CONSTANTS.visibility());
+        publishedCombo.add(Published.NOT_PUBLISHED.getIndex(), I18N.CONSTANTS.privateVisibility());
+        publishedCombo.add(Published.ALL_ARE_PUBLISHED.getIndex(), I18N.CONSTANTS.publicVisibility());
         binding.addFieldBinding(new MappingComboBoxBinding(publishedCombo, "published"));
 
         binding.addListener(Events.Bind, new Listener<BindingEvent>() {
 
             @Override
             public void handleEvent(BindingEvent be) {
+                // User should not be able to change reporting frequency after creation
                 frequencyCombo.setEnabled(!isSaved(be.getModel()));
+
+                // User should only be able to change visibility (i.e. public or private) after creation
+                publishedCombo.setVisible(isSaved(be.getModel()));
             }
         });
 

@@ -103,9 +103,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("All")
     String all();
 
-    @DefaultStringValue("All are published")
-    String allArePublished();
-
     @DefaultStringValue("All dates")
     String allDates();
 
@@ -712,9 +709,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("You are not authorized to make this change: either your access permissions have changed in the last few minutes, or there has been an error on the server.")
     String notAuthorized();
 
-    @DefaultStringValue("Not published")
-    String notPublished();
-
     @DefaultStringValue("Open")
     String open();
 
@@ -774,9 +768,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Proportional circle")
     String proportionalCircle();
-
-    @DefaultStringValue("Published")
-    String published();
 
     @DefaultStringValue("Built-in")
     String builtInLocationTypes();
@@ -1944,4 +1935,14 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Export Activity as a Form. Choose this option if Activity is greater than 256 columns. <br> <br> Exports to a CSV file. <br> <br> No column export limit.")
     String formExportStructureDescription();
+
+    @DefaultStringValue("Visibility")
+    String visibility();
+
+    @DefaultStringValue("Public")
+    String publicVisibility();
+
+    @DefaultStringValue("Private")
+    String privateVisibility();
+
 }
