@@ -240,7 +240,7 @@ public class UserForm extends FormPanel {
             allFolderCheckbox = null;
         } else {
             allFolderCheckbox = new CheckBox();
-            allFolderCheckbox.setValue(false);
+            allFolderCheckbox.setValue(database.getFolders().isEmpty());
             allFolderCheckbox.setBoxLabel(TEMPLATES.allFoldersLabel(I18N.CONSTANTS.all()));
             allFolderCheckbox.addListener(Events.Change, this::onAllFoldersChanged);
             folderGroup.add(allFolderCheckbox);
