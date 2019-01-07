@@ -1951,4 +1951,16 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("All data on this Form will be private, and not available publicly. Select this option if the Form's data is of a sensitive nature, or you do not want it to be publicly published.")
     String privateVisibilityTooltip();
 
+    @DefaultStringValue("Database cannot be transferred to this User due to account restrictions.")
+    String cannotTransferDbToUser();
+
+    @DefaultStringValue("Database is already owned by User.")
+    String userOwnsDatabaseError();
+
+    @DefaultStringValue("There is already a pending transfer request on this Database.")
+    String pendingTransferError();
+
+    @DefaultStringValue("Database can only be transferred by current owner.")
+    String databaseTrasnferOwnerError();
+
 }

@@ -80,6 +80,7 @@ public class ApprovalResource {
                 new DatabaseProviderImpl(entityManager, billingOracle),
                 entityManager,
                 mailSender,
+                billingOracle,
                 database.getId());
 
         return resource.startTransfer(uri, authTokenProvider, transfer);
@@ -108,6 +109,7 @@ public class ApprovalResource {
                 new DatabaseProviderImpl(entityManager, billingOracle),
                 entityManager,
                 mailSender,
+                billingOracle,
                 database.getId());
 
         return resource.cancelTransfer(proposedOwner.asAuthenticatedUser(), TransferDecision.rejected());

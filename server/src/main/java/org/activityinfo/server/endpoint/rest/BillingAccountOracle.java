@@ -16,6 +16,7 @@ import org.activityinfo.server.database.hibernate.entity.User;
 
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
+import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -102,6 +103,23 @@ public class BillingAccountOracle {
         } else {
             return queryUserExistsInBillingAccount(database.getOwner().getBillingAccount().getId(), newUser.getId());
         }
+    }
+
+    /**
+     * Determine whether this User is allowed to accept ownership of a Database.
+     */
+    public boolean isAllowReceiveDatabase(@NotNull User user) {
+        AccountStatus accountStatus = getStatus(user);
+        // Users on a trial account are NEVER allowed to accept ownership of a Database
+        if (accountStatus.isTrial()) {
+            return false;
+        }
+        // Suspended Users are NEVER allowed to accept ownership of a Database.
+        if (accountStatus.isSuspended()) {
+            return false;
+        }
+        // Otherwise, check that we can add a new database on the users account
+        return accountStatus.isNewDatabaseAllowed();
     }
 
     /**

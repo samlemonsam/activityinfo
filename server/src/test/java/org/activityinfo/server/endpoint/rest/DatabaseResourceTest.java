@@ -78,6 +78,7 @@ public class DatabaseResourceTest extends CommandTestCase {
                 new DatabaseProviderImpl(Providers.of(em), billingOracle),
                 Providers.of(em),
                 mailSender,
+                billingOracle,
                 databaseId);
         uri = RestMockUtils.mockUriInfo("http://www.activityinfo.org/");
         helper.setUp();

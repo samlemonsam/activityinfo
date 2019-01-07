@@ -81,6 +81,7 @@ public class ApprovalResourceTest extends CommandTestCase {
                 new DatabaseProviderImpl(Providers.of(em), billingOracle),
                 Providers.of(em),
                 mailSender,
+                billingOracle,
                 databaseId);
 
         approvalResource = new ApprovalResource(Providers.of(em),
