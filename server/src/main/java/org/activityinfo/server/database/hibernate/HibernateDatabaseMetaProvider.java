@@ -20,6 +20,7 @@ import org.activityinfo.server.database.hibernate.entity.Folder;
 import org.activityinfo.server.database.hibernate.entity.LockedPeriod;
 import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.store.spi.DatabaseMetaProvider;
+import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.FormStorageProvider;
 
 import javax.annotation.Nullable;
@@ -114,6 +115,10 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
             case CuidAdapter.FOLDER_DOMAIN:
                 Optional<ResourceId> folderDatabaseId = Optional.ofNullable(queryDatabaseIdForFolder(resourceId));
                 return folderDatabaseId.isPresent() ? getDatabaseMeta(folderDatabaseId.get()) : Optional.empty();
+            case ResourceId.GENERATED_ID_DOMAIN:
+                // Check for a Sub-Form Resource
+                com.google.common.base.Optional<FormStorage> subForm = formStorageProvider.getForm(resourceId);
+                return subForm.isPresent() ? getDatabaseMeta(subForm.get().getFormClass().getDatabaseId()) : Optional.empty();
             default:
                 throw new IllegalArgumentException("Cannot fetch UserDatabaseMeta for Resource: " + resourceId.toString());
         }
