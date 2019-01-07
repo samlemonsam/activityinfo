@@ -24,6 +24,7 @@ import com.extjs.gxt.ui.client.binding.FormBinding;
 import com.extjs.gxt.ui.client.data.ModelData;
 import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.widget.button.Button;
+import com.extjs.gxt.ui.client.widget.form.LabelField;
 import com.extjs.gxt.ui.client.widget.form.NumberField;
 import com.extjs.gxt.ui.client.widget.form.TextField;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -40,6 +41,8 @@ import org.activityinfo.ui.client.widget.legacy.MappingComboBox;
 import org.activityinfo.ui.client.widget.legacy.MappingComboBoxBinding;
 import org.activityinfo.ui.client.widget.legacy.OnlyValidFieldBinding;
 
+import java.util.Objects;
+
 /**
  * FormClass for editing ActivityDTO
  */
@@ -47,6 +50,7 @@ class ActivityForm extends AbstractDesignForm {
 
     private FormBinding binding;
     private String categoryLink = "http://help.activityinfo.org/m/28175/l/842935-folders-in-activityinfo";
+    private final LabelField publishedTooltip = new LabelField();
 
     /**
      * Creates an info button (with icon) which navigates to a given hyperlink on press
@@ -110,21 +114,21 @@ class ActivityForm extends AbstractDesignForm {
         publishedCombo.setFieldLabel(I18N.CONSTANTS.visibility());
         publishedCombo.add(Published.NOT_PUBLISHED.getIndex(), I18N.CONSTANTS.privateVisibility());
         publishedCombo.add(Published.ALL_ARE_PUBLISHED.getIndex(), I18N.CONSTANTS.publicVisibility());
+        publishedCombo.addListener(Events.SelectionChange, this::updateTooltip);
+
         binding.addFieldBinding(new MappingComboBoxBinding(publishedCombo, "published"));
 
-        binding.addListener(Events.Bind, new Listener<BindingEvent>() {
+        binding.addListener(Events.Bind, (Listener<BindingEvent>) be -> {
+            // User should not be able to change reporting frequency after creation
+            frequencyCombo.setEnabled(!isSaved(be.getModel()));
 
-            @Override
-            public void handleEvent(BindingEvent be) {
-                // User should not be able to change reporting frequency after creation
-                frequencyCombo.setEnabled(!isSaved(be.getModel()));
-
-                // User should only be able to change visibility (i.e. public or private) after creation
-                publishedCombo.setVisible(isSaved(be.getModel()));
-            }
+            // User should only be able to change visibility (i.e. public or private) after creation
+            publishedCombo.setVisible(isSaved(be.getModel()));
+            publishedTooltip.setVisible(isSaved(be.getModel()));
         });
 
         this.add(publishedCombo);
+        this.add(publishedTooltip);
 
         getBinding().addListener(Events.Bind, new Listener<BindingEvent>() {
 
@@ -143,6 +147,22 @@ class ActivityForm extends AbstractDesignForm {
         add(categoryInfo);
 
         hideFieldWhenNull(idField);
+    }
+
+    private void updateTooltip(BaseEvent se) {
+        if (se == null || !(se instanceof SelectionChangedEvent)) {
+            return;
+        }
+        SelectionChangedEvent selection = (SelectionChangedEvent) se;
+        if (selection.getSelectedItem() == null) {
+            return;
+        }
+        Object value = selection.getSelectedItem().get("value");
+        if (Objects.equals(value, Published.NOT_PUBLISHED.getIndex())) {
+            publishedTooltip.setText(I18N.CONSTANTS.privateVisibilityTooltip());
+        } else if (Objects.equals(value, Published.ALL_ARE_PUBLISHED.getIndex())) {
+            publishedTooltip.setText(I18N.CONSTANTS.publicVisibilityTooltip());
+        }
     }
 
     @Override

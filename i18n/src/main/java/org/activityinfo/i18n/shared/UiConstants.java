@@ -1945,4 +1945,10 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Private")
     String privateVisibility();
 
+    @DefaultStringValue("All data on this Form will be publicly visible. Select this option if the Form's data is not of a sensitive nature, and you want it to be publicly published.")
+    String publicVisibilityTooltip();
+
+    @DefaultStringValue("All data on this Form will be private, and not available publicly. Select this option if the Form's data is of a sensitive nature, or you do not want it to be publicly published.")
+    String privateVisibilityTooltip();
+
 }
