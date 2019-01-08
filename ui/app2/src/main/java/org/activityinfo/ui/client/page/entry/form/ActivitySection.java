@@ -24,10 +24,14 @@ import com.extjs.gxt.ui.client.widget.form.TextField;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.LockedPeriodSet;
+import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.ui.client.page.entry.form.field.PartnerComboBox;
 import org.activityinfo.ui.client.page.entry.form.field.ProjectComboBox;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ActivitySection extends FormSectionWithFormLayout<SiteDTO> {
 
@@ -38,7 +42,7 @@ public class ActivitySection extends FormSectionWithFormLayout<SiteDTO> {
     private PartnerComboBox partnerCombo;
     private ProjectComboBox projectCombo;
 
-    public ActivitySection(LockedPeriodSet locks, final ActivityFormDTO activity) {
+    public ActivitySection(LockedPeriodSet locks, final ActivityFormDTO activity, boolean isNewSite) {
         super();
 
         this.activity = activity;
@@ -58,7 +62,7 @@ public class ActivitySection extends FormSectionWithFormLayout<SiteDTO> {
         activityField.setReadOnly(true);
         add(activityField);
 
-        partnerCombo = new PartnerComboBox(activity);
+        partnerCombo = new PartnerComboBox(determinePartners(activity, isNewSite));
         add(partnerCombo);
 
         projectCombo = new ProjectComboBox(activity);
@@ -85,6 +89,24 @@ public class ActivitySection extends FormSectionWithFormLayout<SiteDTO> {
             add(dateField2);
 
         }
+    }
+
+    private List<PartnerDTO> determinePartners(ActivityFormDTO activity, boolean isNewSite) {
+        if (isNewSite) {
+            return activity.isCreateAllAllowed()
+                    ? activity.getPartnerRange()
+                    : extractPartner(activity.getCurrentPartnerId(), activity.getPartnerRange());
+        } else {
+            return activity.isEditAllAllowed()
+                    ? activity.getPartnerRange()
+                    : extractPartner(activity.getCurrentPartnerId(), activity.getPartnerRange());
+        }
+    }
+
+    private List<PartnerDTO> extractPartner(int currentPartnerId, List<PartnerDTO> partnerRange) {
+        return partnerRange.stream()
+                .filter(p -> p.getId() == currentPartnerId)
+                .collect(Collectors.toList());
     }
 
     private String validateDateRange(LockedPeriodSet locks, ActivityFormDTO activity) {

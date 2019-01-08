@@ -142,7 +142,7 @@ public class SiteDialogLauncher {
 
                     @Override
                     public void onSuccess(ActivityFormDTO activity) {
-                        SiteDialog dialog = new SiteDialog(dispatcher, locks, activity);
+                        SiteDialog dialog = new SiteDialog(dispatcher, locks, activity, false);
                         dialog.showExisting(site, callback);
                     }
                 });
@@ -159,7 +159,7 @@ public class SiteDialogLauncher {
             newSite.setActivityId(activity.getId());
             newSite.setLocation(location);
 
-            SiteDialog siteDialog = new SiteDialog(dispatcher, locks, activity);
+            SiteDialog siteDialog = new SiteDialog(dispatcher, locks, activity, true);
             siteDialog.showNew(newSite, location, isNew, callback);
         });
     }
@@ -172,7 +172,7 @@ public class SiteDialogLauncher {
         location.setId(new KeyGenerator().generateInt());
         location.setLocationTypeId(activity.getLocationTypeId());
 
-        SiteDialog dialog = new SiteDialog(dispatcher, locks, activity);
+        SiteDialog dialog = new SiteDialog(dispatcher, locks, activity, true);
         dialog.showNew(newSite, location, true, callback);
     }
 
@@ -184,7 +184,7 @@ public class SiteDialogLauncher {
         location.setId(activity.getLocationTypeId());
         location.setLocationTypeId(activity.getLocationTypeId());
 
-        SiteDialog dialog = new SiteDialog(dispatcher, locks, activity);
+        SiteDialog dialog = new SiteDialog(dispatcher, locks, activity, true);
         dialog.showNew(newSite, location, true, callback);
     }
 

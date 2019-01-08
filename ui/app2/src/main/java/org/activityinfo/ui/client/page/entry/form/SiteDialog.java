@@ -76,7 +76,7 @@ public class SiteDialog extends Window {
     private boolean newSite;
     private KeyGenerator keyGenerator;
 
-    public SiteDialog(Dispatcher dispatcher, LockedPeriodSet locks, ActivityFormDTO activity) {
+    public SiteDialog(Dispatcher dispatcher, LockedPeriodSet locks, ActivityFormDTO activity, boolean isNewSite) {
         this.dispatcher = dispatcher;
         this.activity = activity;
 
@@ -105,7 +105,7 @@ public class SiteDialog extends Window {
             locationForm = new LocationSection(dispatcher, activity);
         }
 
-        addSection(FormSectionModel.forComponent(new ActivitySection(locks, activity))
+        addSection(FormSectionModel.forComponent(new ActivitySection(locks, activity, isNewSite))
                 .withHeader(I18N.CONSTANTS.siteDialogIntervention())
                 .withDescription(I18N.CONSTANTS.siteDialogInterventionDesc()));
 
