@@ -20,6 +20,7 @@ package org.activityinfo.ui.client.input.viewModel;
 
 import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.permission.Operation;
 import org.activityinfo.store.testing.NfiForm;
 import org.activityinfo.ui.client.store.TestSetup;
 import org.junit.Test;
@@ -44,7 +45,7 @@ public class OperationFiltersTest {
                 .allowEdit(Optional.of(nfiForm.getVillageField().getId() + "=='g12345'"))
                 .build();
 
-        PermissionFilters filters = new PermissionFilters(formTree, permissions);
+        PermissionFilters filters = new PermissionFilters(formTree, permissions, Operation.EDIT_RECORD);
 
         assertThat(filters.getReferenceBaseFilter(nfiForm.getVillageField().getId()).get().asExpression(),
                 equalTo("[_id] == \"g12345\""));
