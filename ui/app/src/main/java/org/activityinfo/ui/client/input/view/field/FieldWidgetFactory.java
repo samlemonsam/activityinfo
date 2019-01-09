@@ -44,10 +44,10 @@ public class FieldWidgetFactory  {
     private final FormTree formTree;
     private final PermissionFilters permissionFilters;
 
-    public FieldWidgetFactory(FormSource formSource, FormTree formTree) {
+    public FieldWidgetFactory(FormSource formSource, FormTree formTree, boolean newInput) {
         this.formSource = formSource;
         this.formTree = formTree;
-        this.permissionFilters = new PermissionFilters(formTree);
+        this.permissionFilters = newInput ? PermissionFilters.create(formTree) : PermissionFilters.edit(formTree);
     }
 
     public FieldWidget create(FormField field, FieldUpdater updater) {

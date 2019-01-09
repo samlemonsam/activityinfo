@@ -47,13 +47,20 @@ public class PermissionFilters {
 
     private final Map<ResourceId, FormulaNode> fieldFilters = new HashMap<>();
 
+    public static PermissionFilters create(FormTree formTree) {
+        return new PermissionFilters(formTree, Operation.CREATE_RECORD);
+    }
 
-    public PermissionFilters(FormTree formTree) {
-        this(formTree, formTree.getRootMetadata().getPermissions());
+    public static PermissionFilters edit(FormTree formTree) {
+        return new PermissionFilters(formTree, Operation.EDIT_RECORD);
+    }
+
+    public PermissionFilters(FormTree formTree, Operation operation) {
+        this(formTree, formTree.getRootMetadata().getPermissions(), operation);
     }
 
     @VisibleForTesting
-    PermissionFilters(FormTree formTree, FormPermissions permissions) {
+    PermissionFilters(FormTree formTree, FormPermissions permissions, Operation operation) {
 
         /*
          * Create a set of independent boolean permission criteria.
@@ -62,8 +69,8 @@ public class PermissionFilters {
         if(permissions.hasVisibilityFilter()) {
             criteria.addAll(parsePermission(permissions.getViewFilter()));
         }
-        if(permissions.isFiltered(Operation.EDIT_RECORD)) {
-            criteria.addAll(parsePermission(permissions.getFilter(Operation.EDIT_RECORD)));
+        if(permissions.isFiltered(operation)) {
+            criteria.addAll(parsePermission(permissions.getFilter(operation)));
         }
 
         /*

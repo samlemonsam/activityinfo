@@ -28,15 +28,14 @@ import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.PeriodType;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.ui.client.input.model.FieldInput;
-import org.activityinfo.ui.client.input.view.field.FieldUpdater;
-import org.activityinfo.ui.client.input.view.field.FieldView;
-import org.activityinfo.ui.client.input.view.field.FieldWidget;
-import org.activityinfo.ui.client.input.view.field.FieldWidgetFactory;
+import org.activityinfo.ui.client.input.view.field.*;
 import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
 
 import java.util.ArrayList;
@@ -58,13 +57,14 @@ public class FormPanel implements IsWidget {
 
     private InputHandler inputHandler;
     private RecordRef recordRef;
+    private Maybe<RecordTree> existingRecord;
 
     private int horizontalPadding = 0;
 
     private FormInputViewModel viewModel;
     private final TextButton deleteButton;
 
-    public FormPanel(FormSource formSource, FormTree formTree, RecordRef recordRef, InputHandler inputHandler) {
+    public FormPanel(FormSource formSource, FormTree formTree, RecordRef recordRef, InputHandler inputHandler, Maybe<RecordTree> existingRecord) {
         this.formSource = formSource;
 
         assert recordRef != null;
@@ -72,6 +72,7 @@ public class FormPanel implements IsWidget {
         InputResources.INSTANCE.style().ensureInjected();
 
         this.recordRef = recordRef;
+        this.existingRecord = existingRecord;
         this.inputHandler = inputHandler;
 
         panel = new CssFloatLayoutContainer();
@@ -81,7 +82,7 @@ public class FormPanel implements IsWidget {
             panel.addStyleName(InputResources.INSTANCE.style().subform());
         }
 
-        FieldWidgetFactory widgetFactory = new FieldWidgetFactory(formSource, formTree);
+        FieldWidgetFactory widgetFactory = new FieldWidgetFactory(formSource, formTree, !existingRecord.isVisible());
 
         for (FormTree.Node node : formTree.getRootFields()) {
             if(node.isSubForm()) {
@@ -218,13 +219,13 @@ public class FormPanel implements IsWidget {
         SubFormKind subFormKind = subTree.getRootFormClass().getSubFormKind();
 
         if(subFormKind == SubFormKind.REPEATING) {
-            RepeatingSubFormPanel subPanel = new RepeatingSubFormPanel(formSource, node, subTree, inputHandler);
+            RepeatingSubFormPanel subPanel = new RepeatingSubFormPanel(formSource, node, subTree, inputHandler, existingRecord);
 
             panel.add(subPanel, new CssFloatLayoutContainer.CssFloatData(1));
             repeatingSubForms.add(subPanel);
 
         } else {
-            KeyedSubFormPanel subPanel = new KeyedSubFormPanel(recordRef, formSource, node, subTree, inputHandler);
+            KeyedSubFormPanel subPanel = new KeyedSubFormPanel(recordRef, formSource, node, subTree, inputHandler, existingRecord);
             panel.add(subPanel, new CssFloatLayoutContainer.CssFloatData(1));
             keyedSubFormPanels.add(subPanel);
         }

@@ -28,8 +28,10 @@ import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.FieldSet;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.ui.client.input.viewModel.FormInputViewModel;
 import org.activityinfo.ui.client.input.viewModel.SubFormViewModel;
@@ -46,6 +48,7 @@ public class RepeatingSubFormPanel implements IsWidget {
     private InputHandler inputHandler;
     private FormSource formSource;
     private final FormTree subTree;
+    private final Maybe<RecordTree> existingParentRecord;
 
     private final FieldSet fieldSet;
     private final CssFloatLayoutContainer container;
@@ -54,11 +57,17 @@ public class RepeatingSubFormPanel implements IsWidget {
 
     private SubFormViewModel viewModel;
 
-    public RepeatingSubFormPanel(FormSource formSource, FormTree.Node node, FormTree subTree, InputHandler inputHandler) {
+    public RepeatingSubFormPanel(FormSource formSource,
+                                 FormTree.Node node,
+                                 FormTree subTree,
+                                 InputHandler inputHandler,
+                                 Maybe<RecordTree> existingParentRecord) {
+
         this.formSource = formSource;
         this.subTree = subTree;
         this.fieldId = node.getFieldId();
         this.inputHandler = inputHandler;
+        this.existingParentRecord = existingParentRecord;
 
         recordContainer = new CssFloatLayoutContainer();
 
@@ -97,7 +106,8 @@ public class RepeatingSubFormPanel implements IsWidget {
         for (FormInputViewModel subRecord : viewModel.getSubRecords()) {
             FormPanel subPanel = panelMap.get(subRecord.getRecordRef());
             if(subPanel == null) {
-                subPanel = new FormPanel(formSource, subTree, subRecord.getRecordRef(), inputHandler);
+                Maybe<RecordTree> existingSubRecord = maybeFindSubRecordTree(subRecord.getRecordRef());
+                subPanel = new FormPanel(formSource, subTree, subRecord.getRecordRef(), inputHandler, existingSubRecord);
                 subPanel.init(subRecord);
 
                 recordContainer.add(subPanel, new CssFloatLayoutContainer.CssFloatData(1));
@@ -112,6 +122,17 @@ public class RepeatingSubFormPanel implements IsWidget {
                 recordContainer.remove(formPanel);
             }
         }
+    }
+
+    private Maybe<RecordTree> maybeFindSubRecordTree(RecordRef subRecordRef) {
+        if (!existingParentRecord.isVisible()) {
+            return existingParentRecord;
+        }
+        RecordTree recordTree = existingParentRecord.get();
+        if (!recordTree.contains(subRecordRef)) {
+            return Maybe.notFound();
+        }
+        return Maybe.of(recordTree.subTree(subRecordRef));
     }
 
 

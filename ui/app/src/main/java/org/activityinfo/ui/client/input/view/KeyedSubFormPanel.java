@@ -34,10 +34,12 @@ import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formTree.RecordTree;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.time.PeriodValue;
+import org.activityinfo.promise.Maybe;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.ui.client.input.model.FieldInput;
 import org.activityinfo.ui.client.input.view.field.*;
@@ -70,6 +72,7 @@ public class KeyedSubFormPanel implements IsWidget {
     private final FormPanel formPanel;
     private final ContentPanel contentPanel;
     private final InputHandler inputHandler;
+    private final Maybe<RecordTree> existingParentRecord;
 
     private final LabelToolItem lockIndicator;
 
@@ -77,13 +80,18 @@ public class KeyedSubFormPanel implements IsWidget {
 
     private boolean empty = true;
 
-    public KeyedSubFormPanel(RecordRef parentRef, FormSource formSource, FormTree.Node node,
-                             FormTree subTree, InputHandler inputHandler) {
+    public KeyedSubFormPanel(RecordRef parentRef,
+                             FormSource formSource,
+                             FormTree.Node node,
+                             FormTree subTree,
+                             InputHandler inputHandler,
+                             Maybe<RecordTree> existingParentRecord) {
 
         this.fieldId = node.getFieldId();
         this.subFormId = subTree.getRootFormId();
         this.parentRef = parentRef;
         this.inputHandler = inputHandler;
+        this.existingParentRecord = existingParentRecord;
 
         selector = createSelector(subTree.getRootFormClass().getSubFormKind(), new FieldUpdater() {
             @Override
@@ -117,8 +125,10 @@ public class KeyedSubFormPanel implements IsWidget {
         toolBar.add(nextButton);
         toolBar.add(lockIndicator);
 
-        formPanel = new FormPanel(formSource, subTree,
-                new RecordRef(subTree.getRootFormId(), ResourceId.generateId()), inputHandler);
+        RecordRef subFormRecordRef = new RecordRef(subTree.getRootFormId(), ResourceId.generateId());
+        Maybe<RecordTree> existingSubRecord = maybeFindSubRecordTree(subFormRecordRef);
+
+        formPanel = new FormPanel(formSource, subTree, subFormRecordRef, inputHandler, existingSubRecord);
         formPanel.setBorders(false);
 
         VerticalLayoutContainer vlc = new VerticalLayoutContainer();
@@ -130,6 +140,17 @@ public class KeyedSubFormPanel implements IsWidget {
         contentPanel.setHeading(subTree.getRootFormClass().getLabel());
         contentPanel.add(vlc);
         contentPanel.setBorders(true);
+    }
+
+    private Maybe<RecordTree> maybeFindSubRecordTree(RecordRef subFormRecordRef) {
+        if (!existingParentRecord.isVisible()) {
+            return existingParentRecord;
+        }
+        RecordTree recordTree = existingParentRecord.get();
+        if (!recordTree.contains(subFormRecordRef)) {
+            return Maybe.notFound();
+        }
+        return Maybe.of(recordTree.subTree(subFormRecordRef));
     }
 
 
