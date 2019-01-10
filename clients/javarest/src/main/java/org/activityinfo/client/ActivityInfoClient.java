@@ -166,7 +166,6 @@ public class ActivityInfoClient {
     public ColumnSet queryTable(QueryModel queryModel) {
 
         String json = client.resource(root)
-                .path("resources")
                 .path("query")
                 .path("columns")
                 .type(MediaType.APPLICATION_JSON_TYPE)

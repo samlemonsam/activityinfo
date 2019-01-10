@@ -149,6 +149,7 @@ public class RootResource {
                 databaseProvider,
                 entityManager,
                 mailSender,
+                billingOracle,
                 id);
     }
 

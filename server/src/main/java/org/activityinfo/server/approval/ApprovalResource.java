@@ -85,6 +85,7 @@ public class ApprovalResource {
                 databaseProvider,
                 entityManager,
                 mailSender,
+                billingOracle,
                 CuidAdapter.databaseId(database.getId()));
 
         return resource.startTransfer(uri, authTokenProvider, transfer);
@@ -113,6 +114,7 @@ public class ApprovalResource {
                 databaseProvider,
                 entityManager,
                 mailSender,
+                billingOracle,
                 CuidAdapter.databaseId(database.getId()));
 
         return resource.cancelTransfer(proposedOwner.asAuthenticatedUser(), TransferDecision.rejected());

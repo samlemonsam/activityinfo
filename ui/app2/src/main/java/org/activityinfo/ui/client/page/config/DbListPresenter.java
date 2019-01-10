@@ -24,6 +24,7 @@ import com.extjs.gxt.ui.client.event.MessageBoxEvent;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.Dialog;
 import com.extjs.gxt.ui.client.widget.MessageBox;
+import com.google.common.base.Strings;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
@@ -261,8 +262,12 @@ public class DbListPresenter implements ActionListener {
                 client.requestDatabaseTransfer(userEmail, selection.getId()).then(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        if(caught instanceof ApiException && ((ApiException) caught).getStatusCode() == 400) {
-                            MessageBox.alert(I18N.CONSTANTS.error(), caught.getMessage(), null);
+                        if (caught instanceof ApiException) {
+                            ApiException apiException = (ApiException) caught;
+                            String message = !Strings.isNullOrEmpty(apiException.getMessage())
+                                    ? apiException.getMessage()
+                                    : I18N.CONSTANTS.serverError();
+                            MessageBox.alert(I18N.CONSTANTS.error() + ": " + apiException.getStatusCode(), message, null);
                         } else {
                             MessageBox.alert(I18N.CONSTANTS.serverError(), I18N.CONSTANTS.errorOnServer(), null);
                         }

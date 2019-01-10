@@ -75,6 +75,7 @@ public class ApprovalResourceTest extends CommandTestCase {
     @Inject
     private BillingAccountOracle billingOracle;
 
+
     private UriInfo uri;
 
     @Before
@@ -84,6 +85,7 @@ public class ApprovalResourceTest extends CommandTestCase {
                 databaseProvider,
                 Providers.of(em),
                 mailSender,
+                billingOracle,
                 CuidAdapter.databaseId(databaseId));
 
         approvalResource = new ApprovalResource(Providers.of(em),

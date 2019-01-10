@@ -426,7 +426,7 @@ public class DbEditor implements DbPage, IsWidget {
             newEntity = new ActivityDTO();
             newEntity.set(DATABASE_ID_PROPERTY, db.getId());
             newEntity.set(CLASSIC_VIEW_PROPERTY, true);
-            newEntity.set(PUBLISHED_PROPERTY, Published.NOT_PUBLISHED);
+            newEntity.set(PUBLISHED_PROPERTY, Published.NOT_PUBLISHED.getIndex());
             parent = null;
 
         } else if("Form".equals(entityName)) {
@@ -435,7 +435,7 @@ public class DbEditor implements DbPage, IsWidget {
             newEntity.set(CLASSIC_VIEW_PROPERTY, false);
             newEntity.set(REPORTING_FREQUENCY_PROPERTY, ActivityFormDTO.REPORT_ONCE);
             newEntity.set(LOCATION_TYPE_ID_PROPERTY, db.getCountry().getNullLocationType().getId());
-            newEntity.set(PUBLISHED_PROPERTY, Published.NOT_PUBLISHED);
+            newEntity.set(PUBLISHED_PROPERTY, Published.NOT_PUBLISHED.getIndex());
             parent = null;
 
         } else if(FolderDTO.ENTITY_NAME.equals(entityName)) {

@@ -20,6 +20,7 @@ package org.activityinfo.server.endpoint.rest;
 
 import com.google.inject.Provider;
 import com.sun.jersey.api.core.InjectParam;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.io.xform.XFormReader;
 import org.activityinfo.io.xform.form.XForm;
 import org.activityinfo.json.JsonParser;
@@ -33,6 +34,7 @@ import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.database.transfer.RequestTransfer;
 import org.activityinfo.model.database.transfer.TransferAuthorized;
 import org.activityinfo.model.database.transfer.TransferDecision;
+import org.activityinfo.model.error.ApiErrorType;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
@@ -67,7 +69,10 @@ public class DatabaseResource {
     private final DatabaseProvider databaseProvider;
     private final Provider<EntityManager> entityManagerProvider;
     private final MailSender mailSender;
+    private final BillingAccountOracle billingOracle;
+
     private final ResourceId databaseId;
+
     private static final JsonParser PARSER = new JsonParser();
 
     public DatabaseResource(Provider<FormStorageProvider> catalog,
@@ -75,12 +80,14 @@ public class DatabaseResource {
                             DatabaseProvider databaseProvider,
                             Provider<EntityManager> entityManagerProvider,
                             MailSender mailSender,
+                            BillingAccountOracle billingOracle,
                             ResourceId databaseId) {
         this.catalog = catalog;
         this.dispatcher = dispatcher;
         this.databaseProvider = databaseProvider;
         this.entityManagerProvider = entityManagerProvider;
         this.mailSender = mailSender;
+        this.billingOracle = billingOracle;
         this.databaseId = databaseId;
     }
 
@@ -203,19 +210,33 @@ public class DatabaseResource {
         Optional<User> proposedOwner = getUserByEmail(request.getProposedOwnerEmail());
 
         if (executingUser.isAnonymous()) {
-            return Response.status(Response.Status.UNAUTHORIZED).build();
+            return Response.status(ApiErrorType.AUTHENTICATION_ERROR.getHttpResponseCode())
+                    .build();
         }
         if (executingUser.getUserId() != currentOwner.getId()) {
-            return Response.status(Response.Status.FORBIDDEN).build();
+            return Response.status(ApiErrorType.AUTHORIZATION_ERROR.getHttpResponseCode())
+                    .entity(I18N.CONSTANTS.databaseTrasnferOwnerError())
+                    .build();
         }
         if (database.getTransferToken() != null) {
-            return Response.status(Response.Status.CONFLICT).entity("There is a pending transfer on this database").build();
+            return Response.status(ApiErrorType.INVALID_REQUEST_ERROR.getHttpResponseCode())
+                    .entity(I18N.CONSTANTS.pendingTransferError())
+                    .build();
         }
         if (!proposedOwner.isPresent()) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("The email '" + request.getProposedOwnerEmail() + "' is not registered on ActivityInfo.org.").build();
+            return Response.status(ApiErrorType.INVALID_REQUEST_ERROR.getHttpResponseCode())
+                    .entity(I18N.MESSAGES.userNotInSystem(request.getProposedOwnerEmail()))
+                    .build();
         }
         if (currentOwner.equals(proposedOwner.get())) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("User already owns database.").build();
+            return Response.status(ApiErrorType.INVALID_REQUEST_ERROR.getHttpResponseCode())
+                    .entity(I18N.CONSTANTS.userOwnsDatabaseError())
+                    .build();
+        }
+        if (!billingOracle.isAllowReceiveDatabase(proposedOwner.get())) {
+            return Response.status(ApiErrorType.BILLING_ERROR.getHttpResponseCode())
+                    .entity(I18N.CONSTANTS.cannotTransferDbToUser())
+                    .build();
         }
 
         startTransaction();
@@ -259,10 +280,16 @@ public class DatabaseResource {
         if (!matchingRequest(transfer, currentOwner, newOwner)) {
             return Response.status(Response.Status.BAD_REQUEST).entity(transfer.toJson().toJson()).build();
         }
+        if (!billingOracle.isAllowReceiveDatabase(newOwner)) {
+            return Response.status(ApiErrorType.BILLING_ERROR.getHttpResponseCode())
+                    .entity(I18N.CONSTANTS.cannotTransferDbToUser())
+                    .build();
+        }
 
         startTransaction();
         try {
             removeUserPermissions(database, newOwner);
+            removeUserPermissions(database, currentOwner);
             transferDatabase(database, newOwner);
             clearTransferToken(database);
             addUserPermissions(database, currentOwner);

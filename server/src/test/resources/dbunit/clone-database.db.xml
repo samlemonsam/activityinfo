@@ -66,13 +66,16 @@
                adminEntityParentId="4" name="Irumu" code="203" x1="0" y1="0" x2="0"
                y2="0"/>
 
+  <!-- Billing Account Setup -->
+  <billingAccount id="1" code="TEST" name="Test Billing Account" userLimit="10" startTime="1970-01-01 00:00:00" endTime="2099-01-01 00:00:00" />
+
   <!-- User setup -->
   <userLogin userId="1" name="Alex"
              email="akbertram@gmail.com" password="$2a$10$zc7fiaYWXwIN7w4LtFQL7u1ng3vbSNaJ7X24hzISDRMpWpvOHZu1."
-             locale="fr" organization="" jobtitle="" emailnotification="1"/>
+             locale="fr" organization="" jobtitle="" emailnotification="1" billingAccountId="1"/>
   <userLogin userId="2" name="Bavon" email="bavon@nrc.org"
              password="$2a$10$zc7fiaYWXwIN7w4LtFQL7u1ng3vbSNaJ7X24hzISDRMpWpvOHZu1."
-             locale="fr" organization="" jobtitle="" emailnotification="0"/>
+             locale="fr" organization="" jobtitle="" emailnotification="0" billingAccountId="1"/>
 
   <userLogin userId="21" name="Pacifique" email="pacifique@nrc.org"
              password="$2a$10$zc7fiaYWXwIN7w4LtFQL7u1ng3vbSNaJ7X24hzISDRMpWpvOHZu1."
