@@ -207,6 +207,11 @@ public class UserForm extends FormPanel {
         toggleAllPermission(deleteCheckBox, deleteAllCheckBox);
         toggleViewAllPermission(deleteAllCheckBox);
 
+        // All CREATE_/EDIT_/DELETE_ALL permissions require VIEW_ALL. If this is removed, we must deselect those permissions too
+        viewAllCheckBox.addListener(Events.Change, change -> setIfChangedToValue(viewAllCheckBox, createAllCheckBox, Boolean.FALSE));
+        viewAllCheckBox.addListener(Events.Change, change -> setIfChangedToValue(viewAllCheckBox, editAllCheckBox, Boolean.FALSE));
+        viewAllCheckBox.addListener(Events.Change, change -> setIfChangedToValue(viewAllCheckBox, deleteAllCheckBox, Boolean.FALSE));
+
         CheckBox manageUsersCheckBox = permissionsCheckBox(PermissionType.MANAGE_USERS, I18N.CONSTANTS.allowManageUsers());
         CheckBox manageAllUsersCheckBox = permissionsCheckBox(PermissionType.MANAGE_ALL_USERS, I18N.CONSTANTS.forAllPartners());
         toggleAllPermission(manageUsersCheckBox, manageAllUsersCheckBox);
