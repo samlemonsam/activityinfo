@@ -112,8 +112,25 @@ public class UserForm extends FormPanel {
     private final CheckBoxGroup permissionsGroup;
     private final CheckBoxGroup operationsGroup;
     private final CheckBoxGroup allPartnersGroup;
+
     private final CheckBox viewCheckBox;
     private final CheckBox viewAllCheckBox;
+
+    private final CheckBox createCheckBox;
+    private final CheckBox createAllCheckBox;
+
+    private final CheckBox editCheckBox;
+    private final CheckBox editAllCheckBox;
+
+    private final CheckBox deleteCheckBox;
+    private final CheckBox deleteAllCheckBox;
+
+    private final CheckBox manageUsersCheckBox;
+    private final CheckBox manageAllUsersCheckBox;
+
+    private final CheckBox exportCheckBox;
+    private final CheckBox designCheckBox;
+
     private CheckBoxGroup folderGroup = new CheckBoxGroup();
     private WarningBar permissionWarning  = new WarningBar();
 
@@ -179,45 +196,19 @@ public class UserForm extends FormPanel {
         allPartnersGroup.setOrientation(Style.Orientation.VERTICAL);
 
         viewCheckBox = permissionsCheckBox(PermissionType.VIEW, I18N.CONSTANTS.allowView());
-        viewCheckBox.setValue(true);
-        // View check box must always be set to true (and disabling it causes confusion), even if user wants to change it...
-        viewCheckBox.addListener(Events.Change, change -> viewCheckBox.setValue(true));
         viewAllCheckBox = permissionsCheckBox(PermissionType.VIEW_ALL, I18N.CONSTANTS.forAllPartners());
+        createCheckBox = permissionsCheckBox(PermissionType.CREATE, I18N.CONSTANTS.allowCreate());
+        createAllCheckBox = permissionsCheckBox(PermissionType.CREATE_ALL, I18N.CONSTANTS.forAllPartners());
+        editCheckBox = permissionsCheckBox(PermissionType.EDIT, I18N.CONSTANTS.allowEdit());
+        editAllCheckBox = permissionsCheckBox(PermissionType.EDIT_ALL, I18N.CONSTANTS.forAllPartners());
+        deleteCheckBox = permissionsCheckBox(PermissionType.DELETE, I18N.CONSTANTS.allowDelete());
+        deleteAllCheckBox = permissionsCheckBox(PermissionType.DELETE_ALL, I18N.CONSTANTS.forAllPartners());
+        manageUsersCheckBox = permissionsCheckBox(PermissionType.MANAGE_USERS, I18N.CONSTANTS.allowManageUsers());
+        manageAllUsersCheckBox = permissionsCheckBox(PermissionType.MANAGE_ALL_USERS, I18N.CONSTANTS.forAllPartners());
+        exportCheckBox = permissionsCheckBox(PermissionType.EXPORT_RECORDS, I18N.CONSTANTS.allowExport());
+        designCheckBox = permissionsCheckBox(PermissionType.DESIGN, I18N.CONSTANTS.allowDesign());
 
-        CheckBox createCheckBox = permissionsCheckBox(PermissionType.CREATE, I18N.CONSTANTS.allowCreate());
-        CheckBox createAllCheckBox = permissionsCheckBox(PermissionType.CREATE_ALL, I18N.CONSTANTS.forAllPartners());
-        toggleAllPermission(createCheckBox, createAllCheckBox);
-        toggleViewAllPermission(createAllCheckBox);
-
-        CheckBox editCheckBox = permissionsCheckBox(PermissionType.EDIT, I18N.CONSTANTS.allowEdit());
-        CheckBox editAllCheckBox = permissionsCheckBox(PermissionType.EDIT_ALL, I18N.CONSTANTS.forAllPartners());
-        toggleAllPermission(editCheckBox, editAllCheckBox);
-        toggleViewAllPermission(editAllCheckBox);
-
-        // CREATE and CREATE_ALL permissions require the corresponding EDIT permissions, but *not* vice versa.
-        // This avoids confusion when a user can create a record, but not edit any mistakes. It also allows for an
-        // administrator to remove the ability to create records where needed but maintain the ability to edit.
-        createCheckBox.addListener(Events.Change, change -> setIfChangedToValue(createCheckBox, editCheckBox, Boolean.TRUE));
-        createAllCheckBox.addListener(Events.Change, change -> setIfChangedToValue(createAllCheckBox, editAllCheckBox, Boolean.TRUE));
-        editCheckBox.addListener(Events.Change, change -> setIfChangedToValue(editCheckBox, createCheckBox, Boolean.FALSE));
-        editAllCheckBox.addListener(Events.Change, change -> setIfChangedToValue(editAllCheckBox, createAllCheckBox, Boolean.FALSE));
-
-        CheckBox deleteCheckBox = permissionsCheckBox(PermissionType.DELETE, I18N.CONSTANTS.allowDelete());
-        CheckBox deleteAllCheckBox = permissionsCheckBox(PermissionType.DELETE_ALL, I18N.CONSTANTS.forAllPartners());
-        toggleAllPermission(deleteCheckBox, deleteAllCheckBox);
-        toggleViewAllPermission(deleteAllCheckBox);
-
-        // All CREATE_/EDIT_/DELETE_ALL permissions require VIEW_ALL. If this is removed, we must deselect those permissions too
-        viewAllCheckBox.addListener(Events.Change, change -> setIfChangedToValue(viewAllCheckBox, createAllCheckBox, Boolean.FALSE));
-        viewAllCheckBox.addListener(Events.Change, change -> setIfChangedToValue(viewAllCheckBox, editAllCheckBox, Boolean.FALSE));
-        viewAllCheckBox.addListener(Events.Change, change -> setIfChangedToValue(viewAllCheckBox, deleteAllCheckBox, Boolean.FALSE));
-
-        CheckBox manageUsersCheckBox = permissionsCheckBox(PermissionType.MANAGE_USERS, I18N.CONSTANTS.allowManageUsers());
-        CheckBox manageAllUsersCheckBox = permissionsCheckBox(PermissionType.MANAGE_ALL_USERS, I18N.CONSTANTS.forAllPartners());
-        toggleAllPermission(manageUsersCheckBox, manageAllUsersCheckBox);
-
-        CheckBox exportCheckBox = permissionsCheckBox(PermissionType.EXPORT_RECORDS, I18N.CONSTANTS.allowExport());
-        CheckBox designCheckBox = permissionsCheckBox(PermissionType.DESIGN, I18N.CONSTANTS.allowDesign());
+        setupCheckBoxToggles(database);
 
         operationsGroup.add(viewCheckBox);
         operationsGroup.add(createCheckBox);
@@ -226,6 +217,7 @@ public class UserForm extends FormPanel {
         operationsGroup.add(manageUsersCheckBox);
         operationsGroup.add(exportCheckBox);
         operationsGroup.add(designCheckBox);
+
         allPartnersGroup.add(viewAllCheckBox);
         allPartnersGroup.add(createAllCheckBox);
         allPartnersGroup.add(editAllCheckBox);
@@ -271,19 +263,66 @@ public class UserForm extends FormPanel {
         this.add(permissionWarning);
     }
 
-    private void setIfChangedToValue(CheckBox changedValue, CheckBox toSet, Boolean value) {
+    // Set up the propagation logic when users select checkboxes
+    private void setupCheckBoxToggles(UserDatabaseDTO database) {
+        // VIEW CheckBox must always be true, even if user wants to change it (deleting users removes VIEW permission)
+        viewCheckBox.setValue(true);
+        viewCheckBox.addListener(Events.Change, change -> viewCheckBox.setValue(true));
+
+        // VIEW_ALL CheckBox: must ensure CREATE/EDIT/DELETE_ALL permissions are false when it is deselected
+        viewAllCheckBox.addListener(Events.Change, change -> setIfChangedToValue(viewAllCheckBox, Boolean.FALSE, createAllCheckBox));
+        viewAllCheckBox.addListener(Events.Change, change -> setIfChangedToValue(viewAllCheckBox, Boolean.FALSE, editAllCheckBox));
+        viewAllCheckBox.addListener(Events.Change, change -> setIfChangedToValue(viewAllCheckBox, Boolean.FALSE, deleteAllCheckBox));
+
+        // CREATE_ALL CheckBox: if allowed to grant, must ensure CREATE AND VIEW_ALL permissions are selected
+        if (database.canGivePermission(PermissionType.CREATE_ALL, null)) {
+            toggleAllPermissionCheckBox(createCheckBox, createAllCheckBox);
+            toggleViewAllPermissionCheckBox(createAllCheckBox);
+        }
+
+        // EDIT_ALL CheckBox: if allowed to grant, must ensure CREATE AND VIEW_ALL permissions are selected
+        if (database.canGivePermission(PermissionType.EDIT_ALL, null)) {
+            toggleAllPermissionCheckBox(editCheckBox, editAllCheckBox);
+            toggleViewAllPermissionCheckBox(editAllCheckBox);
+        }
+
+        // DELETE_ALL CheckBox: if allowed to grant, must ensure DELETE AND VIEW_ALL permissions are selected
+        if (database.canGivePermission(PermissionType.DELETE_ALL, null)) {
+            toggleAllPermissionCheckBox(deleteCheckBox, deleteAllCheckBox);
+            toggleViewAllPermissionCheckBox(deleteAllCheckBox);
+        }
+
+        // MANAGE_ALL_USERS CheckBox: if allowed to grant, must ensure MANAGE_USERS permission is selected
+        if (database.canGivePermission(PermissionType.MANAGE_ALL_USERS, null)) {
+            toggleAllPermissionCheckBox(manageUsersCheckBox, manageAllUsersCheckBox);
+        }
+
+        // CREATE and CREATE_ALL permissions require the corresponding EDIT permissions, but *not* vice versa.
+        // This avoids confusion when a user can create a record, but not edit any mistakes. It also allows for an
+        // administrator to remove the ability to create records where needed but maintain the ability to edit.
+        if (database.canGivePermission(PermissionType.CREATE, null)) {
+            createCheckBox.addListener(Events.Change, change -> setIfChangedToValue(createCheckBox, Boolean.TRUE, editCheckBox));
+            createAllCheckBox.addListener(Events.Change, change -> setIfChangedToValue(createAllCheckBox, Boolean.TRUE, editAllCheckBox));
+        }
+        if (database.canGivePermission(PermissionType.EDIT, null)) {
+            editCheckBox.addListener(Events.Change, change -> setIfChangedToValue(editCheckBox, Boolean.FALSE, createCheckBox));
+            editAllCheckBox.addListener(Events.Change, change -> setIfChangedToValue(editAllCheckBox, Boolean.FALSE, createAllCheckBox));
+        }
+    }
+
+    private void setIfChangedToValue(CheckBox changedValue, Boolean value, CheckBox toSet) {
         // If the changed value now equals the given value, then we need to update "toSet" to the same value
         if (changedValue.getValue() == value) {
             toSet.setValue(value);
         }
     }
 
-    private void toggleAllPermission(CheckBox permissionCheckBox, CheckBox partnerCheckBox) {
+    private void toggleAllPermissionCheckBox(CheckBox permissionCheckBox, CheckBox partnerCheckBox) {
         // If we haven't selected the permission, then the "All Partners" option is disabled
         permissionCheckBox.addListener(Events.Change, change -> allPartnersToggle(permissionCheckBox, partnerCheckBox));
     }
 
-    private void toggleViewAllPermission(CheckBox partnerCheckBox) {
+    private void toggleViewAllPermissionCheckBox(CheckBox partnerCheckBox) {
         // If the "All Partners" option depends on the user also having VIEW_ALL permissions, then set it when selected
         partnerCheckBox.addListener(Events.Change, change -> viewAllToggle(partnerCheckBox));
     }
