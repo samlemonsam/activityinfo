@@ -3,6 +3,7 @@ package org.activityinfo.server.database.hibernate;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.json.Json;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.model.database.DatabaseMeta;
@@ -300,7 +301,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         return new Resource.Builder()
                 .setId(CuidAdapter.partnerFormId(database.getId()))
                 .setParentId(database.getResourceId())
-                .setLabel("Parent Form")
+                .setLabel(I18N.CONSTANTS.partners())
                 .setVisibleToDatabaseUser()
                 .setType(ResourceType.FORM)
                 .build();
