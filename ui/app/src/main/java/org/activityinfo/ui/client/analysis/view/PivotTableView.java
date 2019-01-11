@@ -69,15 +69,10 @@ public class PivotTableView implements IsWidget {
         exportButton = new TextButton(I18N.CONSTANTS.export());
         exportButton.addSelectHandler(this::exportTable);
 
-
-        TextButton savedReportsButton = new TextButton(I18N.CONSTANTS.savedReports());
-        savedReportsButton.addSelectHandler(event -> openSavedReports());
-
         ToolBar toolbar = new ToolBar();
         toolbar.add(saveButton);
         toolbar.add(copyButton);
         toolbar.add(exportButton);
-        toolbar.add(savedReportsButton);
 
         this.grid = new Grid<>(store, buildColumnModel(new PivotTable()));
         this.grid.getView().setSortingEnabled(false);
