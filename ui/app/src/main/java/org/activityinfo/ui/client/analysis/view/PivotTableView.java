@@ -105,7 +105,7 @@ public class PivotTableView implements IsWidget {
     }
 
     private void openSavedReports() {
-        Window.Location.assign("#ui=3");
+        Window.Location.assign("?ui=3");
     }
 
 
