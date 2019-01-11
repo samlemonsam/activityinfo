@@ -33,6 +33,7 @@ import org.activityinfo.server.DeploymentConfiguration;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileItemHeaders;
+import org.apache.commons.fileupload.util.FileItemHeadersImpl;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -115,6 +116,7 @@ public class AppEngineAttachmentService implements AttachmentService {
             this.contentType = contentType;
             this.formField = isFormField;
             this.fileName = fileName;
+            this.headers = new FileItemHeadersImpl();
         }
 
         @Override
@@ -194,12 +196,12 @@ public class AppEngineAttachmentService implements AttachmentService {
 
         @Override
         public FileItemHeaders getHeaders() {
-            throw new UnsupportedOperationException("TODO");
+            return headers;
         }
 
         @Override
         public void setHeaders(FileItemHeaders headers) {
-            throw new UnsupportedOperationException("TODO");
+            this.headers = headers;
         }
     }
 }
