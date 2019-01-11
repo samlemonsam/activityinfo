@@ -49,6 +49,7 @@ public abstract class TypeEditor<T extends FieldType> implements IsWidget {
 
     protected final void updateType(T updatedType) {
         currentField.getFormField().setType(updatedType);
+        currentField.getFormDesigner().getSavedGuard().setSaved(false);
         currentField.syncWithModel();
     }
 }
