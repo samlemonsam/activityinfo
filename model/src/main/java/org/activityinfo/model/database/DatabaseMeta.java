@@ -43,6 +43,7 @@ public class DatabaseMeta implements JsonSerializable {
     // - "pendingTransfer" databases
     private boolean published = false;
     private boolean pendingTransfer = false;
+    private boolean suspended = false;
 
     // Resources and Locks present on this database
     private final Map<ResourceId, Resource> resources = new HashMap<>();
@@ -80,6 +81,10 @@ public class DatabaseMeta implements JsonSerializable {
         return pendingTransfer;
     }
 
+    public boolean isSuspended() {
+        return suspended;
+    }
+
     public Map<ResourceId, Resource> getResources() {
         return resources;
     }
@@ -112,6 +117,9 @@ public class DatabaseMeta implements JsonSerializable {
         if (pendingTransfer) {
             object.put("pendingTransfer", pendingTransfer);
         }
+        if (suspended) {
+            object.put("suspended", suspended);
+        }
 
         object.put("resources", Json.toJsonArray(resources.values()));
         object.put("locks", Json.toJsonArray(locks.values()));
@@ -141,6 +149,9 @@ public class DatabaseMeta implements JsonSerializable {
         }
         if (object.hasKey("pendingTransfer")) {
             meta.pendingTransfer = object.get("pendingTransfer").asBoolean();
+        }
+        if (object.hasKey("suspended")) {
+            meta.suspended = object.get("suspended").asBoolean();
         }
 
         JsonValue resourceArray = object.get("resources");
@@ -198,6 +209,11 @@ public class DatabaseMeta implements JsonSerializable {
 
         public Builder setPendingTransfer(boolean pendingTransfer) {
             meta.pendingTransfer = pendingTransfer;
+            return this;
+        }
+
+        public Builder setSuspended(boolean suspended) {
+            meta.suspended = suspended;
             return this;
         }
 

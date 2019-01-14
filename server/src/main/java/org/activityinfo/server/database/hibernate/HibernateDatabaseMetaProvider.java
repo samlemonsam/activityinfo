@@ -178,15 +178,16 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         if (toFetch.isEmpty()) {
             return Collections.emptyMap();
         }
-        List<Integer> legacysIds = toFetch.stream()
+        Set<Integer> legacysIds = toFetch.stream()
                 .map(CuidAdapter::getLegacyIdFromCuid)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
+        Set<Integer> suspendedDatabases = billingAccountOracle.getSuspendedDatabases(legacysIds);
         return entityManager.get().createQuery("SELECT db " +
                 "FROM Database db " +
                 "WHERE db.id IN :databaseIds", Database.class)
                 .setParameter("databaseIds", legacysIds)
                 .getResultList().stream()
-                .map(this::buildMeta)
+                .map(db -> buildMeta(db, suspendedDatabases.contains(db.getId())))
                 .collect(Collectors.toMap(
                         DatabaseMeta::getDatabaseId,
                         dbMeta -> dbMeta));
@@ -249,7 +250,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         }
     }
 
-    private @Nullable DatabaseMeta buildMeta(@Nullable Database database) {
+    private @Nullable DatabaseMeta buildMeta(@Nullable Database database, boolean suspended) {
         if (database == null) {
             return null;
         }
@@ -266,6 +267,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
                 .setPendingTransfer(database.hasPendingTransfer())
                 .addResources(fetchResources(database))
                 .addLocks(fetchLocks(database))
+                .setSuspended(suspended)
                 .build();
     }
 
