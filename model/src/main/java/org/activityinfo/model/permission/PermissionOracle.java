@@ -2,6 +2,7 @@ package org.activityinfo.model.permission;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import org.activityinfo.model.database.RecordLockSet;
 import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
@@ -281,7 +282,15 @@ public class PermissionOracle {
         computeEditSchemaFormPermissions(permissionsBuilder, formId, db);
         computeEditRecordFormPermissions(permissionsBuilder, formId, db);
         computeExportRecordsFormPermissions(permissionsBuilder, formId, db);
+        computeLocks(permissionsBuilder, formId, db);
         return permissionsBuilder.build();
+    }
+
+    private static void computeLocks(FormPermissions.Builder permissionsBuilder, ResourceId formId, UserDatabaseMeta db) {
+        RecordLockSet formLocks = db.getEffectiveLocks(formId);
+        if (!formLocks.isEmpty()) {
+            permissionsBuilder.lock(formLocks);
+        }
     }
 
     private static void computeViewFormPermissions(FormPermissions.Builder builder,

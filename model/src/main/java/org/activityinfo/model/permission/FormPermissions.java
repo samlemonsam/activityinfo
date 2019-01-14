@@ -22,6 +22,7 @@ import com.google.common.base.Strings;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
+import org.activityinfo.model.database.RecordLockSet;
 
 import java.util.Optional;
 
@@ -55,6 +56,8 @@ public final class FormPermissions implements JsonSerializable {
     private boolean updateSchema;
 
     private boolean exportRecords;
+
+    private RecordLockSet locks;
 
     /**
      * 
@@ -98,6 +101,17 @@ public final class FormPermissions implements JsonSerializable {
 
     public boolean isExportRecordsAllowed() {
         return exportRecords;
+    }
+
+    public RecordLockSet getLocks() {
+        if (locks == null) {
+            return RecordLockSet.EMPTY;
+        }
+        return locks;
+    }
+
+    public boolean hasLocks() {
+        return locks != null;
     }
 
     public static FormPermissions none() {
@@ -149,6 +163,10 @@ public final class FormPermissions implements JsonSerializable {
 
         permissions.exportRecords = object.getBoolean("exportRecords");
 
+        if (object.hasKey("locks") && object.get("locks").isJsonArray()) {
+            permissions.locks = RecordLockSet.fromJson(object.get("locks"));
+        }
+
         return permissions;
     }
 
@@ -169,6 +187,10 @@ public final class FormPermissions implements JsonSerializable {
 
         object.put("exportRecords", exportRecords);
 
+        if (hasLocks()) {
+            object.put("locks", locks.toJson());
+        }
+
         return object;
     }
 
@@ -188,6 +210,7 @@ public final class FormPermissions implements JsonSerializable {
                 ", deleteAllowed=" + deleteRecord +
                 ", deleteFilter='" + deleteFilter + '\'' +
                 ", exportAllowed='" + exportRecords + '\'' +
+                ", locks='" + locks +
                 '}';
     }
 
@@ -318,6 +341,11 @@ public final class FormPermissions implements JsonSerializable {
 
         public Builder allowExport() {
             permissions.exportRecords = true;
+            return this;
+        }
+
+        public Builder lock(RecordLockSet locks) {
+            permissions.locks = locks;
             return this;
         }
 
