@@ -57,6 +57,7 @@ import org.activityinfo.legacy.shared.command.result.BatchResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.model.*;
 import org.activityinfo.model.job.ExportAuditLog;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.ui.client.App3;
@@ -328,11 +329,11 @@ public class DbEditor implements DbPage, IsWidget {
 
 
     private void exportFullDatabase() {
-        Window.open("/resources/database/" + db.getId() + "/schema.csv", BLANK_WINDOW_TARGET, null);
+        Window.open("/resources/database/" + CuidAdapter.databaseId(db.getId()) + "/schema.csv", BLANK_WINDOW_TARGET, null);
     }
 
     private void exportFullDatabaseBeta() {
-        Window.open("/resources/database/" + db.getId() + "/schema-v3.csv", BLANK_WINDOW_TARGET, null);
+        Window.open("/resources/database/" + CuidAdapter.databaseId(db.getId()) + "/schema-v3.csv", BLANK_WINDOW_TARGET, null);
     }
     
     private void exportFormAsXlsForm() {
