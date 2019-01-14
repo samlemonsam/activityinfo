@@ -347,6 +347,7 @@ public class UserDatabaseMeta implements JsonSerializable {
                 .setPendingTransfer(databaseMeta.isPendingTransfer())
                 .addResources(databaseMeta.getResources().values())
                 .addLocks(databaseMeta.getLocks().values())
+                .setSuspended(databaseMeta.isSuspended())
                 .build();
     }
 
@@ -362,6 +363,7 @@ public class UserDatabaseMeta implements JsonSerializable {
                 .addResources(databaseMeta.getResources().values())
                 .addLocks(databaseMeta.getLocks().values())
                 .addGrants(databaseGrant.getGrants().values())
+                .setSuspended(databaseMeta.isSuspended())
                 .build();
     }
 
@@ -375,6 +377,7 @@ public class UserDatabaseMeta implements JsonSerializable {
                 .setVersion(version(databaseMeta.getVersion(),0))
                 .addResources(databaseMeta.getResources().values())
                 .addLocks(databaseMeta.getLocks().values())
+                .setSuspended(databaseMeta.isSuspended())
                 .build();
     }
 
