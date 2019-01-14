@@ -147,7 +147,6 @@ public class FormInputViewModelTest {
 
         RecordRef recordRef = new RecordRef(formClass.getId(), ResourceId.valueOf("R1"));
         FormInputViewModelBuilder viewModelBuilder = new FormInputViewModelBuilder(setup.getFormStore(),
-                database(formTree),
                 formTree, new TestingActivePeriodMemory());
 
         // Case 1: No entry, B and C should be not relevant
@@ -201,7 +200,6 @@ public class FormInputViewModelTest {
 
         FormStructure structure = fetchStructure(recordRef);
         FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store,
-                structure.getDatabase(),
                 structure.getFormTree(), new TestingActivePeriodMemory());
 
         FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()));
@@ -221,7 +219,6 @@ public class FormInputViewModelTest {
 
         FormStructure structure = fetchStructure(recordRef);
         FormInputViewModelBuilder builder = new FormInputViewModelBuilder(store,
-                structure.getDatabase(),
                 structure.getFormTree(), new TestingActivePeriodMemory());
 
         FormInputModel inputModel = new FormInputModel(new RecordRef(survey.getFormId(), ResourceId.generateId()));
@@ -591,7 +588,6 @@ public class FormInputViewModelTest {
         EasyMock.replay(formStore);
 
         FormInputViewModelBuilder viewModelBuilder = new FormInputViewModelBuilder(formStore,
-                database(formTree),
                 formTree,
                 new TestingActivePeriodMemory());
 
@@ -609,7 +605,6 @@ public class FormInputViewModelTest {
 
     private FormInputViewModelBuilder builderFor(FormStructure structure) {
         return new FormInputViewModelBuilder(setup.getFormStore(),
-                structure.getDatabase(),
                 structure.getFormTree(), new TestingActivePeriodMemory());
     }
 
