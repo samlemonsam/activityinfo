@@ -146,6 +146,18 @@ public final class FormPermissions implements JsonSerializable {
         return permissions;
     }
 
+    public static FormPermissions owner(RecordLockSet locks) {
+        FormPermissions permissions = new FormPermissions();
+        permissions.view = true;
+        permissions.createRecord = true;
+        permissions.editRecord = true;
+        permissions.deleteRecord = true;
+        permissions.updateSchema = true;
+        permissions.exportRecords = true;
+        permissions.locks = locks;
+        return permissions;
+    }
+
     public static FormPermissions fromJson(JsonValue object) {
         FormPermissions permissions = new FormPermissions();
 

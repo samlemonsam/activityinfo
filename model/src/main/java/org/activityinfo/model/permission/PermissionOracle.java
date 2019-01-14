@@ -246,7 +246,7 @@ public class PermissionOracle {
             return FormPermissions.none();
         }
         if (db.isOwner()) {
-            return FormPermissions.owner();
+            return FormPermissions.owner(db.getEffectiveLocks(formId));
         }
         if (db.isPublished()) {
             return FormPermissions.readWrite();
