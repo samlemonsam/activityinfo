@@ -22,7 +22,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.activityinfo.model.database.RecordLockSet;
-import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.TypedFormRecord;
@@ -67,14 +66,14 @@ public class FormInputViewModelBuilder {
 
     private List<SubFormViewModelBuilder> subBuilders = new ArrayList<>();
 
-    public FormInputViewModelBuilder(FormStore formStore, UserDatabaseMeta database, FormTree formTree, ActivePeriodMemory memory) {
+    public FormInputViewModelBuilder(FormStore formStore, FormTree formTree, ActivePeriodMemory memory) {
         this.formTree = formTree;
         this.locks = formTree.getRootMetadata().getPermissions().getLocks();
         this.evalContext = new FormEvalContext(this.formTree.getRootFormClass());
 
         for (FormTree.Node node : this.formTree.getRootFields()) {
             if(node.isSubForm() && node.isSubFormVisible()) {
-                subBuilders.add(new SubFormViewModelBuilder(formStore, database, formTree, node, memory));
+                subBuilders.add(new SubFormViewModelBuilder(formStore, formTree, node, memory));
             }
             if(node.getField().hasRelevanceCondition()) {
                 buildRelevanceCalculator(node);

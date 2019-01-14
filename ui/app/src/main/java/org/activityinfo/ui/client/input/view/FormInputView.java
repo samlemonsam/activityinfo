@@ -105,7 +105,7 @@ public class FormInputView implements IsWidget, InputHandler {
         initialLoad = true;
         container.unmask();
 
-        viewModelBuilder = new FormInputViewModelBuilder(formStore, formStructure.getDatabase(), formStructure.getFormTree(), new LiveActivePeriodMemory());
+        viewModelBuilder = new FormInputViewModelBuilder(formStore, formStructure.getFormTree(), new LiveActivePeriodMemory());
         existingRecord = formStructure.getExistingRecord();
 
         formPanel = new FormPanel(formStore, formStructure.getFormTree(), inputModel.getRecordRef(), this, existingRecord);
