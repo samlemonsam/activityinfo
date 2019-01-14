@@ -23,7 +23,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.activityinfo.model.database.RecordLockSet;
 import org.activityinfo.model.database.UserDatabaseMeta;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormEvalContext;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.TypedFormRecord;
@@ -70,7 +69,7 @@ public class FormInputViewModelBuilder {
 
     public FormInputViewModelBuilder(FormStore formStore, UserDatabaseMeta database, FormTree formTree, ActivePeriodMemory memory) {
         this.formTree = formTree;
-        this.locks = locksForForm(database, formTree);
+        this.locks = formTree.getRootMetadata().getPermissions().getLocks();
         this.evalContext = new FormEvalContext(this.formTree.getRootFormClass());
 
         for (FormTree.Node node : this.formTree.getRootFields()) {
@@ -89,17 +88,6 @@ public class FormInputViewModelBuilder {
             }
         }
     }
-
-    private RecordLockSet locksForForm(UserDatabaseMeta database, FormTree formTree) {
-        // Currently, sub forms are not included in UserDatabaseMeta...
-        FormClass formClass = formTree.getRootFormClass();
-        if(formClass.isSubForm()) {
-            return database.getEffectiveLocks(formClass.getParentFormId().get());
-        } else {
-            return database.getEffectiveLocks(formClass.getId());
-        }
-    }
-
 
     private void buildRelevanceCalculator(FormTree.Node node) {
 
