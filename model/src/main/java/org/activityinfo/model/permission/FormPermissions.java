@@ -54,11 +54,6 @@ public final class FormPermissions implements JsonSerializable {
 
     private boolean updateSchema;
 
-    /**
-     * True if the use has permission to create child folders or forms in this folder.
-     */
-    private boolean createChildren;
-
     private boolean exportRecords;
 
     /**
@@ -101,10 +96,6 @@ public final class FormPermissions implements JsonSerializable {
         return updateSchema;
     }
 
-    public boolean isCreateChildrenAllowed() {
-        return createChildren;
-    }
-
     public boolean isExportRecordsAllowed() {
         return exportRecords;
     }
@@ -137,7 +128,6 @@ public final class FormPermissions implements JsonSerializable {
         permissions.editRecord = true;
         permissions.deleteRecord = true;
         permissions.updateSchema = true;
-        permissions.createChildren = true;
         permissions.exportRecords = true;
         return permissions;
     }
