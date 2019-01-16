@@ -23,7 +23,6 @@ import org.activityinfo.indexedb.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -98,7 +97,7 @@ public class PendingStore {
                 // If it's already been removed from the queue, no need to update
                 if(pendingTransaction != null) {
                     pendingTransaction.setStatus(status);
-                    store.put(id, pendingTransaction);
+                    store.put(pendingTransaction, id);
                 }
                 return null;
             }

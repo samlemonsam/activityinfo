@@ -79,7 +79,7 @@ public class ObjectStoreStub<T> {
         }
 
         @Override
-        public void put(int key, T object) {
+        public void put(T object, int key) {
             put(new ObjectKey(key), object);
         }
 

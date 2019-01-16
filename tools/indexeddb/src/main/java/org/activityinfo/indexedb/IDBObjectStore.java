@@ -27,7 +27,7 @@ public interface IDBObjectStore<T> {
 
     void put(T object);
 
-    void put(int key, T object);
+    void put(T object, int key);
 
     void put(String key, T object);
 

@@ -39,8 +39,8 @@ public final class IDBObjectStoreImpl<T> extends JavaScriptObject implements IDB
     }-*/;
 
     @Override
-    public final native void put(int key, T object) /*-{
-       this.put(key, object);
+    public final native void put(T object, int key) /*-{
+       this.put(object, key);
     }-*/;
 
     @Override
