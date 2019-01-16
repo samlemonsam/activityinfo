@@ -19,10 +19,26 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class OfflineClientStub implements ActivityInfoClientAsync {
+
+    private boolean online = false;
+    private List<RecordTransaction> transactionsSubmitted = new ArrayList<>();
+
+    public void setOnline(boolean online) {
+        this.online = online;
+    }
+
+    public boolean isOnline() {
+        return online;
+    }
+
+    public List<RecordTransaction> getTransactionsSubmitted() {
+        return transactionsSubmitted;
+    }
 
     private <T> Promise<T> offline() {
         return Promise.rejected(new RuntimeException("offline"));
@@ -94,8 +110,13 @@ public class OfflineClientStub implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<Void> updateRecords(RecordTransaction transactions) {
-        return offline();
+    public Promise<Void> updateRecords(RecordTransaction transaction) {
+        if(online) {
+            transactionsSubmitted.add(transaction);
+            return Promise.done();
+        } else {
+            return offline();
+        }
     }
 
     @Override

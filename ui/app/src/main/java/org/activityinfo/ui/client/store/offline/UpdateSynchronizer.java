@@ -18,7 +18,6 @@
  */
 package org.activityinfo.ui.client.store.offline;
 
-import com.google.common.base.Function;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.indexedb.OfflineDatabase;
@@ -26,6 +25,8 @@ import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.http.HttpStore;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,6 +41,7 @@ public class UpdateSynchronizer {
 
     private StatefulValue<Boolean> running = new StatefulValue<>(false);
 
+    private List<Promise<Void>> callbacks = new ArrayList<>();
 
     public UpdateSynchronizer(OfflineDatabase database, HttpStore httpStore, EventBus eventBus) {
         this.database = database;

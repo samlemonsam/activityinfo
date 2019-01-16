@@ -221,6 +221,15 @@ public class OfflineStore {
         updateSynchronizer.start();
     }
 
+    public Promise<Void> syncChangesAndWait() {
+        updateSynchronizer.start();
+        return updateSynchronizer
+                .isRunning()
+                .transformIf(running -> running ?  Optional.empty() : Optional.of(false))
+                .once()
+                .thenDiscardResult();
+    }
+
     /**
      * Stores a new snapshot to the remote store
      */

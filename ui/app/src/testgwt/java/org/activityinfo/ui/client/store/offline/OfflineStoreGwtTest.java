@@ -16,6 +16,7 @@ import org.activityinfo.promise.Promise;
 import org.activityinfo.store.testing.Survey;
 import org.activityinfo.ui.client.store.FormStoreImpl;
 import org.activityinfo.ui.client.store.http.HttpStore;
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -40,6 +41,7 @@ public class OfflineStoreGwtTest extends GWTTestCase {
     private HttpStore httpStore;
     private FormStoreImpl formStore;
     private Survey survey;
+    private OfflineClientStub client;
 
     @Override
     public String getModuleName() {
@@ -58,8 +60,11 @@ public class OfflineStoreGwtTest extends GWTTestCase {
                 Collections.singletonList(surveyMetadata),
                 Collections.singletonList(toFormRecordSet(survey)));
 
+        client = new OfflineClientStub();
+        client.setOnline(false);
+
+        httpStore = new HttpStore(client);
         offlineStore = new OfflineStore(httpStore, IDBFactoryImpl.create());
-        httpStore = new HttpStore(new OfflineClientStub());
         formStore = new FormStoreImpl(httpStore, offlineStore, Scheduler.get());
 
         offlineStore.store(snapshot).then(new AsyncCallback<Void>() {
@@ -77,8 +82,9 @@ public class OfflineStoreGwtTest extends GWTTestCase {
                 verifyWeCanReadFormSchemas()
                         .join(OfflineStoreGwtTest.this::verifyWeCanQueryRecords)
                         .join(OfflineStoreGwtTest.this::verifyWeCanMakeChangesOffline)
-                        .join(OfflineStoreGwtTest.this::verifyWeCanLoadCurrentSnapshot)
+                        .join(OfflineStoreGwtTest.this::verifyWeCanLoadCurrentSnapshotStatus)
                         .join(OfflineStoreGwtTest.this::verifyWeCanQuery)
+                        .join(OfflineStoreGwtTest.this::verifyWeCanSyncChangesToServer)
                         .then(new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -148,7 +154,7 @@ public class OfflineStoreGwtTest extends GWTTestCase {
         return formStore.updateRecords(transaction);
     }
 
-    private Promise<Void> verifyWeCanLoadCurrentSnapshot(Void input) {
+    private Promise<Void> verifyWeCanLoadCurrentSnapshotStatus(Void input) {
         return offlineStore.getDatabase().begin(KeyValueStore.DEF)
             .query(tx -> tx.objectStore(KeyValueStore.DEF).getCurrentSnapshot())
             .then(new Function<SnapshotStatus, Void>() {
@@ -164,7 +170,6 @@ public class OfflineStoreGwtTest extends GWTTestCase {
 
     }
 
-
     private Promise<Void> verifyWeCanQuery(Void input) {
 
         QueryModel queryModel = new QueryModel(survey.getFormId());
@@ -179,6 +184,26 @@ public class OfflineStoreGwtTest extends GWTTestCase {
             public Void apply(@Nullable ColumnSet columnSet) {
 
                 assertEquals(survey.getRowCount() + 2, columnSet.getNumRows());
+
+                return null;
+            }
+        });
+    }
+
+    private Promise<Void> verifyWeCanSyncChangesToServer(Void input) {
+
+        LOGGER.info("Going online...");
+
+        client.setOnline(true);
+
+        return offlineStore.syncChangesAndWait().then(new Function<Void, Void>() {
+            @NullableDecl
+            @Override
+            public Void apply(@NullableDecl Void input) {
+
+                LOGGER.info("Submitted transaction count: " + client.getTransactionsSubmitted().size());
+
+                assertEquals(1, client.getTransactionsSubmitted().size());
 
                 return null;
             }

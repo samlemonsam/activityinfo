@@ -18,7 +18,8 @@
  */
 package org.activityinfo.observable;
 
-import com.google.common.base.Optional;
+
+import java.util.Optional;
 
 /**
  * An observable that based on an observable optional value.

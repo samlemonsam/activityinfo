@@ -153,7 +153,7 @@ public abstract class Observable<T> {
         };
     }
 
-    public final <R> Observable<R> transformIf(Function<T, Optional<R>> function) {
+    public final <R> Observable<R> transformIf(Function<T, java.util.Optional<R>> function) {
         return new FlattenedOptional<>(transform(function));
     }
 
