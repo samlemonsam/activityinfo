@@ -521,12 +521,12 @@ public class FormInputViewModelTest {
                         .setLabel(clinicForm.getFormClass().getLabel())
                         .setType(ResourceType.FORM)
                         .build())
-//            .addResource(new Resource.Builder()
-//                        .setId(clinicForm.getSubForm().getFormId())
-//                        .setParentId(clinicForm.getFormId())
-//                        .setLabel(clinicForm.getSubForm().getFormClass().getLabel())
-//                        .setType(ResourceType.FORM)
-//                        .build())
+            .addResource(new Resource.Builder()
+                        .setId(clinicForm.getSubForm().getFormId())
+                        .setParentId(clinicForm.getFormId())
+                        .setLabel(clinicForm.getSubForm().getFormClass().getLabel())
+                        .setType(ResourceType.SUB_FORM)
+                        .build())
             .addLock(new RecordLock.Builder()
                         .setId(ResourceId.valueOf("lock1"))
                         .setLabel("Archived")
@@ -575,7 +575,7 @@ public class FormInputViewModelTest {
             @Override
             public FormMetadata getFormMetadata(ResourceId formId) {
                 if(formId.equals(parentForm.getId())) {
-                    return FormMetadata.of(1, parentForm, FormPermissions.owner());
+                    return FormMetadata.of(1, parentForm, FormPermissions.owner(null));
                 } else {
                     return FormMetadata.forbidden(formId);
                 }

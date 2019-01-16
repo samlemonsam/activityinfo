@@ -24,6 +24,7 @@ import org.activityinfo.json.JsonSerializable;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.database.RecordLockSet;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 /**
@@ -125,28 +126,18 @@ public final class FormPermissions implements JsonSerializable {
         return permissions;
     }
 
-    public static FormPermissions readWrite() {
+    public static FormPermissions readWrite(@Nullable RecordLockSet locks) {
         FormPermissions permissions = new FormPermissions();
         permissions.view = true;
         permissions.createRecord = true;
         permissions.editRecord = true;
         permissions.deleteRecord = true;
         permissions.exportRecords = true;
+        permissions.locks = locks;
         return permissions;
     }
 
-    public static FormPermissions owner() {
-        FormPermissions permissions = new FormPermissions();
-        permissions.view = true;
-        permissions.createRecord = true;
-        permissions.editRecord = true;
-        permissions.deleteRecord = true;
-        permissions.updateSchema = true;
-        permissions.exportRecords = true;
-        return permissions;
-    }
-
-    public static FormPermissions owner(RecordLockSet locks) {
+    public static FormPermissions owner(@Nullable RecordLockSet locks) {
         FormPermissions permissions = new FormPermissions();
         permissions.view = true;
         permissions.createRecord = true;

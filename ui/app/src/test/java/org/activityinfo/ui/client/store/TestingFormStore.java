@@ -120,7 +120,7 @@ public class TestingFormStore implements FormStore {
             return FormMetadata.forbidden(formId);
 
         } else {
-            return FormMetadata.of(1L, testingCatalog.getFormClass(formId), FormPermissions.readWrite());
+            return FormMetadata.of(1L, testingCatalog.getFormClass(formId), FormPermissions.readWrite(null));
         }
     }
 

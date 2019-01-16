@@ -39,7 +39,7 @@ public class FormMetadataProviderStub implements FormMetadataProvider {
     @Override
     public FormMetadata getFormMetadata(ResourceId formId) {
         if(map.containsKey(formId)) {
-            return FormMetadata.of(1, map.get(formId), FormPermissions.owner());
+            return FormMetadata.of(1, map.get(formId), FormPermissions.owner(null));
         } else {
             return FormMetadata.notFound(formId);
         }

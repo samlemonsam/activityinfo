@@ -178,7 +178,7 @@ public class AsyncClientStub implements ActivityInfoClientAsync {
             return new FormMetadata.Builder()
                 .setId(formId)
                 .setSchema(form.get().getFormClass())
-                .setPermissions(FormPermissions.readWrite())
+                .setPermissions(FormPermissions.readWrite(database.map(db -> db.getEffectiveLocks(formId)).orElse(null)))
                 .setVersion(form.get().cacheVersion())
                 .build();
         }

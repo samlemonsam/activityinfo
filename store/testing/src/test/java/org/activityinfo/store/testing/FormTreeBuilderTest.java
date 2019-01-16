@@ -42,7 +42,7 @@ public class FormTreeBuilderTest {
             FormClass formClass;
             for (TestForm form : testForms) {
                  formClass = form.getFormClass();
-                 forms.put(formClass.getId(), FormMetadata.of(0, formClass, FormPermissions.readWrite()));
+                 forms.put(formClass.getId(), FormMetadata.of(0, formClass, FormPermissions.readWrite(null)));
             }
         }
 

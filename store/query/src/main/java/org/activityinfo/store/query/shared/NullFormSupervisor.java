@@ -25,6 +25,6 @@ public class NullFormSupervisor implements FormSupervisor {
 
     @Override
     public FormPermissions getFormPermissions(ResourceId formId) {
-        return FormPermissions.readWrite();
+        return FormPermissions.readWrite(null);
     }
 }
