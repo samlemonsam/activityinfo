@@ -59,6 +59,7 @@ public final class IDBFactoryImpl extends JavaScriptObject implements IDBFactory
         request.onerror = function(event) {
             promise.@Promise::onFailure(*)(@RuntimeException::new()());
         }
+        return promise;
     }-*/;
 
     private static IDBDatabaseImpl wrap(JavaScriptObject db) {
