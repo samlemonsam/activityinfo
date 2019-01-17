@@ -242,14 +242,18 @@ public class UserForm extends FormPanel {
             allFolderCheckbox.addListener(Events.Change, this::onAllFoldersChanged);
             folderGroup.add(allFolderCheckbox);
         }
-
-        for (FolderDTO folder : database.getFolders()) {
-            CheckBox folderCheckBox = new CheckBox();
-            folderCheckBox.setBoxLabel(folder.getName());
-            folderCheckBox.setValue(false);
-            folderCheckBox.addListener(Events.Change, this::onIndividualFolderChanged);
-            folderGroup.add(folderCheckBox);
-            folderCheckBoxMap.put(folder.getId(), folderCheckBox);
+        // If a database has no folders, hide this section entirely. If it does, then populate folder list
+        if (database.getFolders().isEmpty()) {
+            folderGroup.setVisible(false);
+        } else {
+            for (FolderDTO folder : database.getFolders()) {
+                CheckBox folderCheckBox = new CheckBox();
+                folderCheckBox.setBoxLabel(folder.getName());
+                folderCheckBox.setValue(false);
+                folderCheckBox.addListener(Events.Change, this::onIndividualFolderChanged);
+                folderGroup.add(folderCheckBox);
+                folderCheckBoxMap.put(folder.getId(), folderCheckBox);
+            }
         }
         this.add(folderGroup);
 
