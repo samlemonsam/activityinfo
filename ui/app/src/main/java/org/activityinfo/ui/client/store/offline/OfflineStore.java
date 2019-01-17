@@ -162,6 +162,11 @@ public class OfflineStore {
             new FormChangeWatcher(eventBus, change -> change.isRecordChanged(recordRef)));
     }
 
+    public Observable<List<FormRecord>> getCachedSubRecords(ResourceId formId, RecordRef parent) {
+        return new ObservableTask<>(new SubRecordQuery(database, formId, parent),
+                new FormChangeWatcher(eventBus, change -> change.isFormChanged(formId)));
+    }
+
     public Observable<ColumnSet> query(QueryModel queryModel) {
         ResourceId rootFormId = queryModel.getRowSources().get(0).getRootFormId();
         Observable<FormTree> tree = new ObservableTree<>(new FormTreeLoader(rootFormId, this::getCachedMetadata),

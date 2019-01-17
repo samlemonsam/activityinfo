@@ -19,11 +19,14 @@
 package org.activityinfo.ui.client.store.offline;
 
 import org.activityinfo.indexedb.*;
+import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.form.UpdatedRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.promise.Promise;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -76,6 +79,27 @@ public class RecordStore {
 
     public final Promise<Optional<RecordObject>> get(RecordRef ref) {
         return impl.get(key(ref)).then(Optional::ofNullable);
+    }
+
+    public final Promise<List<FormRecord>> get(ResourceId formId, RecordRef parentRecord) {
+        Promise<List<FormRecord>> result = new Promise<>();
+        List<FormRecord> records = new ArrayList<>();
+        openCursor(formId, new IDBCursorCallback<RecordObject>() {
+            @Override
+            public void onNext(IDBCursor<RecordObject> cursor) {
+                if (cursor.getValue().getParentRecordId().equals(parentRecord.getRecordId().asString())) {
+                    RecordRef subFormRecordRef = RecordRef.fromQualifiedString(cursor.getKeyString());
+                    records.add(cursor.getValue().toFormRecord(subFormRecordRef));
+                }
+                cursor.continue_();
+            }
+
+            @Override
+            public void onDone() {
+                result.onSuccess(records);
+            }
+        });
+        return result;
     }
 
     static String key(RecordRef ref) {

@@ -96,7 +96,13 @@ public class FormStoreImpl implements FormStore {
 
     @Override
     public Observable<List<FormRecord>> getSubRecords(ResourceId formId, RecordRef parent) {
-        return httpStore.get(new SubRecordsRequest(formId, parent));
+        return offlineStore.getCurrentSnapshot().join(snapshot -> {
+            if (snapshot.isFormCached(formId)) {
+                return offlineStore.getCachedSubRecords(formId, parent);
+            } else {
+                return httpStore.get(new SubRecordsRequest(formId, parent));
+            }
+        });
     }
 
     @Override
