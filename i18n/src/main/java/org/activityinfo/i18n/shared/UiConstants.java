@@ -121,7 +121,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Allow user to edit form submissions of all partners")
     String allowEditAllLong();
 
-    @DefaultStringValue("Allow user to edit form submissions")
+    @DefaultStringValue("Allow user to create and edit form submissions")
     String allowEditLong();
 
     @DefaultStringValue("Manage all users")
@@ -1998,5 +1998,4 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("This Partner")
     String forThisPartner();
-
 }
