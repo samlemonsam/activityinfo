@@ -140,4 +140,11 @@
         <cpe>cpe:/a:google:protobuf</cpe>
     </suppress>
 
+    <suppress>
+        <notes>The data-tools project (https://github.com/clarkgrubb/data-tools) is unrelated
+            to the GeoTools project</notes>
+        <gav regex="true">^org\.geotools:.*$</gav>
+        <cpe>cpe:/a:data-tools_project:data_tools</cpe>
+    </suppress>
+
 </suppressions>
