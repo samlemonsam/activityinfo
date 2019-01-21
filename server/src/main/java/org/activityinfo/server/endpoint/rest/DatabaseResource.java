@@ -81,14 +81,20 @@ public class DatabaseResource {
                             Provider<EntityManager> entityManagerProvider,
                             MailSender mailSender,
                             BillingAccountOracle billingOracle,
-                            ResourceId databaseId) {
+                            String id) {
         this.catalog = catalog;
         this.dispatcher = dispatcher;
         this.databaseProvider = databaseProvider;
         this.entityManagerProvider = entityManagerProvider;
         this.mailSender = mailSender;
         this.billingOracle = billingOracle;
-        this.databaseId = databaseId;
+
+        // Id could be an Integer or a ResourceId (to comply with older version of /resources/database endpoint)
+        ResourceId dbResourceId = ResourceId.valueOf(id);
+        if (!CuidAdapter.isValidLegacyId(dbResourceId)) {
+            dbResourceId = CuidAdapter.databaseId(Integer.valueOf(id));
+        }
+        this.databaseId = dbResourceId;
     }
 
     @GET

@@ -86,7 +86,7 @@ public class ApprovalResourceTest extends CommandTestCase {
                 Providers.of(em),
                 mailSender,
                 billingOracle,
-                CuidAdapter.databaseId(databaseId));
+                CuidAdapter.databaseId(databaseId).asString());
 
         approvalResource = new ApprovalResource(Providers.of(em),
                 dispatcher,

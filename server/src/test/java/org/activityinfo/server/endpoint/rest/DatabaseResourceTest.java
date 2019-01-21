@@ -12,6 +12,7 @@ import com.googlecode.objectify.util.Closeable;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.database.transfer.RequestTransfer;
 import org.activityinfo.model.database.transfer.TransferAuthorized;
 import org.activityinfo.model.database.transfer.TransferDecision;
@@ -35,6 +36,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URISyntaxException;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(InjectionSupport.class)
@@ -84,7 +86,7 @@ public class DatabaseResourceTest extends CommandTestCase {
                 Providers.of(em),
                 mailSender,
                 billingOracle,
-                CuidAdapter.databaseId(databaseId));
+                CuidAdapter.databaseId(databaseId).asString());
         uri = RestMockUtils.mockUriInfo("http://www.activityinfo.org/");
         helper.setUp();
         objectifyCloseable = ObjectifyService.begin();
@@ -94,6 +96,33 @@ public class DatabaseResourceTest extends CommandTestCase {
     public void tearDown() {
         helper.tearDown();
         objectifyCloseable.close();
+    }
+
+    @Test
+    public void multipleIdTypes() {
+        // Id can be in the form of an integer or a resource id
+        // Must ensure both resolve to the same UserDatabaseMeta
+        DatabaseResource intIdResource = new DatabaseResource(formStorageProvider,
+                dispatcher,
+                databaseProvider,
+                Providers.of(em),
+                mailSender,
+                billingOracle,
+                Integer.toString(databaseId));
+        UserDatabaseMeta intIdDb = intIdResource.getDatabaseMetadata(alex);
+
+        DatabaseResource resourceIdResource = new DatabaseResource(formStorageProvider,
+                dispatcher,
+                databaseProvider,
+                Providers.of(em),
+                mailSender,
+                billingOracle,
+                CuidAdapter.databaseId(databaseId).asString());
+        UserDatabaseMeta resourceIdDb = resourceIdResource.getDatabaseMetadata(alex);
+
+        assertNotNull(intIdDb);
+        assertNotNull(resourceIdDb);
+        assertTrue(intIdDb.equals(resourceIdDb));
     }
 
     @Test
