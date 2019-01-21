@@ -618,4 +618,21 @@ public class UserDatabaseMeta implements JsonSerializable {
 
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+
+        // Convert both to JSON and compare -> must be _identical_
+        return toString().equals(obj.toString());
+    }
+
+    @Override
+    public String toString() {
+        return this.toJson().toJson();
+    }
 }
