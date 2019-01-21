@@ -90,6 +90,7 @@ public class XFormResourceTest extends CommandTestCase2 {
     private XFormResources formResource;
     private XFormSubmissionResource formSubmissionResource;
     private ResourceLocatorSyncImpl resourceLocator;
+    private DatabaseProvider databaseProvider;
 
     @Before
     public void setUp() throws IOException {
@@ -97,9 +98,10 @@ public class XFormResourceTest extends CommandTestCase2 {
         objectifyService = ObjectifyService.begin();
 
         Provider<AuthenticatedUser> authProvider = Providers.of(new AuthenticatedUser("", USER_ID, "jorden@bdd.com"));
+        databaseProvider = injector.getInstance(DatabaseProvider.class);
         resourceLocator = new ResourceLocatorSyncImpl(
                 injector.getProvider(FormStorageProvider.class),
-                injector.getInstance(DatabaseProvider.class),
+                databaseProvider,
                 authProvider,
                 new BlobAuthorizerStub());
 
@@ -115,7 +117,7 @@ public class XFormResourceTest extends CommandTestCase2 {
         SubmissionArchiver backupService = new SubmissionArchiver(
                 new DeploymentConfiguration(new Properties()));
 
-        formResource = new XFormResources(resourceLocator, authProvider, fieldFactory, tokenService);
+        formResource = new XFormResources(resourceLocator, authProvider, fieldFactory, tokenService, databaseProvider);
         formSubmissionResource = new XFormSubmissionResource(
                 getDispatcherSync(), resourceLocator, tokenService, blobstore, idService, backupService);
     }

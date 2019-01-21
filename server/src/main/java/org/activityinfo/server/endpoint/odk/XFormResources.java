@@ -24,10 +24,14 @@ import org.activityinfo.io.xform.form.XForm;
 import org.activityinfo.io.xform.manifest.MediaFile;
 import org.activityinfo.io.xform.manifest.XFormManifest;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
+import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.FormPermissions;
+import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.endpoint.odk.build.XFormBuilder;
 import org.activityinfo.store.query.UsageTracker;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormNotFoundException;
 
 import javax.inject.Provider;
@@ -37,6 +41,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 
@@ -50,24 +55,34 @@ public class XFormResources {
     private Provider<AuthenticatedUser> authProvider;
     private AuthenticationTokenService authenticationTokenService;
     private ItemSetBuilder itemSetBuilder;
+    private DatabaseProvider databaseProvider;
 
     @Inject
-    public XFormResources(ResourceLocatorSyncImpl locator, OdkAuthProvider authProvider, OdkFormFieldBuilderFactory factory,
-                          AuthenticationTokenService authenticationTokenService, ItemSetBuilder itemSetBuilder) {
+    public XFormResources(ResourceLocatorSyncImpl locator,
+                          OdkAuthProvider authProvider,
+                          OdkFormFieldBuilderFactory factory,
+                          AuthenticationTokenService authenticationTokenService,
+                          ItemSetBuilder itemSetBuilder,
+                          DatabaseProvider databaseProvider) {
         this.locator = locator;
         this.authProvider = authProvider;
         this.factory = factory;
         this.authenticationTokenService = authenticationTokenService;
         this.itemSetBuilder = itemSetBuilder;
+        this.databaseProvider = databaseProvider;
     }
 
     @VisibleForTesting
-    XFormResources(ResourceLocatorSyncImpl locator, Provider<AuthenticatedUser> authProvider, OdkFormFieldBuilderFactory factory,
-                   AuthenticationTokenService authenticationTokenService) {
+    XFormResources(ResourceLocatorSyncImpl locator,
+                   Provider<AuthenticatedUser> authProvider,
+                   OdkFormFieldBuilderFactory factory,
+                   AuthenticationTokenService authenticationTokenService,
+                   DatabaseProvider databaseProvider) {
         this.locator = locator;
         this.authProvider = authProvider;
         this.factory = factory;
         this.authenticationTokenService = authenticationTokenService;
+        this.databaseProvider = databaseProvider;
     }
 
     private FormClass fetchFormClass(int id) {
@@ -78,6 +93,19 @@ public class XFormResources {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
         return formClass;
+    }
+
+    private FormPermissions fetchFormPermissions(int id) {
+        FormPermissions formPermissions;
+        try {
+            formPermissions = databaseProvider
+                    .getDatabaseMetadataByResource(CuidAdapter.activityFormClass(id), authProvider.get().getUserId())
+                    .map(db -> PermissionOracle.formPermissions(CuidAdapter.activityFormClass(id), db))
+                    .orElseThrow(FormNotFoundException::new);
+        } catch (FormNotFoundException formNotFoundException) {
+            throw new WebApplicationException(Response.Status.NOT_FOUND);
+        }
+        return formPermissions;
     }
 
     @GET
@@ -91,6 +119,11 @@ public class XFormResources {
                      user.getEmail() + " (" + user.getId() + ")");
 
         FormClass formClass = fetchFormClass(id);
+        FormPermissions formPermissions = fetchFormPermissions(id);
+
+        if (!formPermissions.isCreateAllowed()) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
 
         UsageTracker.track(user.getUserId(), "odk_download", formClass);
 
@@ -99,7 +132,7 @@ public class XFormResources {
 
         XForm xForm = new XFormBuilder(factory)
                 .setUserId(authenticationToken)
-                .build(formClass);
+                .build(formClass, formPermissions);
 
         return Response.ok(xForm).build();
     }

@@ -27,6 +27,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 
@@ -39,7 +40,7 @@ public interface ResourceLocatorSync extends FormClassProvider {
 
     FormTree getFormTree(ResourceId formId);
 
-    List<ReferenceChoice> getReferenceChoices(Collection<ResourceId> range);
+    List<ReferenceChoice> getReferenceChoices(Collection<ResourceId> range, @Nullable String filter);
 
     void persist(FormClass formClass);
 

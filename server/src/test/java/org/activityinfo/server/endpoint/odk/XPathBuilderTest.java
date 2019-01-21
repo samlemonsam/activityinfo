@@ -32,6 +32,7 @@ import org.activityinfo.model.form.TFormClass;
 import org.activityinfo.model.formula.*;
 import org.activityinfo.model.formula.simple.SimpleConditionList;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
@@ -40,6 +41,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.endpoint.odk.build.XFormBuilder;
+import org.activityinfo.store.spi.DatabaseProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -223,7 +225,7 @@ public class XPathBuilderTest extends CommandTestCase2 {
     private XForm xForm(FormClass formClass) {
         return new XFormBuilder(factory)
                 .setUserId("yuriyz")
-                .build(formClass);
+                .build(formClass, FormPermissions.readWrite(null));
     }
 
     private static TFormClass createFormClass() {

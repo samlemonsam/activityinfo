@@ -26,7 +26,10 @@ import com.google.common.escape.Escapers;
 import com.google.inject.Inject;
 import org.activityinfo.io.xform.form.BindingType;
 import org.activityinfo.io.xform.form.Item;
+import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.AttachmentType;
@@ -42,6 +45,7 @@ import org.activityinfo.model.type.primitive.InputMask;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.*;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,14 +59,14 @@ public class OdkFormFieldBuilderFactory {
 
     private static final Logger LOGGER = Logger.getLogger(OdkFormFieldBuilderFactory.class.getName());
 
-    final private ResourceLocatorSync locator;
+    private final ResourceLocatorSync locator;
 
     @Inject
     public OdkFormFieldBuilderFactory(ResourceLocatorSync table) {
         this.locator = table;
     }
 
-    public OdkFormFieldBuilder get(FieldType fieldType) {
+    public OdkFormFieldBuilder get(FormPermissions formPermissions, FieldType fieldType) {
         if (fieldType instanceof ParametrizedFieldType) {
             ParametrizedFieldType parametrizedFieldType = (ParametrizedFieldType) fieldType;
             if (!parametrizedFieldType.isValid()) {
@@ -85,7 +89,7 @@ public class OdkFormFieldBuilderFactory {
             @Override
             public OdkFormFieldBuilder visitReference(ReferenceType referenceType) {
                 if(isSmallSet(referenceType.getRange())) {
-                    return new SelectBuilder(BindingType.STRING, referenceOptions(referenceType));
+                    return new SelectBuilder(BindingType.STRING, referenceOptions(formPermissions, referenceType));
                 } else {
                     return new ReferenceBuilder(referenceType.getRange());
                 }
@@ -225,10 +229,10 @@ public class OdkFormFieldBuilderFactory {
         return new SelectOptions(Cardinality.SINGLE, Arrays.asList(yes, no));
     }
 
-    private SelectOptions referenceOptions(ReferenceType referenceType) {
+    private SelectOptions referenceOptions(FormPermissions formPermissions, ReferenceType referenceType) {
         ArrayList<Item> items = Lists.newArrayList();
 
-        for (ReferenceChoice choice : locator.getReferenceChoices(referenceType.getRange())) {
+        for (ReferenceChoice choice : locator.getReferenceChoices(referenceType.getRange(), formPermissions.getCreateFilter())) {
             Item item = new Item();
             item.setLabel(choice.getLabel());
             item.setValue(choice.getRef().toQualifiedString());

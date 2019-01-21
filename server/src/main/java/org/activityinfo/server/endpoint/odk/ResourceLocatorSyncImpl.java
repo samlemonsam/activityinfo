@@ -42,6 +42,7 @@ import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.FormStorageProvider;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 
@@ -76,12 +77,15 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
     }
 
     @Override
-    public List<ReferenceChoice> getReferenceChoices(Collection<ResourceId> range) {
+    public List<ReferenceChoice> getReferenceChoices(Collection<ResourceId> range, @Nullable String filter) {
 
         ResourceId formId = Iterables.getOnlyElement(range);
         QueryModel queryModel = new QueryModel(formId);
         queryModel.selectRecordId().as("id");
         queryModel.selectExpr("label").as("label");
+        if (filter != null) {
+            queryModel.setFilter(filter);
+        }
         
         ColumnSetBuilder builder = new ColumnSetBuilder(catalog.get(), new NullFormSupervisor());
         ColumnSet columnSet = builder.build(queryModel);

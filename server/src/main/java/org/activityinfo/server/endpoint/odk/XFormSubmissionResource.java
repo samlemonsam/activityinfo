@@ -33,6 +33,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.Attachment;
@@ -178,7 +179,7 @@ public class XFormSubmissionResource {
         FormField partnerField = formClass.getField(partnerFieldId);
         ReferenceType partnerFieldType = (ReferenceType) partnerField.getType();
 
-        List<ReferenceChoice> choices = locator.getReferenceChoices(partnerFieldType.getRange());
+        List<ReferenceChoice> choices = locator.getReferenceChoices(partnerFieldType.getRange(), null);
         if(choices.size() != 1) {
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
             .entity("No partner selected").build());

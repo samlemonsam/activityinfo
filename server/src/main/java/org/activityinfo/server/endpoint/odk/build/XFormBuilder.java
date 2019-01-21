@@ -24,6 +24,7 @@ import org.activityinfo.io.xform.form.*;
 import org.activityinfo.io.xform.xpath.XPathBuilder;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ParametrizedFieldType;
 import org.activityinfo.model.type.geo.GeoPointType;
@@ -54,6 +55,7 @@ public class XFormBuilder {
     private OdkFormFieldBuilderFactory factory;
     private String userId;
     private FormClass formClass;
+    private FormPermissions formPermissions;
     private List<OdkField> fields;
     private ResourceId startDateFieldId;
     private ResourceId endDateFieldId;
@@ -73,8 +75,9 @@ public class XFormBuilder {
         return this;
     }
 
-    public XForm build(FormClass formClass) {
+    public XForm build(FormClass formClass, FormPermissions formPermissions) {
         this.formClass = formClass;
+        this.formPermissions = formPermissions;
 
         startDateFieldId = field(formClass.getId(), START_DATE_FIELD);
         endDateFieldId = field(formClass.getId(), END_DATE_FIELD);
@@ -82,7 +85,7 @@ public class XFormBuilder {
         locationNameFieldId = field(formClass.getId(), LOCATION_NAME_FIELD);
         gpsFieldId = field(formClass.getId(), GPS_FIELD);
 
-        fields = createFieldBuilders(formClass);
+        fields = createFieldBuilders(formClass, formPermissions);
         odkSymbolHandler = new OdkSymbolHandler(fields);
         xPathBuilder = new XPathBuilder(odkSymbolHandler);
         xform = new XForm();
@@ -93,11 +96,11 @@ public class XFormBuilder {
         return xform;
     }
 
-    private List<OdkField> createFieldBuilders(FormClass formClass) {
+    private List<OdkField> createFieldBuilders(FormClass formClass, FormPermissions formPermissions) {
         fields = new ArrayList<>();
         for (FormField field : formClass.getFields()) {
             if(field.isVisible() && isValid(field)) {
-                OdkFormFieldBuilder builder = factory.get(field.getType());
+                OdkFormFieldBuilder builder = factory.get(formPermissions, field.getType());
                 if (builder != OdkFormFieldBuilder.NONE) {
                     fields.add(new OdkField(field, builder));
                 }
@@ -260,13 +263,13 @@ public class XFormBuilder {
         formField.setType(TextType.SIMPLE);
         formField.setLabel(original.getLabel());
         formField.setRequired(original.isRequired());
-        return new OdkField(formField, factory.get(formField.getType()));
+        return new OdkField(formField, factory.get(formPermissions, formField.getType()));
     }
 
     private OdkField gps(FormField original) {
         FormField formField = new FormField(gpsFieldId);
         formField.setType(GeoPointType.INSTANCE);
         formField.setLabel("GPS coordinates (" + original.getLabel() + ")");
-        return new OdkField(formField, factory.get(formField.getType()));
+        return new OdkField(formField, factory.get(formPermissions, formField.getType()));
     }
 }
