@@ -469,7 +469,7 @@ public class PermissionOracle {
 
     public static Permission view(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
+                db.getLegacyDatabaseId(),
                 Operation.VIEW,
                 resourceId);
         return query(query, db);
@@ -501,7 +501,7 @@ public class PermissionOracle {
 
     public static Permission manageUsers(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
+                db.getLegacyDatabaseId(),
                 Operation.MANAGE_USERS,
                 resourceId);
         return query(query, db);
@@ -517,7 +517,7 @@ public class PermissionOracle {
 
     public static Permission deleteResource(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
+                db.getLegacyDatabaseId(),
                 Operation.DELETE_RESOURCE,
                 resourceId);
         return query(query, db);
@@ -525,7 +525,7 @@ public class PermissionOracle {
 
     public static Permission editResource(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId()),
+                db.getLegacyDatabaseId(),
                 Operation.EDIT_RESOURCE,
                 resourceId);
         return query(query, db);
