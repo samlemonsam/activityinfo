@@ -67,6 +67,9 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
             return Optional.of(loaded.get(databaseId));
         }
         Map<ResourceId,DatabaseMeta> loadedFromDb = loadFromDb(Collections.singleton(databaseId));
+        if (loadedFromDb.isEmpty()) {
+            return Optional.empty();
+        }
         cacheToMemcache(loadedFromDb.values());
         return Optional.of(loadedFromDb.get(databaseId));
     }
@@ -87,8 +90,10 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         }
         loaded.forEach((dbId,cachedDbMeta) -> toFetch.remove(dbId));
         Map<ResourceId,DatabaseMeta> loadedFromDb = loadFromDb(toFetch.keySet());
-        cacheToMemcache(loadedFromDb.values());
-        loaded.putAll(loadedFromDb);
+        if (!loadedFromDb.isEmpty()) {
+            cacheToMemcache(loadedFromDb.values());
+            loaded.putAll(loadedFromDb);
+        }
         return loaded;
     }
 
@@ -187,6 +192,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
                 "WHERE db.id IN :databaseIds", Database.class)
                 .setParameter("databaseIds", legacysIds)
                 .getResultList().stream()
+                .filter(Objects::nonNull)
                 .map(db -> buildMeta(db, suspendedDatabases.contains(db.getId())))
                 .collect(Collectors.toMap(
                         DatabaseMeta::getDatabaseId,
