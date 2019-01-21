@@ -53,6 +53,9 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
             return Optional.of(loaded.get(databaseId));
         }
         loaded = loadFromDb(userId, grantVersion.keySet());
+        if (loaded.isEmpty()) {
+            return Optional.empty();
+        }
         cacheToMemcache(loaded.values());
         return Optional.of(loaded.get(databaseId));
     }
@@ -70,8 +73,10 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         }
         loaded.forEach((dbId,grant) -> grantVersions.remove(dbId));
         Map<ResourceId,DatabaseGrant> loadedFromDb = loadFromDb(userId, grantVersions.keySet());
-        cacheToMemcache(loadedFromDb.values());
-        loaded.putAll(loadedFromDb);
+        if (!loadedFromDb.isEmpty()) {
+            cacheToMemcache(loadedFromDb.values());
+            loaded.putAll(loadedFromDb);
+        }
         return new ArrayList<>(loaded.values());
     }
 
@@ -211,6 +216,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
                 .setParameter("userId", userId)
                 .setParameter("databaseIds", legacyIds)
                 .getResultList().stream()
+                .filter(Objects::nonNull)
                 .map(HibernateDatabaseGrantProvider::buildDatabaseGrant)
                 .collect(Collectors.toMap(DatabaseGrant::getDatabaseId, grant -> grant));
     }
@@ -224,6 +230,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
                 .setParameter("userIds", userIds)
                 .setParameter("databaseId", CuidAdapter.getLegacyIdFromCuid(databaseId))
                 .getResultList().stream()
+                .filter(Objects::nonNull)
                 .map(HibernateDatabaseGrantProvider::buildDatabaseGrant)
                 .collect(Collectors.toMap(DatabaseGrant::getUserId, grant -> grant));
     }
