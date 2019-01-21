@@ -154,8 +154,8 @@ public class PermissionOracle {
         if (Operation.VIEW.equals(operation) && resource.isPublic()) {
             return true;
         }
-        // 2. Check for VIEW operation requests on Resources which are Public to Database Users
-        if (Operation.VIEW.equals(operation) && resource.isPublicToDatabaseUsers() && db.isVisible()) {
+        // 2. Check for VIEW operation requests on Resources which are Public to Database Users (must have grants present)
+        if (Operation.VIEW.equals(operation) && resource.isPublicToDatabaseUsers() && !db.getGrants().isEmpty()) {
             return true;
         }
         // 3. Check further up the Resource tree:
@@ -164,18 +164,29 @@ public class PermissionOracle {
             return db.hasGrant(resource.getParentId())
                     && db.getGrant(resource.getParentId()).get().hasOperation(operation);
         }
+        // -> If we are already at the end of the resource tree defined on database, then we have no grant for this operation
+        if (!db.hasResource(resource.getParentId())) {
+            return false;
+        }
         // -> Otherwise, we climb the resource tree to determine whether the operation is granted there
         return granted(operation, db.getResource(resource.getParentId()).get(), db);
     }
 
     private static Optional<String> operationFilter(Operation operation, ResourceId resourceId, UserDatabaseMeta db) {
         if (isDatabase(resourceId)) {
+            // If this is a database request, get filter on the root grant (if any)
             return getFilter(operation, resourceId, db);
         } else if (isProjectForm(resourceId)) {
+            // Project forms have no filter
             return Optional.empty();
         } else if (isAdminLevelForm(resourceId)) {
+            // Admin Level forms have no filter
+            return Optional.empty();
+        } else if (db.getResource(resourceId).get().isPublic() || db.getResource(resourceId).get().isPublicToDatabaseUsers()) {
+            // Public resources have no filters
             return Optional.empty();
         } else {
+            // Otherwise collect filters on each level of resource tree
             return collectFilters(operation, db.getResource(resourceId).get(), db);
         }
     }
@@ -196,6 +207,9 @@ public class PermissionOracle {
         if (isDatabase(resource.getParentId())) {
             Optional<String> dbFilter = getFilter(operation, resource.getParentId(), db);
             return and(filter, dbFilter);
+        }
+        if (!db.hasResource(resource.getParentId())) {
+            return filter;
         }
         return and(filter, collectFilters(operation, db.getResource(resource.getParentId()).get(), db));
     }
