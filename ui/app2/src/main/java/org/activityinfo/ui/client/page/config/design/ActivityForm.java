@@ -143,9 +143,6 @@ class ActivityForm extends AbstractDesignForm {
             }
         });
 
-        HyperlinkInfoButton categoryInfo = new HyperlinkInfoButton(I18N.CONSTANTS.categoryInfo(), categoryLink);
-        add(categoryInfo);
-
         hideFieldWhenNull(idField);
     }
 

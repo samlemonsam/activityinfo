@@ -40,9 +40,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Permission/Folder editing locked as user has greater permissions than you have")
     String permissionEditingLockedWarning();
 
-    @DefaultStringValue("Looking for Categories?")
-    String categoryInfo();
-
     @DefaultStringValue("Copy addresses to clipboard")
     String CopyAddressToClipBoard();
 
