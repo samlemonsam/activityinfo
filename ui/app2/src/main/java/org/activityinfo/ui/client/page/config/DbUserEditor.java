@@ -114,11 +114,14 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         toolBar.setActionEnabled(UIActions.ADD, db.isManageUsersAllowed());
         toolBar.setActionEnabled(UIActions.DELETE, false);
 
-        grid.getColumnModel().getColumnById(PermissionType.VIEW_ALL.name()).setHidden(!db.isManageUsersAllowed());
-        grid.getColumnModel().getColumnById(PermissionType.EDIT_ALL.name()).setHidden(!db.isManageUsersAllowed());
+        grid.getColumnModel().getColumnById(PermissionType.VIEW_ALL.name()).setHidden(!db.isManageAllUsersAllowed());
+        grid.getColumnModel().getColumnById(PermissionType.CREATE_ALL.name()).setHidden(!db.isManageAllUsersAllowed());
+        grid.getColumnModel().getColumnById(PermissionType.EDIT_ALL.name()).setHidden(!db.isManageAllUsersAllowed());
+        grid.getColumnModel().getColumnById(PermissionType.DELETE_ALL.name()).setHidden(!db.isManageAllUsersAllowed());
         grid.getColumnModel().getColumnById(PermissionType.MANAGE_USERS.name()).setHidden(!db.isManageAllUsersAllowed());
         grid.getColumnModel().getColumnById(PermissionType.MANAGE_ALL_USERS.name()).setHidden(!db.isManageAllUsersAllowed());
         grid.getColumnModel().getColumnById(PermissionType.DESIGN.name()).setHidden(!db.isDesignAllowed());
+        grid.getColumnModel().getColumnById(PermissionType.EXPORT_RECORDS.name()).setHidden(!db.isExportAllowed());
 
         loader.load();
         setModified(false);
