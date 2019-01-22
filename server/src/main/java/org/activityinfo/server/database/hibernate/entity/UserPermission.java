@@ -20,7 +20,9 @@ package org.activityinfo.server.database.hibernate.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Defines a given user's access to a given database.
@@ -40,22 +42,31 @@ import java.util.Date;
 public class UserPermission implements Serializable {
 
     private int id;
-    private Partner partner;
     private Database database;
     private User user;
+    private long version;
+
+    private Partner partner;
+    private List<Partner> assignedUserGroups = new ArrayList<>(0);
+
     private boolean allowView;
     private boolean allowViewAll;
+
     private boolean allowCreate;
     private boolean allowCreateAll;
+
     private boolean allowEdit;
     private boolean allowEditAll;
+
     private boolean allowDelete;
     private boolean allowDeleteAll;
-    private boolean allowDesign;
+
     private boolean allowManageUsers;
     private boolean allowManageAllUsers;
+
     private boolean allowExport;
-    private long version;
+    private boolean allowDesign;
+
     private String model;
 
     public UserPermission() {
@@ -68,6 +79,7 @@ public class UserPermission implements Serializable {
 
     public UserPermission(UserPermission sourcePermission) {
         this.partner = sourcePermission.partner;
+        this.assignedUserGroups = sourcePermission.assignedUserGroups;
         this.database = sourcePermission.database;
         this.user = sourcePermission.user;
         this.allowView = sourcePermission.allowView;
@@ -113,6 +125,22 @@ public class UserPermission implements Serializable {
      */
     public void setPartner(Partner partner) {
         this.partner = partner;
+    }
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "GroupAssignment",
+        joinColumns = { @JoinColumn(name = "UserPermissionId", nullable = false, updatable = false) },
+        inverseJoinColumns = { @JoinColumn(name = "UserGroupId", nullable = false, updatable = false) })
+    public List<Partner> getAssignedUserGroups() {
+        return this.assignedUserGroups;
+    }
+
+    public void setAssignedUserGroups(List<Partner> assignedUserGroups) {
+        this.assignedUserGroups = assignedUserGroups;
+    }
+
+    public void addAssignedUserGroup(Partner userGroup) {
+        this.assignedUserGroups.add(userGroup);
     }
 
     /**
