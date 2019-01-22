@@ -38,7 +38,6 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.GetUsers;
 import org.activityinfo.legacy.shared.command.result.UserResult;
 import org.activityinfo.legacy.shared.model.*;
-import org.activityinfo.model.permission.Permission;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
@@ -221,6 +220,8 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         addHeader(I18N.CONSTANTS.allowDelete(), DELETE_COL_INDEX, columnModel);
         addHeader(I18N.CONSTANTS.allowManageUsers(), MANAGE_USERS_COL_INDEX, columnModel);
 
+        disableColumnMenus(columnModel);
+
         grid = new Grid<>(store, columnModel);
         grid.setLoadMask(true);
         grid.setSelectionModel(new GridSelectionModel<>());
@@ -232,7 +233,6 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
             }
         });
         grid.addListener(Events.DoubleClick, new Listener<GridEvent<UserPermissionDTO>>() {
-
             @Override
             public void handleEvent(GridEvent<UserPermissionDTO> event) {
                 actions.edit(event.getModel());
@@ -250,6 +250,10 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         grid.addPlugin(allowExport);
         grid.addPlugin(allowDesign);
         add(grid);
+    }
+
+    private void disableColumnMenus(ColumnModel columnModel) {
+        columnModel.getColumns().forEach(col -> col.setMenuDisabled(true));
     }
 
     private void addHeader(String header, int colIndex, ColumnModel columnModel) {
