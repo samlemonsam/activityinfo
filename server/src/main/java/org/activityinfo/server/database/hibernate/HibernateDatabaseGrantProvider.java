@@ -7,9 +7,11 @@ import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.database.DatabaseGrant;
 import org.activityinfo.model.formula.ConstantNode;
+import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.FunctionCallNode;
 import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.formula.functions.EqualFunction;
+import org.activityinfo.model.formula.functions.OrFunction;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.permission.Operation;
@@ -374,9 +376,27 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
     }
 
     private static String getPartnerFilter(@NotNull UserPermission userPermission) {
-        SymbolNode partnerForm = new SymbolNode(CuidAdapter.partnerFormId(userPermission.getDatabase().getId()));
-        ConstantNode partnerRecord = new ConstantNode(CuidAdapter.partnerRecordId(userPermission.getPartner().getId()).asString());
-        return new FunctionCallNode(EqualFunction.INSTANCE, partnerForm, partnerRecord).asExpression();
+        List<FormulaNode> userGroups = new ArrayList<>();
+        // Add default user group
+        userGroups.add(partnerNode(userPermission.getDatabase().getId(), userPermission.getPartner().getId()));
+        if (userPermission.getAssignedUserGroups().isEmpty()) {
+            return userGroups.get(0).asExpression();
+        }
+        // Add assigned user groups
+        userGroups.addAll(assignedUserGroupNodes(userPermission));
+        return new FunctionCallNode(OrFunction.INSTANCE, userGroups).asExpression();
+    }
+
+    private static FormulaNode partnerNode(int databaseId, int partnerId) {
+        SymbolNode partnerForm = new SymbolNode(CuidAdapter.partnerFormId(databaseId));
+        ConstantNode partnerRecord = new ConstantNode(CuidAdapter.partnerRecordId(partnerId).asString());
+        return new FunctionCallNode(EqualFunction.INSTANCE, partnerForm, partnerRecord);
+    }
+
+    private static List<FormulaNode> assignedUserGroupNodes(@NotNull UserPermission userPermission) {
+        return userPermission.getAssignedUserGroups().stream()
+                .map(userGroup -> partnerNode(userPermission.getDatabase().getId(), userGroup.getId()))
+                .collect(Collectors.toList());
     }
 
 }
