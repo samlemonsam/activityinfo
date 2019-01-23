@@ -59,6 +59,12 @@ public final class PendingTransaction {
     private RecordUpdate[] rollbacks;
     private String status;
 
+    /**
+     * The time (in milliseconds) at which this transaction was checked out of the queue
+     * and set to "PENDING"
+     */
+    private double checkoutTime;
+
     public PendingTransaction() {
     }
 
@@ -106,5 +112,15 @@ public final class PendingTransaction {
     @JsOverlay
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    @JsOverlay
+    public double getCheckoutTime() {
+        return checkoutTime;
+    }
+
+    @JsOverlay
+    public void setCheckoutTime(double checkoutTime) {
+        this.checkoutTime = checkoutTime;
     }
 }
