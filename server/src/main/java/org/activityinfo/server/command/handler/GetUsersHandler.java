@@ -49,6 +49,7 @@ import javax.persistence.TypedQuery;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author Alex Bertram
@@ -133,6 +134,9 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
             dto.setAllowManageAllUsers(perm.isAllowManageAllUsers());
             dto.setAllowExport(perm.isAllowExport());
             dto.setPartner(new PartnerDTO(perm.getPartner().getId(), perm.getPartner().getName()));
+            dto.setAssignedUserGroups(perm.getAssignedUserGroups().stream()
+                    .map(p -> new PartnerDTO(p.getId(), p.getName()))
+                    .collect(Collectors.toList()));
             dto.setFolderLimitation(!Strings.isNullOrEmpty(perm.getModel()));
             dto.setFolders(folderList(folderMap, perm));
             models.add(dto);

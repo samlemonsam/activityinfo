@@ -38,6 +38,8 @@ import java.util.List;
 @JsonAutoDetect(JsonMethod.NONE)
 public final class UserPermissionDTO extends BaseModelData implements DTO {
 
+    private List<PartnerDTO> assignedUserGroups = new ArrayList<>(0);
+
     private boolean hasFolderLimitation = false;
     private List<FolderDTO> folders = new ArrayList<>(0);
 
@@ -226,6 +228,18 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
         set("partner", value);
     }
 
+    public List<PartnerDTO> getAssignedUserGroups() {
+        return assignedUserGroups;
+    }
+
+    public void setAssignedUserGroups(List<PartnerDTO> assignedUserGroups) {
+        this.assignedUserGroups = assignedUserGroups;
+    }
+
+    public void addAssignedUserGroup(PartnerDTO userGroup) {
+        this.assignedUserGroups.add(userGroup);
+    }
+
     /**
      *
      * @return a list of folders to which the user has access
@@ -258,6 +272,7 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
         return "{email=" + getEmail() +
                 ",name=" + getName() +
                 ",partner=" + getPartner() +
+                ",userGroups=" + getAssignedUserGroups() +
                 ",view=" + getAllowView() +
                 ",viewAll=" + getAllowViewAll() +
                 ",create=" + getAllowCreate() +
