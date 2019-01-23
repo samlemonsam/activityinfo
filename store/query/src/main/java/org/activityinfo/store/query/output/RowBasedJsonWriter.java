@@ -36,8 +36,6 @@ public class RowBasedJsonWriter {
 
     private final JsonWriter writer;
 
-    private boolean includeEmpyFields = false;
-
     public RowBasedJsonWriter(JsonWriter writer) {
         this.writer = writer;
     }
@@ -48,10 +46,6 @@ public class RowBasedJsonWriter {
 
     public RowBasedJsonWriter(OutputStream outputStream, Charset charset) {
         this.writer = new JsonWriter(new OutputStreamWriter(outputStream, charset));
-    }
-
-    public void setIncludeEmpyFields(boolean includeEmpyFields) {
-        this.includeEmpyFields = includeEmpyFields;
     }
 
     public void write(ColumnSet columnSet) throws IOException {
@@ -98,8 +92,10 @@ public class RowBasedJsonWriter {
                     @Override
                     public void write(int rowIndex) throws IOException {
                         String value = view.getString(rowIndex);
-                        if(value != null || includeEmpyFields) {
-                            writer.name(id);
+                        writer.name(id);
+                        if (value == null) {
+                            writer.nullValue();
+                        } else {
                             writer.value(view.getString(rowIndex));
                         }
                     }
@@ -110,12 +106,11 @@ public class RowBasedJsonWriter {
                     @Override
                     public void write(int rowIndex) throws IOException {
                         double value = view.getDouble(rowIndex);
-                        if(!Double.isNaN(value)) {
-                            writer.name(id);
-                            writer.value(value);
-                        } else if(includeEmpyFields) {
-                            writer.name(id);
+                        writer.name(id);
+                        if (Double.isNaN(value)) {
                             writer.nullValue();
+                        } else {
+                            writer.value(value);
                         }
                     }
                 };
@@ -124,12 +119,11 @@ public class RowBasedJsonWriter {
                     @Override
                     public void write(int rowIndex) throws IOException {
                         int value = view.getBoolean(rowIndex);
-                        if(value != ColumnView.NA) {
-                            writer.name(id);
-                            writer.value(value != 0);
-                        } else if(includeEmpyFields) {
-                            writer.name(id);
+                        writer.name(id);
+                        if (value == ColumnView.NA) {
                             writer.nullValue();
+                        } else {
+                            writer.value(value != 0);
                         }
                     }
                 };
