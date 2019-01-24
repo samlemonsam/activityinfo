@@ -182,9 +182,6 @@ public class PermissionOracle {
         } else if (isAdminLevelForm(resourceId)) {
             // Admin Level forms have no filter
             return Optional.empty();
-        } else if (db.getResource(resourceId).get().isPublic() || db.getResource(resourceId).get().isPublicToDatabaseUsers()) {
-            // Public resources have no filters
-            return Optional.empty();
         } else {
             // Otherwise collect filters on each level of resource tree
             return collectFilters(operation, db.getResource(resourceId).get(), db);
