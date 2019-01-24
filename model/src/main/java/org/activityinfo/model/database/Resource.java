@@ -38,14 +38,20 @@ public class Resource implements JsonSerializable {
         PUBLIC,
 
         /**
-         * Public to Database Users. Visible only to Users currently defined on Database.
+         * Public to Database Users. Visible only to Users currently assigned grants on Database.
          */
         DATABASE_USERS,
 
         /**
          * Private. Visible only to Users given explicit permissions.
          */
-        PRIVATE
+        PRIVATE,
+
+        /**
+         * In-built. Visible if any other type of Resource is visible. For example, a Partner form will need to be
+         * visible if any of the other Forms in a Database have been made Public.
+         */
+        IN_BUILT
     }
 
     public static class Node {
@@ -150,6 +156,10 @@ public class Resource implements JsonSerializable {
         return visibility == Visibility.PRIVATE;
     }
 
+    public boolean isInBuilt() {
+        return visibility == Visibility.IN_BUILT;
+    }
+
     @Override
     public JsonValue toJson() {
         JsonValue object = Json.createObject();
@@ -209,6 +219,10 @@ public class Resource implements JsonSerializable {
 
         public Builder setPrivate() {
             return setVisibility(Visibility.PRIVATE);
+        }
+
+        public Builder setInBuilt() {
+            return setVisibility(Visibility.IN_BUILT);
         }
 
         public Resource build() {

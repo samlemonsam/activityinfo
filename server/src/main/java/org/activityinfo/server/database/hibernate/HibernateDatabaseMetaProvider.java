@@ -310,7 +310,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
                 .setId(CuidAdapter.partnerFormId(database.getId()))
                 .setParentId(database.getResourceId())
                 .setLabel(I18N.CONSTANTS.partners())
-                .setVisibleToDatabaseUser()
+                .setInBuilt()
                 .setType(ResourceType.FORM)
                 .build();
     }
