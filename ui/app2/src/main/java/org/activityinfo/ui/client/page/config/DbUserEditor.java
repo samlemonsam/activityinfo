@@ -316,13 +316,13 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
             return false;
         }
 
-        // if the user is only allowed to manager their own partners, then make
+        // if the user is only allowed to manage their own partners, then make
         // sure they're changing someone from their own organisation
-        if (!db.isManageAllUsersAllowed() && db.getMyPartner().getId() != user.getPartner().getId()) {
+        if (!db.canManageUser(user)) {
             return false;
         }
 
-        // check if database user has a greater permission set than user - if not, then we cnanot change permissions
+        // check if database user has a greater permission set than user - if not, then we cannot change permissions
         if (!db.hasGreaterPermissions(user)) {
             return false;
         }
@@ -391,21 +391,11 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
     }
 
     private void onSelectionChanged(UserPermissionDTO selectedItem) {
-
         if (selectedItem != null) {
-            PartnerDTO selectedPartner = selectedItem.getPartner();
-
-            toolBar.setActionEnabled(UIActions.DELETE,
-                    db.isManageAllUsersAllowed() ||
-                    (db.isManageUsersAllowed() && db.getMyPartnerId() == selectedPartner.getId()));
+            toolBar.setActionEnabled(UIActions.DELETE, db.canManageUser(selectedItem));
+        } else {
+            toolBar.setActionEnabled(UIActions.DELETE, false);
         }
-        toolBar.setActionEnabled(UIActions.DELETE, selectedItem != null);
-        toolBar.setActionEnabled(UIActions.DELETE, selectedItem != null);
-    }
-
-
-    private void edit(UserPermissionDTO model) {
-        actions.edit(model);
     }
 
     @Override

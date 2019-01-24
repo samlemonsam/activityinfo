@@ -29,6 +29,7 @@ import org.hibernate.validator.constraints.Length;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Data Transfer Object (DTO) for a single user's permission on a database.
@@ -230,6 +231,10 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
 
     public List<PartnerDTO> getUserGroups() {
         return userGroups;
+    }
+
+    public List<Integer> getUserGroupIds() {
+        return userGroups.stream().map(PartnerDTO::getId).collect(Collectors.toList());
     }
 
     public void setUserGroups(List<PartnerDTO> userGroups) {

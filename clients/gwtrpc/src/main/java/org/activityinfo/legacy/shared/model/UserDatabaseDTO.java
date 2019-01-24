@@ -596,6 +596,16 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         return isDesignAllowed() && !hasFolderLimitation;
     }
 
+    public boolean canManageUser(UserPermissionDTO user) {
+        if (isManageAllUsersAllowed()) {
+            return true;
+        }
+        if (isManageUsersAllowed()) {
+            return user.getUserGroupIds().size() == 1 && user.getUserGroupIds().contains(getMyPartnerId());
+        }
+        return false;
+    }
+
     public boolean hasFolderLimitation() {
         return hasFolderLimitation;
     }
