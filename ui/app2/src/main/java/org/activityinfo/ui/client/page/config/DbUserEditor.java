@@ -165,7 +165,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
                 if (modelData instanceof UserPermissionDTO) {
                     UserPermissionDTO permission = (UserPermissionDTO) modelData;
                     boolean needsComma = false;
-                    for (PartnerDTO userGroup : permission.getAssignedUserGroups()) {
+                    for (PartnerDTO userGroup : permission.getUserGroups()) {
                         if (needsComma) {
                             html.appendHtmlConstant(", ");
                         }

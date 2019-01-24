@@ -21,7 +21,6 @@ package org.activityinfo.server.command.handler;
 import com.extjs.gxt.ui.client.Style;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
-import com.google.inject.util.Providers;
 import org.activityinfo.json.Json;
 import org.activityinfo.legacy.shared.command.GetUsers;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
@@ -134,7 +133,7 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
             dto.setAllowManageAllUsers(perm.isAllowManageAllUsers());
             dto.setAllowExport(perm.isAllowExport());
             dto.setPartner(new PartnerDTO(perm.getPartner().getId(), perm.getPartner().getName()));
-            dto.setAssignedUserGroups(perm.getAssignedUserGroups().stream()
+            dto.setUserGroups(perm.getAssignedUserGroups().stream()
                     .map(p -> new PartnerDTO(p.getId(), p.getName()))
                     .collect(Collectors.toList()));
             dto.setFolderLimitation(!Strings.isNullOrEmpty(perm.getModel()));
