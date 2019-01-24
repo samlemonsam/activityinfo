@@ -385,7 +385,7 @@ public class UserForm extends FormPanel {
         nameField.setValue(user.getName());
         nameField.setReadOnly(true);
 
-        partnerCombo.setValue(user.getPartner());
+        partnerCombo.setValue(user.getUserGroups().get(0));
         partnerCombo.setReadOnly(!database.getAmOwner() && !database.isAllowed(PermissionType.MANAGE_ALL_USERS, user));
 
         addEditPermissionsGroup(user);
