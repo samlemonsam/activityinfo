@@ -183,8 +183,9 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
             throw new IllegalAccessCommandException("Current user does not have the right to manage other users");
         }
 
-        if (!executingUserPermissions.isAllowManageAllUsers() &&
-            executingUserPermissions.getPartner().getId() != cmd.getModel().getPartner().getId()) {
+        if (!executingUserPermissions.isAllowManageAllUsers()
+                && cmd.getModel().getUserGroupIds().size() == 1
+                && cmd.getModel().getUserGroupIds().contains(executingUserPermissions.getPartner().getId())) {
             throw new IllegalAccessCommandException(
                     "Current user does not have the right to manage users from other partners");
         }
@@ -194,8 +195,7 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
         }
 
         if (!executingUserPermissions.isAllowManageAllUsers() &&
-            (cmd.getModel().getAllowViewAll() || cmd.getModel().getAllowEditAll() ||
-             cmd.getModel().getAllowManageAllUsers())) {
+            (cmd.getModel().getAllowViewAll() || cmd.getModel().getAllowEditAll() || cmd.getModel().getAllowManageAllUsers())) {
             throw new IllegalAccessCommandException(
                     "Current user does not have the right to grant viewAll, editAll, or manageAllUsers privileges");
         }
