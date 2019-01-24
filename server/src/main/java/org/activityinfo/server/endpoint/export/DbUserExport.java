@@ -103,7 +103,7 @@ public class DbUserExport extends Exporter {
             int column = 0;
             createCell(row, column++, user.getName());
             createCell(row, column++, user.getEmail());
-            createCell(row, column++, String.valueOf(user.getPartner()));
+            createCell(row, column++, String.valueOf(user.getUserGroups()));
             createCell(row, column++, String.valueOf(user.getAllowView()));
             createCell(row, column++, String.valueOf(user.getAllowViewAll()));
             createCell(row, column++, String.valueOf(user.getAllowDesign()));
