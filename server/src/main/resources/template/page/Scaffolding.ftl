@@ -73,7 +73,7 @@
                 <li><a href="/about/pricing.html">Pricing</a></li>
                 <li><a href="/blog/index.html">Blog</a></li>
                 <li class="cta cta-login"><a href="/login">Log In</a></li>
-                <li class="cta cta-signup"><a href="/signUp">Get Free Account</a></li>
+                <li class="cta cta-signup"><a href="/signUp">Start Free Trial</a></li>
             </ul>
         </nav>
     </div>
