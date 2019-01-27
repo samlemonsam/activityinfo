@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.*;
 
 public class PermissionOracleTest {
@@ -890,6 +891,39 @@ public class PermissionOracleTest {
         for (Resource dbPrivateResource : dbPrivateResources) {
             assertFalse(PermissionOracle.canManageUsers(dbPrivateResource.getId(), db));
         }
+    }
+
+    @Test
+    public void manageUsers() {
+        ResourceId folderId = ResourceId.valueOf("f1");
+        UserDatabaseMeta db = new UserDatabaseMeta.Builder()
+                .setDatabaseId(database)
+                .setUserId(authUser)
+                .setVersion("1")
+                .setLabel("Database")
+                .setOwner(false)
+                .setPublished(false)
+                .setSuspended(false)
+                .addResource(new Resource.Builder()
+                    .setId(folderId)
+                    .setLabel("WASH")
+                    .setParentId(database)
+                    .setType(ResourceType.FOLDER)
+                    .build())
+                .addGrant(new GrantModel.Builder()
+                    .setResourceId(folderId)
+                    .addOperation(Operation.MANAGE_USERS)
+                    .build())
+                .build();
+
+         Permission manageUsers = PermissionOracle.manageUsers(db.getDatabaseId(), db);
+//         assertThat(manageUsers.isPermitted(), equalTo(true));
+
+        manageUsers = PermissionOracle.manageUsers(
+                PermissionOracle.findFirstResourceWithManageUsersPermission(db), db);
+        assertThat(manageUsers.isPermitted(), equalTo(true));
+
+
     }
 
 }

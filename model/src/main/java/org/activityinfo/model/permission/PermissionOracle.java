@@ -7,8 +7,8 @@ import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormEvalContext;
-import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.formula.*;
 import org.activityinfo.model.formula.diagnostic.FormulaException;
 import org.activityinfo.model.formula.eval.EvalContext;
@@ -805,4 +805,13 @@ public class PermissionOracle {
         return manageUsers.isPermitted() && !manageUsers.isFiltered();
     }
 
+    // HOTFIX AI-2025. Temporary only!
+    public static ResourceId findFirstResourceWithManageUsersPermission(UserDatabaseMeta userDatabaseMeta) {
+        for (GrantModel grant : userDatabaseMeta.getGrants()) {
+            if(grant.hasOperation(Operation.MANAGE_USERS)) {
+                return grant.getResourceId();
+            }
+        }
+        return userDatabaseMeta.getDatabaseId();
+    }
 }
