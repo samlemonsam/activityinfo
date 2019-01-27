@@ -41,7 +41,8 @@ public class SubFormPatch {
   public static FormClass patch(FormClass formClass) {
     if(formClass.isSubForm()) {
       if(formClass.getSubFormKind().isPeriod()) {
-        return ensureSubFormHasPeriodField(formClass);
+        return ensureSubFormHasPeriodField(
+                removeExtraSubFormPeriodField(formClass));
       }
     }
     return formClass;
@@ -63,7 +64,6 @@ public class SubFormPatch {
 
     formClass.getElements().add(0, periodField);
 
-    removeExtraSubFormPeriodField(formClass);
 
     return formClass;
   }
