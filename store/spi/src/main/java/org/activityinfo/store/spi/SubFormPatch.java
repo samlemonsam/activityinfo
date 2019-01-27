@@ -21,6 +21,7 @@ package org.activityinfo.store.spi;
 import com.google.common.base.Optional;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormElement;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.SubFormKind;
 import org.activityinfo.model.resource.ResourceId;
@@ -28,7 +29,12 @@ import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.time.PeriodType;
 
+import java.util.ListIterator;
+import java.util.logging.Logger;
+
 public class SubFormPatch {
+
+  private static final Logger LOGGER = Logger.getLogger(SubFormPatch.class.getName());
 
   public static final ResourceId PERIOD_FIELD_ID = ResourceId.valueOf("period");
 
@@ -57,6 +63,32 @@ public class SubFormPatch {
 
     formClass.getElements().add(0, periodField);
 
+    removeExtraSubFormPeriodField(formClass);
+
+    return formClass;
+  }
+
+  /**
+   * Previously, when forms were cloned, the 'period' field was cloned along with it but
+   * given a new id in the form 'p34243423'. The routine above then added another field with the
+   * id 'period'. This removes the extra field.
+   *
+   */
+  private static FormClass removeExtraSubFormPeriodField(FormClass formClass) {
+    ListIterator<FormElement> it = formClass.getElements().listIterator();
+    while(it.hasNext()) {
+      FormElement element = it.next();
+      if(element instanceof FormField) {
+        FormField field = (FormField) element;
+        if (field.getType().equals(formClass.getSubFormKind().getPeriodType()) &&
+            field.isKey() &&
+           !field.getId().equals(PERIOD_FIELD_ID) &&
+            field.getId().asString().startsWith("p")) {
+
+          it.remove();
+        }
+      }
+    }
     return formClass;
   }
 
