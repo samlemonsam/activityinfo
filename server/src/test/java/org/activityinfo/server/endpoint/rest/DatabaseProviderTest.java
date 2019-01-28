@@ -225,10 +225,10 @@ public class DatabaseProviderTest {
         assertTrue(syriaDb.get().getGrants().isEmpty());
 
         // LEBANON: Should have a returned UserDatabaseMeta which is visible as there are public resources
-        // Should be 3 resources visible: Intake Form and its Sub Form, and the In-Built Partner Form
+        // Should be 2 resources visible: Intake Form and its Sub Form
         assertTrue(lebanonDb.isPresent());
         assertTrue(lebanonDb.get().isVisible());
-        assertThat(lebanonDb.get().getResources().size(), equalTo(3));
+        assertThat(lebanonDb.get().getResources().size(), equalTo(2));
         assertTrue(lebanonDb.get().getGrants().isEmpty());
     }
 

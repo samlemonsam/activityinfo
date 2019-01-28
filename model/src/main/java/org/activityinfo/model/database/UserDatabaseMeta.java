@@ -510,9 +510,9 @@ public class UserDatabaseMeta implements JsonSerializable {
         public UserDatabaseMeta build() {
             meta.visible = isVisible();
 
-            // If not visible to current user, strip all sensitive data before building
+            // If not visible to current user, strip all non-visible data before building
             if (!meta.visible) {
-                stripData();
+                removeNonVisibleData();
                 return meta;
             }
 
@@ -578,7 +578,7 @@ public class UserDatabaseMeta implements JsonSerializable {
         }
 
         private void addPublicResources(Set<ResourceId> grantedResources) {
-            // Add any resources which are visible PUBLICLY, to DATABASE_USERS, or are IN_BUILT
+            // Add any resources which are visible PUBLICLY or to DATABASE_USERS
             meta.resources.entrySet().stream()
                     .filter(resource -> resource.getValue().getVisibility() != Resource.Visibility.PRIVATE)
                     .map(Map.Entry::getKey)
@@ -608,7 +608,7 @@ public class UserDatabaseMeta implements JsonSerializable {
             return false;
         }
 
-        private void stripData() {
+        private void removeNonVisibleData() {
             // Strip all resources, grants and lock data as well as label and description
             meta.label = "";
             meta.description = "";
@@ -618,16 +618,7 @@ public class UserDatabaseMeta implements JsonSerializable {
         }
 
         private void removePrivateResources() {
-            // Remove all private resources
-            meta.resources.values().removeIf(Resource::isPrivate);
-
-            // Remove all resources visible to database users only
-            meta.resources.values().removeIf(Resource::isPublicToDatabaseUsers);
-
-            // If there are no public resources, then also remove any in-built resources
-            if (meta.resources.values().stream().noneMatch(Resource::isPublic)) {
-                meta.resources.values().removeIf(Resource::isInBuilt);
-            }
+            meta.resources.values().removeIf(resource -> !resource.isPublic());
         }
 
     }
