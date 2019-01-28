@@ -17,15 +17,6 @@ import static org.junit.Assert.*;
 
 public class PermissionOracleTest {
 
-    // - Special Resources:
-    //  -- Project Form
-    //  -- Partner Form
-    //  -- Admin Level Form
-    // Published Databases
-    // Filter checks:
-    // - Correct Operation Filters
-    // - Multi-level Operation Filters
-
     // Databases
     private static final ResourceId database = ResourceId.valueOf("d0000000001");
 
@@ -344,9 +335,9 @@ public class PermissionOracleTest {
         UserDatabaseMeta db = ownerDatabase(allResources);
 
         // Owner should have MANAGE_USERS permissions on root database and all resources
-        assertTrue(PermissionOracle.canManageUsers(db));
+        assertTrue(PermissionOracle.canManageUsersOnWholeDatabase(db));
         for (Resource resource : allResources) {
-            assertTrue(PermissionOracle.canManageUsers(resource.getId(), db));
+            assertTrue(PermissionOracle.canManageUsersOnResource(resource.getId(), db));
         }
     }
 
@@ -493,9 +484,9 @@ public class PermissionOracleTest {
         UserDatabaseMeta db = unAuthUserDatabase(allResources);
 
         // User should NOT have MANAGE_USERS permissions on root database or any resources
-        assertFalse(PermissionOracle.canManageUsers(db));
+        assertFalse(PermissionOracle.canManageUsersOnWholeDatabase(db));
         for (Resource resource : allResources) {
-            assertFalse(PermissionOracle.canManageUsers(resource.getId(), db));
+            assertFalse(PermissionOracle.canManageUsersOnResource(resource.getId(), db));
         }
     }
 
@@ -630,9 +621,9 @@ public class PermissionOracleTest {
         UserDatabaseMeta db = authUserDatabase(allResources, rootDatabaseGrant());
 
         // User should have MANAGE_USERS permissions on root database and all resources
-        assertTrue(PermissionOracle.canManageUsers(db));
+        assertTrue(PermissionOracle.canManageUsersOnWholeDatabase(db));
         for (Resource resource : allResources) {
-            assertTrue(PermissionOracle.canManageUsers(resource.getId(), db));
+            assertTrue(PermissionOracle.canManageUsersOnResource(resource.getId(), db));
         }
     }
 
@@ -877,19 +868,19 @@ public class PermissionOracleTest {
 
         // First check on private resources
         // User should have MANAGE_USERS permissions on folder and all contained resources, but NOT on root database or root form
-        assertFalse(PermissionOracle.canManageUsers(db));
-        assertFalse(PermissionOracle.canManageUsers(rootFormId, db));
-        assertTrue(PermissionOracle.canManageUsers(rootFolderId, db));
-        assertTrue(PermissionOracle.canManageUsers(formInFolderId, db));
-        assertTrue(PermissionOracle.canManageUsers(folderInFolderId, db));
+        assertFalse(PermissionOracle.canManageUsersOnWholeDatabase(db));
+        assertFalse(PermissionOracle.canManageUsersOnResource(rootFormId, db));
+        assertTrue(PermissionOracle.canManageUsersOnResource(rootFolderId, db));
+        assertTrue(PermissionOracle.canManageUsersOnResource(formInFolderId, db));
+        assertTrue(PermissionOracle.canManageUsersOnResource(folderInFolderId, db));
 
         // Next check on database-private and public resources
         // User should NOT have MANAGE_USERS permissions on any database private and public resources
         for (Resource publicResource : publicResources) {
-            assertFalse(PermissionOracle.canManageUsers(publicResource.getId(), db));
+            assertFalse(PermissionOracle.canManageUsersOnResource(publicResource.getId(), db));
         }
         for (Resource dbPrivateResource : dbPrivateResources) {
-            assertFalse(PermissionOracle.canManageUsers(dbPrivateResource.getId(), db));
+            assertFalse(PermissionOracle.canManageUsersOnResource(dbPrivateResource.getId(), db));
         }
     }
 

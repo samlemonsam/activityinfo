@@ -775,7 +775,7 @@ public class PermissionOracle {
      * <p>The current User can manage users for any Resource on this Database.</p>
      * <p>Does not account for any filters which may be applied/enforced.</p>
      */
-    public static boolean canManageUsers(UserDatabaseMeta db) {
+    public static boolean canManageUsersOnWholeDatabase(UserDatabaseMeta db) {
         return manageUsers(db.getDatabaseId(),db).isPermitted();
     }
 
@@ -783,7 +783,7 @@ public class PermissionOracle {
      * <p>The current User can manage users on the specified Resource in this Database.</p>
      * <p>Does not account for any filters which may be applied/enforced.</p>
      */
-    public static boolean canManageUsers(ResourceId resourceId, UserDatabaseMeta db) {
+    public static boolean canManageUsersOnResource(ResourceId resourceId, UserDatabaseMeta db) {
         return manageUsers(resourceId,db).isPermitted();
     }
 

@@ -118,7 +118,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         }
 
         // 2. copy user permissions
-        if (command.isCopyUserPermissions() && PermissionOracle.canManageUsers(sourceDbMeta)) {
+        if (command.isCopyUserPermissions() && PermissionOracle.canManageUsersOnWholeDatabase(sourceDbMeta)) {
             copyUserPermissions();
         }
 
@@ -126,7 +126,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         copyForms();
 
         // 4. Map old folder ids to new folder ids on permission model
-        if (command.isCopyUserPermissions() && PermissionOracle.canManageUsers(sourceDbMeta)) {
+        if (command.isCopyUserPermissions() && PermissionOracle.canManageUsersOnWholeDatabase(sourceDbMeta)) {
             mapFolderPermissions();
         }
         
