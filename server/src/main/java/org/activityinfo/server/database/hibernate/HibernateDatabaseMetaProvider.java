@@ -38,7 +38,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
     private final Logger LOGGER = Logger.getLogger(HibernateDatabaseGrantProvider.class.getName());
 
     private static final String CACHE_PREFIX = "dbMeta";
-    private static final String CACHE_VERSION = "3";
+    private static final String CACHE_VERSION = "4";
 
     private final Provider<EntityManager> entityManager;
     private final FormStorageProvider formStorageProvider;
