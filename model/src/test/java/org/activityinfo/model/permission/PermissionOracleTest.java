@@ -9,10 +9,11 @@ import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.*;
 
 public class PermissionOracleTest {
@@ -903,18 +904,15 @@ public class PermissionOracleTest {
                     .build())
                 .addGrant(new GrantModel.Builder()
                     .setResourceId(folderId)
-                    .addOperation(Operation.MANAGE_USERS)
+                    .addOperation(Operation.MANAGE_USERS, "P0000000000 == \"p0000000000\"")
                     .build())
                 .build();
 
-         Permission manageUsers = PermissionOracle.manageUsers(db.getDatabaseId(), db);
-//         assertThat(manageUsers.isPermitted(), equalTo(true));
+        assertTrue(PermissionOracle.canManageUsersForOneOrMoreResources(db));
 
-        manageUsers = PermissionOracle.manageUsers(
-                PermissionOracle.findFirstResourceWithManageUsersPermission(db), db);
-        assertThat(manageUsers.isPermitted(), equalTo(true));
-
-
+        Optional<String> filter = PermissionOracle.legacyManageUserFilter(db);
+        assertTrue(filter.isPresent());
+        assertThat(filter.get(), equalTo("P0000000000 == \"p0000000000\""));
     }
 
 }

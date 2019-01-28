@@ -17,7 +17,9 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class PermissionOracle {
 
@@ -805,13 +807,46 @@ public class PermissionOracle {
         return manageUsers.isPermitted() && !manageUsers.isFiltered();
     }
 
-    // HOTFIX AI-2025. Temporary only!
-    public static ResourceId findFirstResourceWithManageUsersPermission(UserDatabaseMeta userDatabaseMeta) {
-        for (GrantModel grant : userDatabaseMeta.getGrants()) {
-            if(grant.hasOperation(Operation.MANAGE_USERS)) {
-                return grant.getResourceId();
-            }
+    /**
+     * <p>The current User can manage users for <b>one or more</b> Resources. If the User is <b>not</b> permitted to
+     * manage users on <i>any</i> Resources on the database, then the User cannot manage users at all and this method
+     * will return false.</p>
+     *
+     * <p>Does not account for any filters which may be applied/enforced.</p>
+     */
+    public static boolean canManageUsersForOneOrMoreResources(UserDatabaseMeta db) {
+        // If we have a root database grant, check if we can grant users at this level
+        if (canManageUsersOnWholeDatabase(db)) {
+            return true;
         }
-        return userDatabaseMeta.getDatabaseId();
+        // If not, check if we have any resources for which we can manage users
+        return !resourcesWithManageUserRights(db).isEmpty();
     }
+
+    private static List<Resource> resourcesWithManageUserRights(UserDatabaseMeta db) {
+        return db.getResources().stream()
+                .filter(r -> canManageUsersOnResource(r.getId(), db))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * <p>The legacy permission model restricts a Users ability to manage users to All Partners or a specified
+     * Partner, across the set of Resources which the User has access to.</p>
+     *
+     * <p>The Partner restriction is consistent across all "manageable" Resources. Therefore, we find the first filter
+     * defined on a manageable resource as it will be the same for all other manageable resources.</p>
+     */
+    public static Optional<String> legacyManageUserFilter(UserDatabaseMeta db) {
+        // If we have a root database grant, then return the filter defined there
+        if (canManageUsersOnWholeDatabase(db)) {
+            return manageUsers(db.getDatabaseId(),db).getOptionalFilter();
+        }
+        // If not, then check for the first filter we find on a manageable resource
+        return db.getResources().stream()
+                .map(r -> manageUsers(r.getId(), db))
+                .filter(Permission::isPermitted)
+                .map(Permission::getOptionalFilter)
+                .findFirst().orElse(Optional.empty());
+    }
+
 }
