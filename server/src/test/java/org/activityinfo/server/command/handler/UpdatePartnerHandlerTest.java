@@ -81,17 +81,20 @@ public class UpdatePartnerHandlerTest extends CommandTestCase2 {
         Optional<UserPermissionDTO> lisa = nfiUsers.getData().stream().filter(u -> u.getEmail().equals("lisa@solidarites")).findAny();
 
         // Bavon should stay as NRC
-        assertThat(bavon.get().getPartner(), hasProperty("name", equalTo("NRC")));
+        assertThat(bavon.get().getUserGroups().size(), equalTo(1));
+        assertThat(bavon.get().getUserGroups().get(0), hasProperty("name", equalTo("NRC")));
 
         // Lisa should be moved to the new Solidarites partner
-        assertThat(lisa.get().getPartner(), hasProperty("name", equalTo("Solidarites")));
+        assertThat(lisa.get().getUserGroups().size(), equalTo(1));
+        assertThat(lisa.get().getUserGroups().get(0), hasProperty("name", equalTo("Solidarites")));
 
         // Users in the Health database should be unaffected
 
         UserResult healthUsers = execute(new GetUsers(HEALTH_DATABASE));
         Optional<UserPermissionDTO> bavonInHealth = healthUsers.getData().stream().filter(u -> u.getEmail().equals("bavon@nrc.org")).findAny();
 
-        assertThat(bavonInHealth.get().getPartner(), hasProperty("name", equalTo("Default")));
+        assertThat(bavonInHealth.get().getUserGroups().size(), equalTo(1));
+        assertThat(bavonInHealth.get().getUserGroups(), hasProperty("name", equalTo("Default")));
 
         // Sites in the NFI database should be update to point to the new partner
         SiteDTO nfiSite1 = execute(GetSites.byId(1)).getData().get(0);
