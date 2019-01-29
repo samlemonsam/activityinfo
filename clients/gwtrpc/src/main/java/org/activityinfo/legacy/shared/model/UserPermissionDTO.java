@@ -220,15 +220,6 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
         return (Boolean) get("allowExport");
     }
 
-    @JsonProperty
-    public PartnerDTO getPartner() {
-        return get("partner");
-    }
-
-    public void setPartner(PartnerDTO value) {
-        set("partner", value);
-    }
-
     public List<PartnerDTO> getUserGroups() {
         return userGroups;
     }

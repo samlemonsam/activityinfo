@@ -248,7 +248,7 @@ public class GetSchemaTest extends CommandTestCase2 {
         // Add bavon, but only give him access to the education folder
         UserPermissionDTO bavon = new UserPermissionDTO();
         bavon.setEmail("bavon@nrc.org");
-        bavon.setPartner(new PartnerDTO(1, "NRC"));
+        bavon.addUserGroup(new PartnerDTO(1, "NRC"));
         bavon.setAllowView(true);
         bavon.setFolders(Arrays.asList(new FolderDTO(databaseId, healthFolderId, "Health")));
         bavon.setFolderLimitation(true);

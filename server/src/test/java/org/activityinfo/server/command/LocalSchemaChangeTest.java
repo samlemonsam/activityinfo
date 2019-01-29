@@ -171,7 +171,7 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
         newPermissions.setAllowView(false);
         newPermissions.setAllowManageUsers(false);
         newPermissions.setAllowEdit(false);
-        newPermissions.setPartner(new PartnerDTO(1, "NRC"));
+        newPermissions.addUserGroup(new PartnerDTO(1, "NRC"));
         executeRemotely(new UpdateUserPermissions(1, newPermissions));
         
         setUser(REPORTING_USER_ID);
@@ -188,7 +188,7 @@ public class LocalSchemaChangeTest extends LocalHandlerTestCase {
         UserPermissionDTO newPermissions = new UserPermissionDTO();
         newPermissions.setEmail("bavon@nrc.org");
         newPermissions.setAllowView(true);
-        newPermissions.setPartner(new PartnerDTO(1, "NRC"));
+        newPermissions.addUserGroup(new PartnerDTO(1, "NRC"));
         executeRemotely(new UpdateUserPermissions(ALPHA_DATABASE_ID, newPermissions));
 
         setUser(REPORTING_USER_ID);

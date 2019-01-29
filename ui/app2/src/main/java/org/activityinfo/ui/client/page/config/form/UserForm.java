@@ -462,7 +462,7 @@ public class UserForm extends FormPanel {
         UserPermissionDTO user = new UserPermissionDTO();
         user.setEmail(emailField.getValue());
         user.setName(nameField.getValue());
-        user.setPartner(partnerCombo.getValue());
+        user.addUserGroup(partnerCombo.getValue());
 
         for (Field field : permissionsGroup.getAll()) {
             if (field instanceof CheckBoxGroup) {
