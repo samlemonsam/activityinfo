@@ -149,7 +149,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             UserPermission newPermission = new UserPermission(sourcePermission);
             newPermission.setDatabase(targetDb);
             newPermission.setLastSchemaUpdate(new Date());
-            newPermission.setPartner(sourcePermission.getPartner());
+            newPermission.setUserGroups(sourcePermission.getUserGroups());
 
             em.persist(newPermission);
             targetDb.getUserPermissions().add(newPermission);

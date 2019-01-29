@@ -128,7 +128,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
             throws IllegalAccessCommandException {
 
         UserPermission executingUserPermissions = new UserPermission();
-        executingUserPermissions.setPartner(NRC);
+        executingUserPermissions.addUserGroup(NRC);
         executingUserPermissions.setAllowManageUsers(true);
 
         UserPermissionDTO dto = new UserPermissionDTO();
@@ -149,7 +149,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
             throws IllegalAccessCommandException {
 
         UserPermission executingUserPermissions = new UserPermission();
-        executingUserPermissions.setPartner(NRC);
+        executingUserPermissions.addUserGroup(NRC);
         executingUserPermissions.setAllowManageUsers(true);
 
         UserPermissionDTO dto = new UserPermissionDTO();
@@ -167,7 +167,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
             throws IllegalAccessCommandException {
 
         UserPermission executingUserPermissions = new UserPermission();
-        executingUserPermissions.setPartner(IRC);
+        executingUserPermissions.addUserGroup(IRC);
         executingUserPermissions.setAllowManageUsers(true);
 
         UserPermissionDTO dto = new UserPermissionDTO();
@@ -185,7 +185,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
             throws IllegalAccessCommandException {
 
         UserPermission executingUserPermissions = new UserPermission();
-        executingUserPermissions.setPartner(IRC);
+        executingUserPermissions.addUserGroup(IRC);
         executingUserPermissions.setAllowManageUsers(true);
         executingUserPermissions.setAllowManageAllUsers(true);
 

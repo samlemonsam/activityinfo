@@ -187,10 +187,9 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
         }
 
         if (!executingUserPermissions.isAllowManageAllUsers()
-                && cmd.getModel().getUserGroupIds().size() == 1
-                && cmd.getModel().getUserGroupIds().contains(executingUserPermissions.getPartner().getId())) {
+                && !executingUserPermissions.getUserGroups().containsAll(cmd.getModel().getUserGroups())) {
             throw new IllegalAccessCommandException(
-                    "Current user does not have the right to manage users from other partners");
+                    "Current user does not have the right to manage users from other user groups");
         }
 
         if (!executingUserPermissions.isAllowDesign() && cmd.getModel().getAllowDesign()) {

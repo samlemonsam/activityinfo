@@ -108,25 +108,6 @@ public class UserPermission implements Serializable {
         this.id = id;
     }
 
-    /**
-     * Gets the Partner to which the <code>user</code> belongs.
-     *
-     * @return The <code>Partner</code> to which the <code>user</code> belongs
-     */
-    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "PartnerId", nullable = false)
-    public Partner getPartner() {
-        return this.partner;
-    }
-
-    /**
-     * Sets the Partner to which the <code>user</code> belongs.
-     *
-     * @param partner The Partner to which the <code>user</code> belongs.
-     */
-    public void setPartner(Partner partner) {
-        this.partner = partner;
-    }
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "GroupAssignment",
         joinColumns = { @JoinColumn(name = "UserPermissionId", nullable = false, updatable = false) },

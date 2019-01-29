@@ -1,6 +1,7 @@
 package org.activityinfo.server.database.hibernate;
 
 import com.google.appengine.api.memcache.MemcacheService;
+import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.json.Json;
@@ -289,7 +290,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         if (userPermission.isAllowViewAll()) {
             partnerFormGrant.addOperation(Operation.VIEW);
         } else {
-            partnerFormGrant.addOperation(Operation.VIEW, getPartnerFilter(userPermission));
+            partnerFormGrant.addOperation(Operation.VIEW, getUserGroupFilter(userPermission));
         }
         if (userPermission.isAllowManageAllUsers()) {
             partnerFormGrant.addOperation(Operation.CREATE_RECORD);
@@ -297,10 +298,10 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
             partnerFormGrant.addOperation(Operation.DELETE_RECORD);
             partnerFormGrant.addOperation(Operation.EXPORT_RECORDS);
         } else if (userPermission.isAllowManageUsers()) {
-            partnerFormGrant.addOperation(Operation.CREATE_RECORD, getPartnerFilter(userPermission));
-            partnerFormGrant.addOperation(Operation.EDIT_RECORD, getPartnerFilter(userPermission));
-            partnerFormGrant.addOperation(Operation.DELETE_RECORD, getPartnerFilter(userPermission));
-            partnerFormGrant.addOperation(Operation.EXPORT_RECORDS, getPartnerFilter(userPermission));
+            partnerFormGrant.addOperation(Operation.CREATE_RECORD, getUserGroupFilter(userPermission));
+            partnerFormGrant.addOperation(Operation.EDIT_RECORD, getUserGroupFilter(userPermission));
+            partnerFormGrant.addOperation(Operation.DELETE_RECORD, getUserGroupFilter(userPermission));
+            partnerFormGrant.addOperation(Operation.EXPORT_RECORDS, getUserGroupFilter(userPermission));
         }
     }
 
@@ -337,27 +338,27 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         if(userPermission.isAllowViewAll()) {
             grantModel.addOperation(Operation.VIEW);
         } else if(userPermission.isAllowView()) {
-            grantModel.addOperation(Operation.VIEW, getPartnerFilter(userPermission));
+            grantModel.addOperation(Operation.VIEW, getUserGroupFilter(userPermission));
         }
         if(userPermission.isAllowCreateAll()) {
             grantModel.addOperation(Operation.CREATE_RECORD);
         } else if(userPermission.isAllowCreate()) {
-            grantModel.addOperation(Operation.CREATE_RECORD, getPartnerFilter(userPermission));
+            grantModel.addOperation(Operation.CREATE_RECORD, getUserGroupFilter(userPermission));
         }
         if(userPermission.isAllowEditAll()) {
             grantModel.addOperation(Operation.EDIT_RECORD);
         } else if(userPermission.isAllowEdit()) {
-            grantModel.addOperation(Operation.EDIT_RECORD, getPartnerFilter(userPermission));
+            grantModel.addOperation(Operation.EDIT_RECORD, getUserGroupFilter(userPermission));
         }
         if(userPermission.isAllowDeleteAll()) {
             grantModel.addOperation(Operation.DELETE_RECORD);
         } else if(userPermission.isAllowDelete()) {
-            grantModel.addOperation(Operation.DELETE_RECORD, getPartnerFilter(userPermission));
+            grantModel.addOperation(Operation.DELETE_RECORD, getUserGroupFilter(userPermission));
         }
         if(userPermission.isAllowManageAllUsers()) {
             grantModel.addOperation(Operation.MANAGE_USERS);
         } else if(userPermission.isAllowManageUsers()) {
-            grantModel.addOperation(Operation.MANAGE_USERS, getPartnerFilter(userPermission));
+            grantModel.addOperation(Operation.MANAGE_USERS, getUserGroupFilter(userPermission));
         }
         if(userPermission.isAllowDesign()) {
             grantModel.addOperation(Operation.CREATE_RESOURCE);
@@ -370,32 +371,28 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
             if (userPermission.isAllowViewAll()) {
                 grantModel.addOperation(Operation.EXPORT_RECORDS);
             } else {
-                grantModel.addOperation(Operation.EXPORT_RECORDS, getPartnerFilter(userPermission));
+                grantModel.addOperation(Operation.EXPORT_RECORDS, getUserGroupFilter(userPermission));
             }
         }
     }
 
-    private static String getPartnerFilter(@NotNull UserPermission userPermission) {
-        List<FormulaNode> userGroups = new ArrayList<>();
-        // Add default user group
-        userGroups.add(partnerNode(userPermission.getDatabase().getId(), userPermission.getPartner().getId()));
-        if (userPermission.getUserGroups().isEmpty()) {
-            return userGroups.get(0).asExpression();
+    private static String getUserGroupFilter(@NotNull UserPermission userPermission) {
+        List<FormulaNode> userGroupNodes = mapUserGroupsToNodes(userPermission);
+        if (userGroupNodes.size() == 1) {
+            return Iterables.getOnlyElement(userGroupNodes).asExpression();
         }
-        // Add assigned user groups
-        userGroups.addAll(assignedUserGroupNodes(userPermission));
-        return new FunctionCallNode(OrFunction.INSTANCE, userGroups).asExpression();
+        return new FunctionCallNode(OrFunction.INSTANCE, userGroupNodes).asExpression();
     }
 
-    private static FormulaNode partnerNode(int databaseId, int partnerId) {
-        SymbolNode partnerForm = new SymbolNode(CuidAdapter.partnerFormId(databaseId));
-        ConstantNode partnerRecord = new ConstantNode(CuidAdapter.partnerRecordId(partnerId).asString());
-        return new FunctionCallNode(EqualFunction.INSTANCE, partnerForm, partnerRecord);
+    private static FormulaNode userGroupNode(int databaseId, int userGroupId) {
+        SymbolNode userGroupForm = new SymbolNode(CuidAdapter.partnerFormId(databaseId));
+        ConstantNode userGroupRecord = new ConstantNode(CuidAdapter.partnerRecordId(userGroupId).asString());
+        return new FunctionCallNode(EqualFunction.INSTANCE, userGroupForm, userGroupRecord);
     }
 
-    private static List<FormulaNode> assignedUserGroupNodes(@NotNull UserPermission userPermission) {
+    private static List<FormulaNode> mapUserGroupsToNodes(@NotNull UserPermission userPermission) {
         return userPermission.getUserGroups().stream()
-                .map(userGroup -> partnerNode(userPermission.getDatabase().getId(), userGroup.getId()))
+                .map(userGroup -> userGroupNode(userPermission.getDatabase().getId(), userGroup.getId()))
                 .collect(Collectors.toList());
     }
 
