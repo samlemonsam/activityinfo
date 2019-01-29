@@ -133,7 +133,7 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
             dto.setAllowManageAllUsers(perm.isAllowManageAllUsers());
             dto.setAllowExport(perm.isAllowExport());
             dto.setPartner(new PartnerDTO(perm.getPartner().getId(), perm.getPartner().getName()));
-            dto.setUserGroups(perm.getAssignedUserGroups().stream()
+            dto.setUserGroups(perm.getUserGroups().stream()
                     .map(p -> new PartnerDTO(p.getId(), p.getName()))
                     .collect(Collectors.toList()));
             dto.setFolderLimitation(!Strings.isNullOrEmpty(perm.getModel()));

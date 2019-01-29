@@ -216,7 +216,7 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
         if (userGroups.isEmpty()) {
             throw new CommandException("User Groups " + dto.getUserGroupIds() + " do not exist");
         }
-        perm.setAssignedUserGroups(userGroups);
+        perm.setUserGroups(userGroups);
         perm.setAllowView(dto.getAllowView());
         perm.setAllowCreate(dto.getAllowCreate());
         perm.setAllowEdit(dto.getAllowEdit());

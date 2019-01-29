@@ -379,7 +379,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         List<FormulaNode> userGroups = new ArrayList<>();
         // Add default user group
         userGroups.add(partnerNode(userPermission.getDatabase().getId(), userPermission.getPartner().getId()));
-        if (userPermission.getAssignedUserGroups().isEmpty()) {
+        if (userPermission.getUserGroups().isEmpty()) {
             return userGroups.get(0).asExpression();
         }
         // Add assigned user groups
@@ -394,7 +394,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
     }
 
     private static List<FormulaNode> assignedUserGroupNodes(@NotNull UserPermission userPermission) {
-        return userPermission.getAssignedUserGroups().stream()
+        return userPermission.getUserGroups().stream()
                 .map(userGroup -> partnerNode(userPermission.getDatabase().getId(), userGroup.getId()))
                 .collect(Collectors.toList());
     }

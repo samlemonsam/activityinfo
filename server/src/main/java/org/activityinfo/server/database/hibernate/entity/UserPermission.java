@@ -47,7 +47,7 @@ public class UserPermission implements Serializable {
     private long version;
 
     private Partner partner;
-    private List<Partner> assignedUserGroups = new ArrayList<>(0);
+    private List<Partner> userGroups = new ArrayList<>(0);
 
     private boolean allowView;
     private boolean allowViewAll;
@@ -79,7 +79,7 @@ public class UserPermission implements Serializable {
 
     public UserPermission(UserPermission sourcePermission) {
         this.partner = sourcePermission.partner;
-        this.assignedUserGroups = sourcePermission.assignedUserGroups;
+        this.userGroups = sourcePermission.userGroups;
         this.database = sourcePermission.database;
         this.user = sourcePermission.user;
         this.allowView = sourcePermission.allowView;
@@ -131,16 +131,16 @@ public class UserPermission implements Serializable {
     @JoinTable(name = "GroupAssignment",
         joinColumns = { @JoinColumn(name = "UserPermissionId", nullable = false, updatable = false) },
         inverseJoinColumns = { @JoinColumn(name = "UserGroupId", nullable = false, updatable = false) })
-    public List<Partner> getAssignedUserGroups() {
-        return this.assignedUserGroups;
+    public List<Partner> getUserGroups() {
+        return this.userGroups;
     }
 
-    public void setAssignedUserGroups(List<Partner> assignedUserGroups) {
-        this.assignedUserGroups = assignedUserGroups;
+    public void setUserGroups(List<Partner> userGroups) {
+        this.userGroups = userGroups;
     }
 
-    public void addAssignedUserGroup(Partner userGroup) {
-        this.assignedUserGroups.add(userGroup);
+    public void addUserGroup(Partner userGroup) {
+        this.userGroups.add(userGroup);
     }
 
     /**
