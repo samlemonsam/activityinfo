@@ -266,13 +266,6 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
         return hasFolderLimitation;
     }
 
-    @JsonSetter
-    public void setPartnerId(int partnerId) {
-        PartnerDTO partner = new PartnerDTO();
-        partner.setId(partnerId);
-        setPartner(partner);
-    }
-
     public String toString() {
         return "{email=" + getEmail() +
                 ",name=" + getName() +
