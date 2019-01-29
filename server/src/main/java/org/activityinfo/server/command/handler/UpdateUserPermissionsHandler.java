@@ -32,6 +32,7 @@ import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.database.hibernate.dao.*;
 import org.activityinfo.server.database.hibernate.entity.Database;
+import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
 import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
@@ -43,8 +44,10 @@ import org.activityinfo.store.query.UsageTracker;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author Alex Bertram
@@ -206,10 +209,14 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
                             boolean isOwner,
                             UserPermission executingUserPermissions) {
 
-        perm.setPartner(partnerDAO.findById(dto.getPartner().getId()));
-        if(perm.getPartner() == null) {
-            throw new CommandException("Partner with id " + dto.getPartner().getId() + " does not exist");
+        List<Partner> userGroups = dto.getUserGroups().stream()
+                .map(ug -> partnerDAO.findById(ug.getId()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        if (userGroups.isEmpty()) {
+            throw new CommandException("User Groups " + dto.getUserGroupIds() + " do not exist");
         }
+        perm.setAssignedUserGroups(userGroups);
         perm.setAllowView(dto.getAllowView());
         perm.setAllowCreate(dto.getAllowCreate());
         perm.setAllowEdit(dto.getAllowEdit());
