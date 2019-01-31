@@ -56,7 +56,10 @@ public class Database implements java.io.Serializable, Deleteable {
     private Set<LockedPeriod> lockedPeriods = new HashSet<>(0);
     private Set<Target> targets = new HashSet<>(0);
     private Date dateDeleted;
+
     private long version;
+    private long metaVersion;
+
     private String transferToken;
     private User transferUser;
     private Date transferRequestDate;
@@ -248,6 +251,15 @@ public class Database implements java.io.Serializable, Deleteable {
 
     public void setVersion(long version) {
         this.version = version;
+    }
+    
+    @Offline(sync = false)
+    public long getMetaVersion() {
+        return metaVersion;
+    }
+
+    public void setMetaVersion(long metaVersion) {
+        this.metaVersion = metaVersion;
     }
 
     /**

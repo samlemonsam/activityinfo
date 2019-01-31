@@ -80,7 +80,7 @@ public class HibernateDatabaseMetaProviderTest {
         assertThat(databaseMeta.getOwnerId(), equalTo(database.getOwner().getId()));
         assertThat(databaseMeta.getLabel(), equalTo(database.getName()));
         assertThat(databaseMeta.getDescription(), equalTo(database.getFullName()));
-        assertThat(databaseMeta.getVersion(), equalTo(database.getVersion()));
+        assertThat(databaseMeta.getVersion(), equalTo(database.getMetaVersion()));
     }
 
     @Test

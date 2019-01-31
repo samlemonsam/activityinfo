@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
 
-    private final Logger LOGGER = Logger.getLogger(HibernateDatabaseGrantProvider.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(HibernateDatabaseGrantProvider.class.getName());
 
     private static final String CACHE_PREFIX = "dbMeta";
     private static final String CACHE_VERSION = "4";
@@ -219,7 +219,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
 
     private @Nullable Long queryDatabaseVersion(ResourceId databaseId) {
         try {
-            return entityManager.get().createQuery("SELECT db.version " +
+            return entityManager.get().createQuery("SELECT db.metaVersion " +
                     "FROM Database db " +
                     "WHERE db.id=:dbId", Long.class)
                     .setParameter("dbId", CuidAdapter.getLegacyIdFromCuid(databaseId))
@@ -266,7 +266,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         return new DatabaseMeta.Builder()
                 .setDatabaseId(CuidAdapter.databaseId(database.getId()))
                 .setOwnerId(database.getOwner().getId())
-                .setVersion(database.getVersion())
+                .setVersion(database.getMetaVersion())
                 .setLabel(database.getName())
                 .setDescription(database.getFullName())
                 .setPublished(false)
@@ -281,7 +281,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         return new DatabaseMeta.Builder()
                 .setDatabaseId(CuidAdapter.databaseId(database.getId()))
                 .setOwnerId(database.getOwner().getId())
-                .setVersion(database.getVersion())
+                .setVersion(database.getMetaVersion())
                 .setDeleted(true)
                 .build();
     }
