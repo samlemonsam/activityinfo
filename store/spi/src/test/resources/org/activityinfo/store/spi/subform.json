@@ -1,0 +1,125 @@
+{
+  "id": "cjr38zb1f4",
+  "schemaVersion": 0,
+  "databaseId": "d0000010234",
+  "label": "Monthly Sub-Form",
+  "parentFormId": "a2145511855",
+  "subFormKind": "monthly",
+  "elements": [
+    {
+      "id": "Q1477865549",
+      "code": null,
+      "label": "Distribution Type",
+      "description": null,
+      "relevanceCondition": null,
+      "visible": true,
+      "required": false,
+      "type": "enumerated",
+      "typeParameters": {
+        "cardinality": "single",
+        "presentation": "automatic",
+        "values": [
+          {
+            "id": "t1472286690",
+            "label": "One-Off"
+          },
+          {
+            "id": "t1477288425",
+            "label": "Multi-Month"
+          }
+        ]
+      }
+    },
+    {
+      "id": "period",
+      "code": null,
+      "label": "Month",
+      "description": null,
+      "relevanceCondition": null,
+      "visible": true,
+      "required": true,
+      "type": "month",
+      "key": true
+    },
+    {
+      "id": "p1403648307",
+      "code": null,
+      "label": "Month",
+      "description": null,
+      "relevanceCondition": null,
+      "visible": true,
+      "required": true,
+      "type": "month",
+      "key": true
+    },
+    {
+      "id": "i1663029472",
+      "code": "MSO2O1I1",
+      "label": "TOTAL number of HHs receiving MPCA",
+      "description": "Please make sure the total number of female and male match this number",
+      "relevanceCondition": null,
+      "visible": true,
+      "required": true,
+      "type": "quantity",
+      "typeParameters": {
+        "units": "Households",
+        "aggregation": "SUM"
+      }
+    },
+    {
+      "id": "i0208463241",
+      "code": "MSO2O1I2",
+      "label": "Number of female headed HHs receiving MPCA",
+      "description": null,
+      "relevanceCondition": null,
+      "visible": true,
+      "required": true,
+      "type": "quantity",
+      "typeParameters": {
+        "units": "Households",
+        "aggregation": "SUM"
+      }
+    },
+    {
+      "id": "i1138779638",
+      "code": null,
+      "label": "Total HHs (Calculated)",
+      "description": null,
+      "relevanceCondition": null,
+      "visible": true,
+      "required": false,
+      "type": "calculated",
+      "typeParameters": {
+        "formula": "MSO2O1I2 + MSO2O1I3"
+      }
+    },
+    {
+      "id": "i0528069380",
+      "code": "MSO2O1I3",
+      "label": "Number of male headed HHs receiving MPCA",
+      "description": null,
+      "relevanceCondition": null,
+      "visible": true,
+      "required": true,
+      "type": "quantity",
+      "typeParameters": {
+        "units": "Households",
+        "aggregation": "SUM"
+      }
+    },
+    {
+      "id": "i1766847652",
+      "code": "MSO2O1I4",
+      "label": "Total cash (IQD) transferred to each HH ",
+      "description": null,
+      "relevanceCondition": null,
+      "visible": true,
+      "required": true,
+      "type": "quantity",
+      "typeParameters": {
+        "units": "IQD",
+        "aggregation": "SUM"
+      }
+    }
+  ]
+}

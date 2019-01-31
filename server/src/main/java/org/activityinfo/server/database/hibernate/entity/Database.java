@@ -56,7 +56,10 @@ public class Database implements java.io.Serializable, Deleteable {
     private Set<LockedPeriod> lockedPeriods = new HashSet<>(0);
     private Set<Target> targets = new HashSet<>(0);
     private Date dateDeleted;
+
     private long version;
+    private long metaVersion;
+
     private String transferToken;
     private User transferUser;
     private Date transferRequestDate;
@@ -218,7 +221,7 @@ public class Database implements java.io.Serializable, Deleteable {
     public void delete() {
         Date now = new Date();
         setDateDeleted(now);
-        setLastSchemaUpdate(now);
+        setLastMetaAndSchemaUpdate(now);
     }
 
     /**
@@ -249,15 +252,37 @@ public class Database implements java.io.Serializable, Deleteable {
     public void setVersion(long version) {
         this.version = version;
     }
+    
+    @Offline(sync = false)
+    public long getMetaVersion() {
+        return metaVersion;
+    }
+
+    public void setMetaVersion(long metaVersion) {
+        this.metaVersion = metaVersion;
+    }
 
     /**
      * Sets the timestamp on which the structure of the database (activities,
-     * indicateurs, etc was last modified.
+     * indicateurs, etc) was last modified, <b>excluding</b> changes which affect the
+     * {@link org.activityinfo.model.database.DatabaseMeta}
      *
      * @param lastSchemaUpdate
      */
     public void setLastSchemaUpdate(Date lastSchemaUpdate) {
         setVersion(lastSchemaUpdate.getTime());
+    }
+
+    /**
+     * Sets the timestamp on which the structure of the database (activities,
+     * indicateurs, etc) was last modified, <b>including</b> changes which affect the
+     * {@link org.activityinfo.model.database.DatabaseMeta}
+     *
+     * @param lastSchemaUpdate
+     */
+    public void setLastMetaAndSchemaUpdate(Date lastSchemaUpdate) {
+        setVersion(lastSchemaUpdate.getTime());
+        setMetaVersion(lastSchemaUpdate.getTime());
     }
 
     public void setProjects(Set<Project> projects) {
@@ -292,10 +317,6 @@ public class Database implements java.io.Serializable, Deleteable {
     @Override
     public String toString() {
         return id + ": " + name;
-    }
-
-    public void updateVersion() {
-        setVersion(System.currentTimeMillis());
     }
 
     public boolean hasPendingTransfer() {

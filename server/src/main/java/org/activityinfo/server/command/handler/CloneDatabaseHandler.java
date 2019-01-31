@@ -30,12 +30,12 @@ import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
-import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
+import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.*;
@@ -118,7 +118,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         }
 
         // 2. copy user permissions
-        if (command.isCopyUserPermissions() && PermissionOracle.canManageUsers(sourceDbMeta)) {
+        if (command.isCopyUserPermissions() && PermissionOracle.canManageUsersOnWholeDatabase(sourceDbMeta)) {
             copyUserPermissions();
         }
 
@@ -126,7 +126,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         copyForms();
 
         // 4. Map old folder ids to new folder ids on permission model
-        if (command.isCopyUserPermissions() && PermissionOracle.canManageUsers(sourceDbMeta)) {
+        if (command.isCopyUserPermissions() && PermissionOracle.canManageUsersOnWholeDatabase(sourceDbMeta)) {
             mapFolderPermissions();
         }
         
@@ -542,13 +542,23 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
     private ResourceId targetFieldId(FormField sourceField, ResourceId sourceClassId, ResourceId targetClassId) {
         ResourceId sourceFieldId = sourceField.getId();
+
         for (int fieldIndex : BUILTIN_FIELDS) {
             if (sourceFieldId.equals(CuidAdapter.field(sourceClassId, fieldIndex))) {
                 return CuidAdapter.field(targetClassId, fieldIndex);
             }
         }
 
-        return CuidAdapter.cuid(sourceField.getId().getDomain(), generator.generateInt());
+        // Fields stored in the indicator and attribute group tables need to
+        // have a GLOBALLY unique identifier, otherwise they will clash with other forms
+        if(sourceField.getId().getDomain() == CuidAdapter.INDICATOR_DOMAIN ||
+           sourceField.getId().getDomain() == CuidAdapter.ATTRIBUTE_GROUP_FIELD_DOMAIN ) {
+
+            return CuidAdapter.cuid(sourceField.getId().getDomain(), generator.generateInt());
+        }
+
+        // Otherwise, the field id doesn't need to be changed
+        return sourceFieldId;
     }
 
 

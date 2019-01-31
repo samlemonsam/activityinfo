@@ -67,13 +67,13 @@
             <h1 class="logo"><a href="/"><img src="/about/assets/images/logo-activityinfo.png" alt="">ActivityInfo</a></h1>
 
             <ul>
-                <li><a href="/about/benefits.html">Benefits</a></li>
                 <li><a href="/about/features.html">Features</a></li>
+                <li><a href="/about/services/consulting.html">Services</a></li>
                 <li><a href="/about/resources.html">Resources</a></li>
                 <li><a href="/about/pricing.html">Pricing</a></li>
                 <li><a href="/blog/index.html">Blog</a></li>
                 <li class="cta cta-login"><a href="/login">Log In</a></li>
-                <li class="cta cta-signup"><a href="/signUp">Get Free Account</a></li>
+                <li class="cta cta-signup"><a href="/signUp">Start Free Trial</a></li>
             </ul>
         </nav>
     </div>
@@ -112,6 +112,7 @@
                     <li><a href="/about/faq.html">FAQ</a></li>
                     <li><a href="/blog/index.html">Blog</a></li>
                     <li><a href="/video/index.html">Videos</a></li>
+                    <li><a href="/about/webinar.html">Webinars</a></li>
                 </ul>
             </li>
 

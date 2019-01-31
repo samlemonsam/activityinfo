@@ -198,6 +198,9 @@ public class RecordTreeLoader implements ObservableTree.TreeLoader<
         for (FieldValue value : record.getFieldValueMap().values()) {
             if (value instanceof ReferenceValue) {
                 for (RecordRef recordRef : ((ReferenceValue) value).getReferences()) {
+                    if (!formTree.getFormMetadata(recordRef.getFormId()).isAccessible()) {
+                        continue;
+                    }
                     children.add(new RecordKey(recordRef));
                 }
             }

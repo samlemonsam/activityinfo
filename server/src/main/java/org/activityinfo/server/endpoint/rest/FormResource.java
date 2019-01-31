@@ -396,25 +396,12 @@ public class FormResource {
     @Path("query/rows")
     @Produces(MediaType.APPLICATION_JSON)
     public Response queryRows(@Context UriInfo uriInfo) {
-        return queryRows(uriInfo, false);
-    }
-
-    @GET
-    @NoCache
-    @Path("query/rows/full")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response queryFullRows(@Context UriInfo uriInfo) {
-        return queryRows(uriInfo, true);
-    }
-
-    private Response queryRows(@Context UriInfo uriInfo, boolean includeEmptyFields) {
         final ColumnSet columnSet = query(uriInfo);
 
         LOGGER.info("Query completed with " + columnSet.getNumRows() + " rows.");
 
         final StreamingOutput output = outputStream -> {
             RowBasedJsonWriter writer = new RowBasedJsonWriter(outputStream, Charsets.UTF_8);
-            writer.setIncludeEmpyFields(includeEmptyFields);
             writer.write(columnSet);
             writer.flush();
         };
@@ -424,7 +411,6 @@ public class FormResource {
             .type(JSON_CONTENT_TYPE)
             .build();
     }
-
 
     @GET
     @NoCache

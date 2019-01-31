@@ -30,6 +30,7 @@ import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
 import org.activityinfo.model.type.expr.CalculatedFieldType;
+import org.activityinfo.model.type.primitive.TextValue;
 
 import java.util.Map;
 
@@ -133,6 +134,9 @@ public class FormEvalContext implements EvalContext {
     }
 
     private ValueSource lookupSymbol(String symbolName) {
+        if (typedFormRecord.getFormId().asString().equals(symbolName)) {
+            return new ConstantValue(TextValue.valueOf(typedFormRecord.getId().asString()));
+        }
         ValueSource valueSource = symbolMap.get(symbolName);
         if (valueSource == null) {
             // todo : we must fix it, here as temporary solution if symbol name can't be resolved we consider it as ReferenceValue

@@ -471,6 +471,11 @@ public class UserDatabaseMeta implements JsonSerializable {
             return this;
         }
 
+        public Builder addGrant(GrantModel grant) {
+            meta.grants.put(grant.getResourceId(), grant);
+            return this;
+        }
+
         public Builder addGrants(Collection<GrantModel> grants) {
             for (GrantModel grant : grants) {
                 meta.grants.put(grant.getResourceId(), grant);

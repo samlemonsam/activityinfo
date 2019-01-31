@@ -19,6 +19,8 @@
 package org.activityinfo.ui.client.store.offline;
 
 import com.google.common.base.Function;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JsDate;
 import org.activityinfo.indexedb.*;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.promise.Promise;
@@ -31,6 +33,11 @@ import java.util.Set;
  * IndexedDB store that records pending Record transactions offline
  */
 public class PendingStore {
+
+    /**
+     * Limit how long a transaction can be checked out for synchronization.
+     */
+    private static final double PENDING_TIME_LIMIT_MS = 5d * 60d * 1000d;
 
     public static final ObjectStoreDefinition<PendingStore> DEF = new ObjectStoreDefinition<PendingStore>() {
         @Override
@@ -69,17 +76,48 @@ public class PendingStore {
         this.store.openCursor(new IDBCursorCallback<PendingTransaction>() {
             @Override
             public void onNext(IDBCursor<PendingTransaction> cursor) {
-                if(cursor.getValue().isReady()) {
-                    // Mark the transaction as being sent
-                    PendingTransaction tx = cursor.getValue();
+
+                PendingTransaction tx = cursor.getValue();
+
+                if(tx.isReady()) {
+                    // Mark the transaction as being in transmission
                     tx.setStatus(PendingTransaction.PENDING);
+                    tx.setCheckoutTime(currentTimeMillis());
                     cursor.update(tx);
 
                     result.onSuccess(Optional.of(new PendingEntry(cursor.getKeyNumber(), cursor.getValue())));
+                    return;
 
-                } else {
-                    cursor.continue_();
                 }
+
+                if(PendingTransaction.PENDING.equals(tx.getStatus())) {
+
+                    // Guard against pending transactions that are stuck in the queue.
+                    // This can be caused because the browser is closed before the HTTP transaction completes
+                    // and the status of the transaction is reset to READY, or because there was an error
+                    // updating the status from Pending -> Ready after a failed sync.
+
+                    double millisecondsSinceCheckout = currentTimeMillis() - tx.getCheckoutTime();
+
+                    if(Double.isNaN(millisecondsSinceCheckout)) {
+                        // This transaction was created by a client version before we added the checkout time.
+                        // Set the checkout time to now and continue
+                        tx.setCheckoutTime(currentTimeMillis());
+                        cursor.update(tx);
+
+                    } else if(millisecondsSinceCheckout > PENDING_TIME_LIMIT_MS) {
+                        // Reset the checkout time and
+                        // return as the next transaction to transmit
+                        tx.setCheckoutTime(currentTimeMillis());
+                        cursor.update(tx);
+
+                        result.onSuccess(Optional.of(new PendingEntry(cursor.getKeyNumber(), cursor.getValue())));
+                        return;
+                    }
+                }
+
+
+                cursor.continue_();
             }
 
             @Override
@@ -88,6 +126,14 @@ public class PendingStore {
             }
         });
         return result;
+    }
+
+    private double currentTimeMillis() {
+        if(GWT.isClient()) {
+            return JsDate.now();
+        } else {
+            return System.currentTimeMillis();
+        }
     }
 
     public Promise<Void> updateStatus(int id, String status) {

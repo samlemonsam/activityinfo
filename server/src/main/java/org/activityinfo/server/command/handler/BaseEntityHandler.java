@@ -167,7 +167,7 @@ public class BaseEntityHandler {
         }
 
         for (Activity activity : attribute.getGroup().getActivities()) {
-            activity.getDatabase().updateVersion();
+            activity.getDatabase().setLastSchemaUpdate(new Date());
         }
     }
 
@@ -211,7 +211,7 @@ public class BaseEntityHandler {
             throw new IllegalArgumentException("From date is not before To date. Refuse lock object persistence: " + lockedPeriod);
         }
 
-        lockedPeriod.getParentDatabase().setLastSchemaUpdate(new Date());
+        lockedPeriod.getParentDatabase().setLastMetaAndSchemaUpdate(new Date());
         entityManager().merge(lockedPeriod);
     }
 

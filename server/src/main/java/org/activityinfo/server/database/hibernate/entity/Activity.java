@@ -298,7 +298,7 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
     @Offline(sync = false)
     public void delete() {
         setDateDeleted(new Date());
-        getDatabase().setLastSchemaUpdate(new Date());
+        getDatabase().setLastMetaAndSchemaUpdate(new Date());
     }
 
     @Offline

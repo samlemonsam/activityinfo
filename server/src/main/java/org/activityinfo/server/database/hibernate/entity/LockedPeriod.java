@@ -186,7 +186,7 @@ public class LockedPeriod implements Serializable, HardDeleteable {
 
     @Override
     public void delete() {
-        getParentDatabase().updateVersion();
+        getParentDatabase().setLastMetaAndSchemaUpdate(new Date());
         if (activity != null) {
             activity.getLockedPeriods().remove(this);
         }

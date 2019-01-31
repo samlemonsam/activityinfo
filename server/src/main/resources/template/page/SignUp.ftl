@@ -19,7 +19,7 @@
 
 -->
 <#include "Scaffolding.ftl">
-<@scaffolding title="Get Free Account">
+<@scaffolding title="Start Free Trial">
 
     <@content>
 
@@ -42,10 +42,14 @@
 
                 <div class="grid grid--spaced">
 
-                    <form action="" method="post" id="signUpForm">
+                    <form class="signup" action="" method="post" id="signUpForm">
 
-                        <p>Complete the following form to start your free trial of
-                            ActivityInfo.org.</p>
+                        <p>Fill out the form below to start your 30-day free trial and
+                            create your own database today.</p>
+
+                        <p class="signup__warning">Are you looking to report results to a cluster or donor? Request an
+                            invitation from your contact point instead!
+                        </p>
 
                         <label>
                             Your full name (ex: John Doe)
@@ -83,7 +87,7 @@
                         <section class="learning-center" id="howto">
 
                             <div class="phototeaser">
-                                <img src="/about/assets/images/waterpump.jpg" alt="">
+                                <img src="https://www.activityinfo.org/about/assets/images/waterpump.jpg" alt="">
 
                                 <div>
                                     <h2>Want to learn more?</h2>

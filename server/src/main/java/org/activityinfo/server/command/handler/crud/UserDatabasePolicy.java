@@ -148,7 +148,7 @@ public class UserDatabasePolicy implements EntityPolicy<Database> {
 
     private void applyProperties(Database database, PropertyMap properties) {
 
-        database.setLastSchemaUpdate(new Date());
+        database.setLastMetaAndSchemaUpdate(new Date());
 
         if (properties.containsKey("name")) {
             database.setName((String) properties.get("name"));

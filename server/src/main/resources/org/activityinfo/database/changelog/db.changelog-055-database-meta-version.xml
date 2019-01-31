@@ -23,26 +23,22 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-    <changeSet author="jamiewhths" id="055">
+    <changeSet author="jamiewhths" id="055-01">
         <comment>
-            Create groupassignment table to establish Many-to-Many relationship between UserPermission records and Partner records (for "assigned" user groups)
+            Add metaVersion field to Database entity
         </comment>
-        <createTable tableName="groupassignment">
-            <column name="UserPermissionId" type="INT">
-                <constraints nullable="false"/>
-            </column>
-            <column name="UserGroupId" type="INT">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-
-        <addPrimaryKey tableName="groupassignment" columnNames="UserPermissionId, UserGroupId"/>
-        <createIndex tableName="groupassignment" indexName="IND_USERPERMISSIONID">
-            <column name="UserPermissionId"></column>
-        </createIndex>
-        <createIndex tableName="groupassignment" indexName="IND_USERGROUPID">
-            <column name="UserGroupId"></column>
-        </createIndex>
+        <sql>
+            ALTER TABLE userdatabase ADD COLUMN metaVersion bigint NOT null DEFAULT 0
+        </sql>
     </changeSet>
 
+    <changeSet author="jamiewhths" id="055-02">
+        <comment>
+            Set metaVersion equal to current Database version
+        </comment>
+        <sql>
+            UPDATE userdatabase
+            SET metaVersion = version;
+        </sql>
+    </changeSet>
 </databaseChangeLog>

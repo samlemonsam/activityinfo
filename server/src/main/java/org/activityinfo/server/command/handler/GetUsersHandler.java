@@ -29,19 +29,21 @@ import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.FolderDTO;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
-import org.activityinfo.model.formula.*;
-import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.database.UserPermissionModel;
+import org.activityinfo.model.formula.ConstantNode;
+import org.activityinfo.model.formula.FormulaNode;
+import org.activityinfo.model.formula.FormulaParser;
+import org.activityinfo.model.formula.FunctionCallNode;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.permission.Permission;
+import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.Folder;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
-import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
+import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -75,9 +77,7 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
         if (!dbMeta.isPresent()) {
             throw new IllegalArgumentException("DatabaseMeta must exist");
         }
-        Permission manageUsers = PermissionOracle.manageUsers(dbMeta.get().getDatabaseId(), dbMeta.get());
-
-        if (manageUsers.isForbidden()) {
+        if (!PermissionOracle.canManageUsersForOneOrMoreResources(dbMeta.get())) {
             throw new IllegalAccessCommandException(String.format(
                     "User %d does not have permission to view user permissions in database %d",
                     currentUser.getId(), cmd.getDatabaseId()));
@@ -87,17 +87,20 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
                              "up.user.id <> :currentUserId and " +
                              "up.allowView = true";
 
-        if (manageUsers.isFiltered()) {
-            whereClause += " and up.partner.id = " + partnerFromFilter(manageUsers.getFilter());
+        Optional<String> manageUsersFilter = PermissionOracle.legacyManageUserFilter(dbMeta.get());
+        if (manageUsersFilter.isPresent()) {
+            whereClause += " and up.partner.id = " + partnerFromFilter(manageUsersFilter.get());
         }
 
-        TypedQuery<UserPermission> query = em.createQuery("select up from UserPermission up where " +
-                                                          whereClause + " " + composeOrderByClause(cmd),
-                UserPermission.class)
-                                             .setParameter("dbId", cmd.getDatabaseId())
-                                             .setParameter("currentUserId", currentUser.getId());
+        TypedQuery<UserPermission> query = em.createQuery("select up " +
+                "from UserPermission up " +
+                 "where " + whereClause + " " + composeOrderByClause(cmd), UserPermission.class)
+                .setParameter("dbId", cmd.getDatabaseId())
+                .setParameter("currentUserId", currentUser.getId());
 
-        List<Folder> folders = em.createQuery("select f from Folder f where f.database.id = :dbId", Folder.class)
+        List<Folder> folders = em.createQuery("select f " +
+                "from Folder f " +
+                "where f.database.id = :dbId", Folder.class)
                 .setParameter("dbId", cmd.getDatabaseId())
                 .getResultList();
 

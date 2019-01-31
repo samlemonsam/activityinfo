@@ -77,7 +77,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
         // and our permission own version, which determines whether we can see the database or not
         long localVersion = request.getLocalVersion() == null ? 0L : Long.parseLong(request.getLocalVersion());
 
-        long serverDbVersion = Math.max(databaseMeta.get().getDatabaseVersion(), MINIMUM_DB_VERSION);
+        long serverDbVersion = Math.max(database.getVersion(), MINIMUM_DB_VERSION);
         long serverUserVersion = databaseMeta.get().getUserVersion();
         long serverVersion = HASHER.hashLong(serverDbVersion + serverUserVersion).asLong();
 
