@@ -264,12 +264,25 @@ public class Database implements java.io.Serializable, Deleteable {
 
     /**
      * Sets the timestamp on which the structure of the database (activities,
-     * indicateurs, etc was last modified.
+     * indicateurs, etc was last modified, <b>excluding</b> changes which affect the
+     * {@link org.activityinfo.model.database.DatabaseMeta}
      *
      * @param lastSchemaUpdate
      */
     public void setLastSchemaUpdate(Date lastSchemaUpdate) {
         setVersion(lastSchemaUpdate.getTime());
+    }
+
+    /**
+     * Sets the timestamp on which the structure of the database (activities,
+     * indicateurs, etc was last modified, <b>including</b> changes which affect the
+     * {@link org.activityinfo.model.database.DatabaseMeta}
+     *
+     * @param lastSchemaUpdate
+     */
+    public void setLastMetaSchemaUpdate(Date lastSchemaUpdate) {
+        setVersion(lastSchemaUpdate.getTime());
+        setMetaVersion(lastSchemaUpdate.getTime());
     }
 
     public void setProjects(Set<Project> projects) {
