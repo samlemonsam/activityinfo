@@ -214,7 +214,27 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
             activity.setSortOrder(changes.get(SORT_ORDER_PROPERTY));
         }
 
-        activity.getDatabase().setLastSchemaUpdate(new Date());
+        if (isMetaChange(changes)) {
+            activity.getDatabase().setLastMetaAndSchemaUpdate(new Date());
+        } else {
+            activity.getDatabase().setLastSchemaUpdate(new Date());
+        }
+    }
+
+    /**
+     * @return true if any change requested alters the {@link org.activityinfo.model.database.DatabaseMeta}
+     */
+    private boolean isMetaChange(PropertyMap changes) {
+        if (changes.containsKey(NAME_PROPERTY)) {
+            return true;
+        }
+        if (changes.containsKey(FOLDER_ID_PROPERTY) || changes.containsKey(CATEGORY_PROPERTY)) {
+            return true;
+        }
+        if (changes.containsKey(PUBLISHED_PROPERTY)) {
+            return true;
+        }
+        return false;
     }
 
     private void updateFolder(Activity activity, PropertyMap changes) {

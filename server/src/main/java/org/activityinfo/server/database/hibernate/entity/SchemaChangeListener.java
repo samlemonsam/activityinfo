@@ -27,7 +27,7 @@ public class SchemaChangeListener {
 
     @PreUpdate @PrePersist @PreRemove
     public void updateDatabaseTimestamp(SchemaElement element) {
-        element.findOwningDatabase().setLastSchemaUpdate(new Date());
+        element.findOwningDatabase().setLastMetaAndSchemaUpdate(new Date());
     }
 
 }

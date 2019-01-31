@@ -110,7 +110,7 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
 
         em.persist(lockedPeriod);
 
-        db.setLastSchemaUpdate(new Date());
+        db.setLastMetaAndSchemaUpdate(new Date());
         em.persist(db);
 
         return new CreateResult(lockedPeriod.getId());

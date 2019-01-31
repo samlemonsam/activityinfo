@@ -221,7 +221,7 @@ public class Database implements java.io.Serializable, Deleteable {
     public void delete() {
         Date now = new Date();
         setDateDeleted(now);
-        setLastSchemaUpdate(now);
+        setLastMetaAndSchemaUpdate(now);
     }
 
     /**
@@ -264,7 +264,7 @@ public class Database implements java.io.Serializable, Deleteable {
 
     /**
      * Sets the timestamp on which the structure of the database (activities,
-     * indicateurs, etc was last modified, <b>excluding</b> changes which affect the
+     * indicateurs, etc) was last modified, <b>excluding</b> changes which affect the
      * {@link org.activityinfo.model.database.DatabaseMeta}
      *
      * @param lastSchemaUpdate
@@ -275,12 +275,12 @@ public class Database implements java.io.Serializable, Deleteable {
 
     /**
      * Sets the timestamp on which the structure of the database (activities,
-     * indicateurs, etc was last modified, <b>including</b> changes which affect the
+     * indicateurs, etc) was last modified, <b>including</b> changes which affect the
      * {@link org.activityinfo.model.database.DatabaseMeta}
      *
      * @param lastSchemaUpdate
      */
-    public void setLastMetaSchemaUpdate(Date lastSchemaUpdate) {
+    public void setLastMetaAndSchemaUpdate(Date lastSchemaUpdate) {
         setVersion(lastSchemaUpdate.getTime());
         setMetaVersion(lastSchemaUpdate.getTime());
     }
