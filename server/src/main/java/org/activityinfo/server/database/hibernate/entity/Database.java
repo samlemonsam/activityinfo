@@ -306,10 +306,6 @@ public class Database implements java.io.Serializable, Deleteable {
         return id + ": " + name;
     }
 
-    public void updateVersion() {
-        setVersion(System.currentTimeMillis());
-    }
-
     public boolean hasPendingTransfer() {
         return getTransferToken() != null;
     }

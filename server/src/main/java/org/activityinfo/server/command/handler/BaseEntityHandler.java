@@ -167,7 +167,7 @@ public class BaseEntityHandler {
         }
 
         for (Activity activity : attribute.getGroup().getActivities()) {
-            activity.getDatabase().updateVersion();
+            activity.getDatabase().setLastSchemaUpdate(new Date());
         }
     }
 
