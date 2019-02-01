@@ -38,7 +38,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
     private static final Logger LOGGER = Logger.getLogger(HibernateDatabaseGrantProvider.class.getName());
 
     private static final String CACHE_PREFIX = "dbMeta";
-    private static final String CACHE_VERSION = "4";
+    private static final String CACHE_VERSION = "5";
 
     private final Provider<EntityManager> entityManager;
     private final FormStorageProvider formStorageProvider;
@@ -310,7 +310,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
                 .setId(CuidAdapter.partnerFormId(database.getId()))
                 .setParentId(database.getResourceId())
                 .setLabel(I18N.CONSTANTS.partners())
-                .setVisibleToDatabaseUser()
+                .setVisibleAsReference()
                 .setType(ResourceType.FORM)
                 .build();
     }

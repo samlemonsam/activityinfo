@@ -33,19 +33,29 @@ public class Resource implements JsonSerializable {
 
     public enum Visibility {
         /**
-         * Public. Visible to *all* Users on system.
+         * Public.
+         * Visible to *all* Users on system, regardless of assigned permissions.
          */
         PUBLIC,
 
         /**
-         * Public to Database Users. Visible only to Users currently defined on Database.
+         * Public to Database Users.
+         * Visible only to Users given explicit permissions to a Resource within the Database.
          */
         DATABASE_USERS,
 
         /**
-         * Private. Visible only to Users given explicit permissions.
+         * Private.
+         * Visible only to Users given explicit permissions.
          */
-        PRIVATE
+        PRIVATE,
+
+        /**
+         * Reference.
+         * Visible only if another Resource on the Database is visible to the current User. Used to provide Forms
+         * with data to be referenced, but not requiring an explicit grant to be generated for the User.
+         */
+        REFERENCE
     }
 
     public static class Node {
@@ -150,6 +160,10 @@ public class Resource implements JsonSerializable {
         return visibility == Visibility.PRIVATE;
     }
 
+    public boolean isReference() {
+        return visibility == Visibility.REFERENCE;
+    }
+
     @Override
     public JsonValue toJson() {
         JsonValue object = Json.createObject();
@@ -209,6 +223,10 @@ public class Resource implements JsonSerializable {
 
         public Builder setPrivate() {
             return setVisibility(Visibility.PRIVATE);
+        }
+
+        public Builder setVisibleAsReference() {
+            return setVisibility(Visibility.REFERENCE);
         }
 
         public Resource build() {
