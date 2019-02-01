@@ -510,16 +510,16 @@ public class UserDatabaseMeta implements JsonSerializable {
         public UserDatabaseMeta build() {
             meta.visible = isVisible();
 
-            // If not visible to current user, strip all non-visible data before building
+            // If not visible to current user, strip all private data before building
             if (!meta.visible) {
-                removeNonVisibleData();
+                stripData();
                 return meta;
             }
 
             // If database is visible but user is not owner, they will be restricted by their assigned grants (if any)
             if (!meta.owner) {
                 if (meta.grants.isEmpty()) {
-                    // If user has no explicit grants, then only PUBLIC resources are visible
+                    // If user has no explicit grants, then only Public or Referenced Resources are visible
                     removePrivateResources();
                 } else {
                     // If user has explicit grants, then remove any resources which the user has not been granted rights to
@@ -566,7 +566,7 @@ public class UserDatabaseMeta implements JsonSerializable {
                 return;
             }
 
-            // Add the granted resource
+            // Add the granted resource itself
             Resource.Node grantedResourceNode = resourceNodeMap.get(grantedResource);
             grantedResources.add(grantedResourceNode.getResource().getId());
 
@@ -600,15 +600,12 @@ public class UserDatabaseMeta implements JsonSerializable {
         }
 
         private boolean hasPublicResources() {
-            for (Resource resource : meta.resources.values()) {
-                if (resource.isPublic()) {
-                    return true;
-                }
-            }
-            return false;
+            return meta.resources.values().stream()
+                    .map(Resource::isPublic)
+                    .reduce(Boolean.FALSE, Boolean::logicalOr);
         }
 
-        private void removeNonVisibleData() {
+        private void stripData() {
             // Strip all resources, grants and lock data as well as label and description
             meta.label = "";
             meta.description = "";
@@ -618,7 +615,14 @@ public class UserDatabaseMeta implements JsonSerializable {
         }
 
         private void removePrivateResources() {
-            meta.resources.values().removeIf(resource -> !resource.isPublic());
+            // Remove all Resources which are Private, or visible only to Database Users
+            meta.resources.values().removeIf(Resource::isPrivate);
+            meta.resources.values().removeIf(Resource::isPublicToDatabaseUsers);
+
+            // Remove all Referenced Resources if there are no Public Resources remaining
+            if(meta.resources.values().stream().noneMatch(Resource::isPublic)) {
+                meta.resources.values().removeIf(Resource::isReference);
+            }
         }
 
     }

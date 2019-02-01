@@ -152,8 +152,8 @@ public class PermissionOracle {
         }
 
         // If there is no explicit grant:
-        // 1. Check for VIEW operation requests on Resources which are Public
-        if (Operation.VIEW.equals(operation) && resource.isPublic()) {
+        // 1. Check for VIEW operation requests on Resources which are Public or Visible as References
+        if (Operation.VIEW.equals(operation) && (resource.isPublic() || resource.isReference())) {
             return true;
         }
         // 2. Check for VIEW operation requests on Resources which are Public to Database Users (must have grants present)
