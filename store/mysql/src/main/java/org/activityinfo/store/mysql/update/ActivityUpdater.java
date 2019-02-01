@@ -154,9 +154,10 @@ public class ActivityUpdater {
     private void updateDatabaseRow() {
         SqlUpdate databaseUpdate = SqlUpdate.update("userdatabase");
         databaseUpdate.where("databaseId", databaseId);
-        databaseUpdate.set("version", System.currentTimeMillis());
+        long timestamp = System.currentTimeMillis();
+        databaseUpdate.set("version", timestamp);
+        databaseUpdate.set("metaVersion", timestamp);
         databaseUpdate.execute(executor);
-
     }
 
     private void updateFields(FormClass formClass) {
