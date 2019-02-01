@@ -21,12 +21,15 @@ package org.activityinfo.ui.client.page.config.form;
 import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.Style.SortDir;
 import com.extjs.gxt.ui.client.event.BaseEvent;
+import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.Events;
+import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.store.ListStore;
+import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.ModelPropertyRenderer;
+import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.form.*;
-import com.extjs.gxt.ui.client.widget.form.ComboBox.TriggerAction;
-import com.extjs.gxt.ui.client.widget.layout.FormLayout;
+import com.extjs.gxt.ui.client.widget.layout.*;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -38,6 +41,7 @@ import org.activityinfo.ui.client.page.config.design.BlankValidator;
 import org.activityinfo.ui.client.page.entry.form.field.MultilineRenderer;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
 
@@ -146,6 +150,7 @@ public class UserForm extends FormPanel {
     private TextField<String> nameField;
     private TextField<String> emailField;
     private ComboBox<PartnerDTO> partnerCombo;
+    private List<ComboBox<PartnerDTO>> partnerCombos = new ArrayList<>();
     private Map<Integer, CheckBox> folderCheckBoxMap = new HashMap<>();
 
     public UserForm(UserDatabaseDTO database) {
@@ -181,10 +186,59 @@ public class UserForm extends FormPanel {
         partnerCombo.setDisplayField("name");
         partnerCombo.setStore(partnerStore);
         partnerCombo.setForceSelection(true);
-        partnerCombo.setTriggerAction(TriggerAction.ALL);
+        partnerCombo.setTriggerAction(ComboBox.TriggerAction.ALL);
         partnerCombo.setAllowBlank(false);
         partnerCombo.setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<>("name")));
+        partnerCombos.add(partnerCombo);
         this.add(partnerCombo);
+
+        LayoutContainer buttonBar = new LayoutContainer(new HBoxLayout());
+
+        Button addNewPartnerButton = new Button(constants.addAnother());
+        addNewPartnerButton.addSelectionListener(new SelectionListener<ButtonEvent>() {
+            @Override
+            public void componentSelected(ButtonEvent buttonEvent) {
+                if (buttonEvent.getButton().getItemId() != addNewPartnerButton.getItemId()) {
+                    return;
+                }
+                if (database.getDatabasePartners().size() == partnerCombos.size()) {
+                    buttonEvent.setCancelled(true);
+                    return;
+                }
+                ComboBox<PartnerDTO> comboBox = new ComboBox<>();
+                comboBox.setName("partner");
+                comboBox.setFieldLabel(constants.partner());
+                comboBox.setDisplayField("name");
+                comboBox.setStore(partnerStore);
+                comboBox.setForceSelection(true);
+                comboBox.setTriggerAction(ComboBox.TriggerAction.ALL);
+                comboBox.setAllowBlank(false);
+                comboBox.setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<>("name")));
+                partnerCombos.add(comboBox);
+                UserForm.this.add(comboBox);
+                UserForm.this.fireEvent(Events.Resize);
+            }
+        });
+        buttonBar.add(addNewPartnerButton);
+
+        Button removePartnerButton = new Button(constants.removePartner());
+        removePartnerButton.addSelectionListener(new SelectionListener<ButtonEvent>() {
+            @Override
+            public void componentSelected(ButtonEvent buttonEvent) {
+                if (buttonEvent.getButton().getItemId() != removePartnerButton.getItemId()) {
+                    return;
+                }
+                if (partnerCombos.size() == 1) {
+                    return;
+                }
+                ComboBox toRemove = partnerCombos.get(partnerCombos.size()-1);
+                partnerCombos.remove(toRemove);
+                UserForm.this.remove(toRemove);
+                UserForm.this.fireEvent(Events.Resize);
+            }
+        });
+        buttonBar.add(removePartnerButton);
+        this.add(buttonBar);
 
         permissionsGroup = new CheckBoxGroup();
         permissionsGroup.setFieldLabel(I18N.CONSTANTS.permissions());
@@ -462,7 +516,7 @@ public class UserForm extends FormPanel {
         UserPermissionDTO user = new UserPermissionDTO();
         user.setEmail(emailField.getValue());
         user.setName(nameField.getValue());
-        user.addPartner(partnerCombo.getValue());
+        user.addPartners(partnerCombos.stream().map(ComboBox::getValue).collect(Collectors.toSet()));
 
         for (Field field : permissionsGroup.getAll()) {
             if (field instanceof CheckBoxGroup) {

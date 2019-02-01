@@ -27,6 +27,7 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -233,6 +234,10 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
 
     public void addPartner(PartnerDTO partner) {
         this.partners.add(partner);
+    }
+
+    public void addPartners(Collection<PartnerDTO> partners) {
+        this.partners.addAll(partners);
     }
 
     /**
