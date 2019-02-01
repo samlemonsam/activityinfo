@@ -52,4 +52,5 @@ public class Tables {
     public static final String USER_DATABASE = "userdatabase";
     public static final String USER_LOGIN = "userlogin";
     public static final String USER_PERMISSION = "userpermission";
+    public static final String GROUP_ASSIGNMENT = "groupassignment";
 }

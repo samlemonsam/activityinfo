@@ -109,7 +109,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
         UserPermissionDTO user = new UserPermissionDTO();
         user.setEmail("other@foobar");
         user.setName("Foo Bar");
-        user.addUserGroup(NRC_DTO);
+        user.addPartner(NRC_DTO);
         user.setAllowView(true);
 
         UpdateUserPermissions cmd = new UpdateUserPermissions(1, user);
@@ -128,11 +128,11 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
             throws IllegalAccessCommandException {
 
         UserPermission executingUserPermissions = new UserPermission();
-        executingUserPermissions.addUserGroup(NRC);
+        executingUserPermissions.addPartner(NRC);
         executingUserPermissions.setAllowManageUsers(true);
 
         UserPermissionDTO dto = new UserPermissionDTO();
-        dto.addUserGroup(NRC_DTO);
+        dto.addPartner(NRC_DTO);
         dto.setAllowView(true);
 
         UpdateUserPermissions cmd = new UpdateUserPermissions(1, dto);
@@ -149,11 +149,11 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
             throws IllegalAccessCommandException {
 
         UserPermission executingUserPermissions = new UserPermission();
-        executingUserPermissions.addUserGroup(NRC);
+        executingUserPermissions.addPartner(NRC);
         executingUserPermissions.setAllowManageUsers(true);
 
         UserPermissionDTO dto = new UserPermissionDTO();
-        dto.addUserGroup(NRC_DTO);
+        dto.addPartner(NRC_DTO);
         dto.setAllowView(true);
         dto.setAllowEdit(true);
 
@@ -167,11 +167,11 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
             throws IllegalAccessCommandException {
 
         UserPermission executingUserPermissions = new UserPermission();
-        executingUserPermissions.addUserGroup(IRC);
+        executingUserPermissions.addPartner(IRC);
         executingUserPermissions.setAllowManageUsers(true);
 
         UserPermissionDTO dto = new UserPermissionDTO();
-        dto.addUserGroup(NRC_DTO);
+        dto.addPartner(NRC_DTO);
         dto.setAllowView(true);
         dto.setAllowEdit(true);
 
@@ -185,12 +185,12 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
             throws IllegalAccessCommandException {
 
         UserPermission executingUserPermissions = new UserPermission();
-        executingUserPermissions.addUserGroup(IRC);
+        executingUserPermissions.addPartner(IRC);
         executingUserPermissions.setAllowManageUsers(true);
         executingUserPermissions.setAllowManageAllUsers(true);
 
         UserPermissionDTO dto = new UserPermissionDTO();
-        dto.addUserGroup(NRC_DTO);
+        dto.addPartner(NRC_DTO);
         dto.setAllowView(true);
         dto.setAllowEdit(true);
 
@@ -212,7 +212,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
         UserPermissionDTO user = new UserPermissionDTO();
         user.setEmail("ralph@lauren.com");
         user.setName("Ralph");
-        user.addUserGroup(new PartnerDTO(1, "NRC"));
+        user.addPartner(new PartnerDTO(1, "NRC"));
         user.setAllowView(true);
         user.setAllowEdit(true);
 
@@ -239,7 +239,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
 
         UserPermissionDTO user = new UserPermissionDTO();
         user.setEmail("bavon@nrcdrc.org");
-        user.addUserGroup(new PartnerDTO(1, "NRC"));
+        user.addPartner(new PartnerDTO(1, "NRC"));
         user.setAllowView(true);
         user.setAllowViewAll(false);
         user.setAllowEdit(true);
@@ -263,7 +263,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
         UserPermissionDTO newUser = new UserPermissionDTO();
         newUser.setName("Bavon");
         newUser.setEmail("bavon@nrcdrc.org");
-        newUser.addUserGroup(new PartnerDTO(1, "NRC"));
+        newUser.addPartner(new PartnerDTO(1, "NRC"));
         newUser.setAllowView(true);
         newUser.setAllowViewAll(false);
         newUser.setAllowEdit(true);

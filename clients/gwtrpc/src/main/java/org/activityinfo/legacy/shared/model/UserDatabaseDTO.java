@@ -42,20 +42,19 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
 
     public static final int MAX_NAME_LENGTH = 255;
 
-    public static final String MY_PARTNER_ID = "myPartnerId";
+    public static final String ENTITY_NAME = "UserDatabase";
 
     private CountryDTO country;
-    private List<PartnerDTO> partners = new ArrayList<>(0);
     private List<ActivityDTO> activities = new ArrayList<>(0);
     private Set<LockedPeriodDTO> lockedPeriods = new HashSet<>(0);
     private List<ProjectDTO> projects = new ArrayList<>(0);
     private List<FolderDTO> folders = new ArrayList<>(0);
 
+    private List<PartnerDTO> databasePartners = new ArrayList<>(0);
+    private List<PartnerDTO> assignedPartners = new ArrayList<>(0);
+
     private boolean hasFolderLimitation = false;
     private boolean hasPendingTransfer = false;
-
-    public static final String ENTITY_NAME = "UserDatabase";
-
     private boolean suspended;
 
     public UserDatabaseDTO() {
@@ -180,8 +179,51 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
      * @return the list of Partners who belong to this UserDatabase
      */
     @JsonProperty @JsonView(DTOViews.Schema.class)
-    public List<PartnerDTO> getPartners() {
-        return partners;
+    public List<PartnerDTO> getDatabasePartners() {
+        return databasePartners;
+    }
+
+    /**
+     * Sets the list of Partners who belong to this UserDatabase
+     */
+    public void setDatabasePartners(List<PartnerDTO> databasePartners) {
+        this.databasePartners = databasePartners;
+    }
+
+    public void addDatabasePartner(PartnerDTO databasePartner) {
+        this.databasePartners.add(databasePartner);
+    }
+
+    /**
+     * @return the Partner(s) of the UserDatabase to which the client belongs
+     */
+    public List<PartnerDTO> getAssignedPartners() {
+        return assignedPartners;
+    }
+
+    public void setAssignedPartners(List<PartnerDTO> assignedPartners) {
+        this.assignedPartners = assignedPartners;
+    }
+
+    public void addAssignedPartner(PartnerDTO assignedPartner) {
+        this.assignedPartners.add(assignedPartner);
+    }
+
+    public boolean hasAssignedPartners() {
+        return !assignedPartners.isEmpty();
+    }
+
+    public Optional<PartnerDTO> getDefaultPartner() {
+        return getDefaultPartner(getDatabasePartners());
+    }
+
+    public static Optional<PartnerDTO> getDefaultPartner(Collection<PartnerDTO> partners) {
+        for (PartnerDTO partner : partners) {
+            if (PartnerDTO.DEFAULT_PARTNER_NAME.equals(partner.getName())) {
+                return Optional.of(partner);
+            }
+        }
+        return Optional.absent();
     }
 
     public List<FolderDTO> getFolders() {
@@ -205,13 +247,6 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         set("accountEndDate", dateString);
     }
 
-    /**
-     * Sets the list of Partners who belong to this UserDatabase
-     */
-    public void setPartners(List<PartnerDTO> partners) {
-        this.partners = partners;
-    }
-
     @JsonProperty @JsonView(DTOViews.Schema.class)
     public List<ProjectDTO> getProjects() {
         return projects;
@@ -219,44 +254,6 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
 
     public void setProjects(List<ProjectDTO> projects) {
         this.projects = projects;
-    }
-
-    public Optional<PartnerDTO> getDefaultPartner() {
-        return getDefaultPartner(getPartners());
-    }
-
-    public static Optional<PartnerDTO> getDefaultPartner(Collection<PartnerDTO> partners) {
-        for (PartnerDTO partner : partners) {
-            if (PartnerDTO.DEFAULT_PARTNER_NAME.equals(partner.getName())) {
-                return Optional.of(partner);
-            }
-        }
-        return Optional.absent();
-    }
-
-    /**
-     * @return the Partner of the UserDatabase to which the client belongs
-     */
-    public PartnerDTO getMyPartner() {
-        return getPartnerById(getMyPartnerId());
-    }
-
-    public boolean hasPartnerId() {
-        return (get(MY_PARTNER_ID) != null);
-    }
-
-    /**
-     * @return the id of the Partner to which the client belongs
-     */
-    public int getMyPartnerId() {
-        return hasPartnerId() ? (Integer) get(MY_PARTNER_ID) : 0;
-    }
-
-    /**
-     * Sets the id of the Partner to which the current user belongs
-     */
-    public void setMyPartnerId(int partnerId) {
-        set(MY_PARTNER_ID, partnerId);
     }
 
     /**
@@ -292,10 +289,10 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
      * Searches this UserDatabase's list of Partners for the PartnerDTO with the
      * given id.
      *
-     * @return the matching UserDatabaseDTO or null if no matches
+     * @return the matching PartnerDTO or null if no matches
      */
     public PartnerDTO getPartnerById(int id) {
-        for (PartnerDTO partner : getPartners()) {
+        for (PartnerDTO partner : getDatabasePartners()) {
             if (partner.getId() == id) {
                 return partner;
             }
@@ -552,16 +549,6 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         set("exportAllowed", allowed);
     }
 
-    public boolean isAllowedToEdit(SiteDTO site) {
-        if (isEditAllAllowed()) {
-            return true;
-        } else if (isEditAllowed()) {
-            return getMyPartnerId() == site.getPartnerId();
-        } else {
-            return false;
-        }
-    }
-
     public boolean isVisible(@NotNull ActivityDTO activity) {
         if (!hasFolderLimitation) {
             return true;
@@ -601,7 +588,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
             return true;
         }
         if (isManageUsersAllowed()) {
-            return user.getUserGroupIds().size() == 1 && user.getUserGroupIds().contains(getMyPartnerId());
+            return getAllowablePartners().containsAll(user.getPartners());
         }
         return false;
     }
@@ -627,9 +614,9 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
         }
 
         if (isEditAllAllowed()) {
-            result.addAll(getPartners());
-        } else if (hasPartnerId()) {
-            result.add(getMyPartner());
+            result.addAll(getDatabasePartners());
+        } else if (hasAssignedPartners()) {
+            result.addAll(getAssignedPartners());
         } else {
             // if the user has no specific rights, they may not
             // have any options to set the partner
@@ -758,7 +745,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
             if (!checkBasicPermission(permissionType)) {
                 return false;
             // Check if database user has partner permissions
-            } else if (!getAllowablePartners().containsAll(user.getUserGroups())) {
+            } else if (!getAllowablePartners().containsAll(user.getPartners())) {
                 return false;
             // Check if database user has any folder limitations - if none, then allowed
             } else if (!hasFolderLimitation()) {

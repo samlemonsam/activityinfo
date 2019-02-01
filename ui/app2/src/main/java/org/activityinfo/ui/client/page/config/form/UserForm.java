@@ -172,7 +172,7 @@ public class UserForm extends FormPanel {
         this.add(emailField);
 
         ListStore<PartnerDTO> partnerStore = new ListStore<>();
-        partnerStore.add(database.getPartners());
+        partnerStore.add(database.getDatabasePartners());
         partnerStore.sort("name", SortDir.ASC);
 
         partnerCombo = new ComboBox<>();
@@ -258,7 +258,7 @@ public class UserForm extends FormPanel {
         this.add(folderGroup);
 
         if(!database.isManageAllUsersAllowed()) {
-            partnerCombo.setValue(database.getMyPartner());
+            partnerCombo.setValue(database.getAssignedPartners().get(0));
             partnerCombo.setReadOnly(true);
         }
 
@@ -385,7 +385,7 @@ public class UserForm extends FormPanel {
         nameField.setValue(user.getName());
         nameField.setReadOnly(true);
 
-        partnerCombo.setValue(user.getUserGroups().get(0));
+        partnerCombo.setValue(user.getPartners().get(0));
         partnerCombo.setReadOnly(!database.getAmOwner() && !database.isAllowed(PermissionType.MANAGE_ALL_USERS, user));
 
         addEditPermissionsGroup(user);
@@ -462,7 +462,7 @@ public class UserForm extends FormPanel {
         UserPermissionDTO user = new UserPermissionDTO();
         user.setEmail(emailField.getValue());
         user.setName(nameField.getValue());
-        user.addUserGroup(partnerCombo.getValue());
+        user.addPartner(partnerCombo.getValue());
 
         for (Field field : permissionsGroup.getAll()) {
             if (field instanceof CheckBoxGroup) {

@@ -60,7 +60,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
 
     public static final PageId PAGE_ID = new PageId("dbusers");
 
-    private static final int VIEW_COL_INDEX = 5;
+    private static final int VIEW_COL_INDEX = 4;
     private static final int CREATE_COL_INDEX = VIEW_COL_INDEX + 2;
     private static final int EDIT_COL_INDEX = CREATE_COL_INDEX + 2;
     private static final int DELETE_COL_INDEX = EDIT_COL_INDEX + 2;
@@ -154,29 +154,28 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
 
         columns.add(new ColumnConfig("name", I18N.CONSTANTS.name(), 100));
         columns.add(new ColumnConfig("email", I18N.CONSTANTS.email(), 150));
-        columns.add(new ColumnConfig("partner.name", I18N.CONSTANTS.partner(), 150));
 
-        ColumnConfig userGroupColumn = new ColumnConfig("groups", I18N.CONSTANTS.partners(), 150);
-        userGroupColumn.setSortable(false);
-        userGroupColumn.setRenderer(new GridCellRenderer() {
+        ColumnConfig partnersColumn = new ColumnConfig("partners", I18N.CONSTANTS.partners(), 150);
+        partnersColumn.setSortable(false);
+        partnersColumn.setRenderer(new GridCellRenderer() {
             @Override
             public SafeHtml render(ModelData modelData, String s, ColumnData columnData, int i, int i1, ListStore listStore, Grid grid) {
                 SafeHtmlBuilder html = new SafeHtmlBuilder();
                 if (modelData instanceof UserPermissionDTO) {
                     UserPermissionDTO permission = (UserPermissionDTO) modelData;
                     boolean needsComma = false;
-                    for (PartnerDTO userGroup : permission.getUserGroups()) {
+                    for (PartnerDTO partner : permission.getPartners()) {
                         if (needsComma) {
                             html.appendHtmlConstant(", ");
                         }
-                        html.appendEscaped(userGroup.getName());
+                        html.appendEscaped(partner.getName());
                         needsComma = true;
                     }
                 }
                 return html.toSafeHtml();
             }
         });
-        columns.add(userGroupColumn);
+        columns.add(partnersColumn);
 
         ColumnConfig folderColumn = new ColumnConfig("category", I18N.CONSTANTS.folders(), 150);
         folderColumn.setSortable(false);

@@ -23,26 +23,43 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-    <changeSet author="jamiewhths" id="056">
+    <changeSet author="jamiewhths" id="056-01">
         <comment>
-            Create groupassignment table to establish Many-to-Many relationship between UserPermission records and Partner records (for "assigned" user groups)
+            Create groupassignment table to establish Many-to-Many relationship between UserPermission records and Partner records (for "assigned" Partners)
         </comment>
         <createTable tableName="groupassignment">
             <column name="UserPermissionId" type="INT">
                 <constraints nullable="false"/>
             </column>
-            <column name="UserGroupId" type="INT">
+            <column name="PartnerId" type="INT">
                 <constraints nullable="false"/>
             </column>
         </createTable>
 
-        <addPrimaryKey tableName="groupassignment" columnNames="UserPermissionId, UserGroupId"/>
+        <addPrimaryKey tableName="groupassignment" columnNames="UserPermissionId, PartnerId"/>
         <createIndex tableName="groupassignment" indexName="IND_USERPERMISSIONID">
             <column name="UserPermissionId"></column>
         </createIndex>
-        <createIndex tableName="groupassignment" indexName="IND_USERGROUPID">
-            <column name="UserGroupId"></column>
+        <createIndex tableName="groupassignment" indexName="IND_PARTNERID">
+            <column name="PartnerId"></column>
         </createIndex>
+    </changeSet>
+
+    <changeSet author="jamiewhths" id="056-02">
+        <comment>
+            Create groupassignment record for each existing userpermission record (to map the current partner id to a group assignment)
+        </comment>
+        <sql>
+            INSERT INTO groupassignment(UserPermissionId, PartnerId)
+            SELECT userpermission.UserPermissionId, userpermission.PartnerId FROM userpermission;
+        </sql>
+    </changeSet>
+
+    <changeSet author="jamiewhths" id="056-03">
+        <comment>
+            Drop partnerId column from userpermission
+        </comment>
+        <dropColumn tableName="userpermission" columnName="partnerId"></dropColumn>
     </changeSet>
 
 </databaseChangeLog>

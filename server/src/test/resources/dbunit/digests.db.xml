@@ -70,29 +70,46 @@
                 ownerUserId="100" lastSchemaUpdate="2009-01-01"/>
 
   <userPermission userPermissionId="1" databaseId="1"
-                  userId="3" partnerId="1" allowView="1" allowViewAll="0" allowEdit="0"
+                  userId="3"
+                  allowView="1" allowViewAll="0" allowEdit="0"
                   allowEditAll="0" allowManageUsers="0" allowManageAllUsers="0"
                   allowDesign="0" lastSchemaUpdate="2009-01-01"/>
+  <groupAssignment userPermissionId="1" partnerId="1" />
+
   <userPermission userPermissionId="2" databaseId="1"
-                  userId="4" partnerId="1" allowView="1" allowViewAll="0" allowEdit="0"
+                  userId="4"
+                  allowView="1" allowViewAll="0" allowEdit="0"
                   allowEditAll="0" allowManageUsers="0" allowManageAllUsers="0"
                   allowDesign="0" lastSchemaUpdate="2009-01-01"/>
+  <groupAssignment userPermissionId="2" partnerId="1" />
+
   <userPermission userPermissionId="3" databaseId="1"
-                  userId="5" partnerId="1" allowView="0" allowViewAll="0" allowEdit="0"
+                  userId="5"
+                  allowView="0" allowViewAll="0" allowEdit="0"
                   allowEditAll="0" allowManageUsers="0" allowManageAllUsers="0"
                   allowDesign="1" lastSchemaUpdate="2009-01-01"/>
+  <groupAssignment userPermissionId="3" partnerId="1" />
+
   <userPermission userPermissionId="4" databaseId="1"
-                  userId="6" partnerId="1" allowView="0" allowViewAll="0" allowEdit="0"
+                  userId="6"
+                  allowView="0" allowViewAll="0" allowEdit="0"
                   allowEditAll="0" allowManageUsers="0" allowManageAllUsers="0"
                   allowDesign="1" lastSchemaUpdate="2009-01-01"/>
+  <groupAssignment userPermissionId="4" partnerId="1" />
+
   <userPermission userPermissionId="5" databaseId="1"
-                  userId="7" partnerId="1" allowView="0" allowViewAll="0" allowEdit="0"
+                  userId="7"
+                  allowView="0" allowViewAll="0" allowEdit="0"
                   allowEditAll="0" allowManageUsers="0" allowManageAllUsers="0"
                   allowDesign="0" lastSchemaUpdate="2009-01-01"/>
+  <groupAssignment userPermissionId="5" partnerId="1" />
+
   <userPermission userPermissionId="100" databaseId="3"
-                  userId="100" partnerId="1" allowView="1" allowViewAll="0" allowEdit="0"
+                  userId="100"
+                  allowView="1" allowViewAll="0" allowEdit="0"
                   allowEditAll="0" allowManageUsers="0" allowManageAllUsers="0"
                   allowDesign="1" lastSchemaUpdate="2009-01-01"/>
+  <groupAssignment userPermissionId="100" partnerId="1" />
 
 
   <activity activityId="1" databaseId="1" name="NFI" published="1"

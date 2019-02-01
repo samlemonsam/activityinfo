@@ -186,10 +186,13 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
             throw new IllegalAccessCommandException("Current user does not have the right to manage other users");
         }
 
+        List<Integer> allowedPartnerIds = executingUserPermissions.getPartners().stream()
+                .map(Partner::getId).collect(Collectors.toList());
+
         if (!executingUserPermissions.isAllowManageAllUsers()
-                && !executingUserPermissions.getUserGroups().containsAll(cmd.getModel().getUserGroups())) {
+                && !allowedPartnerIds.containsAll(cmd.getModel().getPartnerIds())) {
             throw new IllegalAccessCommandException(
-                    "Current user does not have the right to manage users from other user groups");
+                    "Current user does not have the right to manage users from other partners");
         }
 
         if (!executingUserPermissions.isAllowDesign() && cmd.getModel().getAllowDesign()) {
@@ -208,14 +211,14 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
                             boolean isOwner,
                             UserPermission executingUserPermissions) {
 
-        List<Partner> userGroups = dto.getUserGroups().stream()
-                .map(ug -> partnerDAO.findById(ug.getId()))
+        List<Partner> partners = dto.getPartners().stream()
+                .map(p -> partnerDAO.findById(p.getId()))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-        if (userGroups.isEmpty()) {
-            throw new CommandException("User Groups " + dto.getUserGroupIds() + " do not exist");
+        if (partners.isEmpty()) {
+            throw new CommandException("Partners " + dto.getPartnerIds() + " do not exist");
         }
-        perm.setUserGroups(userGroups);
+        perm.setPartners(partners);
         perm.setAllowView(dto.getAllowView());
         perm.setAllowCreate(dto.getAllowCreate());
         perm.setAllowEdit(dto.getAllowEdit());

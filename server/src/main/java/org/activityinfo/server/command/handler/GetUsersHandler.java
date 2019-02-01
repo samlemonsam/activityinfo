@@ -29,6 +29,7 @@ import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.FolderDTO;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
+import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.formula.ConstantNode;
@@ -36,7 +37,6 @@ import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.FormulaParser;
 import org.activityinfo.model.formula.FunctionCallNode;
 import org.activityinfo.model.legacy.CuidAdapter;
-import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.Folder;
@@ -46,6 +46,7 @@ import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.store.spi.DatabaseProvider;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.*;
 import java.util.logging.Level;
@@ -83,20 +84,33 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
                     currentUser.getId(), cmd.getDatabaseId()));
         }
 
-        String whereClause = "up.database.id = :dbId and " +
-                             "up.user.id <> :currentUserId and " +
-                             "up.allowView = true";
-
         Optional<String> manageUsersFilter = PermissionOracle.legacyManageUserFilter(dbMeta.get());
-        if (manageUsersFilter.isPresent()) {
-            whereClause += " and up.partner.id = " + partnerFromFilter(manageUsersFilter.get());
-        }
+        Optional<List<Integer>> filteredPartners = manageUsersFilter.map(this::determineAllowedPartnersFromFilter);
 
-        TypedQuery<UserPermission> query = em.createQuery("select up " +
-                "from UserPermission up " +
-                 "where " + whereClause + " " + composeOrderByClause(cmd), UserPermission.class)
-                .setParameter("dbId", cmd.getDatabaseId())
-                .setParameter("currentUserId", currentUser.getId());
+        TypedQuery<UserPermission> query;
+        String whereClause;
+
+        if(filteredPartners.isPresent()) {
+            whereClause = "up.database.id = :dbId and " +
+                    "up.user.id <> :currentUserId and " +
+                    "up.allowView = true and " +
+                    "p.id in :allowedPartners";
+            query = em.createQuery("select up from UserPermission up " +
+                    "join up.partners p " +
+                    "where " + whereClause + " " + composeOrderByClause(cmd), UserPermission.class)
+                    .setParameter("dbId", cmd.getDatabaseId())
+                    .setParameter("currentUserId", currentUser.getId())
+                    .setParameter("allowedPartners", filteredPartners.get());
+        } else {
+            whereClause = "up.database.id = :dbId and " +
+                    "up.user.id <> :currentUserId and " +
+                    "up.allowView = true";
+            query = em.createQuery("select up from UserPermission up " +
+                    "join fetch up.partners " +
+                    "where " + whereClause + " " + composeOrderByClause(cmd), UserPermission.class)
+                    .setParameter("dbId", cmd.getDatabaseId())
+                    .setParameter("currentUserId", currentUser.getId());
+        }
 
         List<Folder> folders = em.createQuery("select f " +
                 "from Folder f " +
@@ -135,7 +149,7 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
             dto.setAllowManageUsers(perm.isAllowManageUsers());
             dto.setAllowManageAllUsers(perm.isAllowManageAllUsers());
             dto.setAllowExport(perm.isAllowExport());
-            dto.setUserGroups(perm.getUserGroups().stream()
+            dto.setPartners(perm.getPartners().stream()
                     .map(p -> new PartnerDTO(p.getId(), p.getName()))
                     .collect(Collectors.toList()));
             dto.setFolderLimitation(!Strings.isNullOrEmpty(perm.getModel()));
@@ -143,7 +157,11 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
             models.add(dto);
         }
 
-        return new UserResult(models, cmd.getOffset(), queryTotalCount(cmd, currentUser, whereClause));
+        return new UserResult(models, cmd.getOffset(), queryTotalCount(cmd, currentUser, whereClause, filteredPartners));
+    }
+
+    private List<Integer> determineAllowedPartnersFromFilter(String filter) {
+        return Collections.singletonList(partnerFromFilter(filter));
     }
 
     private int partnerFromFilter(String filter) {
@@ -191,11 +209,22 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
         return dto;
     }
 
-    private int queryTotalCount(GetUsers cmd, User currentUser, String whereClause) {
-        return ((Number) em.createQuery("select count(up) from UserPermission up where " + whereClause)
-                           .setParameter("dbId", cmd.getDatabaseId())
-                           .setParameter("currentUserId", currentUser.getId())
-                           .getSingleResult()).intValue();
+    private int queryTotalCount(GetUsers cmd, User currentUser, String whereClause, Optional<List<Integer>> allowedPartners) {
+        Query query;
+        if (allowedPartners.isPresent()) {
+            query = em.createQuery("select count(up) from UserPermission up " +
+                    "join up.partners p " +
+                    "where " + whereClause)
+                    .setParameter("dbId", cmd.getDatabaseId())
+                    .setParameter("currentUserId", currentUser.getId())
+                    .setParameter("allowedPartners", allowedPartners.get());
+        } else {
+            query = em.createQuery("select count(up) from UserPermission up " +
+                    "where " + whereClause)
+                    .setParameter("dbId", cmd.getDatabaseId())
+                    .setParameter("currentUserId", currentUser.getId());
+        }
+        return ((Number) query.getSingleResult()).intValue();
     }
 
     private String composeOrderByClause(GetUsers cmd) {
@@ -210,8 +239,6 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
                 property = "up.user.name";
             } else if ("email".equals(field)) {
                 property = "up.user.email";
-            } else if ("partner".equals(field) || "partner.name".equals(field)) {
-                property = "up.partner.name";
             } else if (field != null && field.startsWith("allow")) {
                 property = "up." + field;
             }

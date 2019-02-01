@@ -68,11 +68,11 @@ public class UpdatePartnerHandlerTest extends CommandTestCase2 {
         nfiDatabase = schema.getDatabaseById(NFI_DATABASE);
         healthDatabase = schema.getDatabaseById(HEALTH_DATABASE);
 
-        assertThat(nfiDatabase.getPartners(), containsInAnyOrder(
+        assertThat(nfiDatabase.getDatabasePartners(), containsInAnyOrder(
                 hasProperty("name", equalTo("Solidarites")),
                 hasProperty("name", equalTo("NRC"))));
 
-        assertThat(healthDatabase.getPartners(), contains(
+        assertThat(healthDatabase.getDatabasePartners(), contains(
                 hasProperty("name", equalTo("Default"))));
 
         // Users in the NFI database should be reassigned to the new NRC partner object
@@ -81,20 +81,20 @@ public class UpdatePartnerHandlerTest extends CommandTestCase2 {
         Optional<UserPermissionDTO> lisa = nfiUsers.getData().stream().filter(u -> u.getEmail().equals("lisa@solidarites")).findAny();
 
         // Bavon should stay as NRC
-        assertThat(bavon.get().getUserGroups().size(), equalTo(1));
-        assertThat(bavon.get().getUserGroups().get(0), hasProperty("name", equalTo("NRC")));
+        assertThat(bavon.get().getPartners().size(), equalTo(1));
+        assertThat(bavon.get().getPartners().get(0), hasProperty("name", equalTo("NRC")));
 
         // Lisa should be moved to the new Solidarites partner
-        assertThat(lisa.get().getUserGroups().size(), equalTo(1));
-        assertThat(lisa.get().getUserGroups().get(0), hasProperty("name", equalTo("Solidarites")));
+        assertThat(lisa.get().getPartners().size(), equalTo(1));
+        assertThat(lisa.get().getPartners().get(0), hasProperty("name", equalTo("Solidarites")));
 
         // Users in the Health database should be unaffected
 
         UserResult healthUsers = execute(new GetUsers(HEALTH_DATABASE));
         Optional<UserPermissionDTO> bavonInHealth = healthUsers.getData().stream().filter(u -> u.getEmail().equals("bavon@nrc.org")).findAny();
 
-        assertThat(bavonInHealth.get().getUserGroups().size(), equalTo(1));
-        assertThat(bavonInHealth.get().getUserGroups(), hasProperty("name", equalTo("Default")));
+        assertThat(bavonInHealth.get().getPartners().size(), equalTo(1));
+        assertThat(bavonInHealth.get().getPartners().get(0), hasProperty("name", equalTo("Default")));
 
         // Sites in the NFI database should be update to point to the new partner
         SiteDTO nfiSite1 = execute(GetSites.byId(1)).getData().get(0);
@@ -121,13 +121,13 @@ public class UpdatePartnerHandlerTest extends CommandTestCase2 {
         SchemaDTO schema = execute(new GetSchema());
         PartnerDTO nrc1 = schema
                 .getDatabaseById(NFI_DATABASE)
-                .getPartners().stream()
+                .getDatabasePartners().stream()
                 .filter(p -> p.getName().equals("NRC"))
                 .findAny()
                 .get();
         PartnerDTO nrc2 = schema
                 .getDatabaseById(HEALTH_DATABASE)
-                .getPartners().stream()
+                .getDatabasePartners().stream()
                 .filter(p -> p.getName().equals("NRC"))
                 .findAny()
                 .get();

@@ -137,6 +137,9 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
         insert(User.class, "userId = " + database.getOwner().getId());
         insert(UserPermission.class, "userId = " + userId);
+
+        delete(Tables.GROUP_ASSIGNMENT, inDatabaseUserPermission(userId));
+        insert(Tables.GROUP_ASSIGNMENT, inDatabaseUserPermission(userId));
     }
 
     private void insertIndicators() {
@@ -195,6 +198,11 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
     private String inDatabase() {
         return "DatabaseId = " + database.getId();
+    }
+
+    private String inDatabaseUserPermission(int userId) {
+        return "UserPermissionId IN (SELECT up.UserPermissionId FROM userpermission up " +
+                "WHERE up.DatabaseId=" + database.getId() + " AND up.UserId=" + userId + ")";
     }
 
     @SuppressWarnings("squid:S3400")

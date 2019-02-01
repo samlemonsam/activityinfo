@@ -77,7 +77,42 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
     }
 
     private Promise<ActivityFormDTO> applyPermissions(final ExecutionContext context, final ActivityFormDTO form) {
-        final Promise<ActivityFormDTO> result = new Promise<>();
+        List<Promise<Void>> tasks = Lists.newArrayList();
+        tasks.add(fetchAssignedPartners(context, form));
+        tasks.add(fetchUserPermission(context, form));
+        return Promise.waitAll(tasks).then(done -> form);
+    }
+
+    private Promise<Void> fetchAssignedPartners(ExecutionContext context, final ActivityFormDTO form) {
+        final Promise<Void> promise = new Promise<>();
+        SqlQuery query = SqlQuery.select("g.partnerId", "p.name", "p.fullName")
+                .from(Tables.USER_PERMISSION, "up")
+                .leftJoin(Tables.GROUP_ASSIGNMENT, "g")
+                .on("up.UserPermissionId=g.UserPermissionId")
+                .leftJoin(Tables.PARTNER, "p")
+                .on("g.partnerId=p.PartnerId")
+                .where("up.DatabaseId").equalTo(form.getDatabaseId())
+                .where("up.UserId").equalTo(context.getUser().getId());
+        query.execute(context.getTransaction(), new SqlResultCallback() {
+            @Override
+            public void onSuccess(SqlTransaction tx, SqlResultSet results) {
+                List<PartnerDTO> assignedPartners = Lists.newArrayList();
+                for (SqlResultSetRow row : results.getRows()) {
+                    PartnerDTO assignedPartner = new PartnerDTO();
+                    assignedPartner.setId(row.getInt("partnerId"));
+                    assignedPartner.setName(row.getString("name"));
+                    assignedPartner.setFullName(row.getString("fullName"));
+                    assignedPartners.add(assignedPartner);
+                }
+                form.setAssignedPartners(assignedPartners);
+                promise.resolve(null);
+            }
+        });
+        return promise;
+    }
+
+    private Promise<Void> fetchUserPermission(ExecutionContext context, final ActivityFormDTO form) {
+        final Promise<Void> promise = new Promise<>();
         SqlQuery.selectAll()
                 .appendColumn("allowView")
                 .appendColumn("allowViewAll")
@@ -89,7 +124,6 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                 .appendColumn("allowDeleteAll")
                 .appendColumn("allowExport")
                 .appendColumn("allowDesign")
-                .appendColumn("partnerId")
                 .from(Tables.USER_PERMISSION, "p")
                 .where("p.UserId").equalTo(context.getUser().getId())
                 .where("p.DatabaseId").equalTo(form.getDatabaseId())
@@ -98,19 +132,19 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                     public void onSuccess(SqlTransaction tx, SqlResultSet results) {
                         if (results.getRows().isEmpty()) {
                             if (form.getPublished() == Published.ALL_ARE_PUBLISHED.getIndex()) {
-                                result.resolve(form);
+                                promise.resolve(null);
                             } else {
-                                result.reject(new IllegalAccessCommandException("User " + context.getUser().getId() +
-                                 " does not have access to form " + form.getId()));
+                                promise.reject(new IllegalAccessCommandException("User " + context.getUser().getId() +
+                                        " does not have access to form " + form.getId()));
                             }
                             return;
                         }
                         SqlResultSetRow row = results.getRow(0);
                         if(!row.getBoolean("allowView")) {
                             if (form.getPublished() == Published.ALL_ARE_PUBLISHED.getIndex()) {
-                                result.resolve(form);
+                                promise.resolve(null);
                             } else {
-                                result.reject(new IllegalAccessCommandException("User " + context.getUser().getId() +
+                                promise.reject(new IllegalAccessCommandException("User " + context.getUser().getId() +
                                         " does not have access to form " + form.getId()));
                             }
                             return;
@@ -123,11 +157,10 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
                         form.setDeleteAllAllowed(row.getBoolean("allowDeleteAll"));
                         form.setExportAllowed(row.getBoolean("allowExport"));
                         form.setDesignAllowed(row.getBoolean("allowDesign"));
-                        form.setCurrentPartnerId(row.getInt("partnerId"));
-                        result.resolve(form);
+                        promise.resolve(null);
                     }
                 });
-        return result;
+        return promise;
     }
 
     private Promise<ActivityFormDTO> fetchForm(ExecutionContext context, final int activityId) {
@@ -528,7 +561,7 @@ public class GetActivityFormHandler implements CommandHandlerAsync<GetActivityFo
             }
 
             for (PartnerDTO partner : allPartners) {
-                if (partner.getId() == form.getCurrentPartnerId()) {
+                if (form.getAssignedPartnerIds().contains(partner.getId())) {
                     result.add(partner);
                 }
             }
