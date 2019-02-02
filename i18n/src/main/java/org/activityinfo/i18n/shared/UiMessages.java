@@ -285,10 +285,10 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Current column length {0} exceeds Column Export Limitation of {1} for Export Type {2}")
     String columnLimit(int colLength, int colLimit, String exportType);
 
-    @DefaultMessage("Your Database Transfer request has been sent to User {0}. You will receive an email informing you of the Users decision to accept or reject ownership of your Database.")
+    @DefaultMessage("Your database transfer request has been sent to {0}. You will receive an email informing you of their decision to accept or reject ownership of your database.")
     String transferDatabase(String userName);
 
-    @DefaultMessage("User {0} does not exist in ActivityInfo system.")
+    @DefaultMessage("User {0} is not registered with ActivityInfo.org")
     String userNotInSystem(String userName);
 
     @DefaultMessage("Do you want to remove User: ''{0}'' from your Database?")
@@ -305,5 +305,4 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("Activity ''{0}'' has too many Attributes/Indicators defined and exceeds the export file column limit ({1}). Please deselect this Activity from the export, or use an alternative export method.")
     String activityColumnLimitExceeded(String activity, int colLimit);
-
 }
