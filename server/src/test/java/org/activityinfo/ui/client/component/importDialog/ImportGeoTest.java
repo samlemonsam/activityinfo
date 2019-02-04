@@ -66,7 +66,7 @@ public class ImportGeoTest extends AbstractImporterTest {
 
         assertThat(importer.getImportTargets(), contains(
                 hasProperty("label", Matchers.equalTo("Name")),
-                hasProperty("label", Matchers.equalTo("Alternate Name")),
+                hasProperty("label", Matchers.equalTo("Alternate name")),
                 hasProperty("label", Matchers.equalTo("Region Name")),
                 hasProperty("label", Matchers.equalTo("Region Code")),
                 hasProperty("label", Matchers.equalTo("District Name")),
@@ -81,7 +81,7 @@ public class ImportGeoTest extends AbstractImporterTest {
         importModel.setColumnAction(columnIndex("Region"), target("Region Name"));
         importModel.setColumnAction(columnIndex("Admin2"), target("District Name"));
         importModel.setColumnAction(columnIndex("Village Name"), target("Name"));
-        importModel.setColumnAction(columnIndex("Pcode"), target("Alternate Name"));
+        importModel.setColumnAction(columnIndex("Pcode"), target("Alternate name"));
         importModel.setColumnAction(columnIndex("Latitude"), target("Latitude"));
         importModel.setColumnAction(columnIndex("Longitude"), target("Longitude"));
 
