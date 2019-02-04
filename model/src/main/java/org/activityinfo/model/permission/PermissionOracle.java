@@ -13,6 +13,7 @@ import org.activityinfo.model.formula.*;
 import org.activityinfo.model.formula.diagnostic.FormulaException;
 import org.activityinfo.model.formula.eval.EvalContext;
 import org.activityinfo.model.formula.functions.EqualFunction;
+import org.activityinfo.model.formula.functions.OrFunction;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
@@ -440,42 +441,23 @@ public class PermissionOracle {
                     CuidAdapter.partnerRecordId(partnerId));
     }
 
+    /**
+     * <p>Parses the provided filter and checks whether it contains a node allowing the provided partner record.
+     * It will return TRUE if a node in the binary tree of FormaulaNodes equals the Partner Record FormulaNode, in the
+     * form of {@code P0000000000 == "p0000000000"}</p>
+     *
+     * <p><b>NB:</b> Assumes that filter contains <b>only</b> Partner restrictions and that all restrictions are defined
+     * as a binary tree of OR operations. </p>
+     */
     private static boolean filterContainsPartner(String filter, ResourceId partnerFormId, ResourceId partnerId) {
         FormulaNode filterFormula = FormulaParser.parse(filter);
+        List<FormulaNode> partnerNodes =  Formulas.findBinaryTree(filterFormula, OrFunction.INSTANCE);
 
         SymbolNode expectedPartnerForm = new SymbolNode(partnerFormId);
         ConstantNode expectedPartnerRecord = new ConstantNode(partnerId.asString());
+        FormulaNode expectedPartnerNode = new FunctionCallNode(EqualFunction.INSTANCE, expectedPartnerForm, expectedPartnerRecord);
 
-        if (!(filterFormula instanceof FunctionCallNode)) {
-            return false;
-        }
-        if (!(((FunctionCallNode) filterFormula).getFunction() instanceof EqualFunction)) {
-            return false;
-        }
-        if (((FunctionCallNode) filterFormula).getArgumentCount() != 2) {
-            return false;
-        }
-
-        FunctionCallNode equalFunctionCall = (FunctionCallNode) filterFormula;
-
-        if (!(equalFunctionCall.getArgument(0 ) instanceof SymbolNode)) {
-            return false;
-        }
-        if (!(equalFunctionCall.getArgument(1) instanceof ConstantNode)) {
-            return false;
-        }
-
-        SymbolNode partnerFormNode = (SymbolNode) equalFunctionCall.getArgument(0);
-        ConstantNode partnerFieldNode = (ConstantNode) equalFunctionCall.getArgument(1);
-
-        if (!partnerFormNode.equals(expectedPartnerForm)) {
-            return false;
-        }
-        if (!partnerFieldNode.equals(expectedPartnerRecord)) {
-            return false;
-        }
-
-        return true;
+        return partnerNodes.stream().anyMatch(expectedPartnerNode::equals);
     }
 
     ///////////////////////////////////////////// BASIC PERMISSION QUERIES /////////////////////////////////////////////
