@@ -51,7 +51,7 @@ task checkMessages(type: JavaExec) {
     workingDir = projectDir
 }
 
-check.dependsOn checkMessages
+test.dependsOn checkMessages
 
 task pullTranslations(type: JavaExec) {
     group = "I18N"

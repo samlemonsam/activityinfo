@@ -41,7 +41,6 @@ public class Project {
     private Project() {
         sourceDirectory = new File("src/main/java");
         defaultLanguage = "en";
-        translationSource = new PoEditorSource(ACTIVITYINFO_PROJECT_ID, System.getProperty("poApiKey"));
         resourceClasses.add("org.activityinfo.i18n.shared.UiConstants");
         resourceClasses.add("org.activityinfo.i18n.shared.UiMessages");
     }
@@ -67,6 +66,9 @@ public class Project {
     }
 
     public PoEditorSource getTranslationSource() {
+        if(translationSource == null) {
+            translationSource = new PoEditorSource(ACTIVITYINFO_PROJECT_ID, System.getProperty("poApiKey"));
+        }
         return translationSource;
     }
 }

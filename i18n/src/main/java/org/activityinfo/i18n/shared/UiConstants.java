@@ -1975,7 +1975,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Create all")
     String allowCreateAll();
 
-    @DefaultStringValue("Allow user to create form submissions for all partners")
+    @DefaultStringValue("Allow user to add records for all partners")
     String allowCreateAllLong();
 
     @DefaultStringValue("Delete")
