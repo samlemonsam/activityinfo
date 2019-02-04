@@ -460,6 +460,33 @@ public class PermissionOracle {
         return partnerNodes.stream().anyMatch(expectedPartnerNode::equals);
     }
 
+    /**
+     * <p>Parses the provided filter and maps each Partner Record FormulaNode, in the form of
+     * {@code P0000000000 == "p0000000000"}, to the Partner Record Integer id.</p>
+     *
+     * <p><b>NB:</b> Assumes that filter contains <b>only</b> Partner restrictions and that all restrictions are defined
+     * as a binary tree of OR operations. </p>
+     */
+    public static List<Integer> allowedPartnersFromFilter(String filter) {
+        FormulaNode filterFormula = FormulaParser.parse(filter);
+        List<FormulaNode> partnerNodes = Formulas.findBinaryTree(filterFormula, OrFunction.INSTANCE);
+        return partnerNodes.stream()
+                .filter(PermissionOracle::isEqualFunctionCallNode)
+                .map(PermissionOracle::partnerFromNode)
+                .collect(Collectors.toList());
+    }
+
+    private static boolean isEqualFunctionCallNode(FormulaNode node) {
+        return node instanceof FunctionCallNode
+                && ((FunctionCallNode) node).getFunction() instanceof EqualFunction;
+    }
+
+    private static int partnerFromNode(FormulaNode partnerNode) {
+        FunctionCallNode equalFunctionCall = (FunctionCallNode) partnerNode;
+        ConstantNode partnerRecordNode = (ConstantNode) equalFunctionCall.getArgument(1);
+        return CuidAdapter.getLegacyIdFromCuid(partnerRecordNode.getValue().toString());
+    }
+
     ///////////////////////////////////////////// BASIC PERMISSION QUERIES /////////////////////////////////////////////
 
     public static Permission view(ResourceId resourceId, UserDatabaseMeta db) {
