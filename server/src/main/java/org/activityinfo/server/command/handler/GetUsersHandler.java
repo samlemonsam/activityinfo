@@ -97,6 +97,7 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
                 "from UserPermission up " +
                 "join up.partners p " +
                 "join fetch up.partners " +
+                "join fetch up.user " +
                 "where " + whereClause + " " + composeOrderByClause(cmd), UserPermission.class)
                 .setParameter("dbId", cmd.getDatabaseId())
                 .setParameter("currentUserId", currentUser.getId());
@@ -143,10 +144,21 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
             dto.setAllowExport(perm.isAllowExport());
             dto.setPartners(perm.getPartners().stream()
                     .map(p -> new PartnerDTO(p.getId(), p.getName()))
+                    .sorted(Comparator.comparing(PartnerDTO::getName))
                     .collect(Collectors.toList()));
             dto.setFolderLimitation(!Strings.isNullOrEmpty(perm.getModel()));
             dto.setFolders(folderList(folderMap, perm));
             models.add(dto);
+        }
+
+        if ("partners".equals(cmd.getSortInfo().getSortField())) {
+            models.sort((perm1,perm2) -> {
+                if (Style.SortDir.ASC.equals(cmd.getSortInfo().getSortDir())) {
+                    return perm1.getPartners().toString().compareTo(perm2.getPartners().toString());
+                } else {
+                    return -perm1.getPartners().toString().compareTo(perm2.getPartners().toString());
+                }
+            });
         }
 
         return new UserResult(models, cmd.getOffset(), queryTotalCount(cmd, currentUser, whereClause, filteredPartners));

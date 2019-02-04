@@ -156,7 +156,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
         columns.add(new ColumnConfig("email", I18N.CONSTANTS.email(), 150));
 
         ColumnConfig partnersColumn = new ColumnConfig("partners", I18N.CONSTANTS.partners(), 150);
-        partnersColumn.setSortable(false);
+        partnersColumn.setSortable(true);
         partnersColumn.setRenderer(new GridCellRenderer() {
             @Override
             public SafeHtml render(ModelData modelData, String s, ColumnData columnData, int i, int i1, ListStore listStore, Grid grid) {
