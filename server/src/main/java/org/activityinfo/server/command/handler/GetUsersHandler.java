@@ -29,9 +29,6 @@ import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.FolderDTO;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
-import org.activityinfo.model.formula.*;
-import org.activityinfo.model.formula.functions.EqualFunction;
-import org.activityinfo.model.formula.functions.OrFunction;
 import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.database.UserPermissionModel;
@@ -83,32 +80,28 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
                     currentUser.getId(), cmd.getDatabaseId()));
         }
 
-        Optional<String> manageUsersFilter = PermissionOracle.legacyManageUserFilter(dbMeta.get());
-        Optional<List<Integer>> filteredPartners = manageUsersFilter.map(PermissionOracle::allowedPartnersFromFilter);
+        Optional<List<Integer>> filteredPartners = PermissionOracle
+                .legacyManageUserFilter(dbMeta.get())
+                .map(PermissionOracle::allowedPartnersFromFilter);
 
-        TypedQuery<UserPermission> query;
-        String whereClause;
+        String whereClause = filteredPartners
+                .map(list -> "up.database.id = :dbId " +
+                        "and up.user.id <> :currentUserId " +
+                        "and up.allowView = true " +
+                        "and p.id in :allowedPartners")
+                .orElse("up.database.id = :dbId " +
+                        "and up.user.id <> :currentUserId " +
+                        "and up.allowView = true");
 
-        if(filteredPartners.isPresent()) {
-            whereClause = "up.database.id = :dbId and " +
-                    "up.user.id <> :currentUserId and " +
-                    "up.allowView = true and " +
-                    "p.id in :allowedPartners";
-            query = em.createQuery("select up from UserPermission up " +
-                    "join up.partners p " +
-                    "where " + whereClause + " " + composeOrderByClause(cmd), UserPermission.class)
-                    .setParameter("dbId", cmd.getDatabaseId())
-                    .setParameter("currentUserId", currentUser.getId())
-                    .setParameter("allowedPartners", filteredPartners.get());
-        } else {
-            whereClause = "up.database.id = :dbId and " +
-                    "up.user.id <> :currentUserId and " +
-                    "up.allowView = true";
-            query = em.createQuery("select up from UserPermission up " +
-                    "join fetch up.partners " +
-                    "where " + whereClause + " " + composeOrderByClause(cmd), UserPermission.class)
-                    .setParameter("dbId", cmd.getDatabaseId())
-                    .setParameter("currentUserId", currentUser.getId());
+        TypedQuery<UserPermission> query = em.createQuery("select distinct up " +
+                "from UserPermission up " +
+                "join up.partners p " +
+                "join fetch up.partners " +
+                "where " + whereClause + " " + composeOrderByClause(cmd), UserPermission.class)
+                .setParameter("dbId", cmd.getDatabaseId())
+                .setParameter("currentUserId", currentUser.getId());
+        if (filteredPartners.isPresent()) {
+            query.setParameter("allowedPartners", filteredPartners.get());
         }
 
         List<Folder> folders = em.createQuery("select f " +
@@ -198,19 +191,14 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
     }
 
     private int queryTotalCount(GetUsers cmd, User currentUser, String whereClause, Optional<List<Integer>> allowedPartners) {
-        Query query;
+        Query query = em.createQuery("select count (distinct up) " +
+                "from UserPermission up " +
+                "join up.partners p " +
+                "where " + whereClause)
+                .setParameter("dbId", cmd.getDatabaseId())
+                .setParameter("currentUserId", currentUser.getId());
         if (allowedPartners.isPresent()) {
-            query = em.createQuery("select count(up) from UserPermission up " +
-                    "join up.partners p " +
-                    "where " + whereClause)
-                    .setParameter("dbId", cmd.getDatabaseId())
-                    .setParameter("currentUserId", currentUser.getId())
-                    .setParameter("allowedPartners", allowedPartners.get());
-        } else {
-            query = em.createQuery("select count(up) from UserPermission up " +
-                    "where " + whereClause)
-                    .setParameter("dbId", cmd.getDatabaseId())
-                    .setParameter("currentUserId", currentUser.getId());
+            query.setParameter("allowedPartners", allowedPartners.get());
         }
         return ((Number) query.getSingleResult()).intValue();
     }

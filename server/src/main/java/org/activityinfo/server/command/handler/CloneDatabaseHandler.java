@@ -149,7 +149,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             UserPermission newPermission = new UserPermission(sourcePermission);
             newPermission.setDatabase(targetDb);
             newPermission.setLastSchemaUpdate(new Date());
-            newPermission.setPartners(new ArrayList<>(sourcePermission.getPartners()));
+            newPermission.setPartners(new HashSet<>(sourcePermission.getPartners()));
 
             em.persist(newPermission);
             targetDb.getUserPermissions().add(newPermission);
@@ -282,7 +282,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             targetFormClass.setSubFormKind(sourceFormClass.getSubFormKind());
             ResourceId targetParentFormId = this.typeIdMapping.get(sourceFormClass.getParentFormId().get());
             if(targetParentFormId == null) {
-                LOGGER.severe(String.format("Parent (%s) of subform (%s) was not copied",
+                LOGGER.severe(() -> String.format("Parent (%s) of subform (%s) was not copied",
                     sourceFormClass.getParentFormId(),
                     sourceFormId));
                 throw new IllegalStateException("Parent form has not been copied!");

@@ -41,10 +41,7 @@ import org.activityinfo.server.mail.MailSender;
 import org.activityinfo.server.mail.Message;
 import org.activityinfo.store.query.UsageTracker;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -211,10 +208,10 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
                             boolean isOwner,
                             UserPermission executingUserPermissions) {
 
-        List<Partner> partners = dto.getPartners().stream()
+        Set<Partner> partners = dto.getPartners().stream()
                 .map(p -> partnerDAO.findById(p.getId()))
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
         if (partners.isEmpty()) {
             throw new CommandException("Partners " + dto.getPartnerIds() + " do not exist");
         }

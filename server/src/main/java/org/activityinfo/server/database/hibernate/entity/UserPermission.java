@@ -20,9 +20,7 @@ package org.activityinfo.server.database.hibernate.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Defines a given user's access to a given database.
@@ -46,7 +44,7 @@ public class UserPermission implements Serializable {
     private User user;
     private long version;
 
-    private List<Partner> partners = new ArrayList<>(0);
+    private Set<Partner> partners = new HashSet<>(0);
 
     private boolean allowView;
     private boolean allowViewAll;
@@ -110,11 +108,11 @@ public class UserPermission implements Serializable {
     @JoinTable(name = "GroupAssignment",
         joinColumns = { @JoinColumn(name = "UserPermissionId", nullable = false, updatable = false) },
         inverseJoinColumns = { @JoinColumn(name = "PartnerId", nullable = false, updatable = false) })
-    public List<Partner> getPartners() {
+    public Set<Partner> getPartners() {
         return this.partners;
     }
 
-    public void setPartners(List<Partner> partners) {
+    public void setPartners(Set<Partner> partners) {
         this.partners = partners;
     }
 
