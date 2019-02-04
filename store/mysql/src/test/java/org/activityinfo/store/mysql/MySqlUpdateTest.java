@@ -29,8 +29,8 @@ import org.activityinfo.json.JsonMappingException;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
 import org.activityinfo.model.query.ColumnView;
@@ -38,6 +38,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransactionBuilder;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.SerialNumber;
@@ -437,7 +438,7 @@ public class MySqlUpdateTest extends AbstractMySqlTest {
     }
 
     private Updater updater() {
-        return new Updater(catalog, databaseProvider, new BlobAuthorizerStub(), new HrdSerialNumberProvider(), userId);
+        return new Updater(catalog, databaseProvider, new BlobAuthorizerStub(), new HrdSerialNumberProvider(), userId, TransactionMode.STRICT);
     }
 
 

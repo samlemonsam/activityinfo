@@ -31,6 +31,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 
@@ -144,7 +145,7 @@ public interface ActivityInfoClientAsync {
      */
     Promise<ColumnSet> queryTableColumns(QueryModel query);
 
-    Promise<Void> updateRecords(RecordTransaction transactions);
+    Promise<Void> updateRecords(RecordTransaction transactions, TransactionMode mode);
 
     Promise<Maybe<Analysis>> getAnalysis(String id);
 

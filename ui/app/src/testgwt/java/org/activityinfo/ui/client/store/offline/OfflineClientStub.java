@@ -16,6 +16,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 
@@ -110,7 +111,7 @@ public class OfflineClientStub implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<Void> updateRecords(RecordTransaction transaction) {
+    public Promise<Void> updateRecords(RecordTransaction transaction, TransactionMode mode) {
         if(online) {
             transactionsSubmitted.add(transaction);
             return Promise.done();

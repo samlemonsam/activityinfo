@@ -43,6 +43,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.store.query.UsageTracker;
@@ -312,7 +313,7 @@ public class FormResource {
     public Response createRecord(JsonValue jsonObject) {
 
         try {
-            backend.newUpdater().create(formId, jsonObject);
+            backend.newUpdater(TransactionMode.STRICT).create(formId, jsonObject);
         } catch (InvalidUpdateException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
@@ -327,7 +328,7 @@ public class FormResource {
     public Response updateRecord(@PathParam("recordId") String recordId, JsonValue jsonObject) {
 
         try {
-            backend.newUpdater().execute(formId, valueOf(recordId), jsonObject);
+            backend.newUpdater(TransactionMode.STRICT).execute(formId, valueOf(recordId), jsonObject);
         } catch (InvalidUpdateException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }

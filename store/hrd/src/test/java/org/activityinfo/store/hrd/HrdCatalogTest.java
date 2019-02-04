@@ -29,7 +29,10 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormSyncSet;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
+import org.activityinfo.model.resource.RecordTransaction;
+import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
@@ -51,8 +54,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -174,6 +179,63 @@ public class HrdCatalogTest {
         assertThat(version.getType(), equalTo(RecordChangeType.CREATED));
     }
 
+    @Test
+    public void offlineDeleteConflict() {
+
+        ResourceId formId = ResourceId.generateId();
+        ResourceId villageField = ResourceId.valueOf("FV");
+
+        FormClass formClass = new FormClass(formId);
+        formClass.setParentFormId(ResourceId.valueOf("foo"));
+        formClass.setLabel("NFI Distributions");
+        formClass.addField(villageField)
+                .setLabel("Village name")
+                .setCode("VILLAGE")
+                .setType(TextType.SIMPLE);
+
+        HrdStorageProvider catalog = new HrdStorageProvider();
+        catalog.create(formClass);
+
+        Optional<FormStorage> storage = catalog.getForm(formId);
+
+        assertTrue(storage.isPresent());
+
+        RecordUpdate village = new RecordUpdate();
+        village.setFormId(formId);
+        village.setRecordId(ResourceId.generateId());
+        village.setFieldValue(villageField, TextValue.valueOf("Penekusu"));
+
+        RecordTransaction addTx = RecordTransaction.builder().add(village).build();
+
+        Updater updater = newUpdater(catalog, TransactionMode.STRICT);
+        updater.execute(addTx);
+
+        RecordTransaction deleteTx = RecordTransaction.builder()
+                .delete(formId, village.getRecordId())
+                .build();
+
+        updater.execute(deleteTx);
+
+        // If we repeat in strict mode, we get an error
+        assertThrows(() -> updater.execute(deleteTx));
+
+        // if we repeat with offline validation mode, then it should
+        // complete successfully.
+        Updater offlineUpdater = newUpdater(catalog, TransactionMode.OFFLINE);
+        offlineUpdater.execute(deleteTx);
+    }
+
+    private void assertThrows(Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (Exception e) {
+            // Good, we threw.
+            return;
+        }
+
+        throw new AssertionError("Expected exception");
+    }
+
 
     @Test
     public void enumWithNoChoices() {
@@ -227,11 +289,7 @@ public class HrdCatalogTest {
                 .setType(TextType.SIMPLE);
 
         HrdStorageProvider catalog = new HrdStorageProvider();
-        Updater updater = new Updater(catalog,
-                databaseProvider,
-                new BlobAuthorizerStub(),
-                new HrdSerialNumberProvider(),
-                userId);
+        Updater updater = newUpdater(catalog, TransactionMode.STRICT);
 
         catalog.create(formClass);
         
@@ -257,6 +315,45 @@ public class HrdCatalogTest {
 
         
         System.out.println(columnSet);
+    }
+
+    private Updater newUpdater(HrdStorageProvider catalog, TransactionMode mode) {
+
+        TransactionalStorageProvider wrapper = new TransactionalStorageProvider() {
+            @Override
+            public void begin() {
+            }
+
+            @Override
+            public void commit() {
+            }
+
+            @Override
+            public void rollback() {
+            }
+
+            @Override
+            public Optional<FormStorage> getForm(ResourceId formId) {
+                return catalog.getForm(formId);
+            }
+
+            @Override
+            public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
+                return catalog.getFormClasses(formIds);
+            }
+
+            @Override
+            public FormClass getFormClass(ResourceId formId) {
+                return catalog.getFormClass(formId);
+            }
+        };
+
+        return new Updater(wrapper,
+                    databaseProvider,
+                    new BlobAuthorizerStub(),
+                    new HrdSerialNumberProvider(),
+                    userId,
+                    mode);
     }
 
     @Test

@@ -30,7 +30,7 @@ import org.activityinfo.model.type.RecordRef;
 import java.util.Optional;
 
 /**
- * Constructs a series of updates to a FormClass
+ * An update to specific {@code Record}
  */
 @JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
 public final class RecordUpdate {

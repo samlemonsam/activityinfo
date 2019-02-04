@@ -36,17 +36,18 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.ObservableTree;
 import org.activityinfo.promise.Function2;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
+import org.activityinfo.store.query.shared.FormOfflineStatus;
 import org.activityinfo.ui.client.store.http.CatalogRequest;
 import org.activityinfo.ui.client.store.http.DatabaseRequest;
 import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.ui.client.store.http.SubRecordsRequest;
-import org.activityinfo.store.query.shared.FormOfflineStatus;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.SnapshotStatus;
 
@@ -224,7 +225,7 @@ public class FormStoreImpl implements FormStore {
             if(snapshot.areAllCached(tx.getAffectedFormIds())) {
                 return offlineStore.execute(tx);
             } else {
-                return httpStore.updateRecords(tx);
+                return httpStore.updateRecords(tx, TransactionMode.STRICT);
             }
         });
     }

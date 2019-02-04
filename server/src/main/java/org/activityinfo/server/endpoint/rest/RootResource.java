@@ -30,6 +30,7 @@ import org.activityinfo.legacy.shared.model.DTOViews;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.authentication.ServerSideAuthProvider;
 import org.activityinfo.server.command.DispatcherSync;
@@ -188,10 +189,21 @@ public class RootResource {
     @Path("/update") 
     @Consumes(MediaType.APPLICATION_JSON)
     public Response update(String json) {
+        return update(json, TransactionMode.STRICT);
+    }
 
+
+    @POST
+    @Path("/update/offline")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response offlineUpdate(String json) {
+        return update(json, TransactionMode.OFFLINE);
+    }
+
+    private Response update(String json, TransactionMode mode) {
         final JsonValue jsonElement = Json.parse(json);
 
-        Updater updater = backend.newUpdater();
+        Updater updater = backend.newUpdater(mode);
         try {
             updater.execute(jsonElement);
         } catch (InvalidUpdateException e) {

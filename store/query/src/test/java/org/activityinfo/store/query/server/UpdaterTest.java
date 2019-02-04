@@ -24,9 +24,10 @@ import org.activityinfo.json.JsonMappingException;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.SerialNumber;
 import org.activityinfo.model.type.SerialNumberType;
@@ -53,7 +54,7 @@ public class UpdaterTest {
     public void setUp() {
         MockFormStorageProvider catalog = new MockFormStorageProvider();
         MockDatabaseProvider databaseProvider = new MockDatabaseProvider();
-        updater = new Updater(catalog, databaseProvider, new BlobAuthorizerStub(), new SerialNumberProviderStub(), userId);
+        updater = new Updater(catalog, databaseProvider, new BlobAuthorizerStub(), new SerialNumberProviderStub(), userId, TransactionMode.STRICT);
     }
 
     @Test(expected = InvalidUpdateException.class)

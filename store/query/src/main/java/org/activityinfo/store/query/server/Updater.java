@@ -35,10 +35,7 @@ import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.FormulaParser;
 import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.permission.PermissionOracle;
-import org.activityinfo.model.resource.RecordTransaction;
-import org.activityinfo.model.resource.RecordTransactionBuilder;
-import org.activityinfo.model.resource.RecordUpdate;
-import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.*;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.SerialNumber;
@@ -61,32 +58,36 @@ import static java.lang.String.format;
 
 /**
  * Validates and authorizes an update received from the client and
- * passes it on the correct form accessor.
+ * passes it on the correct {@link FormStorage} implementation.
  *
- * <p>This class enforces all logical permissions related to the form. </p>
+ * <p>This class enforces all logical permissions related to the form.</p>
+ *
  */
 public class Updater {
 
     private static final Logger LOGGER = Logger.getLogger(Updater.class.getName());
 
     private final FormStorageProvider catalog;
-    private int userId;
-    private BlobAuthorizer blobAuthorizer;
-    private SerialNumberProvider serialNumberProvider;
-    private DatabaseProvider databaseProvider;
+    private final TransactionMode mode;
+    private final int userId;
+    private final BlobAuthorizer blobAuthorizer;
+    private final SerialNumberProvider serialNumberProvider;
+    private final DatabaseProvider databaseProvider;
 
     private boolean enforcePermissions = true;
+
 
     public Updater(FormStorageProvider catalog,
                    DatabaseProvider databaseProvider,
                    BlobAuthorizer blobAuthorizer,
                    SerialNumberProvider serialNumberProvider,
-                   int userId) {
+                   int userId, TransactionMode mode) {
         this.catalog = catalog;
         this.databaseProvider = databaseProvider;
         this.userId = userId;
         this.blobAuthorizer = blobAuthorizer;
         this.serialNumberProvider = serialNumberProvider;
+        this.mode = mode;
     }
 
     public void setEnforcePermissions(boolean enforcePermissions) {
@@ -94,11 +95,10 @@ public class Updater {
     }
 
     /**
-     * Validates and executes a {@code ResourceUpdate} encoded as a json object. The object
-     * must have a changes property that takes the value of an array. 
+     * Parses, validates and executes a {@link RecordTransaction} encoded as a JSON object. The object
+     * must have a {@code changes} property that takes the value of an array.
      *
-     * @throws InvalidUpdateException if the given update
-     * is not a validate update.
+     * @throws InvalidUpdateException if the given update is not a validate update.
      */
     public void execute(JsonValue transactionObject) {
         try {
@@ -108,6 +108,11 @@ public class Updater {
         }
     }
 
+    /**
+     * Executes a {@code RecordTransaction}.
+     * @param tx
+     * @throws InvalidUpdateException
+     */
     public void execute(RecordTransaction tx) {
         TransactionalStorageProvider txStorageProvider = (TransactionalStorageProvider) catalog;
         txStorageProvider.begin();
@@ -251,7 +256,12 @@ public class Updater {
         }
         Optional<FormStorage> storage = catalog.getForm(update.getFormId());
         if(!storage.isPresent()) {
-            throw new InvalidUpdateException("No such resource: " + update.getRecordId());
+            if(mode == TransactionMode.OFFLINE) {
+                LOGGER.warning("Offline update to missing form " + update.getFormId());
+                return;
+            } else {
+                throw new InvalidUpdateException("No such resource: " + update.getRecordId());
+            }
         }
 
         executeUpdate(storage.get(), update);
@@ -262,21 +272,25 @@ public class Updater {
         Preconditions.checkNotNull(update.getFormId());
 
         FormClass formClass = form.getFormClass();
-        Optional<FormRecord> existingResource = form.get(update.getRecordId());
+        Optional<FormRecord> existingRecord = form.get(update.getRecordId());
 
         if(update.isDeleted() && update.getChangedFieldValues().size() > 0) {
             throw new InvalidUpdateException("A deletion may not include field value updates.");
         }
-        if(!update.isDeleted()) {
-            validateUpdate(formClass, existingResource, update);
+        if(update.isDeleted() && !existingRecord.isPresent() && mode == TransactionMode.OFFLINE) {
+            LOGGER.warning("Offline deletion of non-existant record " + update.getRef());
+            return;
         }
-        authorizeUpdate(form, existingResource, update);
+        if(!update.isDeleted()) {
+            validateUpdate(formClass, existingRecord, update);
+        }
+        authorizeUpdate(form, existingRecord, update);
 
-        generateSerialNumbers(formClass, existingResource, update);
+        generateSerialNumbers(formClass, existingRecord, update);
 
         UsageTracker.track(userId, "update_record", formClass);
 
-        if(existingResource.isPresent()) {
+        if(existingRecord.isPresent()) {
             form.update(update);
         } else {
             form.add(update);
@@ -587,8 +601,8 @@ public class Updater {
     }
 
     private void createOrUpdate(ResourceId formId, ResourceId recordId, JsonValue jsonObject, boolean create) {
-        Optional<FormStorage> collection = catalog.getForm(formId);
-        if(!collection.isPresent()) {
+        Optional<FormStorage> form = catalog.getForm(formId);
+        if(!form.isPresent()) {
             throw new InvalidUpdateException("No such formId: " + formId);
         }
 
@@ -605,7 +619,7 @@ public class Updater {
             update.setParentId(ResourceId.valueOf(jsonObject.get("parentRecordId").asString()));
         }
 
-        FormClass formClass = collection.get().getFormClass();
+        FormClass formClass = form.get().getFormClass();
         JsonValue fieldValues = jsonObject.get("fieldValues");
         for (FormField formField : formClass.getFields()) {
             if(formField.getType().isUpdatable()) {
@@ -631,6 +645,6 @@ public class Updater {
             }
         }
 
-        executeUpdate(collection.get(), update);
+        executeUpdate(form.get(), update);
     }
 }

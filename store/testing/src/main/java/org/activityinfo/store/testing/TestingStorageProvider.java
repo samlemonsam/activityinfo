@@ -20,7 +20,6 @@ package org.activityinfo.store.testing;
 
 import com.google.common.base.Optional;
 import com.google.gwt.core.shared.GwtIncompatible;
-import net.lightoze.gwt.i18n.server.LocaleProxy;
 import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.database.ResourceType;
 import org.activityinfo.model.database.UserDatabaseMeta;
@@ -33,6 +32,7 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.RecordUpdate;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
@@ -240,7 +240,7 @@ public class TestingStorageProvider implements FormStorageProvider, Transactiona
     }
 
     public void updateRecords(RecordTransaction transaction) {
-        Updater updater = new Updater(this, databaseProvider, new BlobAuthorizerStub(), serialNumberProvider, 1);
+        Updater updater = new Updater(this, databaseProvider, new BlobAuthorizerStub(), serialNumberProvider, 1, TransactionMode.STRICT);
         updater.execute(transaction);
     }
 
