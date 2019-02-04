@@ -192,53 +192,55 @@ public class UserForm extends FormPanel {
         partnerCombos.add(partnerCombo);
         this.add(partnerCombo);
 
-        LayoutContainer buttonBar = new LayoutContainer(new HBoxLayout());
+        if (showMultiplePartnerEditor(database.getOwnerEmail())) {
+            LayoutContainer buttonBar = new LayoutContainer(new HBoxLayout());
 
-        Button addNewPartnerButton = new Button(constants.addAnother());
-        addNewPartnerButton.addSelectionListener(new SelectionListener<ButtonEvent>() {
-            @Override
-            public void componentSelected(ButtonEvent buttonEvent) {
-                if (buttonEvent.getButton().getItemId() != addNewPartnerButton.getItemId()) {
-                    return;
+            Button addNewPartnerButton = new Button(constants.addAnother());
+            addNewPartnerButton.addSelectionListener(new SelectionListener<ButtonEvent>() {
+                @Override
+                public void componentSelected(ButtonEvent buttonEvent) {
+                    if (buttonEvent.getButton().getItemId() != addNewPartnerButton.getItemId()) {
+                        return;
+                    }
+                    if (database.getDatabasePartners().size() == partnerCombos.size()) {
+                        buttonEvent.setCancelled(true);
+                        return;
+                    }
+                    ComboBox<PartnerDTO> comboBox = new ComboBox<>();
+                    comboBox.setName("partner");
+                    comboBox.setFieldLabel(constants.partner());
+                    comboBox.setDisplayField("name");
+                    comboBox.setStore(partnerStore);
+                    comboBox.setForceSelection(true);
+                    comboBox.setTriggerAction(ComboBox.TriggerAction.ALL);
+                    comboBox.setAllowBlank(false);
+                    comboBox.setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<>("name")));
+                    partnerCombos.add(comboBox);
+                    UserForm.this.add(comboBox);
+                    UserForm.this.fireEvent(Events.Resize);
                 }
-                if (database.getDatabasePartners().size() == partnerCombos.size()) {
-                    buttonEvent.setCancelled(true);
-                    return;
-                }
-                ComboBox<PartnerDTO> comboBox = new ComboBox<>();
-                comboBox.setName("partner");
-                comboBox.setFieldLabel(constants.partner());
-                comboBox.setDisplayField("name");
-                comboBox.setStore(partnerStore);
-                comboBox.setForceSelection(true);
-                comboBox.setTriggerAction(ComboBox.TriggerAction.ALL);
-                comboBox.setAllowBlank(false);
-                comboBox.setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<>("name")));
-                partnerCombos.add(comboBox);
-                UserForm.this.add(comboBox);
-                UserForm.this.fireEvent(Events.Resize);
-            }
-        });
-        buttonBar.add(addNewPartnerButton);
+            });
+            buttonBar.add(addNewPartnerButton);
 
-        Button removePartnerButton = new Button(constants.removePartner());
-        removePartnerButton.addSelectionListener(new SelectionListener<ButtonEvent>() {
-            @Override
-            public void componentSelected(ButtonEvent buttonEvent) {
-                if (buttonEvent.getButton().getItemId() != removePartnerButton.getItemId()) {
-                    return;
+            Button removePartnerButton = new Button(constants.removePartner());
+            removePartnerButton.addSelectionListener(new SelectionListener<ButtonEvent>() {
+                @Override
+                public void componentSelected(ButtonEvent buttonEvent) {
+                    if (buttonEvent.getButton().getItemId() != removePartnerButton.getItemId()) {
+                        return;
+                    }
+                    if (partnerCombos.size() == 1) {
+                        return;
+                    }
+                    ComboBox toRemove = partnerCombos.get(partnerCombos.size() - 1);
+                    partnerCombos.remove(toRemove);
+                    UserForm.this.remove(toRemove);
+                    UserForm.this.fireEvent(Events.Resize);
                 }
-                if (partnerCombos.size() == 1) {
-                    return;
-                }
-                ComboBox toRemove = partnerCombos.get(partnerCombos.size()-1);
-                partnerCombos.remove(toRemove);
-                UserForm.this.remove(toRemove);
-                UserForm.this.fireEvent(Events.Resize);
-            }
-        });
-        buttonBar.add(removePartnerButton);
-        this.add(buttonBar);
+            });
+            buttonBar.add(removePartnerButton);
+            this.add(buttonBar);
+        }
 
         permissionsGroup = new CheckBoxGroup();
         permissionsGroup.setFieldLabel(I18N.CONSTANTS.permissions());
@@ -319,6 +321,13 @@ public class UserForm extends FormPanel {
         permissionWarning.setWarning(I18N.CONSTANTS.permissionEditingLockedWarning());
         permissionWarning.hide();
         this.add(permissionWarning);
+    }
+
+    private boolean showMultiplePartnerEditor(String ownerEmail) {
+        if (ownerEmail.contains("@bedatadriven.com") || ownerEmail.contains("@unrwa.org")) {
+            return true;
+        }
+        return false;
     }
 
     // Set up the propagation logic when users select checkboxes
