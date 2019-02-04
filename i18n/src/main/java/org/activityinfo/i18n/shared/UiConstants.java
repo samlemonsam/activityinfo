@@ -1519,7 +1519,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("To begin, copy your table from Excel and paste in the box below:")
     String importHelpText();
 
-    @DefaultStringValue("Upload of ‘{0}’ has failed.")
+    @DefaultStringValue("Upload failed")
     String uploadFailed();
 
     @DefaultStringValue("Browse")
