@@ -588,7 +588,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
             return true;
         }
         if (isManageUsersAllowed()) {
-            return getAllowablePartners().containsAll(user.getPartners());
+            return getAssignedPartners().containsAll(user.getPartners());
         }
         return false;
     }
@@ -607,13 +607,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
 
     public List<PartnerDTO> getAllowablePartners() {
         Set<PartnerDTO> result = Sets.newHashSet();
-        Optional<PartnerDTO> defaultPartner = getDefaultPartner();
-
-        if (defaultPartner.isPresent()) {
-            result.add(defaultPartner.get());
-        }
-
-        if (isEditAllAllowed()) {
+        if (isManageAllUsersAllowed()) {
             result.addAll(getDatabasePartners());
         } else if (hasAssignedPartners()) {
             result.addAll(getAssignedPartners());
@@ -745,7 +739,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
             if (!checkBasicPermission(permissionType)) {
                 return false;
             // Check if database user has partner permissions
-            } else if (!getAllowablePartners().containsAll(user.getPartners())) {
+            } else if (!getAssignedPartners().containsAll(user.getPartners())) {
                 return false;
             // Check if database user has any folder limitations - if none, then allowed
             } else if (!hasFolderLimitation()) {
