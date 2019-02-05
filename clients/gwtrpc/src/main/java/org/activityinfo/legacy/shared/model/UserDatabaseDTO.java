@@ -739,7 +739,7 @@ public final class UserDatabaseDTO extends BaseModelData implements EntityDTO, H
             if (!checkBasicPermission(permissionType)) {
                 return false;
             // Check if database user has partner permissions
-            } else if (!getAssignedPartners().containsAll(user.getPartners())) {
+            } else if (!getAllowablePartners().containsAll(user.getPartners())) {
                 return false;
             // Check if database user has any folder limitations - if none, then allowed
             } else if (!hasFolderLimitation()) {
