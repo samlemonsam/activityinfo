@@ -120,16 +120,21 @@ public class UsageResource {
             throw new WebApplicationException(Response.Status.FORBIDDEN);
         }
 
-        User user;
-        if(userQuery.matches("[0-9]+")) {
-            user = entityManager.get().find(User.class, Integer.parseInt(userQuery));
-        } else {
-            user = entityManager.get().createQuery("SELECT u FROM User u WHERE u.email = :email", User.class)
-                    .setParameter("email", userQuery)
-                    .getSingleResult();
+
+        List<User> matching = entityManager.get().createQuery("SELECT u FROM User u WHERE u.email = :email", User.class)
+                .setParameter("email", userQuery)
+                .getResultList();
+
+        if(matching.isEmpty()) {
+            JsonValue profile = Json.createObject();
+            profile.put("registered", false);
+            return profile.toJson();
         }
 
+        User user = matching.get(0);
+
         JsonValue profile = Json.createObject();
+        profile.put("registered", true);
         profile.put("name", user.getName());
         profile.put("email", user.getEmail());
         profile.put("invited", user.getInvitedBy() != null);
