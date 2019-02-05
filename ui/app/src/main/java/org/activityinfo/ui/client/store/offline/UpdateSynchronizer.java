@@ -21,6 +21,7 @@ package org.activityinfo.ui.client.store.offline;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.indexedb.OfflineDatabase;
+import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.observable.StatefulValue;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.store.http.HttpStore;
@@ -97,7 +98,7 @@ public class UpdateSynchronizer {
     }
 
     private void sendUpdate(PendingEntry entry) {
-        httpStore.updateRecords(entry.getTransaction().getTransaction()).then(new AsyncCallback<Void>() {
+        httpStore.updateRecords(entry.getTransaction().getTransaction(), TransactionMode.OFFLINE).then(new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable throwable) {
 

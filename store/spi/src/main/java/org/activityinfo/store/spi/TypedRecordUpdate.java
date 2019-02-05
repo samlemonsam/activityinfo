@@ -23,6 +23,7 @@ import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.RecordRef;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +49,11 @@ public class TypedRecordUpdate {
         this.recordId = record.getRef().getRecordId();
         this.parentId = record.getParentRecordId();
         this.changedFieldValues.putAll(record.getFieldValueMap());
+    }
+
+
+    public RecordRef getRef() {
+        return new RecordRef(formId, recordId);
     }
 
     public long getUserId() {
@@ -105,4 +111,5 @@ public class TypedRecordUpdate {
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
+
 }

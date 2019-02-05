@@ -41,6 +41,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.authentication.AuthenticationModuleStub;
@@ -180,7 +181,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     public Promise<Void> updateRecord(String formId, String recordId, FormRecordUpdateBuilder query) {
         try {
             FormStorageProvider catalog = newCatalog();
-            Updater updater = new Updater(catalog, databaseProvider, blobAuthorizer, new SerialNumberProviderStub(), currentUserId());
+            Updater updater = new Updater(catalog, databaseProvider, blobAuthorizer, new SerialNumberProviderStub(), currentUserId(), TransactionMode.STRICT);
             updater.execute(ResourceId.valueOf(formId), ResourceId.valueOf(recordId), query.toJsonObject());
 
             return Promise.resolved(null);
@@ -203,7 +204,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     public Promise<Void> createRecord(String formId, NewFormRecordBuilder query) {
         try {
             FormStorageProvider catalog = newCatalog();
-            Updater updater = new Updater(catalog, databaseProvider, blobAuthorizer, new SerialNumberProviderStub(), currentUserId());
+            Updater updater = new Updater(catalog, databaseProvider, blobAuthorizer, new SerialNumberProviderStub(), currentUserId(), TransactionMode.STRICT);
             updater.create(ResourceId.valueOf(formId), query.toJsonObject());
 
             return Promise.resolved(null);
@@ -254,7 +255,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<Void> updateRecords(RecordTransaction transactions) {
+    public Promise<Void> updateRecords(RecordTransaction transactions, TransactionMode mode) {
         return Promise.rejected(new UnsupportedOperationException("TODO"));
     }
 

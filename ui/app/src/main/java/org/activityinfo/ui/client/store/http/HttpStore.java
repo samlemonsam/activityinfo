@@ -38,6 +38,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.observable.ObservableTree;
@@ -149,8 +150,8 @@ public class HttpStore {
         return get(new HistoryRequest(ref), new FormChangeWatcher(eventBus, change -> change.isRecordChanged(ref)));
     }
 
-    public Promise<Void> updateRecords(RecordTransaction tx) {
-        return client.updateRecords(tx).then(new Function<Void, Void>() {
+    public Promise<Void> updateRecords(RecordTransaction tx, TransactionMode mode) {
+        return client.updateRecords(tx, mode).then(new Function<Void, Void>() {
             @Override
             public Void apply(Void aVoid) {
                 eventBus.fireEvent(new FormChangeEvent(FormChange.from(tx)));

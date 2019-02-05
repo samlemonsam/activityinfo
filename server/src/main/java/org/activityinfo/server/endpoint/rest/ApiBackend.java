@@ -19,6 +19,7 @@
 package org.activityinfo.server.endpoint.rest;
 
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.FormSupervisor;
@@ -42,7 +43,7 @@ public interface ApiBackend {
 
     void createNewForm(FormClass formClass);
 
-    Updater newUpdater();
+    Updater newUpdater(TransactionMode mode);
 
     ColumnSetBuilder newQueryBuilder();
 

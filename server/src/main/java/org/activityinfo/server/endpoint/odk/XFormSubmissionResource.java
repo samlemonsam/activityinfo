@@ -33,8 +33,8 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.legacy.KeyGenerator;
-import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.attachment.Attachment;
 import org.activityinfo.model.type.attachment.AttachmentValue;
@@ -158,7 +158,7 @@ public class XFormSubmissionResource {
                 }
             }
 
-            locator.persist(typedFormRecord);
+            locator.persist(typedFormRecord, TransactionMode.OFFLINE);
             instanceIdService.submit(instanceId);
         }
 

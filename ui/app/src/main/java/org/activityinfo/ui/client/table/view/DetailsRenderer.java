@@ -175,7 +175,7 @@ public class DetailsRenderer {
         @Override
         public void renderTo(FieldValue fieldValue, SafeHtmlBuilder html) {
             FortnightValue fortnight = (FortnightValue) fieldValue;
-            html.appendEscaped(I18N.MESSAGES.fortnight(
+            html.appendEscaped(I18N.MESSAGES.fortnightFormat(
                     fortnight.getYear(),
                     fortnight.getWeekInYear(),
                     fortnight.getWeekInYear() + 1));

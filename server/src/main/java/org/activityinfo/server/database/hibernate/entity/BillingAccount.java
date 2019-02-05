@@ -12,6 +12,8 @@ public class BillingAccount {
 
     private String name;
 
+    private String code;
+
     private int userLimit;
 
     private Date startTime;
@@ -36,6 +38,14 @@ public class BillingAccount {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public int getUserLimit() {

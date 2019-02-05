@@ -26,6 +26,7 @@ import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.permission.PermissionOracle;
+import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.mysql.MySqlRecordHistoryBuilder;
@@ -112,12 +113,13 @@ public class ActivityInfoApiBackend implements ApiBackend {
     }
 
     @Override
-    public Updater newUpdater() {
+    public Updater newUpdater(TransactionMode mode) {
         return new Updater(getStorage(),
                 getDatabaseProvider(),
                 injector.getInstance(BlobAuthorizer.class),
                 new HrdSerialNumberProvider(),
-                getAuthenticatedUser().getUserId());
+                getAuthenticatedUser().getUserId(),
+                mode);
     }
 
     @Override

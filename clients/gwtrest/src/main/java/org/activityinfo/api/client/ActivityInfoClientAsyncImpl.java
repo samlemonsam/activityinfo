@@ -45,6 +45,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.RecordTransaction;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.promise.Promise;
 
@@ -284,8 +285,12 @@ public class ActivityInfoClientAsyncImpl implements ActivityInfoClientAsync {
     }
 
     @Override
-    public Promise<Void> updateRecords(RecordTransaction transaction) {
-        return post(RequestBuilder.POST, baseUrl + "/update", Json.stringify(transaction));
+    public Promise<Void> updateRecords(RecordTransaction transaction, TransactionMode mode) {
+        String url = baseUrl + "/update";
+        if(mode == TransactionMode.OFFLINE) {
+            url += "/offline";
+        }
+        return post(RequestBuilder.POST, url, Json.stringify(transaction));
     }
 
     @Override

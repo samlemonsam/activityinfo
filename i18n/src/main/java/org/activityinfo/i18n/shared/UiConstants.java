@@ -25,13 +25,13 @@ import com.google.gwt.i18n.client.Constants;
  */
 public interface UiConstants extends Constants {
 
-    @DefaultStringValue("Folder Assignment Error")
+    @DefaultStringValue("Folder assignment error")
     String noFolderAssignmentTitle();
 
-    @DefaultStringValue("User must be assigned to a Folder or Folders")
+    @DefaultStringValue("User must be assigned to a folder or folders")
     String noFolderAssignmentMessage();
 
-    @DefaultStringValue("Permission Assignment Error")
+    @DefaultStringValue("Permission assignment error")
     String permissionAssignmentErrorTitle();
 
     @DefaultStringValue("Cannot give greater permissions than you currently have")
@@ -58,7 +58,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Add")
     String add();
 
-    @DefaultStringValue("Add Chart")
+    @DefaultStringValue("Add chart")
     String addChart();
 
     @DefaultStringValue("Add")
@@ -73,31 +73,31 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("If you can't find the site listed here, you can add a new site.")
     String addLocationDescription();
 
-    @DefaultStringValue("Add Map")
+    @DefaultStringValue("Add map")
     String addMap();
 
-    @DefaultStringValue("Add Partner to Program")
+    @DefaultStringValue("Add partner to program")
     String addPartner();
 
     @DefaultStringValue("Add a project")
     String addProject();
 
-    @DefaultStringValue("Add Pivot Table")
+    @DefaultStringValue("Add pivot table")
     String addTable();
 
-    @DefaultStringValue("Add Text")
+    @DefaultStringValue("Add text")
     String addText();
 
     @DefaultStringValue("Add a timelock")
     String addTimeLock();
 
-    @DefaultStringValue("Add User")
+    @DefaultStringValue("Add user")
     String addUser();
 
-    @DefaultStringValue("Administrative Unit")
+    @DefaultStringValue("Administrative unit")
     String adminEntities();
 
-    @DefaultStringValue("Aggregation Method")
+    @DefaultStringValue("Aggregation method")
     String aggregationMethod();
 
     @DefaultStringValue("All")
@@ -115,7 +115,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Edit")
     String allowEdit();
 
-    @DefaultStringValue("Edit All")
+    @DefaultStringValue("Edit all")
     String allowEditAll();
 
     @DefaultStringValue("Allow user to edit form submissions of all partners")
@@ -127,13 +127,13 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Manage all users")
     String allowManageAllUsers();
 
-    @DefaultStringValue("Manage Users")
+    @DefaultStringValue("Manage users")
     String allowManageUsers();
 
     @DefaultStringValue("View")
     String allowView();
 
-    @DefaultStringValue("View All")
+    @DefaultStringValue("View all")
     String allowViewAll();
 
     @DefaultStringValue("Allow user to view form submissions of all partners")
@@ -151,7 +151,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Apply")
     String apply();
 
-    @DefaultStringValue("Attach File")
+    @DefaultStringValue("Attach file")
     String attachFile();
 
     @DefaultStringValue("Attachments")
@@ -217,7 +217,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Choose the indicator or indicators to map")
     String chooseIndicatorsToMap();
 
-    @DefaultStringValue("Choose Site")
+    @DefaultStringValue("Choose site")
     String chooseLocation();
 
     @DefaultStringValue("Here you can choose the location of your form submission. Use the filters below to find locations linked to existing form submissions. This will make it possible to link your form submissions to other forms inside and outside of your organization.")
@@ -277,22 +277,22 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Country")
     String country();
 
-    @DefaultStringValue("New Report")
+    @DefaultStringValue("New report")
     String createNewReport();
 
-    @DefaultStringValue("Create Project")
+    @DefaultStringValue("Create project")
     String createProject();
 
-    @DefaultStringValue("Create Target")
+    @DefaultStringValue("Create target")
     String createTarget();
 
     @DefaultStringValue("Edit Target")
     String editTarget();
 
-    @DefaultStringValue("Custom Date Range")
+    @DefaultStringValue("Custom date range")
     String customDateRange();
 
-    @DefaultStringValue("Custom Report")
+    @DefaultStringValue("Custom report")
     String customReport();
 
     @DefaultStringValue("Create a custom report from a combination of tables, charts, and maps")
@@ -301,7 +301,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Dashboard")
     String dashboard();
 
-    @DefaultStringValue("Data Entry")
+    @DefaultStringValue("Data entry")
     String dataEntry();
 
     @DefaultStringValue("Database")
@@ -340,7 +340,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Are you sure you want to delete this lock?")
     String deleteLockedPeriodQuestion();
 
-    @DefaultStringValue("Delete Lock")
+    @DefaultStringValue("Delete lock")
     String deleteLockedPeriodTitle();
 
     @DefaultStringValue("Delete")
@@ -388,16 +388,16 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Email")
     String email();
 
-    @DefaultStringValue("Email Frequency")
+    @DefaultStringValue("Email frequency")
     String emailFrequency();
 
-    @DefaultStringValue("Email Notification")
+    @DefaultStringValue("Email notification")
     String emailNotification();
 
     @DefaultStringValue("Email options...")
     String emailOptions();
 
-    @DefaultStringValue("Email Subscription")
+    @DefaultStringValue("Email subscription")
     String emailSubscription();
 
     @DefaultStringValue("Publish to website")
@@ -415,7 +415,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Active")
     String enabledColumn();
 
-    @DefaultStringValue("End Date")
+    @DefaultStringValue("End date")
     String endDate();
 
     @DefaultStringValue("Error")
@@ -472,22 +472,22 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("from")
     String fromDate();
 
-    @DefaultStringValue("Full Name")
+    @DefaultStringValue("Full name")
     String fullName();
 
     @DefaultStringValue("Geography")
     String geography();
 
-    @DefaultStringValue("Satellite Map with Streets")
+    @DefaultStringValue("Satellite map with streets")
     String googleHybrid();
 
-    @DefaultStringValue("Road Map")
+    @DefaultStringValue("Road map")
     String googleRoadmap();
 
-    @DefaultStringValue("Satellite Map")
+    @DefaultStringValue("Satellite map")
     String googleSatelliteMap();
 
-    @DefaultStringValue("Terrain Map")
+    @DefaultStringValue("Terrain map")
     String googleTerrainMap();
 
     @DefaultStringValue("Group")
@@ -526,7 +526,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Job title")
     String jobtitle();
 
-    @DefaultStringValue("Preferred Language")
+    @DefaultStringValue("Preferred language")
     String language();
 
     @DefaultStringValue("last edit:")
@@ -547,10 +547,10 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Lines")
     String lines();
 
-    @DefaultStringValue("Link Indicators")
+    @DefaultStringValue("Link indicators")
     String linkIndicators();
 
-    @DefaultStringValue("List Header")
+    @DefaultStringValue("List header")
     String listHeader();
 
     @DefaultStringValue("Load new version now")
@@ -559,7 +559,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Loading...")
     String loading();
 
-    @DefaultStringValue("Loading Component...")
+    @DefaultStringValue("Loading component...")
     String loadingComponent();
 
     @DefaultStringValue("Loading maps...")
@@ -571,7 +571,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Your search did not match any existing sites. Make your search more general or add a new location.")
     String locationSearchNoResults();
 
-    @DefaultStringValue("Location Type")
+    @DefaultStringValue("Location type")
     String locationType();
 
     @DefaultStringValue("Sites")
@@ -592,10 +592,10 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Longitude")
     String longitude();
 
-    @DefaultStringValue("Mailing List")
+    @DefaultStringValue("Mailing list")
     String mailingList();
 
-    @DefaultStringValue("Manage All Users")
+    @DefaultStringValue("Manage all users")
     String manageAllUsers();
 
     @DefaultStringValue("Mandatory")
@@ -616,31 +616,31 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Monthly")
     String monthly();
 
-    @DefaultStringValue("Monthly Reports")
+    @DefaultStringValue("Monthly reports")
     String monthlyReports();
 
     @DefaultStringValue("Name")
     String name();
 
-    @DefaultStringValue("New Form")
+    @DefaultStringValue("New form")
     String newActivity();
 
-    @DefaultStringValue("New Attachment")
+    @DefaultStringValue("New attachment")
     String newAttachment();
 
-    @DefaultStringValue("New Attribute")
+    @DefaultStringValue("New attribute")
     String newAttribute();
 
-    @DefaultStringValue("New Attribute Group")
+    @DefaultStringValue("New attribute group")
     String newAttributeGroup();
 
-    @DefaultStringValue("New Database")
+    @DefaultStringValue("New database")
     String newDatabase();
 
-    @DefaultStringValue("Rename Database")
+    @DefaultStringValue("Rename database")
     String renameDatabase();
 
-    @DefaultStringValue("New Indicator")
+    @DefaultStringValue("New indicator")
     String newIndicator();
 
     @DefaultStringValue("Add new site")
@@ -652,7 +652,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("New partner")
     String newPartner();
 
-    @DefaultStringValue("New Submission")
+    @DefaultStringValue("New submission")
     String newSite();
 
     @DefaultStringValue("New")
@@ -667,7 +667,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("A new version of ActivityInfo has been downloaded. Do you want to reload now?")
     String newVersionChoice();
 
-    @DefaultStringValue("No Data.")
+    @DefaultStringValue("No data.")
     String noData();
 
     @DefaultStringValue("Coordinates must specify a hemisphere (+/-/N/S)")
@@ -742,7 +742,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Cross all of the dimensions of your results, including by activity, time period, partner, or geography")
     String pivotTableDescription();
 
-    @DefaultStringValue("Pivot Tables")
+    @DefaultStringValue("Pivot tables")
     String pivotTables();
 
     @DefaultStringValue("Please complete the form correctly before continuing.")
@@ -751,7 +751,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Preview")
     String preview();
 
-    @DefaultStringValue("Print Form")
+    @DefaultStringValue("Print form")
     String printForm();
 
     @DefaultStringValue("Project")
@@ -787,10 +787,10 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Realized")
     String realized();
 
-    @DefaultStringValue("Realized / Targeted")
+    @DefaultStringValue("Realized / targeted")
     String realizedOrTargeted();
 
-    @DefaultStringValue("Refresh Preview")
+    @DefaultStringValue("Refresh preview")
     String refreshPreview();
 
     @DefaultStringValue("A minute ago")
@@ -799,7 +799,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Remove")
     String remove();
 
-    @DefaultStringValue("Remove from Dashboard")
+    @DefaultStringValue("Remove from dashboard")
     String removeFromDashboard();
 
     @DefaultStringValue("Remove partner")
@@ -808,7 +808,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Once")
     String reportOnce();
 
-    @DefaultStringValue("Reporting Frequency")
+    @DefaultStringValue("Reporting frequency")
     String reportingFrequency();
 
     @DefaultStringValue("Reports")
@@ -859,13 +859,13 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Setup")
     String setup();
 
-    @DefaultStringValue("Shaded Polygons")
+    @DefaultStringValue("Shaded polygons")
     String shadedPolygons();
 
     @DefaultStringValue("Share")
     String share();
 
-    @DefaultStringValue("Share Report")
+    @DefaultStringValue("Share report")
     String shareReport();
 
     @DefaultStringValue("This report is still empty, so it can't yet be model.")
@@ -889,7 +889,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Enter indicator results for this form submission")
     String siteDialogIndicators();
 
-    @DefaultStringValue("Intervention Details")
+    @DefaultStringValue("Intervention details")
     String siteDialogIntervention();
 
     @DefaultStringValue("Choose the project and partner implementing this intervention")
@@ -916,7 +916,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("S")
     String southHemiChars();
 
-    @DefaultStringValue("Start Date")
+    @DefaultStringValue("Start date")
     String startDate();
 
     @DefaultStringValue("Starting...")
@@ -940,7 +940,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("There is a new version of ActivityInfo available. You need to reload the page to load the new version and continue with synchronization.")
     String syncErrorReload();
 
-    @DefaultStringValue("Synchronization Error")
+    @DefaultStringValue("Synchronization error")
     String syncError();
 
     @DefaultStringValue("An unexpected error occurred during synchronization.")
@@ -949,7 +949,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Sync Now")
     String syncNow();
 
-    @DefaultStringValue("Synchronization Complete")
+    @DefaultStringValue("Synchronization complete")
     String synchronizationComplete();
 
     @DefaultStringValue("Target")
@@ -958,7 +958,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Define targets to be reached by your project.")
     String targetDescription();
 
-    @DefaultStringValue("Target Value")
+    @DefaultStringValue("Target value")
     String targetValue();
 
     @DefaultStringValue("Targeted")
@@ -973,7 +973,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Locks")
     String timeLocks();
 
-    @DefaultStringValue("Time Period")
+    @DefaultStringValue("Time period")
     String timePeriod();
 
     @DefaultStringValue("Title")
@@ -1000,16 +1000,16 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("You have unsaved changes. If you leave this page or close your browser, these changes will be lost.")
     String unsavedChangesWarning();
 
-    @DefaultStringValue("Untitled Chart")
+    @DefaultStringValue("Untitled chart")
     String untitledChart();
 
-    @DefaultStringValue("Untitled Map")
+    @DefaultStringValue("Untitled map")
     String untitledMap();
 
-    @DefaultStringValue("Untitled Report")
+    @DefaultStringValue("Untitled report")
     String untitledReport();
 
-    @DefaultStringValue("Untitled Table")
+    @DefaultStringValue("Untitled table")
     String untitledTable();
 
     @DefaultStringValue("Upload")
@@ -1024,7 +1024,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Add users or control their access level")
     String userManagerDescription();
 
-    @DefaultStringValue("Profile Settings")
+    @DefaultStringValue("Profile settings")
     String userProfile();
 
     @DefaultStringValue("Users")
@@ -1069,7 +1069,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Year")
     String year();
 
-    @DefaultStringValue("Year/Month")
+    @DefaultStringValue("Year/month")
     String yearMonthGrouping();
 
     @DefaultStringValue("Reset")
@@ -1159,7 +1159,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Save operation failed (formclass).")
     String failedToSaveClass();
 
-    @DefaultStringValue("Alternate Name")
+    @DefaultStringValue("Alternate name")
     String alternateName();
 
     @DefaultStringValue("Confirmation")
@@ -1171,7 +1171,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("No")
     String no();
 
-    @DefaultStringValue("New Value")
+    @DefaultStringValue("New value")
     String changeHeaderMessage();
 
     @DefaultStringValue("Clear filter")
@@ -1183,13 +1183,13 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Deselect all")
     String deselectAll();
 
-    @DefaultStringValue("Confirm Deletion")
+    @DefaultStringValue("Confirm deletion")
     String confirmDeletion();
 
-    @DefaultStringValue("Deletion Failed")
+    @DefaultStringValue("Deletion failed")
     String deletionFailed();
 
-    @DefaultStringValue("Deletion in Progress")
+    @DefaultStringValue("Deletion in progress")
     String deletionInProgress();
 
     @DefaultStringValue("This field is required")
@@ -1261,7 +1261,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Calculation expression is invalid")
     String calculationExpressionIsInvalid();
 
-    @DefaultStringValue("Invalid Relevance Expression")
+    @DefaultStringValue("Invalid relevance formula")
     String relevanceExpressionIsInvalid();
 
     @DefaultStringValue("An (optional) short code for this form field. This code can be used to refer to the field in calculated expressions.")
@@ -1273,7 +1273,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Import schema")
     String importSchemaDialogTitle();
 
-    @DefaultStringValue("New Location Type")
+    @DefaultStringValue("New location type")
     String newLocationType();
 
     @DefaultStringValue("Create")
@@ -1291,7 +1291,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Relevance")
     String relevance();
 
-    @DefaultStringValue("Form Category")
+    @DefaultStringValue("Form category")
     String formCategory();
 
     @DefaultStringValue("Define IF")
@@ -1300,7 +1300,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Defined")
     String defined();
 
-    @DefaultStringValue("Show in Data Entry")
+    @DefaultStringValue("Show in data entry")
     String showInDataEntry();
 
     @DefaultStringValue("And")
@@ -1423,10 +1423,10 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Alert")
     String alert();
 
-    @DefaultStringValue("New Submission")
+    @DefaultStringValue("New submission")
     String newSubmission();
 
-    @DefaultStringValue("Edit Submission")
+    @DefaultStringValue("Edit submission")
     String editSubmission();
 
     @DefaultStringValue("Barcode")
@@ -1603,7 +1603,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("households")
     String defaultQuantityUnits();
 
-    @DefaultStringValue("Offline Mode not supported")
+    @DefaultStringValue("Offline mode not supported")
     String offlineNotSupportedTitle();
 
     @DefaultStringValue("Unfortunately, offline mode is not supported on your browser. To enable offline mode, we recommend using Google Chrome.")
@@ -1612,13 +1612,13 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Download Google Chrome")
     String downloadGoogleChrome();
 
-    @DefaultStringValue("New Report Element")
+    @DefaultStringValue("New report element")
     String newReportElement();
 
-    @DefaultStringValue("ActivityInfo News")
+    @DefaultStringValue("ActivityInfo news")
     String activityInfoNews();
 
-    @DefaultStringValue("Saved Reports")
+    @DefaultStringValue("Saved reports")
     String savedReports();
 
     @DefaultStringValue("An indicator cannot be linked to itself")
@@ -1648,22 +1648,22 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("You do not have permission to edit the design of this database.")
     String noDbDesignPermissions();
 
-    @DefaultStringValue("Repeating Sub-Form")
+    @DefaultStringValue("Repeating subform")
     String repeatingSubform();
 
-    @DefaultStringValue("Monthly Sub-Form")
+    @DefaultStringValue("Monthly subform")
     String monthlySubform();
 
-    @DefaultStringValue("Weekly Sub-Form")
+    @DefaultStringValue("Weekly subform")
     String weeklySubform();
 
-    @DefaultStringValue("Fortnightly Sub-Form")
+    @DefaultStringValue("Fortnightly subform")
     String fortnightlySubform();
 
-    @DefaultStringValue("{0,number,#}W{1}-{2}")
+    @DefaultStringValue("Fortnight")
     String fortnight();
 
-    @DefaultStringValue("Daily Sub-Form")
+    @DefaultStringValue("Daily subform")
     String dailySubform();
 
     @DefaultStringValue("Select")
@@ -1711,7 +1711,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Total")
     String tableTotal();
 
-    @DefaultStringValue("Input Mask")
+    @DefaultStringValue("Input mask")
     String inputMask();
 
     @DefaultStringValue("Learn more about input masks")
@@ -1771,7 +1771,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Are you sure you want to remove all offline data? Any pending changes will be lost!")
     String confirmClearOfflineMode();
 
-    @DefaultStringValue("Deleted Form")
+    @DefaultStringValue("Deleted form")
     String deletedForm();
 
     @DefaultStringValue("Forbidden Form")
@@ -1786,10 +1786,10 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Copied")
     String copied();
 
-    @DefaultStringValue("Copied to Clipboard!")
+    @DefaultStringValue("Copied to clipboard!")
     String copiedToClipboard();
 
-    @DefaultStringValue("Count Distinct")
+    @DefaultStringValue("Count distinct")
     String countDistinct();
 
     @DefaultStringValue("No records found.")
@@ -1816,7 +1816,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("New Activity (Classic Form)")
     String newClassicActivity();
 
-    @DefaultStringValue("Selected Columns")
+    @DefaultStringValue("Selected columns")
     String selectedColumns();
 
     @DefaultStringValue("All")
@@ -1840,70 +1840,70 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("This entry references a site which has been deleted. Please update the location to avoid loss of data.")
     String deletedLocation();
 
-    @DefaultStringValue("No Filter")
+    @DefaultStringValue("No filter")
     String noFilter();
 
-    @DefaultStringValue("Current Filter")
+    @DefaultStringValue("Current filter")
     String currentFilter();
 
     @DefaultStringValue("To request change of email address or account deletion, please contact support@activityinfo.org.")
     String requestDeleteChangeEmail();
 
-    @DefaultStringValue("Clear Sort")
+    @DefaultStringValue("Clear sort")
     String clearSort();
 
-    @DefaultStringValue("Transfer Database")
+    @DefaultStringValue("Transfer database")
     String transferDatabaseLabel();
 
     @DefaultStringValue("Email of new owner")
     String newDatabaseOwnerEmail();
 
-    @DefaultStringValue("Database Transfer Failed")
+    @DefaultStringValue("Database transfer failed")
     String transferFailed();
 
-    @DefaultStringValue("Cannot Find User")
+    @DefaultStringValue("Cannot find user")
     String noUser();
 
-    @DefaultStringValue("There is a currently pending transfer for this Database. Do you wish to cancel the pending transfer?")
+    @DefaultStringValue("There is a currently pending transfer for this database. Do you wish to cancel the pending transfer?")
     String pendingTransfer();
 
-    @DefaultStringValue("Cancel Transfer")
+    @DefaultStringValue("Cancel transfer")
     String cancelTransfer();
 
-    @DefaultStringValue("Please select a User to transfer ownership to. The selected User must accept responsibility for the Database before ownership will be transferred.")
+    @DefaultStringValue("Please select a user to transfer ownership to. The selected user must accept responsibility for the database before ownership will be transferred.")
     String transferDatabaseUserInfo();
 
     @DefaultStringValue("Select a date (YYYY-MM-DD)")
     String selectDatePlaceholder();
 
-    @DefaultStringValue("Wide Format")
+    @DefaultStringValue("Wide format")
     String wideFormat();
 
     @DefaultStringValue("Each Activity is exported as a separate worksheet. <br> <br> All Fields appear as columns, with each Record in a separate row. <br> <br> NOTE: Only Activities will be exported via this method.")
     String wideFormatDescription();
 
-    @DefaultStringValue("Long Format")
+    @DefaultStringValue("Long format")
     String longFormat();
 
     @DefaultStringValue("All Forms and Activities are exported as a single worksheet. <br> <br> Each Quantity Field and Value appear in a separate row.")
     String longFormatDescription();
 
-    @DefaultStringValue("Remove User")
+    @DefaultStringValue("Remove user")
     String removeUser();
 
-    @DefaultStringValue("Delete Project")
+    @DefaultStringValue("Delete project")
     String deleteProject();
 
-    @DefaultStringValue("Delete Target")
+    @DefaultStringValue("Delete target")
     String deleteTarget();
 
-    @DefaultStringValue("Billing Account")
+    @DefaultStringValue("Billing account")
     String billingAccount();
 
     @DefaultStringValue("User limit exceeded")
     String usersExceeded();
 
-    @DefaultStringValue("Referenced Form(s) not accessible by current User")
+    @DefaultStringValue("Referenced form(s) not accessible by current User")
     String refFormsNotAccessible();
 
     @DefaultStringValue("Your trial account has expired.")
@@ -1921,19 +1921,19 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Contact us")
     String contactUs();
 
-    @DefaultStringValue("Export Format")
+    @DefaultStringValue("Export format")
     String exportFormat();
 
-    @DefaultStringValue("Classic Structure")
+    @DefaultStringValue("Classic structure")
     String classicExportStructure();
 
     @DefaultStringValue("Traditional Activity export. Choose this option for standard Sites export. <br> <br> Exports to an Excel XLS file. <br> <br> NOTE: Due to XLS limitations, there is an export limit of 256 columns.")
     String classicExportStructureDescription();
 
-    @DefaultStringValue("Form Structure")
+    @DefaultStringValue("Form structure")
     String formExportStructure();
 
-    @DefaultStringValue("Export Activity as a Form. Choose this option if Activity is greater than 256 columns. <br> <br> Exports to a CSV file. <br> <br> No column export limit.")
+    @DefaultStringValue("Export activity as a form. Choose this option if Activity is greater than 256 columns. <br> <br> Exports to a CSV file. <br> <br> No column export limit.")
     String formExportStructureDescription();
 
     @DefaultStringValue("Visibility")
@@ -1945,19 +1945,19 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Private")
     String privateVisibility();
 
-    @DefaultStringValue("All data on this Form will be publicly visible. Select this option if the Form's data is not of a sensitive nature, and you want it to be publicly published.")
+    @DefaultStringValue("All data on this form will be publicly visible. Select this option if the form's data is not of a sensitive nature, and you want it to be publicly published.")
     String publicVisibilityTooltip();
 
-    @DefaultStringValue("All data on this Form will be private, and not available publicly. Select this option if the Form's data is of a sensitive nature, or you do not want it to be publicly published.")
+    @DefaultStringValue("All data on this form will be private, and not available publicly. Select this option if the form's data is of a sensitive nature, or you do not want it to be publicly published.")
     String privateVisibilityTooltip();
 
-    @DefaultStringValue("The specified User has account restrictions which prevent them from owning a Database. Therefore, this Database cannot be transferred to the specified User.")
+    @DefaultStringValue("The specified user has account restrictions which prevent them from owning a database. Therefore, this database cannot be transferred to the specified user.")
     String cannotTransferDbToUser();
 
     @DefaultStringValue("Database is already owned by User.")
     String userOwnsDatabaseError();
 
-    @DefaultStringValue("There is already a pending transfer request on this Database.")
+    @DefaultStringValue("There is already a pending transfer request on this database.")
     String pendingTransferError();
 
     @DefaultStringValue("Database can only be transferred by current owner.")
@@ -1975,10 +1975,10 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Allow user to create form submissions")
     String allowCreateLong();
 
-    @DefaultStringValue("Create All")
+    @DefaultStringValue("Create all")
     String allowCreateAll();
 
-    @DefaultStringValue("Allow user to create form submissions for all partners")
+    @DefaultStringValue("Allow user to add records for all partners")
     String allowCreateAllLong();
 
     @DefaultStringValue("Delete")
@@ -1993,7 +1993,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Allow user to edit form submissions of all partners")
     String allowDeleteAllLong();
 
-    @DefaultStringValue("All Partners")
+    @DefaultStringValue("All partners")
     String forAllPartners();
 
     @DefaultStringValue("This Partner")

@@ -32,6 +32,7 @@ import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
@@ -120,12 +121,13 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
     }
 
     @Override
-    public void persist(TypedFormRecord typedFormRecord) {
+    public void persist(TypedFormRecord typedFormRecord, TransactionMode transactionMode) {
         Updater updater = new Updater(catalog.get(),
                 databaseProvider,
                 blobAuthorizer,
                 new HrdSerialNumberProvider(),
-                authenticatedUser.get().getUserId());
+                authenticatedUser.get().getUserId(),
+                transactionMode);
         updater.execute(typedFormRecord);
     }
 }

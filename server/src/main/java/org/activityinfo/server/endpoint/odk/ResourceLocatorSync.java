@@ -26,6 +26,7 @@ import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.resource.TransactionMode;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -34,7 +35,7 @@ import java.util.List;
 @ImplementedBy(ResourceLocatorSyncImpl.class)
 public interface ResourceLocatorSync extends FormClassProvider {
     
-    void persist(TypedFormRecord typedFormRecord);
+    void persist(TypedFormRecord typedFormRecord, TransactionMode offline);
 
     FormClass getFormClass(ResourceId formId);
 

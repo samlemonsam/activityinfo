@@ -20,6 +20,7 @@ package org.activityinfo.i18n.shared;
 
 import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.safehtml.shared.SafeHtml;
+
 import java.util.Date;
 
 /**
@@ -59,7 +60,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     String week(int year, int week);
 
     @DefaultMessage("{0,number,#}W{1}-{2}")
-    String fortnight(int year, int firstWeek, int secondWeek);
+    String fortnightFormat(int year, int firstWeek, int secondWeek);
 
     @DefaultMessage("{0,date,MMM}")
     @Key("monthName")
@@ -111,10 +112,10 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("{0} days ago")
     String daysAgo(int hours);
 
-    @DefaultMessage("{0,date,dd-MM-yyyy - HH:mm} {1} ({2}) added the entry.")
+    @DefaultMessage("{0,date,dd-MM-yyyy - HH:mm} {1} ({2}) added the record.")
     String siteHistoryCreated(Date date, String userName, String userEmail);
 
-    @DefaultMessage("{0,date,dd-MM-yyyy - HH:mm} {1} ({2}) added the entry in the {3} sub form.")
+    @DefaultMessage("{0,date,dd-MM-yyyy - HH:mm} {1} ({2}) added the record in the {3} subform.")
     String siteHistorySubFormCreated(Date date, String userName, String userEmail, String subFormName);
 
     @DefaultMessage("Added on {0,date,dd-MM-yyyy}.")
@@ -285,10 +286,10 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Current column length {0} exceeds Column Export Limitation of {1} for Export Type {2}")
     String columnLimit(int colLength, int colLimit, String exportType);
 
-    @DefaultMessage("Your Database Transfer request has been sent to User {0}. You will receive an email informing you of the Users decision to accept or reject ownership of your Database.")
+    @DefaultMessage("Your database transfer request has been sent to {0}. You will receive an email informing you of their decision to accept or reject ownership of your database.")
     String transferDatabase(String userName);
 
-    @DefaultMessage("User {0} does not exist in ActivityInfo system.")
+    @DefaultMessage("User {0} is not registered with ActivityInfo.org")
     String userNotInSystem(String userName);
 
     @DefaultMessage("Do you want to remove User: ''{0}'' from your Database?")
@@ -305,5 +306,4 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("Activity ''{0}'' has too many Attributes/Indicators defined and exceeds the export file column limit ({1}). Please deselect this Activity from the export, or use an alternative export method.")
     String activityColumnLimitExceeded(String activity, int colLimit);
-
 }
