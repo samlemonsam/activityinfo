@@ -39,6 +39,7 @@ import org.activityinfo.ui.client.page.config.design.BlankValidator;
 import org.activityinfo.ui.client.page.entry.form.field.MultilineRenderer;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
 
@@ -108,6 +109,8 @@ import java.util.*;
 
  */
 public class UserForm extends FormPanel {
+
+    private static final Logger LOGGER = Logger.getLogger(UserForm.class.getName());
 
     private final CheckBox allFolderCheckbox;
     private final CheckBoxGroup permissionsGroup;
@@ -454,8 +457,14 @@ public class UserForm extends FormPanel {
     private void addEditPartners(UserPermissionDTO user) {
         if (showMultiplePartnerEditor(database.getOwnerEmail())) {
             // slight hack to uncheck the default selected partner first (no way to deselect all in a CheckBoxListView...)
-            partnerCheckList.getChecked().forEach(checked -> partnerCheckList.setChecked(checked, false));
-            user.getPartners().forEach(p -> partnerCheckList.setChecked(p, true));
+            partnerCheckList.getChecked().forEach(checked -> {
+                LOGGER.info("PARTNERS - UNCHECK " + checked.toString());
+                partnerCheckList.setChecked(checked, false);
+            });
+            user.getPartners().forEach(p -> {
+                LOGGER.info("PARTNERS - CHECK " + p.toString());
+                partnerCheckList.setChecked(p, true);
+            });
             partnerCheckList.setEnabled(database.canManageUser(user));
         } else {
             partnerCombo.setValue(user.getPartners().get(0));
