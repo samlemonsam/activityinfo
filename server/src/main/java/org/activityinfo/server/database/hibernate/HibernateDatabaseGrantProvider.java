@@ -7,12 +7,8 @@ import com.google.inject.Provider;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.database.DatabaseGrant;
-import org.activityinfo.model.formula.ConstantNode;
-import org.activityinfo.model.formula.FormulaNode;
-import org.activityinfo.model.formula.FunctionCallNode;
-import org.activityinfo.model.formula.SymbolNode;
+import org.activityinfo.model.formula.*;
 import org.activityinfo.model.formula.functions.EqualFunction;
-import org.activityinfo.model.formula.functions.OrFunction;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.permission.Operation;
@@ -33,7 +29,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
     private static final Logger LOGGER = Logger.getLogger(HibernateDatabaseGrantProvider.class.getName());
 
     private static final String CACHE_PREFIX = "dbGrant";
-    private static final String CACHE_VERSION = "1";
+    private static final String CACHE_VERSION = "2";
 
     private final Provider<EntityManager> entityManager;
     private final MemcacheService memcacheService;
@@ -381,7 +377,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         if (partnerNodes.size() == 1) {
             return Iterables.getOnlyElement(partnerNodes).asExpression();
         }
-        return new FunctionCallNode(OrFunction.INSTANCE, partnerNodes).asExpression();
+        return Formulas.anyTrue(partnerNodes).asExpression();
     }
 
     private static FormulaNode partnerNode(int databaseId, int partnerId) {
