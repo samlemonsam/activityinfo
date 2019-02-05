@@ -143,6 +143,7 @@ public class UsageResource {
         if(user.getBillingAccount() != null) {
             JsonValue billingAccount = Json.createObject();
             billingAccount.put("name", user.getBillingAccount().getName());
+            billingAccount.put("code", user.getBillingAccount().getCode());
             billingAccount.put("userLimit", user.getBillingAccount().getUserLimit());
             billingAccount.put("endTime", user.getBillingAccount().getEndTime().toString());
             profile.put("billingAccount", billingAccount);
@@ -159,6 +160,7 @@ public class UsageResource {
 
         for (Database ownedDatabase : ownedDatabases) {
             JsonValue database = Json.createObject();
+            database.put("id", ownedDatabase.getId());
             database.put("role", "owns");
             database.put("name", ownedDatabase.getName());
             database.put("country", ownedDatabase.getCountry().getName());
@@ -174,6 +176,7 @@ public class UsageResource {
         for (UserPermission permission : permissions) {
             if(!permission.getDatabase().isDeleted()) {
                 JsonValue database = Json.createObject();
+                database.put("id", permission.getDatabase().getId());
                 database.put("name", permission.getDatabase().getName());
                 database.put("country", permission.getDatabase().getCountry().getName());
                 if (permission.isAllowDesign()) {
