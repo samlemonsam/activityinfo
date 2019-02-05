@@ -33,8 +33,20 @@ public class PermissionOracle {
         if (db.isOwner()) {
             return allowOwner(query.getOperation());
         }
-        if (db.isPublished() && query.getOperation() == Operation.VIEW) {
-            return allow(Operation.VIEW);
+        if (db.isPublished()) {
+            switch (query.getOperation()) {
+                case VIEW:
+                    return allow(query.getOperation());
+
+                case CREATE_RECORD:
+                case EDIT_RECORD:
+                case DELETE_RECORD:
+                    // Carve out special permissions for public location types.
+                    if(query.getResourceId().getDomain() == CuidAdapter.LOCATION_TYPE_DOMAIN) {
+                        return allow(query.getOperation());
+                    }
+                    break;
+            }
         }
         if (!db.isVisible()) {
             return deny(query.getOperation());
@@ -262,7 +274,11 @@ public class PermissionOracle {
             return FormPermissions.owner(db.getEffectiveLocks(formId));
         }
         if (db.isPublished()) {
-            return FormPermissions.readonly();
+            if(formId.getDomain() == CuidAdapter.LOCATION_TYPE_DOMAIN) {
+                return FormPermissions.readWrite(db.getEffectiveLocks(formId));
+            } else {
+                return FormPermissions.readonly();
+            }
         }
         if (isProjectForm(formId)) {
             return computeFormPermissions(formId, db);
