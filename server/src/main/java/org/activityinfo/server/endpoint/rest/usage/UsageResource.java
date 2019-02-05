@@ -20,6 +20,7 @@ package org.activityinfo.server.endpoint.rest.usage;
 
 import com.google.common.base.Strings;
 import com.google.gson.stream.JsonWriter;
+import com.sun.jersey.api.core.InjectParam;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.server.DeploymentConfiguration;
@@ -40,6 +41,7 @@ import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Provides general usage statistics need for running the server.
@@ -109,9 +111,14 @@ public class UsageResource {
     @GET
     @Path("profile")
     @Produces(MediaType.APPLICATION_JSON)
-    public String queryProfile(@QueryParam("accessKey") String requestKey, @QueryParam("user") String userQuery) {
-        assertAuthorized(requestKey);
+    public String queryProfile(@InjectParam DeploymentConfiguration config,
+                               @QueryParam("api_token") String grooveApiToken,
+                               @QueryParam("email") String userQuery) {
 
+
+        if(!Objects.equals(config.getProperty("grooveApiToken"), grooveApiToken)) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
 
         User user;
         if(userQuery.matches("[0-9]+")) {
