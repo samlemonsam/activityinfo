@@ -32,7 +32,10 @@ import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
 import org.activityinfo.store.mysql.metadata.DatabaseCacheImpl;
 import org.activityinfo.store.mysql.update.ActivityUpdater;
-import org.activityinfo.store.spi.*;
+import org.activityinfo.store.spi.FormNotFoundException;
+import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.FormStorageProvider;
+import org.activityinfo.store.spi.TransactionalStorageProvider;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -56,7 +59,7 @@ public class MySqlStorageProvider implements FormStorageProvider, TransactionalS
 
         providers.add(new SimpleTableStorageProvider(new UserTable()));
         providers.add(new SimpleTableStorageProvider(new CountryTable()));
-        providers.add(new SimpleTableStorageProvider(new AdminEntityTable()));
+        providers.add(new AdminFormStorageProvider());
         providers.add(new SimpleTableStorageProvider(new PartnerTable(databaseCache)));
         providers.add(new SimpleTableStorageProvider(new ProjectTable(databaseCache)));
         providers.add(new TargetFormProvider());

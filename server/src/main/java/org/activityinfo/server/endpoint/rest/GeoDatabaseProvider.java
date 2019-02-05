@@ -19,6 +19,7 @@ public class GeoDatabaseProvider {
 
     public static final ResourceId GEODB_ID = ResourceId.valueOf("geodb");
     public static final String COUNTRY_ID_PREFIX = "country:";
+    public static final int GEODB_OWNER_USER_ID = 3;
 
     private final Provider<EntityManager> entityManager;
 
@@ -46,7 +47,7 @@ public class GeoDatabaseProvider {
                 .setDatabaseId(GEODB_ID)
                 .setUserId(userId)
                 .setLabel("Geographic Database")
-                .setOwner(false)
+                .setOwner(userId == GEODB_OWNER_USER_ID)
                 .setVersion("1")
                 .setPublished(true)
                 .build());

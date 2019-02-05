@@ -18,7 +18,6 @@
  */
 package org.activityinfo.store.mysql.collections;
 
-import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.SimpleTable;
@@ -48,7 +47,7 @@ public class SimpleTableStorageProvider implements FormProvider {
     }
 
     @Override
-    public FormStorage openForm(QueryExecutor executor, ResourceId formId) throws SQLException {
+    public SimpleTableStorage openForm(QueryExecutor executor, ResourceId formId) throws SQLException {
         return new SimpleTableStorage(table.getMapping(executor, formId), executor);
     }
 

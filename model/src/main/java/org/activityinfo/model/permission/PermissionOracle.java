@@ -33,8 +33,8 @@ public class PermissionOracle {
         if (db.isOwner()) {
             return allowOwner(query.getOperation());
         }
-        if (db.isPublished()) {
-            return allow(query.getOperation());
+        if (db.isPublished() && query.getOperation() == Operation.VIEW) {
+            return allow(Operation.VIEW);
         }
         if (!db.isVisible()) {
             return deny(query.getOperation());
@@ -262,7 +262,7 @@ public class PermissionOracle {
             return FormPermissions.owner(db.getEffectiveLocks(formId));
         }
         if (db.isPublished()) {
-            return FormPermissions.readWrite(db.getEffectiveLocks(formId));
+            return FormPermissions.readonly();
         }
         if (isProjectForm(formId)) {
             return computeFormPermissions(formId, db);
