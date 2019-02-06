@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  */
 public class DatabaseModelTestResources {
 
-    public final ResourceId DB_ID = ResourceId.valueOf("TESTDB");
+    public final ResourceId DB_ID = ResourceId.valueOf("d0000000001");
     public final int OWNER_ID = 1;
     public final int USER_ID = 2;
     public final int UNAUTH_USER_ID = 3;
