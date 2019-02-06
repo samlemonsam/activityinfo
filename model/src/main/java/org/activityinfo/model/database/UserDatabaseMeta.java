@@ -197,6 +197,7 @@ public class UserDatabaseMeta implements JsonSerializable {
         }
         // Return the catalog entries for the this nodes _direct_ children
         return parentNode.getChildNodes().stream()
+                .filter(node -> !node.getResource().getId().equals(CuidAdapter.partnerFormId(getLegacyDatabaseId())))
                 .map(UserDatabaseMeta::buildCatalogEntry)
                 .collect(Collectors.toList());
     }
