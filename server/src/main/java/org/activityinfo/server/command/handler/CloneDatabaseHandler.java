@@ -60,6 +60,7 @@ import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static org.activityinfo.model.legacy.CuidAdapter.BUILTIN_FIELDS;
 import static org.activityinfo.model.legacy.CuidAdapter.activityFormClass;
@@ -106,7 +107,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         assert sourceDb != null && sourceMetadata.isPresent();
         this.sourceDbMeta = sourceMetadata.get();
 
-        createDefaultPartner(user);
+        int defaultPartnerId = createDefaultPartner(user);
 
         if (!PermissionOracle.canView(sourceDbMeta)) {
             throw new IllegalAccessCommandException();
@@ -119,7 +120,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
         // 2. copy user permissions
         if (command.isCopyUserPermissions() && PermissionOracle.canManageUsersOnWholeDatabase(sourceDbMeta)) {
-            copyUserPermissions();
+            copyUserPermissions(defaultPartnerId);
         }
 
         // 3. copy forms and form data
@@ -133,27 +134,44 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         return new CreateResult(targetDb.getId());
     }
 
-    private void createDefaultPartner(User user) {
+    private int createDefaultPartner(User user) {
         Preconditions.checkNotNull(targetDb);
         Preconditions.checkState(targetDb.getId() > 0);
 
         PartnerDTO partner = new PartnerDTO();
         partner.setName("Default");
 
-        new UpdatePartnerHandler(em, databaseProvider).execute(new UpdatePartner(targetDb.getId(), partner), user);
+        CommandResult newPartnerId = new UpdatePartnerHandler(em, databaseProvider).execute(new UpdatePartner(targetDb.getId(), partner), user);
+        return ((CreateResult) newPartnerId).getNewId();
     }
 
-    private void copyUserPermissions() {
-
+    private void copyUserPermissions(int defaultPartnerId) {
+        Partner defaultPartner = em.find(Partner.class, defaultPartnerId);
         for (UserPermission sourcePermission : sourceDb.getUserPermissions()) {
             UserPermission newPermission = new UserPermission(sourcePermission);
             newPermission.setDatabase(targetDb);
             newPermission.setLastSchemaUpdate(new Date());
-            newPermission.setPartners(new HashSet<>(sourcePermission.getPartners()));
+            newPermission.setPartners(copyPartnerAssignment(sourcePermission.getPartners(), defaultPartner));
 
             em.persist(newPermission);
             targetDb.getUserPermissions().add(newPermission);
         }
+    }
+
+    private Set<Partner> copyPartnerAssignment(Set<Partner> partners, Partner defaultPartner) {
+        Set<Partner> copiedPartners = new HashSet<>(partners.size());
+
+        // Add the new default partner if the user has been assigned to the default partner
+        if (partners.stream().map(Partner::getName).anyMatch(PartnerDTO.DEFAULT_PARTNER_NAME::equals)) {
+            copiedPartners.add(defaultPartner);
+        }
+
+        // Add the remaining partners, filtering out the old default partner
+        copiedPartners.addAll(partners.stream()
+                .filter(partner -> !PartnerDTO.DEFAULT_PARTNER_NAME.equals(partner.getName()))
+                .collect(Collectors.toSet()));
+
+        return copiedPartners;
     }
 
     private void mapFolderPermissions() {
@@ -191,7 +209,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
     private void copyPartners() {
         for (Partner partner : sourceDb.getPartners()) {
-            if (!partner.getName().equals("Default")) {
+            if (!PartnerDTO.DEFAULT_PARTNER_NAME.equals(partner.getName())) {
                 targetDb.getPartners().add(partner);
             }
         }
