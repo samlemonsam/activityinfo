@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,6 +41,9 @@ public class HibernateDatabaseGrantProviderTest {
 
     private final LocalServiceTestHelper helper =
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+
+    @Inject
+    HibernateDatabaseGrantCache sessionCache;
 
     @Before
     public void setUp() {
@@ -161,20 +165,38 @@ public class HibernateDatabaseGrantProviderTest {
         int dbId = 1;
 
         // Clear cache
+        // 1. Clear session cache
+        sessionCache.clear();
+
+        // 2. Clear Memcache
         MemcacheService memcacheService = MemcacheServiceFactory.getMemcacheService();
         memcacheService.clearAll();
         assert memcacheService.getStatistics().getItemCount() == 0;
         assert memcacheService.getStatistics().getHitCount() == 0;
 
-        // Fetch a database grant - should be cached once retrieved
+        // Fetch a database grant - should be cached in both session cache and memcache once retrieved
         Optional<DatabaseGrant> dbGrant = databaseGrantProvider.getDatabaseGrant(userId, databaseId(dbId));
         assert dbGrant.isPresent();
+
+        // 1. Session cache
+        String cacheKey = sessionCache.key(userId, databaseId(dbId));
+        String memcacheKey = HibernateDatabaseGrantProvider.memcacheKey(userId, databaseId(dbId), dbGrant.get().getVersion());
+        Map<String,DatabaseGrant> sessionCachedDbMeta = sessionCache.loadAll(Collections.singletonMap(cacheKey,memcacheKey));
+        assert sessionCachedDbMeta.size() == 1;
+
+        // 2. Memcache
         assert memcacheService.getStatistics().getItemCount() > 0;
         assert memcacheService.getStatistics().getHitCount() == 0;
-        assert memcacheService.contains(HibernateDatabaseGrantProvider.memcacheKey(userId, databaseId(dbId), dbGrant.get().getVersion()));
 
-        // Fetch the same database grant again - should be retrieved from cache
+        // Fetch the same database grant again - should be retrieved from session cache
         Optional<DatabaseGrant> cachedDbGrant = databaseGrantProvider.getDatabaseGrant(userId, databaseId(dbId));
+        assert cachedDbGrant.isPresent();
+        assert memcacheService.getStatistics().getItemCount() > 0;
+        assert memcacheService.getStatistics().getHitCount() == 0;
+
+        // Clear session cache and fetch the same grant again - should be retrieved from memcache
+        sessionCache.clear();
+        cachedDbGrant = databaseGrantProvider.getDatabaseGrant(userId, databaseId(dbId));
         assert cachedDbGrant.isPresent();
         assert memcacheService.getStatistics().getItemCount() > 0;
         assert memcacheService.getStatistics().getHitCount() > 0;

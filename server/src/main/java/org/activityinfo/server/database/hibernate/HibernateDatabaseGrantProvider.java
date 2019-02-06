@@ -16,6 +16,7 @@ import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.util.Pair;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
+import org.activityinfo.store.spi.DatabaseGrantCache;
 import org.activityinfo.store.spi.DatabaseGrantProvider;
 
 import javax.persistence.EntityManager;
@@ -33,12 +34,15 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
     private static final String CACHE_VERSION = "1";
 
     private final Provider<EntityManager> entityManager;
+    private final DatabaseGrantCache sessionCache;
     private final MemcacheService memcacheService;
 
     @Inject
     public HibernateDatabaseGrantProvider(Provider<EntityManager> entityManager,
+                                          DatabaseGrantCache sessionCache,
                                           MemcacheService memcacheService) {
         this.entityManager = entityManager;
+        this.sessionCache = sessionCache;
         this.memcacheService = memcacheService;
     }
 
@@ -48,14 +52,26 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         if (grantVersion.isEmpty()) {
             return Optional.empty();
         }
+
+        // Session Cache
         Map<ResourceId,DatabaseGrant> loaded = loadFromCache(userId, grantVersion);
         if (!loaded.isEmpty()) {
             return Optional.of(loaded.get(databaseId));
         }
+
+        // Memcache
+        loaded = loadFromMemcache(userId, grantVersion);
+        if (!loaded.isEmpty()) {
+            cacheToSessionCache(loaded.values());
+            return Optional.of(loaded.get(databaseId));
+        }
+
+        // Database
         loaded = loadFromDb(userId, grantVersion.keySet());
         if (loaded.isEmpty()) {
             return Optional.empty();
         }
+        cacheToSessionCache(loaded.values());
         cacheToMemcache(loaded.values());
         return Optional.of(loaded.get(databaseId));
     }
@@ -66,14 +82,30 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         if (grantedDatabases.isEmpty()) {
             return Collections.emptyList();
         }
-        Map<ResourceId,Long> grantVersions = queryGrantVersions(userId, grantedDatabases);
-        Map<ResourceId,DatabaseGrant> loaded = loadFromCache(userId, grantVersions);
-        if (loaded.size() == grantVersions.size()) {
+        Map<ResourceId,Long> toFetch = queryGrantVersions(userId, grantedDatabases);
+
+        // Session Cache
+        Map<ResourceId,DatabaseGrant> loaded = loadFromCache(userId, toFetch);
+        loaded.forEach((dbId,grant) -> toFetch.remove(dbId));
+        if (toFetch.isEmpty()) {
             return new ArrayList<>(loaded.values());
         }
-        loaded.forEach((dbId,grant) -> grantVersions.remove(dbId));
-        Map<ResourceId,DatabaseGrant> loadedFromDb = loadFromDb(userId, grantVersions.keySet());
+
+        // Memcache
+        Map<ResourceId,DatabaseGrant> loadedFromMemcache = loadFromMemcache(userId, toFetch);
+        if (!loadedFromMemcache.isEmpty()) {
+            cacheToSessionCache(loadedFromMemcache.values());
+            loaded.putAll(loadedFromMemcache);
+            loadedFromMemcache.forEach((dbId,grant) -> toFetch.remove(dbId));
+        }
+        if (toFetch.isEmpty()) {
+            return new ArrayList<>(loaded.values());
+        }
+
+        // Database
+        Map<ResourceId,DatabaseGrant> loadedFromDb = loadFromDb(userId, toFetch.keySet());
         if (!loadedFromDb.isEmpty()) {
+            cacheToSessionCache(loadedFromDb.values());
             cacheToMemcache(loadedFromDb.values());
             loaded.putAll(loadedFromDb);
         }
@@ -86,15 +118,33 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         if (users.isEmpty()) {
             return Collections.emptyList();
         }
-        Map<Integer,Long> grantVersions = queryGrantVersions(users, databaseId);
-        Map<Integer,DatabaseGrant> loaded = loadFromCache(databaseId, grantVersions);
-        if (loaded.size() == grantVersions.size()) {
+        Map<Integer,Long> toFetch = queryGrantVersions(users, databaseId);
+
+        // Session cache
+        Map<Integer,DatabaseGrant> loaded = loadFromCache(databaseId, toFetch);
+        loaded.forEach((userId,grant) -> toFetch.remove(userId));
+        if (toFetch.isEmpty()) {
             return new ArrayList<>(loaded.values());
         }
-        loaded.forEach((userId,grant) -> grantVersions.remove(userId));
-        Map<Integer,DatabaseGrant> loadedFromDb = loadFromDb(databaseId, grantVersions.keySet());
-        cacheToMemcache(loadedFromDb.values());
-        loaded.putAll(loadedFromDb);
+
+        // Memcache
+        Map<Integer,DatabaseGrant> loadedFromMemcache = loadFromMemcache(databaseId, toFetch);
+        if (!loadedFromMemcache.isEmpty()) {
+            cacheToSessionCache(loadedFromMemcache.values());
+            loaded.putAll(loadedFromMemcache);
+            loadedFromMemcache.forEach((userId,grant) -> toFetch.remove(userId));
+        }
+        if (toFetch.isEmpty()) {
+            return new ArrayList<>(loaded.values());
+        }
+
+        // Database
+        Map<Integer,DatabaseGrant> loadedFromDb = loadFromDb(databaseId, toFetch.keySet());
+        if (!loadedFromDb.isEmpty()) {
+            cacheToSessionCache(loadedFromDb.values());
+            cacheToMemcache(loadedFromDb.values());
+            loaded.putAll(loadedFromDb);
+        }
         return new ArrayList<>(loaded.values());
     }
 
@@ -148,6 +198,43 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
     }
 
     private Map<ResourceId,DatabaseGrant> loadFromCache(int userId, Map<ResourceId,Long> databaseGrantVersions) {
+        Map<String,String> fetchKeys = databaseGrantVersions.entrySet().stream()
+                .collect(Collectors.toMap(
+                        dbGrantVer -> sessionCache.key(userId,dbGrantVer.getKey()),
+                        dbGrantVer -> memcacheKey(userId, dbGrantVer.getKey(), dbGrantVer.getValue())));
+        Map<String,DatabaseGrant> loaded = loadFromCache(fetchKeys);
+        return loaded.entrySet().stream()
+                .collect(Collectors.toMap(
+                        cachedGrant -> cachedGrant.getValue().getDatabaseId(),
+                        Map.Entry::getValue));
+    }
+
+    private Map<Integer,DatabaseGrant> loadFromCache(ResourceId databaseId, Map<Integer,Long> userGrantVersions) {
+        Map<String,String> fetchKeys = userGrantVersions.entrySet().stream()
+                .collect(Collectors.toMap(
+                        userGrantVer -> sessionCache.key(userGrantVer.getKey(), databaseId),
+                        userGrantVer -> memcacheKey(userGrantVer.getKey(), databaseId, userGrantVer.getValue())));
+        Map<String,DatabaseGrant> loaded = loadFromCache(fetchKeys);
+        return loaded.entrySet().stream()
+                .collect(Collectors.toMap(
+                        cachedGrant -> cachedGrant.getValue().getUserId(),
+                        Map.Entry::getValue));
+    }
+
+    private Map<String,DatabaseGrant> loadFromCache(Map<String,String> fetchKeys) {
+        LOGGER.info(() -> String.format("Fetching %d DatabaseGrant(s) from SessionCache", fetchKeys.size()));
+        Map<String,DatabaseGrant> loaded = new HashMap<>(fetchKeys.size());
+        try {
+            loaded.putAll(sessionCache.loadAll(fetchKeys));
+        } catch (Exception ignorable) {
+            // Session cache load failed, but we can still retrieve from memcache or database
+            LOGGER.info(() -> String.format("Failed to fetch %d DatabaseGrant(s) from SessionCache", fetchKeys.size()));
+        }
+        LOGGER.info(() -> String.format("Fetched %d/%d DatabaseGrant(s) from SessionCache", loaded.size(), fetchKeys.size()));
+        return loaded;
+    }
+
+    private Map<ResourceId,DatabaseGrant> loadFromMemcache(int userId, Map<ResourceId,Long> databaseGrantVersions) {
         Map<String,ResourceId> fetchKeys = databaseGrantVersions.entrySet().stream()
                 .collect(Collectors.toMap(
                         dbGrant -> memcacheKey(userId, dbGrant.getKey(), dbGrant.getValue()),
@@ -159,7 +246,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
                         Map.Entry::getValue));
     }
 
-    private Map<Integer,DatabaseGrant> loadFromCache(ResourceId databaseId, Map<Integer,Long> userGrantVersions) {
+    private Map<Integer,DatabaseGrant> loadFromMemcache(ResourceId databaseId, Map<Integer,Long> userGrantVersions) {
         Map<String,Integer> fetchKeys = userGrantVersions.entrySet().stream()
                 .collect(Collectors.toMap(
                         userGrant -> memcacheKey(userGrant.getKey(), databaseId, userGrant.getValue()),
@@ -186,6 +273,20 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         }
         LOGGER.info(() -> String.format("Fetched %d/%d DatabaseGrant(s) from Memcache", loaded.size(), fetchKeys.size()));
         return loaded;
+    }
+
+    private void cacheToSessionCache(Collection<DatabaseGrant> grants) {
+        LOGGER.info(() -> String.format("Caching %d DatabaseGrant(s) to SessionCache", grants.size()));
+        Map<String,DatabaseGrant> toCache = grants.stream()
+                .collect(Collectors.toMap(
+                        grant -> memcacheKey(grant.getUserId(), grant.getDatabaseId(), grant.getVersion()),
+                        grant -> grant));
+        try {
+            sessionCache.putAll(toCache);
+        } catch (Exception ignorable) {
+            // Caching failed, but is not terminal
+            LOGGER.severe(String.format("Caching failed for %d DatabaseGrant(s) to SessionCache", grants.size()));
+        }
     }
 
     private void cacheToMemcache(Collection<DatabaseGrant> grants) {

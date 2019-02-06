@@ -20,6 +20,7 @@ import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Folder;
 import org.activityinfo.server.database.hibernate.entity.LockedPeriod;
 import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
+import org.activityinfo.store.spi.DatabaseMetaCache;
 import org.activityinfo.store.spi.DatabaseMetaProvider;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.FormStorageProvider;
@@ -42,16 +43,19 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
 
     private final Provider<EntityManager> entityManager;
     private final FormStorageProvider formStorageProvider;
+    private final DatabaseMetaCache sessionCache;
     private final MemcacheService memcacheService;
     private final BillingAccountOracle billingAccountOracle;
 
     @Inject
     public HibernateDatabaseMetaProvider(Provider<EntityManager> entityManager,
                                          FormStorageProvider formStorageProvider,
+                                         DatabaseMetaCache sessionCache,
                                          MemcacheService memcacheService,
                                          BillingAccountOracle billingAccountOracle) {
         this.entityManager = entityManager;
         this.formStorageProvider = formStorageProvider;
+        this.sessionCache = sessionCache;
         this.memcacheService = memcacheService;
         this.billingAccountOracle = billingAccountOracle;
     }
@@ -62,14 +66,26 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         if (databaseVersion == null) {
             return Optional.empty();
         }
-        Map<ResourceId,DatabaseMeta> loaded = loadFromMemcache(Collections.singletonMap(databaseId,databaseVersion));
+
+        // Session Cache
+        Map<ResourceId,DatabaseMeta> loaded = loadFromSessionCache(Collections.singletonMap(databaseId,databaseVersion));
         if (!loaded.isEmpty()) {
             return Optional.of(loaded.get(databaseId));
         }
+
+        // Memcache
+        loaded = loadFromMemcache(Collections.singletonMap(databaseId,databaseVersion));
+        if (!loaded.isEmpty()) {
+            cacheToSessionCache(loaded.values());
+            return Optional.of(loaded.get(databaseId));
+        }
+
+        // Database
         Map<ResourceId,DatabaseMeta> loadedFromDb = loadFromDb(Collections.singleton(databaseId));
         if (loadedFromDb.isEmpty()) {
             return Optional.empty();
         }
+        cacheToSessionCache(loadedFromDb.values());
         cacheToMemcache(loadedFromDb.values());
         return Optional.of(loadedFromDb.get(databaseId));
     }
@@ -84,18 +100,36 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
             return Collections.emptyMap();
         }
         Map<ResourceId,DatabaseMeta> loaded = new HashMap<>(databases.size());
-        loaded.putAll(loadFromMemcache(toFetch));
-        if (loaded.size() == toFetch.size()) {
+
+        // Session Cache
+        loaded.putAll(loadFromSessionCache(toFetch));
+        loaded.forEach((dbId,cachedDbMeta) -> toFetch.remove(dbId));
+        if (toFetch.isEmpty()) {
             return loaded;
         }
-        loaded.forEach((dbId,cachedDbMeta) -> toFetch.remove(dbId));
+
+        // Memcache
+        Map<ResourceId, DatabaseMeta> loadedFromMemcache = loadFromMemcache(toFetch);
+        if (!loadedFromMemcache.isEmpty()) {
+            cacheToSessionCache(loadedFromMemcache.values());
+            loaded.putAll(loadedFromMemcache);
+            loadedFromMemcache.forEach((dbId,cachedDbMeta) -> toFetch.remove(dbId));
+        }
+        if (toFetch.isEmpty()) {
+            return loaded;
+        }
+
+        // Database
         Map<ResourceId,DatabaseMeta> loadedFromDb = loadFromDb(toFetch.keySet());
         if (!loadedFromDb.isEmpty()) {
+            cacheToSessionCache(loadedFromDb.values());
             cacheToMemcache(loadedFromDb.values());
             loaded.putAll(loadedFromDb);
         }
         return loaded;
     }
+
+
 
     @Override
     public Map<ResourceId, DatabaseMeta> getOwnedDatabaseMeta(int ownerId) {
@@ -153,6 +187,21 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
                 .collect(Collectors.toSet());
     }
 
+    private Map<ResourceId,DatabaseMeta> loadFromSessionCache(Map<ResourceId,Long> toFetch) {
+        LOGGER.info(() -> String.format("Fetching %d DatabaseMeta from SessionCache", toFetch.size()));
+        Map<ResourceId,DatabaseMeta> loaded = new HashMap<>(toFetch.size());
+        Map<ResourceId,String> fetchKeys = toFetch.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, db -> memcacheKey(db.getKey(),db.getValue())));
+        try {
+            loaded.putAll(sessionCache.loadAll(fetchKeys));
+        } catch (Exception ignorable) {
+            // Session cache load failed, but we can still retrieve from memcache or database
+            LOGGER.severe(String.format("Fetching failed for %d DatabaseMeta from SessionCache", toFetch.size()));
+        }
+        LOGGER.info(() -> String.format("Fetched %d/%d DatabaseMeta from SessionCache", loaded.size(), toFetch.size()));
+        return loaded;
+    }
+
     private Map<ResourceId,DatabaseMeta> loadFromMemcache(Map<ResourceId,Long> toFetch) {
         LOGGER.info(() -> String.format("Fetching %d DatabaseMeta from Memcache", toFetch.size()));
         Map<ResourceId,DatabaseMeta> loaded = new HashMap<>(toFetch.size());
@@ -197,6 +246,15 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
                 .collect(Collectors.toMap(
                         DatabaseMeta::getDatabaseId,
                         dbMeta -> dbMeta));
+    }
+
+    private void cacheToSessionCache(Collection<DatabaseMeta> databases) {
+        LOGGER.info(() -> String.format("Caching %d DatabaseMeta to SessionCache", databases.size()));
+        Map<String,DatabaseMeta> toCache = databases.stream()
+                .collect(Collectors.toMap(
+                        db -> memcacheKey(db.getDatabaseId(),db.getVersion()),
+                        db -> db));
+        sessionCache.putAll(toCache);
     }
 
     private void cacheToMemcache(Collection<DatabaseMeta> databases) {

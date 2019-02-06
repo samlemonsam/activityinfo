@@ -29,9 +29,7 @@ import org.activityinfo.server.database.hibernate.dao.HibernateDAOModule;
 import org.activityinfo.server.database.hibernate.dao.TransactionModule;
 import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
-import org.activityinfo.store.spi.DatabaseGrantProvider;
-import org.activityinfo.store.spi.DatabaseMetaProvider;
-import org.activityinfo.store.spi.FormStorageProvider;
+import org.activityinfo.store.spi.*;
 import org.hibernate.Session;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.validator.HibernateValidator;
@@ -62,6 +60,8 @@ public class HibernateModule extends ServletModule {
         bind(FormStorageProvider.class).toProvider(HibernateCatalogProvider.class);
         bind(DatabaseMetaProvider.class).to(HibernateDatabaseMetaProvider.class);
         bind(DatabaseGrantProvider.class).to(HibernateDatabaseGrantProvider.class);
+        bind(DatabaseMetaCache.class).to(HibernateDatabaseMetaCache.class);
+        bind(DatabaseGrantCache.class).to(HibernateDatabaseGrantCache.class);
 
         /*
          * Important: the CloudSqlFilter must be listed before
@@ -109,16 +109,33 @@ public class HibernateModule extends ServletModule {
     @Provides
     protected HibernateDatabaseMetaProvider provideHibernateDatabaseMetaProvider(Provider<EntityManager> entityManager,
                                                                                  FormStorageProvider formStorageProvider,
+                                                                                 DatabaseMetaCache databaseMetaCache,
                                                                                  BillingAccountOracle billingAccountOracle) {
         return new HibernateDatabaseMetaProvider(entityManager,
                 formStorageProvider,
+                databaseMetaCache,
                 MemcacheServiceFactory.getMemcacheService(),
                 billingAccountOracle);
     }
 
     @Provides
-    protected HibernateDatabaseGrantProvider provideHibernateDatabaseGrantProvider(Provider<EntityManager> entityManager) {
-        return new HibernateDatabaseGrantProvider(entityManager, MemcacheServiceFactory.getMemcacheService());
+    @Singleton
+    protected HibernateDatabaseMetaCache provideHibernateDatabaseMetaCache() {
+        return HibernateDatabaseMetaCache.newSession();
+    }
+
+    @Provides
+    protected HibernateDatabaseGrantProvider provideHibernateDatabaseGrantProvider(Provider<EntityManager> entityManager,
+                                                                                   DatabaseGrantCache databaseGrantCache) {
+        return new HibernateDatabaseGrantProvider(entityManager,
+                databaseGrantCache,
+                MemcacheServiceFactory.getMemcacheService());
+    }
+
+    @Provides
+    @Singleton
+    protected HibernateDatabaseGrantCache provideHibernateDatabaseGrantCache() {
+        return HibernateDatabaseGrantCache.newSession();
     }
     
 }

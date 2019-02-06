@@ -22,6 +22,7 @@ import org.junit.runner.RunWith;
 
 import javax.persistence.EntityManager;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -38,6 +39,9 @@ public class HibernateDatabaseMetaProviderTest {
 
     private final LocalServiceTestHelper helper =
             new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
+
+    @Inject
+    HibernateDatabaseMetaCache sessionCache;
 
     @Before
     public void setUp() {
@@ -118,20 +122,37 @@ public class HibernateDatabaseMetaProviderTest {
     @Test
     public void caching() {
         // Clear cache
+        // 1. Clear Session Cache
+        sessionCache.clear();
+
+        // 2. Clear Memcache
         MemcacheService memcacheService = MemcacheServiceFactory.getMemcacheService();
         memcacheService.clearAll();
         assert memcacheService.getStatistics().getItemCount() == 0;
         assert memcacheService.getStatistics().getHitCount() == 0;
 
-        // Fetch a database - should be cached once retrieved
+        // Fetch a database - should be cached in both session cache and memcache once retrieved
         Optional<DatabaseMeta> dbMeta = databaseMetaProvider.getDatabaseMeta(databaseId(1));
         assert dbMeta.isPresent();
+
+        // 1. Session cache
+        String cacheKey = HibernateDatabaseMetaProvider.memcacheKey(dbMeta.get().getDatabaseId(), dbMeta.get().getVersion());
+        Map<ResourceId,DatabaseMeta> sessionCachedDbMeta = sessionCache.loadAll(Collections.singletonMap(dbMeta.get().getDatabaseId(), cacheKey));
+        assert sessionCachedDbMeta.size() == 1;
+
+        // 2. Memcache
         assert memcacheService.getStatistics().getItemCount() > 0;
         assert memcacheService.getStatistics().getHitCount() == 0;
-        assert memcacheService.contains(HibernateDatabaseMetaProvider.memcacheKey(dbMeta.get().getDatabaseId(), dbMeta.get().getVersion()));
 
-        // Fetch the same database again - should be retrieved from cache
+        // Fetch the same database again - should be retrieved from session cache
         Optional<DatabaseMeta> cachedDbMeta = databaseMetaProvider.getDatabaseMeta(databaseId(1));
+        assert cachedDbMeta.isPresent();
+        assert memcacheService.getStatistics().getItemCount() > 0;
+        assert memcacheService.getStatistics().getHitCount() == 0;
+
+        // Clear session cache and fetch the same database again - should be retrieved from memcache
+        sessionCache.clear();
+        cachedDbMeta = databaseMetaProvider.getDatabaseMeta(databaseId(1));
         assert cachedDbMeta.isPresent();
         assert memcacheService.getStatistics().getItemCount() > 0;
         assert memcacheService.getStatistics().getHitCount() > 0;
