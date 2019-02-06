@@ -20,7 +20,6 @@ package org.activityinfo.i18n.shared;
 
 import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.safehtml.shared.SafeHtml;
-
 import java.util.Date;
 
 /**
@@ -85,7 +84,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Report ''{0}'' added to dashboard.")
     String addedToDashboard(String reportName);
 
-    @DefaultMessage("Report ''{0}'' removed from dashboard.")
+    @DefaultMessage("Report ''{0}'' deleted from dashboard.")
     String removedFromDashboard(String reportName);
 
     @DefaultMessage("The report ''{0}'' has been saved.")
@@ -145,7 +144,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Added attribute {0}")
     String siteHistoryAttrAdd(String attrName);
 
-    @DefaultMessage("Removed attribute {0}")
+    @DefaultMessage("Deleted attribute {0}")
     String siteHistoryAttrRemove(String attrName);
 
     @DefaultMessage("ActivityInfo digest for {0,date,dd-MM-yyyy}")
@@ -292,7 +291,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("User {0} is not registered with ActivityInfo.org")
     String userNotInSystem(String userName);
 
-    @DefaultMessage("Do you want to remove User: ''{0}'' from your Database?")
+    @DefaultMessage("Do you want to delete User: ''{0}'' from your Database?")
     String requestConfirmationToRemoveUser(String userName);
 
     @DefaultMessage("Do you want to delete Partner: ''{0}'' from your Database?")
