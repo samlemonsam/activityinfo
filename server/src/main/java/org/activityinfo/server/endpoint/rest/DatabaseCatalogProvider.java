@@ -71,6 +71,7 @@ public class DatabaseCatalogProvider implements FormCatalog {
 
     private List<CatalogEntry> findDatabaseEntries(int userId) {
         return userDatabaseProvider.queryVisibleUserDatabaseMeta(userId).stream()
+                .filter(db -> !db.isDeleted())
                 .map(DatabaseCatalogProvider::databaseEntry)
                 .collect(Collectors.toList());
     }
