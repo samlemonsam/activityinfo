@@ -5,22 +5,28 @@ import org.activityinfo.model.resource.ResourceId;
 
 import javax.validation.constraints.NotNull;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
+/**
+ * Caching interface for DatabaseMeta
+ */
 public interface DatabaseMetaCache {
+
+    /**
+     * Load requested DatabaseMeta from Session Cache.
+     *
+     * @param toLoad ResourceId of DatabaseMeta to load
+     * @return Optional DatabaseMeta
+     */
+    @NotNull Optional<DatabaseMeta> load(@NotNull ResourceId toLoad);
 
     /**
      * Load all requested DatabaseMeta from Session Cache.
      *
-     * @param toLoad Map of databaseId of DatabaseMeta -> Memcache Key
-     * @return Map of databaseId of DatabaseMeta -> DatabaseMeta (if present)
+     * @param toLoad Set of ResourceId of DatabaseMeta to load
+     * @return Map of ResourceId of DatabaseMeta -> DatabaseMeta (if present)
      */
-    @NotNull Map<ResourceId,DatabaseMeta> loadAll(@NotNull Map<ResourceId,String> toLoad);
-
-    /**
-     * Put all DatabaseMeta into Session Cache. Overwrites any previous versions stored.
-     *
-     * @param toStore Map of Memcache Key -> DatabaseMeta
-     */
-    void putAll(@NotNull Map<String,DatabaseMeta> toStore);
+    @NotNull Map<ResourceId,DatabaseMeta> loadAll(@NotNull Set<ResourceId> toLoad);
 
 }

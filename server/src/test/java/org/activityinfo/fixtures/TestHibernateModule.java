@@ -106,13 +106,10 @@ public class TestHibernateModule extends AbstractModule {
     @Provides
     protected HibernateDatabaseMetaProvider provideHibernateDatabaseMetaProvider(Provider<EntityManager> entityManager,
                                                                                  FormStorageProvider formStorageProvider,
-                                                                                 HibernateDatabaseMetaCache databaseMetaCache,
-                                                                                 BillingAccountOracle billingAccountOracle) {
+                                                                                 HibernateDatabaseMetaCache databaseMetaCache) {
         return new HibernateDatabaseMetaProvider(entityManager,
                 formStorageProvider,
-                databaseMetaCache,
-                MemcacheServiceFactory.getMemcacheService(),
-                billingAccountOracle);
+                databaseMetaCache);
     }
 
     @Provides
@@ -124,9 +121,13 @@ public class TestHibernateModule extends AbstractModule {
     }
 
     @Provides
-    @Singleton
-    protected HibernateDatabaseMetaCache provideHibernateDatabaseMetaCache() {
-        return HibernateDatabaseMetaCache.newSession();
+    protected HibernateDatabaseMetaCache provideHibernateDatabaseMetaCache(Provider<EntityManager> entityManager,
+                                                                           FormStorageProvider formStorageProvider,
+                                                                           BillingAccountOracle billingAccountOracle) {
+        return new HibernateDatabaseMetaCache(entityManager,
+                formStorageProvider,
+                MemcacheServiceFactory.getMemcacheService(),
+                billingAccountOracle);
     }
 
     @Provides
