@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.json.Json;
@@ -34,18 +35,18 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * <p>Caching mechanism for DatabaseMeta. The sessionCache has three components:
+ * <p>Caching mechanism for DatabaseMeta. The cache has three components:
  * <ol>
- *     <li>Request-level in-memory session cache for DatabaseMeta, using Guava LoadingCache as backing sessionCache.</li>
+ *     <li>Request-level in-memory cache for DatabaseMeta, using Guava LoadingCache as backing cache.</li>
  *     <li>Distributed in-memory cache, using Appengine Memcache.</li>
  *     <li>Database Loader, using Hibernate EntityManager.</li>
  * </ol>
- *     The sessionCache will attempt to retrieve DatabaseMeta from the session sessionCache first, then memcache, and if that
- *     fails then loads and builds the DatabaseMeta from the database. DatabaseMeta, when constructed, will be stored in
- *     memcache and session sessionCache.
+ *     The cache will attempt to retrieve DatabaseMeta from the request cache first, then Memcache, and if that
+ *     fails then loads and builds the DatabaseMeta from the MySQL Database. DatabaseMeta, when constructed, will be
+ *     stored in Memcache and request cache.
  * </p>
  *
- * <p>DatabaseMeta are keyed in the request sessionCache by the ResourceId of the Database.</p>
+ * <p>DatabaseMeta are keyed in the request cache by the ResourceId of the Database.</p>
  */
 public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
 
@@ -62,8 +63,9 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
     private final MemcacheService memcacheService;
     private final BillingAccountOracle billingAccountOracle;
 
-    private final LoadingCache<ResourceId,Optional<DatabaseMeta>> sessionCache;
+    private final LoadingCache<ResourceId,Optional<DatabaseMeta>> cache;
 
+    @Inject
     public HibernateDatabaseMetaCache(Provider<EntityManager> entityManager,
                                       FormStorageProvider formStorageProvider,
                                       MemcacheService memcacheService,
@@ -72,7 +74,7 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
         this.formStorageProvider = formStorageProvider;
         this.memcacheService = memcacheService;
         this.billingAccountOracle = billingAccountOracle;
-        this.sessionCache = CacheBuilder.newBuilder()
+        this.cache = CacheBuilder.newBuilder()
                 .maximumSize(MAX_CACHE_SIZE)
                 .expireAfterAccess(EXPIRES_IN, TimeUnit.MINUTES)
                 .build(buildCacheLoader());
@@ -81,7 +83,7 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
     @Override
     public Optional<DatabaseMeta> load(ResourceId toLoad) {
         try {
-            return sessionCache.get(toLoad);
+            return cache.get(toLoad);
         } catch (ExecutionException loadFailure) {
             throw new RuntimeException(loadFailure);
         }
@@ -90,17 +92,13 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
     @Override
     public Map<ResourceId, DatabaseMeta> loadAll(Set<ResourceId> toLoad) {
         try {
-            return sessionCache.getAll(toLoad).values().stream()
+            return cache.getAll(toLoad).values().stream()
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .collect(Collectors.toMap(DatabaseMeta::getDatabaseId, db -> db));
         } catch (ExecutionException loadFailure) {
             throw new RuntimeException(loadFailure);
         }
-    }
-
-    protected LoadingCache getSessionCache() {
-        return sessionCache;
     }
 
     private CacheLoader<ResourceId,Optional<DatabaseMeta>> buildCacheLoader() {
@@ -135,6 +133,12 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
 
                 // Load versions
                 Map<ResourceId,Long> toLoad = queryDatabaseVersions(keySet);
+                if (toLoad.isEmpty()) {
+                    return keySet.stream()
+                            .collect(Collectors.toMap(
+                                    key -> key,
+                                    key -> Optional.empty()));
+                }
                 Map<ResourceId,Optional<DatabaseMeta>> loaded = new HashMap<>(toLoad.size());
 
                 // Load from Memcache
@@ -156,7 +160,10 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
                 }
 
                 // Return Optional.empty for database(s) left in "toLoad"
-                loaded.putAll(toLoad.keySet().stream().collect(Collectors.toMap(id -> id, id -> Optional.empty())));
+                loaded.putAll(toLoad.keySet().stream()
+                        .collect(Collectors.toMap(
+                                id -> id,
+                                id -> Optional.empty())));
 
                 return loaded;
             }

@@ -21,20 +21,20 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
 
     private final Provider<EntityManager> entityManager;
     private final FormStorageProvider formStorageProvider;
-    private final DatabaseMetaCache sessionCache;
+    private final DatabaseMetaCache cache;
 
     @Inject
     public HibernateDatabaseMetaProvider(Provider<EntityManager> entityManager,
                                          FormStorageProvider formStorageProvider,
-                                         DatabaseMetaCache sessionCache) {
+                                         DatabaseMetaCache cache) {
         this.entityManager = entityManager;
         this.formStorageProvider = formStorageProvider;
-        this.sessionCache = sessionCache;
+        this.cache = cache;
     }
 
     @Override
     public Optional<DatabaseMeta> getDatabaseMeta(@NotNull ResourceId databaseId) {
-        return sessionCache.load(databaseId);
+        return cache.load(databaseId);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         if (databases.isEmpty()) {
             return Collections.emptyMap();
         }
-        return sessionCache.loadAll(databases);
+        return cache.loadAll(databases);
     }
 
     @Override
