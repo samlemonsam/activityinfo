@@ -116,8 +116,7 @@ public class TestHibernateModule extends AbstractModule {
     protected HibernateDatabaseGrantProvider provideHibernateDatabaseGrantProvider(Provider<EntityManager> entityManager,
                                                                                    DatabaseGrantCache databaseGrantCache) {
         return new HibernateDatabaseGrantProvider(entityManager,
-                databaseGrantCache,
-                MemcacheServiceFactory.getMemcacheService());
+                databaseGrantCache);
     }
 
     @Provides
@@ -131,9 +130,9 @@ public class TestHibernateModule extends AbstractModule {
     }
 
     @Provides
-    @Singleton
-    protected HibernateDatabaseGrantCache provideHibernateDatabaseGrantCache() {
-        return HibernateDatabaseGrantCache.newSession();
+    protected HibernateDatabaseGrantCache provideHibernateDatabaseGrantCache(Provider<EntityManager> entityManager) {
+        return new HibernateDatabaseGrantCache(entityManager,
+                MemcacheServiceFactory.getMemcacheService());
     }
     
 }

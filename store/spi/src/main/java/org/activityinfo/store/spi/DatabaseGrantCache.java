@@ -1,35 +1,32 @@
 package org.activityinfo.store.spi;
 
 import org.activityinfo.model.database.DatabaseGrant;
-import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.database.DatabaseGrantKey;
 
 import javax.validation.constraints.NotNull;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
+/**
+ * Cache interface for DatabaseGrants
+ */
 public interface DatabaseGrantCache {
 
     /**
-     * Session Cache Key for retrieving DatabaseGrants.
-     * It differs from the Memcache Key in that it is not dependent on DatabaseGrant or cache version.
+     * Load requested DatabaseGrant from Cache.
      *
-     * @param userId the userId of the requesting User
-     * @param databaseId the databaseId of the requested DatabaseGrant
+     * @param toLoad DatabaseGrantKey of DatabaseGrant to load
+     * @return Optional DatabaseGrant
      */
-    @NotNull String key(int userId, @NotNull ResourceId databaseId);
+    @NotNull Optional<DatabaseGrant> load(@NotNull DatabaseGrantKey toLoad);
 
     /**
-     * Load all requested DatabaseGrants from Session Cache.
+     * Load all requested DatabaseGrants from Cache.
      *
-     * @param toLoad Map of Session Cache Key (UserId:DatabaseId) -> Memcache Key
-     * @return Map of Session Cache Key -> DatabaseGrant (if present)
+     * @param toLoad Set of DatabaseGrantKey of DatabaseGrants to load
+     * @return Map of DatabaseGrantKey -> DatabaseGrant (if present)
      */
-    @NotNull Map<String,DatabaseGrant> loadAll(@NotNull Map<String,String> toLoad);
-
-    /**
-     * Put all DatabaseGrants into Session Cache. Overwrites any previous versions stored.
-     *
-     * @param toStore Map of Memcache Key -> DatabaseGrant
-     */
-    void putAll(@NotNull Map<String,DatabaseGrant> toStore);
+    @NotNull Map<DatabaseGrantKey,DatabaseGrant> loadAll(@NotNull Set<DatabaseGrantKey> toLoad);
 
 }
