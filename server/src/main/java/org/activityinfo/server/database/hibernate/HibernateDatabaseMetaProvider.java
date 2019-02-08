@@ -1,25 +1,11 @@
 package org.activityinfo.server.database.hibernate;
 
-import com.google.appengine.api.memcache.MemcacheService;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import org.activityinfo.i18n.shared.I18N;
-import org.activityinfo.json.Json;
-import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.model.database.DatabaseMeta;
-import org.activityinfo.model.database.RecordLock;
-import org.activityinfo.model.database.Resource;
-import org.activityinfo.model.database.ResourceType;
-import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.subform.SubFormReferenceType;
-import org.activityinfo.server.database.hibernate.entity.Activity;
-import org.activityinfo.server.database.hibernate.entity.Database;
-import org.activityinfo.server.database.hibernate.entity.Folder;
-import org.activityinfo.server.database.hibernate.entity.LockedPeriod;
-import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
+import org.activityinfo.store.spi.DatabaseMetaCache;
 import org.activityinfo.store.spi.DatabaseMetaProvider;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.FormStorageProvider;
@@ -29,49 +15,26 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.validation.constraints.NotNull;
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
 
-    private static final Logger LOGGER = Logger.getLogger(HibernateDatabaseGrantProvider.class.getName());
-
-    private static final String CACHE_PREFIX = "dbMeta";
-    private static final String CACHE_VERSION = "5";
-
     private final Provider<EntityManager> entityManager;
     private final FormStorageProvider formStorageProvider;
-    private final MemcacheService memcacheService;
-    private final BillingAccountOracle billingAccountOracle;
+    private final DatabaseMetaCache cache;
 
     @Inject
     public HibernateDatabaseMetaProvider(Provider<EntityManager> entityManager,
                                          FormStorageProvider formStorageProvider,
-                                         MemcacheService memcacheService,
-                                         BillingAccountOracle billingAccountOracle) {
+                                         DatabaseMetaCache cache) {
         this.entityManager = entityManager;
         this.formStorageProvider = formStorageProvider;
-        this.memcacheService = memcacheService;
-        this.billingAccountOracle = billingAccountOracle;
+        this.cache = cache;
     }
 
     @Override
     public Optional<DatabaseMeta> getDatabaseMeta(@NotNull ResourceId databaseId) {
-        Long databaseVersion = queryDatabaseVersion(databaseId);
-        if (databaseVersion == null) {
-            return Optional.empty();
-        }
-        Map<ResourceId,DatabaseMeta> loaded = loadFromMemcache(Collections.singletonMap(databaseId,databaseVersion));
-        if (!loaded.isEmpty()) {
-            return Optional.of(loaded.get(databaseId));
-        }
-        Map<ResourceId,DatabaseMeta> loadedFromDb = loadFromDb(Collections.singleton(databaseId));
-        if (loadedFromDb.isEmpty()) {
-            return Optional.empty();
-        }
-        cacheToMemcache(loadedFromDb.values());
-        return Optional.of(loadedFromDb.get(databaseId));
+        return cache.load(databaseId);
     }
 
     @Override
@@ -79,22 +42,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         if (databases.isEmpty()) {
             return Collections.emptyMap();
         }
-        Map<ResourceId,Long> toFetch = queryDatabaseVersions(databases);
-        if (toFetch.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        Map<ResourceId,DatabaseMeta> loaded = new HashMap<>(databases.size());
-        loaded.putAll(loadFromMemcache(toFetch));
-        if (loaded.size() == toFetch.size()) {
-            return loaded;
-        }
-        loaded.forEach((dbId,cachedDbMeta) -> toFetch.remove(dbId));
-        Map<ResourceId,DatabaseMeta> loadedFromDb = loadFromDb(toFetch.keySet());
-        if (!loadedFromDb.isEmpty()) {
-            cacheToMemcache(loadedFromDb.values());
-            loaded.putAll(loadedFromDb);
-        }
-        return loaded;
+        return cache.loadAll(databases);
     }
 
     @Override
@@ -130,18 +78,6 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         }
     }
 
-    private Map<ResourceId,Long> queryDatabaseVersions(@NotNull Set<ResourceId> databaseIds) {
-        Map<ResourceId,Long> versions = databaseIds.stream()
-                .collect(Collectors.toMap(
-                        dbId -> dbId,
-                        this::queryDatabaseVersion));
-        return versions.entrySet().stream()
-                .filter(dbVersion -> dbVersion.getValue() != null)
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue));
-    }
-
     private Set<ResourceId> queryOwnedDatabaseIds(int ownerId) {
         return entityManager.get().createQuery("SELECT db.id " +
                 "FROM Database db " +
@@ -151,82 +87,6 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
                 .getResultList().stream()
                 .map(CuidAdapter::databaseId)
                 .collect(Collectors.toSet());
-    }
-
-    private Map<ResourceId,DatabaseMeta> loadFromMemcache(Map<ResourceId,Long> toFetch) {
-        LOGGER.info(() -> String.format("Fetching %d DatabaseMeta from Memcache", toFetch.size()));
-        Map<ResourceId,DatabaseMeta> loaded = new HashMap<>(toFetch.size());
-        Map<String,ResourceId> fetchKeys = toFetch.entrySet().stream()
-                .collect(Collectors.toMap(
-                        db -> memcacheKey(db.getKey(), db.getValue()),
-                        Map.Entry::getKey));
-        try {
-            Map<String,Object> cached = memcacheService.getAll(fetchKeys.keySet());
-            loaded.putAll(cached.entrySet().stream()
-                    .collect(Collectors.toMap(
-                            cachedDb -> fetchKeys.get(cachedDb.getKey()),
-                            cachedDb -> deserialize((String) cachedDb.getValue()))));
-        } catch (Exception ignorable) {
-            // Memcache load failed, but we can still retrieve from database
-            LOGGER.severe(String.format("Fetching failed for %d DatabaseMeta from Memcache", toFetch.size()));
-        }
-        LOGGER.info(() -> String.format("Fetched %d/%d DatabaseMeta from Memcache", loaded.size(), toFetch.size()));
-        return loaded;
-    }
-
-    private DatabaseMeta deserialize(String serializedDatabaseMeta) {
-        return DatabaseMeta.fromJson(Json.parse(serializedDatabaseMeta));
-    }
-
-    private Map<ResourceId,DatabaseMeta> loadFromDb(Set<ResourceId> toFetch) {
-        LOGGER.info(() -> String.format("Fetching %d DatabaseMeta from MySqlDatabase", toFetch.size()));
-        if (toFetch.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        Set<Integer> legacysIds = toFetch.stream()
-                .map(CuidAdapter::getLegacyIdFromCuid)
-                .collect(Collectors.toSet());
-        Set<Integer> suspendedDatabases = billingAccountOracle.getSuspendedDatabases(legacysIds);
-        return entityManager.get().createQuery("SELECT db " +
-                "FROM Database db " +
-                "WHERE db.id IN :databaseIds", Database.class)
-                .setParameter("databaseIds", legacysIds)
-                .getResultList().stream()
-                .filter(Objects::nonNull)
-                .map(db -> buildMeta(db, suspendedDatabases.contains(db.getId())))
-                .collect(Collectors.toMap(
-                        DatabaseMeta::getDatabaseId,
-                        dbMeta -> dbMeta));
-    }
-
-    private void cacheToMemcache(Collection<DatabaseMeta> databases) {
-        LOGGER.info(() -> String.format("Caching %d DatabaseMeta to Memcache", databases.size()));
-        Map<String,String> toCache = databases.stream()
-                .collect(Collectors.toMap(
-                        db -> memcacheKey(db.getDatabaseId(),db.getVersion()),
-                        db -> db.toJson().toJson()));
-        try {
-            memcacheService.putAll(toCache);
-        } catch (Exception ignorable) {
-            // Caching failed, but is not terminal
-            LOGGER.severe(String.format("Caching failed for %d DatabaseMeta to Memcache", databases.size()));
-        }
-    }
-
-    static String memcacheKey(ResourceId databaseId, long databaseVersion) {
-        return String.format("%s:%s_%s:%d", CACHE_PREFIX, CACHE_VERSION,  databaseId.asString(), databaseVersion);
-    }
-
-    private @Nullable Long queryDatabaseVersion(ResourceId databaseId) {
-        try {
-            return entityManager.get().createQuery("SELECT db.metaVersion " +
-                    "FROM Database db " +
-                    "WHERE db.id=:dbId", Long.class)
-                    .setParameter("dbId", CuidAdapter.getLegacyIdFromCuid(databaseId))
-                    .getSingleResult();
-        } catch (NoResultException noDatabase) {
-            return null;
-        }
     }
 
     private @Nullable ResourceId queryDatabaseIdForForm(@NotNull ResourceId formId) {
@@ -254,140 +114,6 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         } catch (NoResultException noResult) {
             return null;
         }
-    }
-
-    private @Nullable DatabaseMeta buildMeta(@Nullable Database database, boolean suspended) {
-        if (database == null) {
-            return null;
-        }
-        if (database.isDeleted()) {
-            return buildDeletedMeta(database);
-        }
-        return new DatabaseMeta.Builder()
-                .setDatabaseId(CuidAdapter.databaseId(database.getId()))
-                .setOwnerId(database.getOwner().getId())
-                .setVersion(database.getMetaVersion())
-                .setLabel(database.getName())
-                .setDescription(database.getFullName())
-                .setPublished(false)
-                .setPendingTransfer(database.hasPendingTransfer())
-                .addResources(fetchResources(database))
-                .addLocks(fetchLocks(database))
-                .setSuspended(suspended)
-                .build();
-    }
-
-    private @Nullable DatabaseMeta buildDeletedMeta(@NotNull Database database) {
-        return new DatabaseMeta.Builder()
-                .setDatabaseId(CuidAdapter.databaseId(database.getId()))
-                .setOwnerId(database.getOwner().getId())
-                .setVersion(database.getMetaVersion())
-                .setDeleted(true)
-                .build();
-    }
-
-    private List<Resource> fetchResources(@NotNull Database database) {
-        List<Resource> resources = new ArrayList<>();
-
-        List<Resource> formResources = fetchForms(database);
-        List<Resource> monthlyReportingResources = fetchMonthlyReportingSubForms(database);
-        List<Resource> subFormResources = fetchSubForms(formResources);
-        List<Resource> folderResources = fetchFolders(database);
-
-        Resource partnerResource = partnerFormResource(database);
-
-        resources.addAll(formResources);
-        resources.addAll(monthlyReportingResources);
-        resources.addAll(subFormResources);
-        resources.addAll(folderResources);
-        resources.add(partnerResource);
-
-        return resources;
-    }
-
-    private Resource partnerFormResource(Database database) {
-        return new Resource.Builder()
-                .setId(CuidAdapter.partnerFormId(database.getId()))
-                .setParentId(database.getResourceId())
-                .setLabel(I18N.CONSTANTS.partners())
-                .setVisibleAsReference()
-                .setType(ResourceType.FORM)
-                .build();
-    }
-
-    private List<Resource> fetchForms(@NotNull Database database) {
-        return database.getActivities().stream()
-                .filter(a -> !a.isDeleted())
-                .map(Activity::asResource)
-                .collect(Collectors.toList());
-    }
-
-    private List<Resource> fetchMonthlyReportingSubForms(Database database) {
-        return database.getActivities().stream()
-                .filter(a -> !a.isDeleted())
-                .filter(Activity::isClassicView)
-                .filter(a -> a.getReportingFrequency() == ActivityFormDTO.REPORT_MONTHLY)
-                .map(HibernateDatabaseMetaProvider::buildMonthlyReportResource)
-                .collect(Collectors.toList());
-    }
-
-    private static Resource buildMonthlyReportResource(Activity monthlyActivity) {
-        return new Resource.Builder()
-                .setId(CuidAdapter.reportingPeriodFormClass(monthlyActivity.getId()))
-                .setParentId(monthlyActivity.getFormId())
-                .setLabel(monthlyActivity.getName() + " Monthly Reports")
-                .setVisibility(monthlyActivity.resourceVisibility())
-                .setType(ResourceType.SUB_FORM)
-                .build();
-    }
-
-    private List<Resource> fetchSubForms(List<Resource> formResources) {
-        return formResources.stream()
-                .flatMap(this::extractSubFormResources)
-                .collect(Collectors.toList());
-    }
-
-    private Stream<Resource> extractSubFormResources(@NotNull Resource formResource) {
-        return formStorageProvider.getForm(formResource.getId())
-                .transform(form -> extractSubFormReferenceFields(form.getFormClass())
-                        .map(sf -> buildSubFormResource(formResource, sf)))
-                .or(Stream::empty);
-    }
-
-    private static Stream<FormField> extractSubFormReferenceFields(FormClass formClass) {
-        return formClass.getFields().stream()
-                .filter(field -> field.getType() instanceof SubFormReferenceType);
-    }
-
-    private static Resource buildSubFormResource(Resource parentFormResource, FormField subFormReferenceField) {
-        return new Resource.Builder()
-                .setId(subFormId(subFormReferenceField))
-                .setParentId(parentFormResource.getId())
-                .setLabel(subFormReferenceField.getLabel())
-                .setVisibility(parentFormResource.getVisibility())
-                .setType(ResourceType.SUB_FORM)
-                .build();
-    }
-
-    private static ResourceId subFormId(@NotNull FormField subFormField) {
-        return ((SubFormReferenceType) subFormField.getType()).getClassId();
-    }
-
-    private List<Resource> fetchFolders(@NotNull Database database) {
-        return entityManager.get().createQuery("SELECT f " +
-                "FROM Folder f " +
-                "WHERE f.database=:database", Folder.class)
-                .setParameter("database", database)
-                .getResultList().stream()
-                .map(Folder::asResource)
-                .collect(Collectors.toList());
-    }
-
-    private List<RecordLock> fetchLocks(@NotNull Database database) {
-        return database.getLockedPeriods().stream()
-                .filter(LockedPeriod::isEnabled)
-                .map(LockedPeriod::asDatabaseLock)
-                .collect(Collectors.toList());
     }
 
 }

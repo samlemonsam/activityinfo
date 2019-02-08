@@ -26,17 +26,12 @@ import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.activityinfo.server.database.TestConnectionProvider;
-import org.activityinfo.server.database.hibernate.EntityManagerProvider;
-import org.activityinfo.server.database.hibernate.HibernateCatalogProvider;
-import org.activityinfo.server.database.hibernate.HibernateDatabaseGrantProvider;
-import org.activityinfo.server.database.hibernate.HibernateDatabaseMetaProvider;
+import org.activityinfo.server.database.hibernate.*;
 import org.activityinfo.server.database.hibernate.dao.HibernateDAOModule;
 import org.activityinfo.server.database.hibernate.dao.TransactionModule;
 import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
-import org.activityinfo.store.spi.DatabaseGrantProvider;
-import org.activityinfo.store.spi.DatabaseMetaProvider;
-import org.activityinfo.store.spi.FormStorageProvider;
+import org.activityinfo.store.spi.*;
 import org.hibernate.Session;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.validator.HibernateValidator;
@@ -63,6 +58,8 @@ public class TestHibernateModule extends AbstractModule {
 
         bind(DatabaseGrantProvider.class).to(HibernateDatabaseGrantProvider.class);
         bind(DatabaseMetaProvider.class).to(HibernateDatabaseMetaProvider.class);
+        bind(DatabaseMetaCache.class).to(HibernateDatabaseMetaCache.class);
+        bind(DatabaseGrantCache.class).to(HibernateDatabaseGrantCache.class);
 
         bind(SqlDialect.class).to(MySqlDialect.class);
         bind(Connection.class).toProvider(TestConnectionProvider.class);
@@ -109,16 +106,33 @@ public class TestHibernateModule extends AbstractModule {
     @Provides
     protected HibernateDatabaseMetaProvider provideHibernateDatabaseMetaProvider(Provider<EntityManager> entityManager,
                                                                                  FormStorageProvider formStorageProvider,
-                                                                                 BillingAccountOracle billingAccountOracle) {
+                                                                                 HibernateDatabaseMetaCache databaseMetaCache) {
         return new HibernateDatabaseMetaProvider(entityManager,
+                formStorageProvider,
+                databaseMetaCache);
+    }
+
+    @Provides
+    protected HibernateDatabaseGrantProvider provideHibernateDatabaseGrantProvider(Provider<EntityManager> entityManager,
+                                                                                   DatabaseGrantCache databaseGrantCache) {
+        return new HibernateDatabaseGrantProvider(entityManager,
+                databaseGrantCache);
+    }
+
+    @Provides
+    protected HibernateDatabaseMetaCache provideHibernateDatabaseMetaCache(Provider<EntityManager> entityManager,
+                                                                           FormStorageProvider formStorageProvider,
+                                                                           BillingAccountOracle billingAccountOracle) {
+        return new HibernateDatabaseMetaCache(entityManager,
                 formStorageProvider,
                 MemcacheServiceFactory.getMemcacheService(),
                 billingAccountOracle);
     }
 
     @Provides
-    protected HibernateDatabaseGrantProvider provideHibernateDatabaseGrantProvider(Provider<EntityManager> entityManager) {
-        return new HibernateDatabaseGrantProvider(entityManager, MemcacheServiceFactory.getMemcacheService());
+    protected HibernateDatabaseGrantCache provideHibernateDatabaseGrantCache(Provider<EntityManager> entityManager) {
+        return new HibernateDatabaseGrantCache(entityManager,
+                MemcacheServiceFactory.getMemcacheService());
     }
     
 }

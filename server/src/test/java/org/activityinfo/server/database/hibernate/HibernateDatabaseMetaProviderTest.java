@@ -22,6 +22,7 @@ import org.junit.runner.RunWith;
 
 import javax.persistence.EntityManager;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -117,25 +118,24 @@ public class HibernateDatabaseMetaProviderTest {
 
     @Test
     public void caching() {
-        // Clear cache
+        // Clear memcache
         MemcacheService memcacheService = MemcacheServiceFactory.getMemcacheService();
         memcacheService.clearAll();
         assert memcacheService.getStatistics().getItemCount() == 0;
         assert memcacheService.getStatistics().getHitCount() == 0;
 
-        // Fetch a database - should be cached once retrieved
+        // Fetch a database - should be cached in memcache once retrieved
         Optional<DatabaseMeta> dbMeta = databaseMetaProvider.getDatabaseMeta(databaseId(1));
         assert dbMeta.isPresent();
         assert memcacheService.getStatistics().getItemCount() > 0;
         assert memcacheService.getStatistics().getHitCount() == 0;
-        assert memcacheService.contains(HibernateDatabaseMetaProvider.memcacheKey(dbMeta.get().getDatabaseId(), dbMeta.get().getVersion()));
 
-        // Fetch the same database again - should be retrieved from cache
+        // Fetch the same database again - should be retrieved from session cache but present in memcache
         Optional<DatabaseMeta> cachedDbMeta = databaseMetaProvider.getDatabaseMeta(databaseId(1));
         assert cachedDbMeta.isPresent();
         assert memcacheService.getStatistics().getItemCount() > 0;
-        assert memcacheService.getStatistics().getHitCount() > 0;
-        assert memcacheService.contains(HibernateDatabaseMetaProvider.memcacheKey(cachedDbMeta.get().getDatabaseId(), cachedDbMeta.get().getVersion()));
+        assert memcacheService.getStatistics().getHitCount() == 0;
+        assert memcacheService.contains(HibernateDatabaseMetaCache.memcacheKey(cachedDbMeta.get().getDatabaseId(), cachedDbMeta.get().getVersion()));
     }
 
 }
