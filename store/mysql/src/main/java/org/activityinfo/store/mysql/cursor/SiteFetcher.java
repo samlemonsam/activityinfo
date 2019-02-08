@@ -226,7 +226,7 @@ public class SiteFetcher {
             }
         }
 
-        LOGGER.severe("Could not find group for attribute id " + itemId);
+        LOGGER.warning("Could not find group for attribute id " + itemId);
         return null;
     }
 
