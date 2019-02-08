@@ -55,11 +55,4 @@
         </sql>
     </changeSet>
 
-    <changeSet author="jamiewhths" id="056-03">
-        <comment>
-            Drop partnerId column from userpermission
-        </comment>
-        <dropColumn tableName="userpermission" columnName="partnerId"></dropColumn>
-    </changeSet>
-
 </databaseChangeLog>
