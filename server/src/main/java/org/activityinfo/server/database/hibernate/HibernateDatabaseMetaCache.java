@@ -329,21 +329,19 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
     }
 
     private List<Resource> fetchSubForms(List<Resource> formResources) {
-        return formResources.stream()
-                .flatMap(this::extractSubFormResources)
+        Map<ResourceId,Resource> resourceMap = formResources.stream().collect(Collectors.toMap(Resource::getId, r -> r));
+        return formStorageProvider
+                .getFormClasses(resourceMap.keySet())
+                .values().stream()
+                .filter(formClass -> resourceMap.containsKey(formClass.getId()))
+                .flatMap(formClass -> extractSubFormResources(resourceMap.get(formClass.getId()), formClass))
                 .collect(Collectors.toList());
     }
 
-    private Stream<Resource> extractSubFormResources(@NotNull Resource formResource) {
-        return formStorageProvider.getForm(formResource.getId())
-                .transform(form -> extractSubFormReferenceFields(form.getFormClass())
-                        .map(sf -> buildSubFormResource(formResource, sf)))
-                .or(Stream::empty);
-    }
-
-    private static Stream<FormField> extractSubFormReferenceFields(FormClass formClass) {
+    private static Stream<Resource> extractSubFormResources(@NotNull Resource formResource, @NotNull FormClass formClass) {
         return formClass.getFields().stream()
-                .filter(field -> field.getType() instanceof SubFormReferenceType);
+                .filter(field -> field.getType() instanceof SubFormReferenceType)
+                .map(subFormRef -> buildSubFormResource(formResource, subFormRef));
     }
 
     private static Resource buildSubFormResource(Resource parentFormResource, FormField subFormReferenceField) {

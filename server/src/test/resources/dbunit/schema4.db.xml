@@ -85,7 +85,7 @@
         ** Form 12: Access to Food
   -->
   <activity activityId="9" databaseId="3" name="Intake Form" classicView="0" published="1" reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1"
-            formClass='{"id":"a0000000001","schemaVersion":1,"databaseId":"d0000000508","label":"Form",
+            formClass='{"id":"a0000000009","schemaVersion":1,"databaseId":"d0000000003","label":"Form",
             "elements":[{"id":"i0392386002","code":null,"label":"Repeating Sub-Form","description":null,"relevanceCondition":null,"visible":true,"required":false,"type":"subform","typeParameters":{"formId":"cjpcn95rd1"}}]}'/>
   <folder databaseId="3" folderId="7" name="Education"/>
   <activity activityId="10" databaseId="3" folderId="7" name="Access to education" classicView="1" reportingFrequency="0" allowEdit="1" sortOrder="1" locationTypeId="1" published="0"/>
