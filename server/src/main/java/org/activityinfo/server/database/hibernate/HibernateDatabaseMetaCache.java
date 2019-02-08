@@ -55,7 +55,7 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
     private static final String CACHE_PREFIX = "dbMeta";
     private static final String CACHE_VERSION = "5";
 
-    private static final long MAX_CACHE_SIZE = 25;
+    private static final long MAX_CACHE_SIZE = 50;
     private static final long EXPIRES_IN = 10;
 
     private final Provider<EntityManager> entityManager;
