@@ -82,16 +82,17 @@ public class DatabaseCatalogProvider implements FormCatalog {
                 "FROM Database db " +
                 "WHERE db.owner.id=:ownerId " +
                 "AND db.dateDeleted IS NULL", Object[].class)
-                .setParameter("ownerId", userId)
-                .getResultList().stream()
-                .map(result -> new CatalogEntry(
-                        CuidAdapter.databaseId((int) result[0]).asString(), // db.id
-                        (String) result[1],                                 // db.name
-                        CatalogEntryType.FOLDER));
+            .setParameter("ownerId", userId)
+            .getResultList().stream()
+            .map(result -> new CatalogEntry(
+                    CuidAdapter.databaseId((int) result[0]).asString(), // db.id
+                    (String) result[1],                                 // db.name
+                    CatalogEntryType.FOLDER));
         Stream<CatalogEntry> assignedDatabases = entityManager.get().createQuery("SELECT up.database.id, up.database.name " +
-            "FROM UserPermission up " +
-            "WHERE up.user.id=:userId " +
-            "AND up.allowView = TRUE", Object[].class)
+                "FROM UserPermission up " +
+                "WHERE up.user.id=:userId " +
+                "AND up.allowView = TRUE " +
+                "AND up.database.dateDeleted IS NULL", Object[].class)
             .setParameter("userId", userId)
             .getResultList().stream()
             .map(result -> new CatalogEntry(
