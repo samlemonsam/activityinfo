@@ -48,6 +48,8 @@ public class BatchingFormTreeBuilder {
     private final int userId;
 
     private final Map<ResourceId, FormClass> formCache = new HashMap<>();
+    private final Map<ResourceId, FormPermissions> formPermissionsCache = new HashMap<>();
+
     private final Set<ResourceId> databaseIds = new HashSet<>();
     private final Set<ResourceId> suspendedDatabaseIds = new HashSet<>();
 
@@ -167,9 +169,21 @@ public class BatchingFormTreeBuilder {
             fetched.add(formClass);
         }
 
+        fetchPermissions(toFetch);
+
         return fetched;
     }
 
+    private void fetchPermissions(Iterable<ResourceId> formIds) {
+        // Identify forms whose permissions are not yet in cache
+        Set<ResourceId> toFetch = new HashSet<>();
+        for (ResourceId formId : formIds) {
+            if (!formPermissionsCache.containsKey(formId)) {
+                toFetch.add(formId);
+            }
+        }
+        formPermissionsCache.putAll(formSupervisor.getFormPermissions(toFetch));
+    }
 
     public FormMetadata queryFormMetadata(ResourceId formId) {
         fetchFormClasses(Collections.singleton(formId));
@@ -178,15 +192,11 @@ public class BatchingFormTreeBuilder {
     }
 
     private FormMetadata buildMetadata(FormClass formClass) {
-
-        FormPermissions permissions = formSupervisor.getFormPermissions(formClass.getId());
+        FormPermissions permissions = formPermissionsCache.get(formClass.getId());
         if(!permissions.isVisible()) {
             return FormMetadata.forbidden(formClass.getId());
-
         } else {
-
             Optional<FormStorage> storage = catalog.getForm(formClass.getId());
-
             return new FormMetadata.Builder()
                     .setId(formClass.getId())
                     .setPermissions(permissions)

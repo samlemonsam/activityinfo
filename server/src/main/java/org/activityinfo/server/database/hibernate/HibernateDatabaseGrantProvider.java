@@ -32,6 +32,17 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
     }
 
     @Override
+    public Map<ResourceId, DatabaseGrant> getDatabaseGrants(int userId, Set<ResourceId> databaseIds) {
+        Set<DatabaseGrantKey> keys = databaseIds.stream()
+                .map(dbId -> DatabaseGrantKey.of(userId, dbId))
+                .collect(Collectors.toSet());
+        return cache.loadAll(keys).entrySet().stream()
+                .collect(Collectors.toMap(
+                        grant -> grant.getKey().getDatabaseId(),
+                        Map.Entry::getValue));
+    }
+
+    @Override
     public List<DatabaseGrant> getAllDatabaseGrantsForUser(int userId) {
         Set<DatabaseGrantKey> grantedDatabases = queryGrantedDatabases(userId).stream()
                 .map(dbId -> DatabaseGrantKey.of(userId,dbId))

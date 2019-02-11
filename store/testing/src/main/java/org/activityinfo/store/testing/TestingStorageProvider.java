@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @GwtIncompatible
 public class TestingStorageProvider implements FormStorageProvider, TransactionalStorageProvider {
@@ -226,7 +227,9 @@ public class TestingStorageProvider implements FormStorageProvider, Transactiona
 
     @Override
     public Map<ResourceId, FormClass> getFormClasses(Collection<ResourceId> formIds) {
-        throw new UnsupportedOperationException("TODO");
+        return formIds.stream()
+                .map(this::getFormClass)
+                .collect(Collectors.toMap(FormClass::getId, formClass -> formClass));
     }
 
     @Override

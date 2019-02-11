@@ -74,7 +74,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
                 com.google.common.base.Optional<FormStorage> subForm = formStorageProvider.getForm(resourceId);
                 return subForm.isPresent() ? getDatabaseMeta(subForm.get().getFormClass().getDatabaseId()) : Optional.empty();
             default:
-                throw new IllegalArgumentException("Cannot fetch UserDatabaseMeta for Resource: " + resourceId.toString());
+                return Optional.empty();
         }
     }
 

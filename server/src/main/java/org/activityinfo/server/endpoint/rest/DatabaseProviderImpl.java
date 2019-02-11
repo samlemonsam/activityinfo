@@ -25,7 +25,11 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.DatabaseProvider;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DatabaseProviderImpl implements DatabaseProvider {
 
@@ -51,6 +55,26 @@ public class DatabaseProviderImpl implements DatabaseProvider {
     @Override
     public Optional<UserDatabaseMeta> getDatabaseMetadata(int databaseId, int userId) {
         return getDatabaseMetadata(CuidAdapter.databaseId(databaseId), userId);
+    }
+
+    @Override
+    public Map<ResourceId, UserDatabaseMeta> getDatabaseMetadata(Set<ResourceId> databaseIds, int userId) {
+        Set<ResourceId> geoDbIds = databaseIds.stream().filter(geoDbProvider::accept).collect(Collectors.toSet());
+        Set<ResourceId> userDbIds = databaseIds.stream().filter(id -> !geoDbIds.contains(id)).collect(Collectors.toSet());
+
+        return Stream.concat(fetchGeoDbs(geoDbIds, userId), fetchUserDbs(userDbIds, userId))
+                .collect(Collectors.toMap(UserDatabaseMeta::getDatabaseId, db -> db));
+    }
+
+    private Stream<UserDatabaseMeta> fetchGeoDbs(Set<ResourceId> geoDbIds, int userId) {
+        return geoDbIds.stream()
+                .map(geoDbId -> geoDbProvider.queryGeoDb(userId))
+                .filter(Optional::isPresent)
+                .map(Optional::get);
+    }
+
+    private Stream<UserDatabaseMeta> fetchUserDbs(Set<ResourceId> userDbIds, int userId) {
+        return userDbProvider.queryDatabaseMeta(userDbIds, userId).values().stream();
     }
 
     @Override

@@ -21,11 +21,16 @@ package org.activityinfo.store.query.shared;
 import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Provides form- and record-level permissions to the query engine.
  */
 public interface FormSupervisor {
 
     FormPermissions getFormPermissions(ResourceId formId);
+
+    Map<ResourceId,FormPermissions> getFormPermissions(Set<ResourceId> formIds);
 
 }
