@@ -18,6 +18,7 @@
  */
 package org.activityinfo.store.query.server;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
@@ -28,10 +29,7 @@ import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.model.permission.FormPermissions;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -41,7 +39,9 @@ public class FormSupervisorAdapter implements FormSupervisor {
 
     private final FormStorageProvider catalog;
     private final DatabaseProvider databaseProvider;
-    private int userId;
+    private final int userId;
+
+    private final Map<ResourceId,FormPermissions> formPermissionsCache = Maps.newHashMap();
 
     public FormSupervisorAdapter(FormStorageProvider catalog, DatabaseProvider databaseProvider, int userId) {
         this.catalog = catalog;
@@ -56,13 +56,22 @@ public class FormSupervisorAdapter implements FormSupervisor {
 
     @Override
     public Map<ResourceId,FormPermissions> getFormPermissions(Set<ResourceId> formIds) {
-        Map<ResourceId,FormClass> forms = catalog.getFormClasses(formIds);
+        if (formIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<ResourceId,FormPermissions> permissions = new HashMap<>(formIds.size());
+
+        Set<ResourceId> cached = formIds.stream().filter(formPermissionsCache::containsKey).collect(Collectors.toSet());
+        cached.forEach(cachedForm -> permissions.put(cachedForm, formPermissionsCache.get(cachedForm)));
+
+        Set<ResourceId> toFetch = Sets.difference(formIds, cached).immutableCopy();
+        Map<ResourceId,FormClass> forms = catalog.getFormClasses(toFetch);
         Map<ResourceId,ResourceId> formDbMap = forms.values().stream()
                 .collect(Collectors.toMap(
                         FormClass::getId,
                         FormClass::getDatabaseId));
         Map<ResourceId,UserDatabaseMeta> dbs = databaseProvider.getDatabaseMetadata(Sets.newHashSet(formDbMap.values()), userId);
-        return formDbMap.entrySet().stream()
+        Map<ResourceId,FormPermissions> fetchedPermissions = formDbMap.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         formDbEntry -> {
@@ -71,5 +80,10 @@ public class FormSupervisorAdapter implements FormSupervisor {
                             }
                             return PermissionOracle.formPermissions(formDbEntry.getKey(), dbs.get(formDbEntry.getValue()));
                         }));
+
+        formPermissionsCache.putAll(fetchedPermissions);
+        permissions.putAll(fetchedPermissions);
+        return permissions;
     }
+
 }

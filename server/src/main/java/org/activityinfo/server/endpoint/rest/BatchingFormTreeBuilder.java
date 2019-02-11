@@ -48,7 +48,6 @@ public class BatchingFormTreeBuilder {
     private final int userId;
 
     private final Map<ResourceId, FormClass> formCache = new HashMap<>();
-    private final Map<ResourceId, FormPermissions> formPermissionsCache = new HashMap<>();
 
     private final Set<ResourceId> databaseIds = new HashSet<>();
     private final Set<ResourceId> suspendedDatabaseIds = new HashSet<>();
@@ -132,7 +131,6 @@ public class BatchingFormTreeBuilder {
         return treeMap;
     }
 
-
     private void checkSuspendedDatabases() {
         suspendedDatabaseIds.addAll(billingAccountOracle
                     .transform(oracle -> oracle.getSuspendedDatabasesById(databaseIds))
@@ -175,14 +173,7 @@ public class BatchingFormTreeBuilder {
     }
 
     private void fetchPermissions(Iterable<ResourceId> formIds) {
-        // Identify forms whose permissions are not yet in cache
-        Set<ResourceId> toFetch = new HashSet<>();
-        for (ResourceId formId : formIds) {
-            if (!formPermissionsCache.containsKey(formId)) {
-                toFetch.add(formId);
-            }
-        }
-        formPermissionsCache.putAll(formSupervisor.getFormPermissions(toFetch));
+        formSupervisor.getFormPermissions(Sets.newHashSet(formIds));
     }
 
     public FormMetadata queryFormMetadata(ResourceId formId) {
@@ -192,7 +183,7 @@ public class BatchingFormTreeBuilder {
     }
 
     private FormMetadata buildMetadata(FormClass formClass) {
-        FormPermissions permissions = formPermissionsCache.get(formClass.getId());
+        FormPermissions permissions = formSupervisor.getFormPermissions(formClass.getId());
         if(!permissions.isVisible()) {
             return FormMetadata.forbidden(formClass.getId());
         } else {

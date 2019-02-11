@@ -69,7 +69,6 @@ public class FormScanBatch {
      * keep track of what we need
      */
     private Map<ResourceId, FormScan> tableMap = Maps.newHashMap();
-    private Map<ResourceId, FormPermissions> tablePermissions = Maps.newHashMap();
 
     private Map<FilterKey, Slot<TableFilter>> filterMap = Maps.newHashMap();
     private Map<ResourceId, Slot<TableFilter>> parentFilterMap = Maps.newHashMap();
@@ -327,7 +326,7 @@ public class FormScanBatch {
 
     private Slot<TableFilter> computePermissionFilter(ResourceId formId) {
 
-        FormPermissions permissions = tablePermissions.computeIfAbsent(formId, supervisor::getFormPermissions);
+        FormPermissions permissions = supervisor.getFormPermissions(formId);
 
         if(!permissions.isVisible()) {
             return new PendingSlot<>(TableFilter.NONE_SELECTED);
