@@ -25,7 +25,6 @@ import org.activityinfo.model.database.DatabaseGrantKey;
 import javax.persistence.EntityManager;
 import javax.validation.constraints.NotNull;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -74,7 +73,7 @@ public class HibernateDatabaseGrantCache implements DatabaseGrantCache {
     public Optional<DatabaseGrant> load(DatabaseGrantKey toLoad) {
         try {
             return cache.get(toLoad);
-        } catch (ExecutionException loadFailure) {
+        } catch (Exception loadFailure) {
             throw new RuntimeException(loadFailure);
         }
     }
@@ -87,7 +86,7 @@ public class HibernateDatabaseGrantCache implements DatabaseGrantCache {
                     .collect(Collectors.toMap(
                             Map.Entry::getKey,
                             grant -> grant.getValue().get()));
-        } catch (ExecutionException loadFailure) {
+        } catch (Exception loadFailure) {
             throw new RuntimeException(loadFailure);
         }
     }
@@ -125,12 +124,12 @@ public class HibernateDatabaseGrantCache implements DatabaseGrantCache {
                 // Load versions
                 Map<DatabaseGrantKey,Long> toLoad = queryGrantVersions(keySet);
                 if (toLoad.isEmpty()) {
-                    return keySet.stream()
-                            .collect(Collectors.toMap(
-                                    key -> key,
-                                    key -> Optional.empty()));
+                    return mapMissingEntries(toLoad.keySet());
                 }
                 Map<DatabaseGrantKey,Optional<DatabaseGrant>> loaded = new HashMap<>(toLoad.size());
+
+                // Create set of missing entries which cannot be loaded
+                Set<DatabaseGrantKey> missing = Sets.difference(keySet,toLoad.keySet()).immutableCopy();
 
                 // Load from Memcache
                 loaded.putAll(loadFromMemcache(toLoad));
@@ -150,15 +149,20 @@ public class HibernateDatabaseGrantCache implements DatabaseGrantCache {
                     loadedFromDb.keySet().forEach(toLoad::remove);
                 }
 
-                // Return an Optional.empty for grant(s) left in "toLoad"
-                loaded.putAll(toLoad.keySet().stream()
-                        .collect(Collectors.toMap(
-                                key -> key,
-                                key -> Optional.empty())));
+                // Return an Optional.empty for grant(s) left in "toLoad" and for missing grants
+                loaded.putAll(mapMissingEntries(toLoad.keySet()));
+                loaded.putAll(mapMissingEntries(missing));
 
                 return loaded;
             }
         };
+    }
+
+    private static Map<DatabaseGrantKey,Optional<DatabaseGrant>> mapMissingEntries(Set<DatabaseGrantKey> keySet) {
+        return keySet.stream()
+                .collect(Collectors.toMap(
+                        key -> key,
+                        key -> Optional.empty()));
     }
 
     private Map<DatabaseGrantKey,Long> queryGrantVersions(Set<DatabaseGrantKey> grantKeys) {
@@ -185,11 +189,11 @@ public class HibernateDatabaseGrantCache implements DatabaseGrantCache {
                     .collect(Collectors.toMap(
                             cachedGrant -> fetchKeys.get(cachedGrant.getKey()),
                             cachedGrant -> Optional.of(deserialize((String) cachedGrant.getValue())))));
+            LOGGER.info(() -> String.format("Fetched %d/%d DatabaseGrant(s) from Memcache", loaded.size(), fetchKeys.size()));
         } catch (Exception ignorable) {
             // Memcache load failed, but we can still retrieve from database
             LOGGER.info(() -> String.format("Failed to fetch %d DatabaseGrant(s) from Memcache", fetchKeys.size()));
         }
-        LOGGER.info(() -> String.format("Fetched %d/%d DatabaseGrant(s) from Memcache", loaded.size(), fetchKeys.size()));
         return loaded;
     }
 
