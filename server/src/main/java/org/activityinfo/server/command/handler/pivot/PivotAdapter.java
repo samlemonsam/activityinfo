@@ -610,7 +610,7 @@ public class PivotAdapter {
                                                         LinkedActivity linkedActivity) {
         Preconditions.checkArgument(activity.isMonthly());
 
-        FormTree formTree = formTrees.get(linkedActivity.getSiteFormClassId());
+        FormTree formTree = formTrees.get(linkedActivity.getLeafFormClassId());
         if (formTree == null || formTree.getRootState() != FormTree.State.VALID) {
             return;
         }
