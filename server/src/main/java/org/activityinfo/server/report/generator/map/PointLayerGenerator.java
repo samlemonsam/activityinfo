@@ -68,6 +68,9 @@ public abstract class PointLayerGenerator<T extends PointMapLayer> implements La
 
         for (int id : layer.getIndicatorIds()) {
             Indicator indicator = indicators.get(id);
+            if (indicator == null) {
+                continue;
+            }
             if (indicator.isDeleted()) {
                 continue;
             }
