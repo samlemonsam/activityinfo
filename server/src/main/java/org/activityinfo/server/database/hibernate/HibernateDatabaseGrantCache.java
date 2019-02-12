@@ -135,6 +135,7 @@ public class HibernateDatabaseGrantCache implements DatabaseGrantCache {
                 loaded.putAll(loadFromMemcache(toLoad));
                 loaded.keySet().forEach(toLoad::remove);
                 if (toLoad.isEmpty()) {
+                    loaded.putAll(mapMissingEntries(missing));
                     return loaded;
                 }
 
