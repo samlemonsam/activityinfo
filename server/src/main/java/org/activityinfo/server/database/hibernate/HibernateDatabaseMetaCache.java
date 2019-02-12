@@ -133,7 +133,7 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
                 // Load versions
                 Map<ResourceId,Long> toLoad = queryDatabaseVersions(keySet);
                 if (toLoad.isEmpty()) {
-                    return mapMissingEntries(toLoad.keySet());
+                    return mapMissingEntries(keySet);
                 }
                 Map<ResourceId,Optional<DatabaseMeta>> loaded = new HashMap<>(toLoad.size());
 

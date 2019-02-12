@@ -124,7 +124,7 @@ public class HibernateDatabaseGrantCache implements DatabaseGrantCache {
                 // Load versions
                 Map<DatabaseGrantKey,Long> toLoad = queryGrantVersions(keySet);
                 if (toLoad.isEmpty()) {
-                    return mapMissingEntries(toLoad.keySet());
+                    return mapMissingEntries(keySet);
                 }
                 Map<DatabaseGrantKey,Optional<DatabaseGrant>> loaded = new HashMap<>(toLoad.size());
 
