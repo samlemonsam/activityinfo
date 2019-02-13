@@ -74,7 +74,7 @@ public class ImportSource {
         this.mbrOnly = this.file.length() > IN_MEMORY_LIMIT_BYTES;
 
 
-        ShapefileDataStore ds = new ShapefileDataStore(shapefile.toURI().toURL());
+        ShapefileDataStore ds = new ShapefileDataStore(shapefile.toURI().toURL(), false, Charsets.UTF_8);
 
         featureSource = ds.getFeatureSource();
 

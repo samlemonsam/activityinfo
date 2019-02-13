@@ -67,7 +67,10 @@ public abstract class ScoreMatrix {
         double sum = 0;
         int dimCount = getDimensionCount();
         for(int d=0;d< dimCount;++d) {
-            sum += score(i, j, d);
+            double score = score(i, j, d);
+            if(Double.isFinite(score)) {
+                sum += score;
+            }
         }
         return sum;
     }

@@ -18,6 +18,7 @@
  */
 package org.activityinfo.geoadmin.source;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import org.activityinfo.model.form.FormClass;
@@ -55,7 +56,7 @@ public class FeatureSourceStorageProvider implements FormStorageProvider {
     
     public void add(ResourceId id, String path) throws IOException {
         File shapeFile = new File(path);
-        ShapefileDataStore dataStore = new ShapefileDataStore(shapeFile.toURI().toURL());
+        ShapefileDataStore dataStore = new ShapefileDataStore(shapeFile.toURI().toURL(), false, Charsets.UTF_8);
         sources.put(id, new FeatureSourceStorage(id, dataStore.getFeatureSource()));
     }
     
@@ -70,7 +71,7 @@ public class FeatureSourceStorageProvider implements FormStorageProvider {
 
             try {
                 File shapeFile = new File(formId.asString().substring(FILE_PREFIX.length()));
-                ShapefileDataStore dataStore = new ShapefileDataStore(shapeFile.toURI().toURL());
+                ShapefileDataStore dataStore = new ShapefileDataStore(shapeFile.toURI().toURL(), false, Charsets.UTF_8);
                 accessor = new FeatureSourceStorage(formId, dataStore.getFeatureSource());
                 sources.put(formId, accessor);
 
