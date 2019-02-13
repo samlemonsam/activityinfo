@@ -8,7 +8,7 @@ dependencies {
     compileOnly libraries.gwt.user
     compile     libraries.gwt.jsinterop
     compile     libraries.guava
-    compile     "com.fasterxml.jackson.core:jackson-annotations:2.4.5"
+    compile     "com.fasterxml.jackson.core:jackson-annotations:${libraries.jackson2Version}"
 
     gwtSdk libraries.gwt.dev
 
