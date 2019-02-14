@@ -57,9 +57,10 @@
 
     <changeSet author="jamiewhths" id="056-03">
         <comment>
-            Drop partnerId column from userpermission
+            Set a default partnerId of 0: Partner Id will no longer be used, but we want to maintain it for consistency
+            checks during migration
         </comment>
-        <dropColumn tableName="userpermission" columnName="partnerId"></dropColumn>
+        <addDefaultValue tableName="userpermission" columnName="partnerId" defaultValueNumeric="0"/>
     </changeSet>
 
 </databaseChangeLog>
