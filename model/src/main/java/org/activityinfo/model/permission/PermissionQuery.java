@@ -16,14 +16,14 @@ import org.activityinfo.model.resource.ResourceId;
 public class PermissionQuery implements JsonSerializable {
 
     private int user;
-    private int database;
+    private ResourceId database;
     private Operation operation;
     private ResourceId resourceId;
 
-    public PermissionQuery() {
+    private PermissionQuery() {
     }
 
-    public PermissionQuery(int user, int database, Operation operation, ResourceId resourceId) {
+    public PermissionQuery(int user, ResourceId database, Operation operation, ResourceId resourceId) {
         this.user = user;
         this.database = database;
         this.operation = operation;
@@ -34,7 +34,7 @@ public class PermissionQuery implements JsonSerializable {
         return user;
     }
 
-    public int getDatabase() {
+    public ResourceId getDatabase() {
         return database;
     }
 
@@ -49,7 +49,7 @@ public class PermissionQuery implements JsonSerializable {
     public static PermissionQuery fromJson(JsonValue object) {
         PermissionQuery query = new PermissionQuery();
         query.user = object.get("user").asInt();
-        query.database = object.get("database").asInt();
+        query.database = ResourceId.valueOf(object.get("database").asString());
         query.operation = Operation.valueOf(object.get("operation").asString());
         query.resourceId = ResourceId.valueOf(object.get("resource").asString());
         return query;
@@ -59,7 +59,7 @@ public class PermissionQuery implements JsonSerializable {
     public JsonValue toJson() {
         JsonValue object = Json.createObject();
         object.put("user", user);
-        object.put("database", database);
+        object.put("database", database.asString());
         object.put("operation", operation.name());
         object.put("resource", resourceId.asString());
         return object;
