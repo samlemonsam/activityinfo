@@ -68,6 +68,9 @@ public abstract class PointLayerGenerator<T extends PointMapLayer> implements La
 
         for (int id : layer.getIndicatorIds()) {
             Indicator indicator = indicators.get(id);
+            if (indicator == null) {
+                continue;
+            }
             if (indicator.isDeleted()) {
                 continue;
             }
@@ -103,6 +106,9 @@ public abstract class PointLayerGenerator<T extends PointMapLayer> implements La
         List<Integer> ids = Lists.newArrayList();
         for (int id : layer.getIndicatorIds()) {
             Indicator indicator = indicators.get(id);
+            if (indicator == null || indicator.isDeleted()) {
+                continue;
+            }
             if (indicator.getAggregation() != IndicatorDTO.AGGREGATE_SITE_COUNT) {
                 ids.add(id);
             }

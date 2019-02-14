@@ -28,7 +28,6 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.validation.constraints.NotNull;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -84,7 +83,7 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
     public Optional<DatabaseMeta> load(ResourceId toLoad) {
         try {
             return cache.get(toLoad);
-        } catch (ExecutionException loadFailure) {
+        } catch (Exception loadFailure) {
             throw new RuntimeException(loadFailure);
         }
     }
@@ -96,7 +95,7 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .collect(Collectors.toMap(DatabaseMeta::getDatabaseId, db -> db));
-        } catch (ExecutionException loadFailure) {
+        } catch (Exception loadFailure) {
             throw new RuntimeException(loadFailure);
         }
     }
@@ -105,7 +104,7 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
         return new CacheLoader<ResourceId,Optional<DatabaseMeta>>() {
             @Override
             public Optional<DatabaseMeta> load(ResourceId key) throws Exception {
-                // Load versions
+                // Load version
                 Map<ResourceId,Long> toLoad = queryDatabaseVersions(Collections.singleton(key));
                 if (toLoad.isEmpty()) {
                     return Optional.empty();
@@ -134,17 +133,18 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
                 // Load versions
                 Map<ResourceId,Long> toLoad = queryDatabaseVersions(keySet);
                 if (toLoad.isEmpty()) {
-                    return keySet.stream()
-                            .collect(Collectors.toMap(
-                                    key -> key,
-                                    key -> Optional.empty()));
+                    return mapMissingEntries(keySet);
                 }
                 Map<ResourceId,Optional<DatabaseMeta>> loaded = new HashMap<>(toLoad.size());
+
+                // Create set of missing entries which cannot be loaded
+                Set<ResourceId> missing = Sets.difference(keySet,toLoad.keySet()).immutableCopy();
 
                 // Load from Memcache
                 loaded.putAll(loadFromMemcache(toLoad));
                 loaded.keySet().forEach(toLoad::remove);
                 if (toLoad.isEmpty()) {
+                    loaded.putAll(mapMissingEntries(missing));
                     return loaded;
                 }
 
@@ -159,30 +159,31 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
                     loadedFromDb.keySet().forEach(toLoad::remove);
                 }
 
-                // Return Optional.empty for database(s) left in "toLoad"
-                loaded.putAll(toLoad.keySet().stream()
-                        .collect(Collectors.toMap(
-                                id -> id,
-                                id -> Optional.empty())));
+                // Return Optional.empty for database(s) left in "toLoad" and for missing databases
+                loaded.putAll(mapMissingEntries(toLoad.keySet()));
+                loaded.putAll(mapMissingEntries(missing));
 
                 return loaded;
             }
         };
     }
 
+    private static Map<ResourceId,Optional<DatabaseMeta>> mapMissingEntries(Set<ResourceId> keySet) {
+        return keySet.stream()
+                .collect(Collectors.toMap(
+                        key -> key,
+                        key -> Optional.empty()));
+    }
+
     private Map<ResourceId,Long> queryDatabaseVersions(@NotNull Set<ResourceId> databaseIds) {
-        try {
-            return entityManager.get().createQuery("SELECT db.id, db.metaVersion " +
-                    "FROM Database db " +
-                    "WHERE db.id in :dbIds", Object[].class)
-                    .setParameter("dbIds", databaseIds.stream().map(CuidAdapter::getLegacyIdFromCuid).collect(Collectors.toSet()))
-                    .getResultList().stream()
-                    .collect(Collectors.toMap(
-                            result -> CuidAdapter.databaseId(((int) result[0])),
-                            result -> (long) result[1]));
-        } catch (Exception failure) {
-            return Collections.emptyMap();
-        }
+        return entityManager.get().createQuery("SELECT db.id, db.metaVersion " +
+                "FROM Database db " +
+                "WHERE db.id in :dbIds", Object[].class)
+                .setParameter("dbIds", databaseIds.stream().map(CuidAdapter::getLegacyIdFromCuid).collect(Collectors.toSet()))
+                .getResultList().stream()
+                .collect(Collectors.toMap(
+                        result -> CuidAdapter.databaseId(((int) result[0])),
+                        result -> (long) result[1]));
     }
 
     private Map<ResourceId,Optional<DatabaseMeta>> loadFromMemcache(Map<ResourceId,Long> toFetch) {
@@ -199,11 +200,11 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
                             cachedDb -> fetchKeys.get(cachedDb.getKey()),
                             cachedDb -> Optional.of(deserialize((String) cachedDb.getValue()))
                     )));
+            LOGGER.info(() -> String.format("Fetched %d/%d DatabaseMeta from Memcache", loaded.size(), toFetch.size()));
         } catch (Exception ignorable) {
             // Memcache load failed, but we can still retrieve from database
             LOGGER.severe(String.format("Fetching failed for %d DatabaseMeta from Memcache", toFetch.size()));
         }
-        LOGGER.info(() -> String.format("Fetched %d/%d DatabaseMeta from Memcache", loaded.size(), toFetch.size()));
         return loaded;
     }
 

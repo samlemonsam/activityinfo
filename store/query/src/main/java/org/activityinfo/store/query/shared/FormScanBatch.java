@@ -327,6 +327,7 @@ public class FormScanBatch {
     private Slot<TableFilter> computePermissionFilter(ResourceId formId) {
 
         FormPermissions permissions = supervisor.getFormPermissions(formId);
+
         if(!permissions.isVisible()) {
             return new PendingSlot<>(TableFilter.NONE_SELECTED);
         }

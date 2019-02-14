@@ -147,4 +147,11 @@
         <cpe>cpe:/a:data-tools_project:data_tools</cpe>
     </suppress>
 
+    <suppress>
+        <notes>com.jhlabs.filters is an image processing library unrelated to the processing language</notes>
+        <gav regex="true">^com\.jhlabs:filters:.*$</gav>
+        <cpe>cpe:/a:processing:processing</cpe>
+    </suppress>
+
+
 </suppressions>

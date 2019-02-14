@@ -76,6 +76,25 @@ public class HibernateDatabaseMetaProviderTest {
         assertFalse(databaseMeta.isPresent());
     }
 
+    @Test
+    public void mixOfGrantedAndMissing() {
+        int presentDbId = 1;
+        int missingDbId = 666;
+
+        Set<ResourceId> databases = Sets.newHashSet(databaseId(presentDbId), databaseId(missingDbId));
+
+        Database present = entityManager.get().find(Database.class, presentDbId);
+        Database missing = entityManager.get().find(Database.class, missingDbId);
+
+        Map<ResourceId,DatabaseMeta> databaseMeta = databaseMetaProvider.getDatabaseMeta(databases);
+
+        assertNotNull(present);
+        assertNull(missing);
+        assertFalse(databaseMeta.isEmpty());
+        assertTrue(databaseMeta.containsKey(databaseId(presentDbId)));
+        assertFalse(databaseMeta.containsKey(databaseId(missingDbId)));
+    }
+
     private void match(DatabaseMeta databaseMeta, Database database) {
         assertThat(databaseMeta.getDatabaseId(), equalTo(databaseId(database.getId())));
         assertThat(databaseMeta.getOwnerId(), equalTo(database.getOwner().getId()));

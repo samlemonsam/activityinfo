@@ -48,6 +48,7 @@ public class BatchingFormTreeBuilder {
     private final int userId;
 
     private final Map<ResourceId, FormClass> formCache = new HashMap<>();
+
     private final Set<ResourceId> databaseIds = new HashSet<>();
     private final Set<ResourceId> suspendedDatabaseIds = new HashSet<>();
 
@@ -130,7 +131,6 @@ public class BatchingFormTreeBuilder {
         return treeMap;
     }
 
-
     private void checkSuspendedDatabases() {
         suspendedDatabaseIds.addAll(billingAccountOracle
                     .transform(oracle -> oracle.getSuspendedDatabasesById(databaseIds))
@@ -167,9 +167,14 @@ public class BatchingFormTreeBuilder {
             fetched.add(formClass);
         }
 
+        fetchPermissions(toFetch);
+
         return fetched;
     }
 
+    private void fetchPermissions(Iterable<ResourceId> formIds) {
+        formSupervisor.getFormPermissions(Sets.newHashSet(formIds));
+    }
 
     public FormMetadata queryFormMetadata(ResourceId formId) {
         fetchFormClasses(Collections.singleton(formId));
@@ -178,15 +183,11 @@ public class BatchingFormTreeBuilder {
     }
 
     private FormMetadata buildMetadata(FormClass formClass) {
-
         FormPermissions permissions = formSupervisor.getFormPermissions(formClass.getId());
         if(!permissions.isVisible()) {
             return FormMetadata.forbidden(formClass.getId());
-
         } else {
-
             Optional<FormStorage> storage = catalog.getForm(formClass.getId());
-
             return new FormMetadata.Builder()
                     .setId(formClass.getId())
                     .setPermissions(permissions)

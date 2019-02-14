@@ -4,6 +4,7 @@ import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.fixtures.InjectionSupport;
@@ -23,10 +24,7 @@ import org.junit.runner.RunWith;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -104,6 +102,26 @@ public class HibernateDatabaseGrantProviderTest {
         // Database exists but users permission should not
         assertNull(userPermission);
         assertFalse(databaseGrant.isPresent());
+    }
+
+    @Test
+    public void mixOfGrantedAndMissing() {
+        int grantedDatabase = 1;
+        int forbiddenDatabase = 2;
+        int userId = 3;
+
+        Set<ResourceId> databases = Sets.newHashSet(databaseId(grantedDatabase), databaseId(forbiddenDatabase));
+
+        UserPermission grantedPermission = queryUserPermission(userId, grantedDatabase);
+        UserPermission missingPermission = queryUserPermission(userId, forbiddenDatabase);
+
+        Map<ResourceId,DatabaseGrant> databaseGrants = databaseGrantProvider.getDatabaseGrants(userId, databases);
+
+        assertNotNull(grantedPermission);
+        assertNull(missingPermission);
+        assertFalse(databaseGrants.isEmpty());
+        assertTrue(databaseGrants.containsKey(databaseId(grantedDatabase)));
+        assertFalse(databaseGrants.containsKey(databaseId(forbiddenDatabase)));
     }
 
     @Test

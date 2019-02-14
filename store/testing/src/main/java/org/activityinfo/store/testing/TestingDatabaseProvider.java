@@ -25,6 +25,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.DatabaseProvider;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TestingDatabaseProvider implements DatabaseProvider {
 
@@ -67,6 +68,18 @@ public class TestingDatabaseProvider implements DatabaseProvider {
 
     @Override
     public Optional<UserDatabaseMeta> getDatabaseMetadataByResource(ResourceId resourceId, int userId) {
-        throw new IllegalArgumentException("TODO");
+        return Optional.ofNullable(resourceMap.get(resourceId));
     }
+
+    @Override
+    public Map<ResourceId, UserDatabaseMeta> getDatabaseMetadata(Set<ResourceId> databaseIds, int userId) {
+        return databaseIds.stream()
+                .map(dbId -> getDatabaseMetadata(dbId, userId))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toMap(
+                        UserDatabaseMeta::getDatabaseId,
+                        dbMeta -> dbMeta));
+    }
+
 }

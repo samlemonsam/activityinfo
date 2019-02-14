@@ -21,10 +21,22 @@ package org.activityinfo.store.query.shared;
 import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public class NullFormSupervisor implements FormSupervisor {
 
     @Override
     public FormPermissions getFormPermissions(ResourceId formId) {
         return FormPermissions.readWrite(null);
+    }
+
+    @Override
+    public Map<ResourceId, FormPermissions> getFormPermissions(Set<ResourceId> formIds) {
+        return formIds.stream()
+                .collect(Collectors.toMap(
+                        formId -> formId,
+                        formId -> FormPermissions.readWrite(null)));
     }
 }

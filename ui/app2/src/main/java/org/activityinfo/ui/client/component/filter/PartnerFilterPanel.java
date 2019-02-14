@@ -126,6 +126,20 @@ public class PartnerFilterPanel extends ContentPanel implements FilterPanel {
         final Filter filter = new Filter(rawFilter);
         filter.clearRestrictions(DimensionType.Partner);
 
+        if (!this.isCollapsed()) {
+            query(filter);
+        } else {
+            baseFilter = filter;
+        }
+    }
+
+    @Override
+    protected void onExpand() {
+        super.onExpand();
+        query(baseFilter);
+    }
+
+    protected void query(final Filter filter) {
         service.execute(new GetPartnersDimension(filter), new AsyncCallback<PartnerResult>() {
 
             @Override

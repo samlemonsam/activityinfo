@@ -6,7 +6,10 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.spi.DatabaseProvider;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class MockDatabaseProvider implements DatabaseProvider {
 
@@ -34,6 +37,16 @@ public class MockDatabaseProvider implements DatabaseProvider {
 
     @Override
     public Optional<UserDatabaseMeta> getDatabaseMetadataByResource(ResourceId resourceId, int userId) {
-        throw new IllegalArgumentException("TODO");
+        return getDatabaseMetadata(ResourceId.valueOf("d0000000001"), userId);
     }
+
+    @Override
+    public Map<ResourceId,UserDatabaseMeta> getDatabaseMetadata(Set<ResourceId> databaseIds, int userId) {
+        return databaseIds.stream()
+                .map(dbId -> getDatabaseMetadata(dbId, userId))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toMap(UserDatabaseMeta::getDatabaseId, dbMeta -> dbMeta));
+    }
+
 }

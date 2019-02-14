@@ -159,7 +159,7 @@ public class FormScan {
         // from this collection
         if (cacheVersion == 0) {
 
-            LOGGER.severe(() -> this.formId + " has zero-valued version.");
+            LOGGER.warning(() -> this.formId + " has zero-valued version.");
 
             return Collections.emptySet();
         }

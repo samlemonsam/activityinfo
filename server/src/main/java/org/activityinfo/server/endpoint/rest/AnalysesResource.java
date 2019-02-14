@@ -129,13 +129,16 @@ public class AnalysesResource {
 
     private boolean isVisible(AnalysisEntity entity) {
         ResourceId databaseId = ResourceId.valueOf(entity.getParentId());
+        if (!CuidAdapter.isValidLegacyId(databaseId) || databaseId.getDomain() != CuidAdapter.DATABASE_DOMAIN) {
+            return false;
+        }
         Optional<UserDatabaseMeta> database = databaseProvider.getDatabaseMetadata(databaseId, userProvider.get().getId());
         return database.isPresent() && PermissionOracle.canView(database.get());
     }
 
     private void assertUpdateAuthorized(AnalysisUpdate update) {
         ResourceId databaseId = ResourceId.valueOf(update.getParentId());
-        if(databaseId.getDomain() != CuidAdapter.DATABASE_DOMAIN) {
+        if(!CuidAdapter.isValidLegacyId(databaseId) || databaseId.getDomain() != CuidAdapter.DATABASE_DOMAIN) {
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("No such folder: " + databaseId).build());
         }
         Optional<UserDatabaseMeta> database = databaseProvider.getDatabaseMetadata(databaseId, userProvider.get().getId());

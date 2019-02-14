@@ -5,7 +5,9 @@ import org.activityinfo.model.resource.ResourceId;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public interface DatabaseGrantProvider {
 
@@ -14,5 +16,7 @@ public interface DatabaseGrantProvider {
     List<DatabaseGrant> getAllDatabaseGrantsForDatabase(@NotNull ResourceId databaseId);
 
     Optional<DatabaseGrant> getDatabaseGrant(int userId, @NotNull ResourceId databaseId);
+
+    Map<ResourceId,DatabaseGrant> getDatabaseGrants(int userId, @NotNull Set<ResourceId> databaseIds);
 
 }

@@ -18,17 +18,20 @@
  */
 package org.activityinfo.store.query.server;
 
-import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.shared.FormSupervisor;
 import org.activityinfo.store.spi.DatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.model.permission.FormPermissions;
-import org.activityinfo.store.spi.FormStorage;
 
+import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class FormSupervisorAdapter implements FormSupervisor {
 
@@ -36,7 +39,9 @@ public class FormSupervisorAdapter implements FormSupervisor {
 
     private final FormStorageProvider catalog;
     private final DatabaseProvider databaseProvider;
-    private int userId;
+    private final int userId;
+
+    private final Map<ResourceId,FormPermissions> formPermissionsCache = Maps.newHashMap();
 
     public FormSupervisorAdapter(FormStorageProvider catalog, DatabaseProvider databaseProvider, int userId) {
         this.catalog = catalog;
@@ -46,16 +51,39 @@ public class FormSupervisorAdapter implements FormSupervisor {
 
     @Override
     public FormPermissions getFormPermissions(ResourceId formId) {
-        Optional<FormStorage> form = catalog.getForm(formId);
-        if(!form.isPresent()) {
-            LOGGER.severe("Form " + formId + " does not exist.");
-            throw new IllegalStateException("Invalid form ID");
-        }
-        ResourceId databaseId = form.get().getFormClass().getDatabaseId();
-        java.util.Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, userId);
-        if (!databaseMeta.isPresent()) {
-            return FormPermissions.none();
-        }
-        return PermissionOracle.formPermissions(formId, databaseMeta.get());
+        return getFormPermissions(Collections.singleton(formId)).get(formId);
     }
+
+    @Override
+    public Map<ResourceId,FormPermissions> getFormPermissions(Set<ResourceId> formIds) {
+        if (formIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<ResourceId,FormPermissions> permissions = new HashMap<>(formIds.size());
+
+        Set<ResourceId> cached = formIds.stream().filter(formPermissionsCache::containsKey).collect(Collectors.toSet());
+        cached.forEach(cachedForm -> permissions.put(cachedForm, formPermissionsCache.get(cachedForm)));
+
+        Set<ResourceId> toFetch = Sets.difference(formIds, cached).immutableCopy();
+        Map<ResourceId,FormClass> forms = catalog.getFormClasses(toFetch);
+        Map<ResourceId,ResourceId> formDbMap = forms.values().stream()
+                .collect(Collectors.toMap(
+                        FormClass::getId,
+                        FormClass::getDatabaseId));
+        Map<ResourceId,UserDatabaseMeta> dbs = databaseProvider.getDatabaseMetadata(Sets.newHashSet(formDbMap.values()), userId);
+        Map<ResourceId,FormPermissions> fetchedPermissions = formDbMap.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        formDbEntry -> {
+                            if (!dbs.containsKey(formDbEntry.getValue())) {
+                                return FormPermissions.none();
+                            }
+                            return PermissionOracle.formPermissions(formDbEntry.getKey(), dbs.get(formDbEntry.getValue()));
+                        }));
+
+        formPermissionsCache.putAll(fetchedPermissions);
+        permissions.putAll(fetchedPermissions);
+        return permissions;
+    }
+
 }

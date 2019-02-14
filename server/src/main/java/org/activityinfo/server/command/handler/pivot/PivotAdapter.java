@@ -571,6 +571,10 @@ public class PivotAdapter {
         Preconditions.checkState(!indicatorDimension.isPresent());
 
         FormTree formTree = formTrees.get(linkedActivity.getSiteFormClassId());
+        if (formTree == null || formTree.getRootState() != FormTree.State.VALID) {
+            return;
+        }
+
         QueryModel queryModel = new QueryModel(linkedActivity.getSiteFormClassId());
         queryModel.setFilter(composeFilter(formTree));
 
@@ -606,8 +610,12 @@ public class PivotAdapter {
                                                         LinkedActivity linkedActivity) {
         Preconditions.checkArgument(activity.isMonthly());
 
-        // Query the linked activity
         FormTree formTree = formTrees.get(linkedActivity.getLeafFormClassId());
+        if (formTree == null || formTree.getRootState() != FormTree.State.VALID) {
+            return;
+        }
+
+        // Query the linked activity
         QueryModel queryModel = new QueryModel(activity.getLeafFormClassId());
 
         queryModel.setFilter(composeFilter(formTree));
