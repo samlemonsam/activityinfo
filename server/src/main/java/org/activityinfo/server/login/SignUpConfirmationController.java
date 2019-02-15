@@ -57,7 +57,7 @@ public class SignUpConfirmationController {
     private static final int MAX_PARAM_LENGTH = 200;
 
     private static final int DEFAULT_DATABASE_ID = 507; // training DB
-    private static final int DEFAULT_PARTNER_ID = 274; // bedatadriven
+    private static final int DEFAULT_PARTNER_ID = 563; // brc
 
     private final MailingListClient mailingList;
 
