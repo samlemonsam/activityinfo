@@ -33,7 +33,7 @@
     <g:HTMLPanel>
       <h3 ui:field="promptHeading"/>
       <p><ui:text from="{i18n.columnMappingHelpLink}"/> 
-          <a href="http://help.activityinfo.org/m/28175/l/445646-batch-import" target="_blank">
+          <a href="http://help.activityinfo.org/m/entering_data/l/852929-importing-form-records" target="_blank">
               <ui:text from="{i18n.showMe}"/></a></p>
     </g:HTMLPanel>
 

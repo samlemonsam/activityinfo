@@ -31,7 +31,7 @@
         <f:FormGroup label="{i18n.inputMask}" columnLabelWidth="4">
             <a:TextBox ui:field="inputMask" width="100%"/>
             <g:FlowPanel addStyleNames="help-block">
-                <a:HelpLink helpId="718178" label="{i18n.learnMoreAboutInputMasks}"/>
+                <a:HelpLink helpId="1052327-adding-an-input-mask" label="{i18n.learnMoreAboutInputMasks}"/>
             </g:FlowPanel>
         </f:FormGroup>
     </g:FlowPanel>

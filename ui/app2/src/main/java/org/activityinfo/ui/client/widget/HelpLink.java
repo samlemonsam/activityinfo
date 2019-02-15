@@ -32,7 +32,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class HelpLink implements IsWidget {
 
     interface Templates extends SafeHtmlTemplates {
-        @Template("<a href=\"http://help.activityinfo.org/m/28175/l/{0}\" target=\"_blank\">{1}</a>")
+        @Template("<a href=\"http://help.activityinfo.org/m/75865/l/{0}\" target=\"_blank\">{1}</a>")
         SafeHtml link(int helpId, String label);
     }
 
