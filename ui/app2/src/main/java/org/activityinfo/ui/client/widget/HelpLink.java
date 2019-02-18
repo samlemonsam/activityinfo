@@ -32,8 +32,8 @@ import com.google.gwt.user.client.ui.Widget;
 public class HelpLink implements IsWidget {
 
     interface Templates extends SafeHtmlTemplates {
-        @Template("<a href=\"http://help.activityinfo.org/m/28175/l/{0}\" target=\"_blank\">{1}</a>")
-        SafeHtml link(int helpId, String label);
+        @Template("<a href=\"http://help.activityinfo.org/m/75865/l/{0}\" target=\"_blank\">{1}</a>")
+        SafeHtml link(String helpId, String label);
     }
 
     private static final Templates TEMPLATES = GWT.create(Templates.class);
@@ -45,7 +45,7 @@ public class HelpLink implements IsWidget {
      * @param helpId the ScreenSteps id
      */
     @UiConstructor
-    public HelpLink(String label, int helpId) {
+    public HelpLink(String label, String helpId) {
         this.html = new HTML(TEMPLATES.link(helpId, label));
     }
 

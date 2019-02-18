@@ -31,7 +31,7 @@
         <f:FormGroup ui:field="prefixGroup" label="{i18n.prefixFormula}" columnLabelWidth="4">
             <a:TextBox ui:field="prefixFormulaBox" width="100%"/>
             <g:FlowPanel addStyleNames="help-block">
-                <a:HelpLink helpId="719141" label="{i18n.learnMoreAboutSerialNumbers}"/>
+                <a:HelpLink helpId="1052325-adding-a-serial-number" label="{i18n.learnMoreAboutSerialNumbers}"/>
             </g:FlowPanel>
         </f:FormGroup>
     </g:FlowPanel>
