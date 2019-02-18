@@ -48,7 +48,7 @@ public class HibernateDatabaseGrantCache implements DatabaseGrantCache {
     private static final Logger LOGGER = Logger.getLogger(HibernateDatabaseGrantCache.class.getName());
 
     private static final String CACHE_PREFIX = "dbGrant";
-    private static final String CACHE_VERSION = "1";
+    private static final String CACHE_VERSION = "2";
 
     private static final long MAX_CACHE_SIZE = 1000;
     private static final long EXPIRES_IN = 10;
@@ -281,19 +281,19 @@ public class HibernateDatabaseGrantCache implements DatabaseGrantCache {
     private static void setPartnerOperations(GrantModel.Builder partnerFormGrant, UserPermission userPermission) {
         if (userPermission.isAllowViewAll()) {
             partnerFormGrant.addOperation(Operation.VIEW);
+            partnerFormGrant.addOperation(Operation.EXPORT_RECORDS);
         } else {
             partnerFormGrant.addOperation(Operation.VIEW, getPartnerFilter(userPermission));
+            partnerFormGrant.addOperation(Operation.EXPORT_RECORDS, getPartnerFilter(userPermission));
         }
         if (userPermission.isAllowManageAllUsers()) {
             partnerFormGrant.addOperation(Operation.CREATE_RECORD);
             partnerFormGrant.addOperation(Operation.EDIT_RECORD);
             partnerFormGrant.addOperation(Operation.DELETE_RECORD);
-            partnerFormGrant.addOperation(Operation.EXPORT_RECORDS);
         } else if (userPermission.isAllowManageUsers()) {
             partnerFormGrant.addOperation(Operation.CREATE_RECORD, getPartnerFilter(userPermission));
             partnerFormGrant.addOperation(Operation.EDIT_RECORD, getPartnerFilter(userPermission));
             partnerFormGrant.addOperation(Operation.DELETE_RECORD, getPartnerFilter(userPermission));
-            partnerFormGrant.addOperation(Operation.EXPORT_RECORDS, getPartnerFilter(userPermission));
         }
     }
 
