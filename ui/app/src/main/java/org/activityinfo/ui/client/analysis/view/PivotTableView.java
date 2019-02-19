@@ -53,15 +53,12 @@ public class PivotTableView implements IsWidget {
     private ContentPanel panel;
     private Grid<PivotRow> grid;
 
-    private final TextButton saveButton;
     private final TextButton copyButton;
     private final TextButton exportButton;
 
     public PivotTableView(AnalysisViewModel model) {
         this.model = model;
         this.store = new ListStore<>(point -> point.toString());
-
-        saveButton = new TextButton(I18N.CONSTANTS.save());
 
         copyButton = new TextButton(I18N.CONSTANTS.copy());
         copyButton.addSelectHandler(this::copyTable);
@@ -70,7 +67,6 @@ public class PivotTableView implements IsWidget {
         exportButton.addSelectHandler(this::exportTable);
 
         ToolBar toolbar = new ToolBar();
-        toolbar.add(saveButton);
         toolbar.add(copyButton);
         toolbar.add(exportButton);
 
@@ -118,10 +114,6 @@ public class PivotTableView implements IsWidget {
     private void exportTable(SelectEvent event) {
         String table = PivotTableRenderer.renderDelimited(model.getPivotTable().get(), ",");
         OfflineExporter.export("Export.csv", table, OfflineExporter.CSV_MIMETYPE);
-    }
-
-    public TextButton getSaveButton() {
-        return saveButton;
     }
 
     private void update(PivotTable pivotTable) {
