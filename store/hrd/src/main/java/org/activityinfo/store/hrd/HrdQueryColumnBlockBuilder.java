@@ -107,9 +107,15 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
             FieldDescriptor descriptor = formEntity.getFieldDescriptor(field.getName());
             BlockManager blockManager = BlockFactory.get(field);
 
-            ColumnView columnView = blockManager.buildView(formEntity, tombstoneIndex,
-                    blockResolver.getBlocks(descriptor),
-                    fieldComponent.getComponent());
+            ColumnView columnView;
+            try {
+                columnView = blockManager.buildView(formEntity, tombstoneIndex,
+                        blockResolver.getBlocks(descriptor),
+                        fieldComponent.getComponent());
+            } catch (Exception e) {
+                throw new RuntimeException("Exception building view from " + descriptor, e);
+
+            }
 
             for (PendingSlot<ColumnView> fieldTarget : fieldTargets.get(fieldComponent)) {
                 fieldTarget.set(columnView);
