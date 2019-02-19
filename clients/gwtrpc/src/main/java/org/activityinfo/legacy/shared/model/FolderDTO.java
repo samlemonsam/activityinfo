@@ -98,17 +98,17 @@ public class FolderDTO extends BaseModelData implements ProvidesKey, EntityDTO, 
 
         FolderDTO that = (FolderDTO) o;
 
-        return Objects.equals(this.getName(), that.getName());
+        return Objects.equals(this.getId(), that.getId());
     }
 
     @Override
     public int hashCode() {
-        return getName() != null ? getName().hashCode() : 0;
+        return getId();
     }
 
     @Override
     public String getKey() {
-        return "activity_category_" + getDatabaseId() + "_" + getName();
+        return "activity_category_" + getDatabaseId() + "_" + getId();
     }
 
     @Override
