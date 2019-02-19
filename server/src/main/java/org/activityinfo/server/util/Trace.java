@@ -23,6 +23,8 @@ import com.google.cloud.trace.core.*;
 import com.google.cloud.trace.service.AppEngineTraceService;
 import org.activityinfo.server.DeploymentEnvironment;
 
+import java.util.Optional;
+
 /**
  * Provides
  */
@@ -85,8 +87,13 @@ public class Trace {
      * @param name a string that represents the name of the new span.
      * @return The {@link TraceContext} associated with the newly created span.
      */
-    public static TraceContext startSpan(String name) {
-        return TRACER.startSpan(name);
+    public static Optional<TraceContext> startSpan(String name) {
+        try {
+            return Optional.ofNullable(TRACER.startSpan(name));
+        } catch (Exception ignorable) {
+            // Errors creating spans shouldn't cause an overall failure
+            return Optional.empty();
+        }
     }
 
     /**
@@ -94,8 +101,12 @@ public class Trace {
      *
      * @param traceContext The {@link TraceContext} associated with the span that will be ended.
      */
-    public static void endSpan(TraceContext traceContext) {
-        TRACER.endSpan(traceContext);
+    public static void endSpan(Optional<TraceContext> traceContext) {
+        try {
+            traceContext.ifPresent(TRACER::endSpan);
+        } catch (Exception ignorable) {
+            // Errors in closing spans shouldn't cause an overall failure
+        }
     }
 
 }

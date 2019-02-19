@@ -188,7 +188,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private void fetchActivityMetadata(Filter filter) {
-        TraceContext activityMetadataTrace = Trace.startSpan("ai/cmd/GetSites/fetchActivityMetadata");
+        java.util.Optional<TraceContext> activityMetadataTrace = Trace.startSpan("ai/cmd/GetSites/fetchActivityMetadata");
         try {
             metadataTime.start();
             activities = loadMetadata(filter);
@@ -221,7 +221,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private void queryFormTrees() {
-        TraceContext formTreeQueryTrace = Trace.startSpan("ai/cmd/GetSites/queryFormTrees");
+        java.util.Optional<TraceContext> formTreeQueryTrace = Trace.startSpan("ai/cmd/GetSites/queryFormTrees");
         treeTime.start();
 
         Set<ResourceId> formIds = new HashSet<>();
@@ -247,7 +247,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private void buildQueries() {
-        TraceContext queryBuildTrace = Trace.startSpan("ai/cmd/GetSites/buildQuery");
+        java.util.Optional<TraceContext> queryBuildTrace = Trace.startSpan("ai/cmd/GetSites/buildQuery");
         queryBuildTime.start();
 
         formTreeMap.forEach((formId,formTree) -> {
@@ -528,16 +528,16 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private void executeBatch() {
-        TraceContext batchExecutionTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch");
+        java.util.Optional<TraceContext> batchExecutionTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch");
         queryExecTime.start();
 
-        TraceContext fetchTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch/fetchColumns");
+        java.util.Optional<TraceContext> fetchTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch/fetchColumns");
         queryFetchTime.start();
         builder.execute(batch);
         queryFetchTime.stop();
         Trace.endSpan(fetchTrace);
 
-        TraceContext dataExtractionTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch/extractColumnData");
+        java.util.Optional<TraceContext> dataExtractionTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch/extractColumnData");
         queryExtractTime.start();
         for (Runnable handler : queryResultHandlers) {
             handler.run();
@@ -550,7 +550,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     }
 
     private void mergeMonthlyRootSites() {
-        TraceContext monthlyMergeTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch/mergeMonthlySites");
+        java.util.Optional<TraceContext> monthlyMergeTrace = Trace.startSpan("ai/cmd/GetSites/executeBatch/mergeMonthlySites");
         monthlyMergeTime.start();
 
         monthlySiteList.forEach(monthlySite -> {

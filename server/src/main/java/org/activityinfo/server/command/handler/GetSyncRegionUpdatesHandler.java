@@ -29,6 +29,7 @@ import org.activityinfo.server.command.handler.sync.*;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.util.Trace;
 
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,7 +73,7 @@ public class GetSyncRegionUpdatesHandler implements CommandHandler<GetSyncRegion
             throw new CommandException("Unknown sync region: " + cmd.getRegionPath());
         }
 
-        TraceContext traceContext = Trace.startSpan("/ai/cmd/sync/" + prefix(cmd.getRegionPath()));
+        Optional<TraceContext> traceContext = Trace.startSpan("/ai/cmd/sync/" + prefix(cmd.getRegionPath()));
 
         try {
             return builder.build(user, cmd);

@@ -41,6 +41,7 @@ import org.activityinfo.server.util.Trace;
 import org.hibernate.ejb.HibernateEntityManager;
 
 import javax.persistence.EntityManager;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -252,7 +253,7 @@ public class RemoteExecutionContext implements ExecutionContext {
     private class FiringCallback<R extends CommandResult> implements AsyncCallback<R> {
         private final AsyncCallback<R> callback;
         private final String commandName;
-        private final TraceContext traceContext;
+        private final Optional<TraceContext> traceContext;
         private final Stopwatch stopwatch = Stopwatch.createStarted();
 
         public FiringCallback(Command command, AsyncCallback<R> callback) {
