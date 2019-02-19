@@ -57,6 +57,11 @@ public class ReportsPage extends LayoutContainer implements Page {
         betaLinkPanel.setHeaderVisible(false);
         betaLinkPanel.setLayout(new CenterLayout());
 
+        Anchor v4link = new Anchor(I18N.CONSTANTS.tryV4ReportingInterface());
+        v4link.addClickHandler(clickEvent -> Window.open("https://v4.activityinfo.org/app#reports", "_blank", null));
+        betaLinkPanel.add(v4link);
+        add(betaLinkPanel, new BorderLayoutData(LayoutRegion.NORTH, 32));
+
         BorderLayoutData newLayout = new BorderLayoutData(LayoutRegion.EAST);
         newLayout.setSize(0.40f);
         newLayout.setMargins(new Margins(0, 5, 0, 0));
