@@ -250,10 +250,12 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         java.util.Optional<TraceContext> queryBuildTrace = Trace.startSpan("ai/cmd/GetSites/buildQuery");
         queryBuildTime.start();
 
-        formTreeMap.forEach((formId,formTree) -> {
-            QueryModel query = buildQuery(formId, formTree);
-            query.setFilter(determineQueryFilter(command.getFilter(), formTree));
-            queryMap.put(formId, query);
+        formTreeMap.entrySet().stream()
+                .filter(formTreeEntry -> formTreeEntry.getValue().getRootState() == FormTree.State.VALID)
+                .forEach(formTreeEntry -> {
+            QueryModel query = buildQuery(formTreeEntry.getKey(), formTreeEntry.getValue());
+            query.setFilter(determineQueryFilter(command.getFilter(), formTreeEntry.getValue()));
+            queryMap.put(formTreeEntry.getKey(), query);
             LOGGER.info(query.toString());
         });
 
