@@ -54,9 +54,18 @@ public class HrdProvider implements FormProvider {
         Map<ResourceId, FormStorage> map = new HashMap<>();
         for (ResourceId resourceId : formIds) {
             if(accept(resourceId)) {
-                map.put(resourceId, openForm(executor, resourceId));
+                fetchForm(executor,resourceId).transform(form -> map.put(resourceId, form));
             }
         }
         return map;
     }
+
+    private Optional<FormStorage> fetchForm(QueryExecutor executor, ResourceId formId) throws SQLException {
+        try {
+            return Optional.of(openForm(executor, formId));
+        } catch (FormNotFoundException notFound) {
+            return Optional.absent();
+        }
+    }
+
 }
