@@ -380,6 +380,15 @@ public class SiteFormStorage implements VersionedFormStorage, FormStorageV2 {
             return new SiteColumnQueryBuilder(activity, baseMapping, queryExecutor);
         }
     }
+
+    @Override
+    public ColumnQueryBuilderV2 newColumnQueryV2() {
+        if(activity.isMigratedToHrd() && formEntity.isColumnStorageActive()) {
+            return new HrdQueryColumnBlockBuilder(formEntity);
+        } else {
+            return null;
+        }
+    }
     
     public long incrementSiteVersion() {
         long newVersion = activity.getVersion() + 1;
@@ -413,14 +422,5 @@ public class SiteFormStorage implements VersionedFormStorage, FormStorageV2 {
 
     private HrdFormStorage delegateToHrd() {
         return new HrdFormStorage(getFormClass());
-    }
-
-    @Override
-    public ColumnQueryBuilderV2 newColumnQueryV2() {
-        if(activity.isMigratedToHrd()) {
-            return new HrdQueryColumnBlockBuilder(formEntity);
-        } else {
-            return null;
-        }
     }
 }
