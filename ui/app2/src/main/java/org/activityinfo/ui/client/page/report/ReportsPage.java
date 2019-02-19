@@ -56,10 +56,6 @@ public class ReportsPage extends LayoutContainer implements Page {
         betaLinkPanel.setBodyStyle("font-family: sans-serif;");
         betaLinkPanel.setHeaderVisible(false);
         betaLinkPanel.setLayout(new CenterLayout());
-        Anchor betaLink = new Anchor(I18N.CONSTANTS.tryNewReportingInterface());
-        betaLink.addClickHandler(clickEvent -> Window.open("/app?ui=3#analysis", "_blank", null));
-        betaLinkPanel.add(betaLink);
-        add(betaLinkPanel, new BorderLayoutData(LayoutRegion.NORTH, 32));
 
         BorderLayoutData newLayout = new BorderLayoutData(LayoutRegion.EAST);
         newLayout.setSize(0.40f);
