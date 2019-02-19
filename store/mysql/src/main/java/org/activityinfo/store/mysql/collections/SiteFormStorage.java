@@ -21,7 +21,10 @@ package org.activityinfo.store.mysql.collections;
 import com.google.common.base.Optional;
 import com.googlecode.objectify.VoidWork;
 import com.vividsolutions.jts.geom.Geometry;
-import org.activityinfo.model.form.*;
+import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormRecord;
+import org.activityinfo.model.form.FormSyncSet;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
@@ -206,8 +209,11 @@ public class SiteFormStorage implements VersionedFormStorage, FormStorageV2 {
             @Override
             public void vrun() {
 
-                FormEntity rootEntity = new FormEntity();
-                rootEntity.setId(activity.getSiteFormClassId());
+                FormEntity rootEntity = Hrd.ofy().load().key(FormEntity.key(activity.getSiteFormClassId())).now();
+                if(rootEntity == null) {
+                    rootEntity = new FormEntity();
+                    rootEntity.setId(activity.getSiteFormClassId());
+                }
                 rootEntity.setVersion(activity.getVersion());
                 rootEntity.setSchemaVersion(activity.getActivityVersion().getSchemaVersion());
 
@@ -306,7 +312,6 @@ public class SiteFormStorage implements VersionedFormStorage, FormStorageV2 {
             }
         }
     }
-
 
     @Override
     public void update(TypedRecordUpdate update) {

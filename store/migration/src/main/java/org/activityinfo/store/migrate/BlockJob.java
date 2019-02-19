@@ -29,7 +29,7 @@ public class BlockJob extends Job0<Void> {
 
     private static final Logger LOGGER = Logger.getLogger(BlockJob.class.getName());
 
-    private static final int BATCH_SIZE = 20;
+    private static final int BATCH_SIZE = 5;
 
     private ResourceId formId;
 
@@ -45,9 +45,11 @@ public class BlockJob extends Job0<Void> {
         try(Closeable o = ObjectifyService.begin()) {
 
             // First read in the array of blocks that DO have record numbers
+            // Based on the ID block
             FormEntity formEntity = Hrd.ofy().load().key(FormEntity.key(formId)).safe();
             Set<String> numberedRecords = queryAssignedRecordIds(formEntity);
 
+            // Now query all the record keys
             QueryResultIterable<Key<FormRecordEntity>> keys = Hrd.ofy().load()
                     .type(FormRecordEntity.class)
                     .ancestor(formEntity)
@@ -57,6 +59,9 @@ public class BlockJob extends Job0<Void> {
 
             for (Key<FormRecordEntity> key : keys) {
                 if(!numberedRecords.contains(key.getName())) {
+                    if(toNumber.size() > 100) {
+                        break;
+                    }
                     toNumber.add(key.getName());
                 }
             }
@@ -66,7 +71,6 @@ public class BlockJob extends Job0<Void> {
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
-
 
         ActivateColumnStorage activateJob = new ActivateColumnStorage(formId);
 
