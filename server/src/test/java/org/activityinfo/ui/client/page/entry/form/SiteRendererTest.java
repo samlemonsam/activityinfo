@@ -22,16 +22,25 @@ import org.activityinfo.legacy.shared.SiteRenderer;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
+import org.activityinfo.legacy.shared.type.IndicatorValueFormatter;
 import org.activityinfo.model.type.FieldTypeClass;
-import org.activityinfo.server.endpoint.kml.JreIndicatorValueFormatter;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.text.DecimalFormat;
 
 import static org.junit.Assert.assertTrue;
 
 public class SiteRendererTest {
 
     private SiteRenderer siteRenderer;
+
+    private static class JreIndicatorValueFormatter implements IndicatorValueFormatter {
+        @Override
+        public String format(Double value) {
+            return new DecimalFormat("#,##0.####").format(value);
+        }
+    }
 
 
     @Before
