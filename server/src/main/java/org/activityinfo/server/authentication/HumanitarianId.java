@@ -219,7 +219,7 @@ public class HumanitarianId {
         UsageTracker.track(user.getId(), "login/humanitarian_id");
 
         return Response.seeOther(UriBuilder.fromUri(baseUri).replacePath(HostController.ENDPOINT).build())
-                .cookie(authTokenProvider.createNewAuthCookies(user))
+                .cookie(authTokenProvider.createNewAuthCookies(user, baseUri))
                 .build();
     }
 }

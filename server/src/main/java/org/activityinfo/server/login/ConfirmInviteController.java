@@ -94,7 +94,7 @@ public class ConfirmInviteController {
             UsageTracker.track(user.getId(), "login");
 
             return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/app").build())
-                           .cookie(authTokenProvider.createNewAuthCookies(user))
+                           .cookie(authTokenProvider.createNewAuthCookies(user, uri.getBaseUri()))
                            .build();
 
         } catch (EntityNotFoundException e) {

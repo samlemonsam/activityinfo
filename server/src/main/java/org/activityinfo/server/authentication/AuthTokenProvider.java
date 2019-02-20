@@ -28,8 +28,10 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.store.hrd.Hrd;
 import org.activityinfo.store.hrd.entity.AuthTokenEntity;
 
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.ws.rs.core.NewCookie;
+import java.net.URI;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -66,23 +68,32 @@ public class AuthTokenProvider {
         return auth;
     }
 
-    public NewCookie[] createNewAuthCookies(User user) {
+    public NewCookie[] createNewAuthCookies(User user, @Nullable URI baseUri) {
         Authentication token = createNewAuthToken(user);
 
-        NewCookie cookie = newAuthCookie(AuthenticatedUser.AUTH_TOKEN_COOKIE, token.getId());
+        NewCookie cookie = newAuthCookie(AuthenticatedUser.AUTH_TOKEN_COOKIE, token.getId(), baseUri);
         NewCookie userCookie = newAuthCookie(AuthenticatedUser.USER_ID_COOKIE,
-                Integer.toString(token.getUser().getId()));
-        NewCookie emailCookie = newAuthCookie(AuthenticatedUser.EMAIL_COOKIE, user.getEmail());
+                Integer.toString(token.getUser().getId()), baseUri);
+        NewCookie emailCookie = newAuthCookie(AuthenticatedUser.EMAIL_COOKIE, user.getEmail(), baseUri);
 
         return new NewCookie[]{cookie, userCookie, emailCookie };
     }
 
-    private NewCookie newAuthCookie(String name, String value) {
+    private NewCookie newAuthCookie(String name, String value, @Nullable URI baseUri) {
         String path = ROOT;
-        String domain = DOMAIN;
+        String domain = domain(baseUri);
         String comment = null;
         int maxAge = THIS_SESSION;
         boolean onlySecure = DeploymentEnvironment.isAppEngineProduction();
         return new NewCookie(name, value, path, domain, comment, maxAge, onlySecure);
+    }
+
+    private static String domain(@Nullable URI baseUri) {
+        // If this is an xxx.activityinfo.org host, set a cross-domain cookie
+        if (baseUri != null && baseUri.getHost().contains(DOMAIN)) {
+            return DOMAIN;
+        }
+        // If base URI not provided, or is not an xxx.activityinfo.org host, then set just for this host
+        return null;
     }
 }

@@ -77,7 +77,7 @@ public class LoginController {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        return Response.ok().cookie(authTokenProvider.get().createNewAuthCookies(user)).build();
+        return Response.ok().cookie(authTokenProvider.get().createNewAuthCookies(user, null)).build();
     }
 
     @POST
@@ -107,7 +107,7 @@ public class LoginController {
         URI appUri = UriBuilder.fromUri(baseUri).replacePath(HostController.ENDPOINT).build();
 
         return Response.seeOther(appUri)
-                       .cookie(authTokenProvider.get().createNewAuthCookies(user))
+                       .cookie(authTokenProvider.get().createNewAuthCookies(user, baseUri))
                        .build();
     }
 
