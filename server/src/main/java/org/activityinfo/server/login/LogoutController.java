@@ -19,6 +19,7 @@
 package org.activityinfo.server.login;
 
 import org.activityinfo.legacy.shared.AuthenticatedUser;
+import org.activityinfo.server.authentication.AuthTokenProvider;
 
 import javax.servlet.ServletException;
 import javax.ws.rs.GET;
@@ -37,7 +38,6 @@ public class LogoutController {
 
     public static final String ENDPOINT = "/logout";
 
-    private static final String CROSS_DOMAIN = "activityinfo.org";
     private static final int DEFAULT_MAX_AGE = -1;
 
     private static final int COOKIES_TO_CLEAR = 8;          // 2 sets of 4 cookies (for cross domain and host domain)
@@ -53,11 +53,11 @@ public class LogoutController {
         List<NewCookie> cookies = new ArrayList<>(COOKIES_TO_CLEAR);
 
         // clear cross-domain cookies
-        if (baseUri.getHost().contains(CROSS_DOMAIN)) {
-            cookies.add(newEmptyCookie(AuthenticatedUser.AUTH_TOKEN_COOKIE, CROSS_DOMAIN));
-            cookies.add(newEmptyCookie(AuthenticatedUser.EMAIL_COOKIE, CROSS_DOMAIN));
-            cookies.add(newEmptyCookie(AuthenticatedUser.USER_ID_COOKIE, CROSS_DOMAIN));
-            cookies.add(newEmptyCookie(AuthenticatedUser.USER_LOCAL_COOKIE, CROSS_DOMAIN));
+        if (baseUri.getHost().contains(AuthTokenProvider.DOMAIN)) {
+            cookies.add(newEmptyCookie(AuthenticatedUser.AUTH_TOKEN_COOKIE, AuthTokenProvider.DOMAIN));
+            cookies.add(newEmptyCookie(AuthenticatedUser.EMAIL_COOKIE, AuthTokenProvider.DOMAIN));
+            cookies.add(newEmptyCookie(AuthenticatedUser.USER_ID_COOKIE, AuthTokenProvider.DOMAIN));
+            cookies.add(newEmptyCookie(AuthenticatedUser.USER_LOCAL_COOKIE, AuthTokenProvider.DOMAIN));
         }
 
         // clear host domain cookies
