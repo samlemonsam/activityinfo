@@ -68,7 +68,7 @@ public class AuthTokenProvider {
         return auth;
     }
 
-    public NewCookie[] createNewAuthCookies(User user, @Nullable URI baseUri) {
+    public NewCookie[] createNewAuthCookies(User user, URI baseUri) {
         Authentication token = createNewAuthToken(user);
 
         NewCookie cookie = newAuthCookie(AuthenticatedUser.AUTH_TOKEN_COOKIE, token.getId(), baseUri);
@@ -79,7 +79,7 @@ public class AuthTokenProvider {
         return new NewCookie[]{cookie, userCookie, emailCookie };
     }
 
-    private NewCookie newAuthCookie(String name, String value, @Nullable URI baseUri) {
+    private NewCookie newAuthCookie(String name, String value, URI baseUri) {
         String path = ROOT;
         String domain = domain(baseUri);
         String comment = null;
@@ -88,12 +88,12 @@ public class AuthTokenProvider {
         return new NewCookie(name, value, path, domain, comment, maxAge, onlySecure);
     }
 
-    private static String domain(@Nullable URI baseUri) {
+    private static String domain(URI baseUri) {
         // If this is an xxx.activityinfo.org host, set a cross-domain cookie
-        if (baseUri != null && baseUri.getHost().contains(DOMAIN)) {
+        if (baseUri.getHost().contains(DOMAIN)) {
             return DOMAIN;
         }
-        // If base URI not provided, or is not an xxx.activityinfo.org host, then set just for this host
+        // If base URI is not an xxx.activityinfo.org host, then set just for this host
         return null;
     }
 }
