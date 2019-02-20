@@ -34,7 +34,6 @@ import org.activityinfo.store.spi.SubFormPatch;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -147,8 +146,11 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
             observer.done();
         }
 
-        LOGGER.log(count > 1000  ? Level.SEVERE : Level.INFO,
-                "HRDQueryColumnBuilder finished, read " + count + " entities.");
+        LOGGER.info("HRDQueryColumnBuilder finished, read " + count + " entities.");
+
+        if(count > 1000) {
+            LOGGER.severe("HRD READ EXPLOSION ALERT: " + count);
+        }
     }
 
     private long megabytesFree() {
