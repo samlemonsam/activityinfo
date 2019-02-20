@@ -19,15 +19,16 @@
 package org.activityinfo.store.hrd.op;
 
 import com.googlecode.objectify.Key;
-import com.googlecode.objectify.VoidWork;
+import com.googlecode.objectify.Work;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.store.hrd.HrdFormStorage;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormSchemaEntity;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
 
 
-public class CreateOrUpdateForm extends VoidWork {
+public class CreateOrUpdateForm implements Work<HrdFormStorage> {
     
     private FormClass formClass;
 
@@ -36,19 +37,19 @@ public class CreateOrUpdateForm extends VoidWork {
     }
     
     @Override
-    public void vrun() {
+    public HrdFormStorage run() {
 
         Key<FormSchemaEntity> schemaKey = FormSchemaEntity.key(formClass.getId());
         FormSchemaEntity schemaEntity = ofy().load().key(schemaKey).now();
         
         if(schemaEntity == null) {
-            create();
+            return create();
         } else {
-            update(schemaEntity);
+            return update(schemaEntity);
         }
     }
 
-    private void create() {
+    private HrdFormStorage create() {
         FormEntity rootEntity = new FormEntity();
         rootEntity.setId(formClass.getId());
         rootEntity.setVersion(1);
@@ -59,9 +60,11 @@ public class CreateOrUpdateForm extends VoidWork {
         formClassEntity.setSchemaVersion(1);
 
         ofy().save().entities(rootEntity, formClassEntity);
+
+        return new HrdFormStorage(rootEntity, formClass);
     }
 
-    private void update(FormSchemaEntity formClassEntity) {
+    private HrdFormStorage update(FormSchemaEntity formClassEntity) {
 
         FormEntity rootEntity = ofy().load().key(FormEntity.key(formClass)).safe();
         
@@ -75,5 +78,7 @@ public class CreateOrUpdateForm extends VoidWork {
         formClassEntity.setSchemaVersion(newVersion);
         
         ofy().save().entities(rootEntity, formClassEntity);
+
+        return new HrdFormStorage(rootEntity, formClass);
     }
 }

@@ -22,7 +22,6 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.TextType;
-import org.activityinfo.store.hrd.HrdFormStorage;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.mapping.SimpleTable;
 import org.activityinfo.store.mysql.mapping.TableMapping;
@@ -83,14 +82,6 @@ public class PartnerTable implements SimpleTable {
         mapping.addTextField(fullNameField, "FullName");
 
         return mapping.build();
-    }
-
-    public HrdFormStorage getHrdStorage(int databaseId) {
-        try {
-            return new HrdFormStorage(getMapping(CuidAdapter.partnerFormId(databaseId)).getFormClass());
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }

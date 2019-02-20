@@ -384,7 +384,7 @@ public class SiteFormStorage implements VersionedFormStorage, FormStorageV2 {
     @Override
     public ColumnQueryBuilderV2 newColumnQueryV2() {
         if(activity.isMigratedToHrd() && formEntity.isColumnStorageActive()) {
-            return new HrdQueryColumnBlockBuilder(formEntity);
+            return new HrdQueryColumnBlockBuilder(formEntity, getFormClass());
         } else {
             return null;
         }
@@ -421,6 +421,6 @@ public class SiteFormStorage implements VersionedFormStorage, FormStorageV2 {
     }
 
     private HrdFormStorage delegateToHrd() {
-        return new HrdFormStorage(getFormClass());
+        return new HrdFormStorage(formEntity, getFormClass());
     }
 }

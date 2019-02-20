@@ -487,6 +487,8 @@ public class HrdCatalogTest {
 
         // Verify that the version is incremented and the version range
         // (0, 2] includes our new record
+        formStorage = (VersionedFormStorage) catalog.getForm(collectionId).get();
+
 
         assertThat(formStorage.cacheVersion(), equalTo(2L));
 
@@ -502,6 +504,7 @@ public class HrdCatalogTest {
 
         // Verify that the version is incremented and the version range
         // (1, 2] includes our new record
+        formStorage = (VersionedFormStorage) catalog.getForm(collectionId).get();
 
         assertThat(formStorage.cacheVersion(), equalTo(3L));
 

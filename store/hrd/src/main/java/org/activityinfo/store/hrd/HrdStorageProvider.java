@@ -20,14 +20,15 @@ package org.activityinfo.store.hrd;
 
 import com.google.common.base.Optional;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.LoadResult;
 import com.googlecode.objectify.ObjectifyService;
-import org.activityinfo.model.form.CatalogEntry;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormSchemaEntity;
 import org.activityinfo.store.hrd.op.CreateOrUpdateForm;
-import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.FormStorageProvider;
 
 import java.util.*;
 
@@ -38,20 +39,20 @@ public class HrdStorageProvider implements FormStorageProvider {
 
 
     public HrdFormStorage create(FormClass formClass) {
-        Hrd.ofy().transact(new CreateOrUpdateForm(formClass));
-        
-        return new HrdFormStorage(formClass);
+        return Hrd.ofy().transact(new CreateOrUpdateForm(formClass));
     }
     
     @Override
     public Optional<FormStorage> getForm(ResourceId formId) {
 
-        FormSchemaEntity schemaEntity = Hrd.ofy().load().key(FormSchemaEntity.key(formId)).now();
-        if(schemaEntity == null) {
+        LoadResult<FormSchemaEntity> schemaEntity = Hrd.ofy().load().key(FormSchemaEntity.key(formId));
+        FormEntity rootEntity = Hrd.ofy().load().key(FormEntity.key(formId)).now();
+
+        if(rootEntity == null) {
             return Optional.absent();
         }
 
-        HrdFormStorage accessor = new HrdFormStorage(schemaEntity.readFormClass());
+        HrdFormStorage accessor = new HrdFormStorage(rootEntity, schemaEntity.safe().readFormClass());
         
         return Optional.<FormStorage>of(accessor);
     }

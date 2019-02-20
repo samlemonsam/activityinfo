@@ -167,6 +167,7 @@ public class FormEntity {
     }
 
     public FieldDescriptor getFieldDescriptor(String fieldName) {
+
         if(fields == null) {
             fields = new HashMap<>();
         }

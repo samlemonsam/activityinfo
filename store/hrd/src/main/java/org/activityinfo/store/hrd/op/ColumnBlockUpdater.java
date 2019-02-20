@@ -12,7 +12,6 @@ import org.activityinfo.store.hrd.columns.*;
 import org.activityinfo.store.hrd.entity.ColumnDescriptor;
 import org.activityinfo.store.hrd.entity.FieldDescriptor;
 import org.activityinfo.store.hrd.entity.FormEntity;
-import org.activityinfo.store.query.shared.columns.ViewBuilderFactory;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -69,7 +68,7 @@ public class ColumnBlockUpdater {
     }
 
     public void updateParentId(int recordNumber, String parentRecordId) {
-        BlockManager blockManager = new StringBlock("parent", new ViewBuilderFactory.TextFieldReader());
+        BlockManager blockManager = BlockFactory.forParentId();
         BlockId descriptor = blockManager.getBlockId(formClass.getId(), "@parent", recordNumber);
 
         updateBlock(blockManager, descriptor, recordNumber, TextValue.valueOf(parentRecordId));
