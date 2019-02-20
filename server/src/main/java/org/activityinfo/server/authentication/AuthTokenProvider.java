@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 public class AuthTokenProvider {
 
     private static final String ROOT = "/";
+    private static final String DOMAIN = "activityinfo.org";
     private static final int THIS_SESSION = -1;
     private static final int ONE_YEAR = 365 * 24 * 60 * 60;
 
@@ -78,7 +79,7 @@ public class AuthTokenProvider {
 
     private NewCookie newAuthCookie(String name, String value) {
         String path = ROOT;
-        String domain = null;
+        String domain = DOMAIN;
         String comment = null;
         int maxAge = THIS_SESSION;
         boolean onlySecure = DeploymentEnvironment.isAppEngineProduction();
