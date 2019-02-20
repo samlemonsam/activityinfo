@@ -28,23 +28,50 @@ import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 @Path(LogoutController.ENDPOINT)
 public class LogoutController {
+
     public static final String ENDPOINT = "/logout";
 
+    private static final String CROSS_DOMAIN = "activityinfo.org";
+    private static final int DEFAULT_MAX_AGE = -1;
+
+    private static final int COOKIES_TO_CLEAR = 8;          // 2 sets of 4 cookies (for cross domain and host domain)
 
     @GET
     public Response logout(@Context UriInfo uri) throws ServletException, IOException {
         return Response.seeOther(uri.getAbsolutePathBuilder().replacePath(LoginController.ENDPOINT).build())
-                       .cookie(emptyCookies())
+                       .cookie(emptyCookies(uri.getBaseUri()))
                        .build();
     }
 
-    private NewCookie[] emptyCookies() {
-        return new NewCookie[]{new NewCookie(AuthenticatedUser.AUTH_TOKEN_COOKIE, null),
-                new NewCookie(AuthenticatedUser.EMAIL_COOKIE, null),
-                new NewCookie(AuthenticatedUser.USER_ID_COOKIE, null),
-                new NewCookie(AuthenticatedUser.USER_LOCAL_COOKIE, null)};
+    private NewCookie[] emptyCookies(URI baseUri) {
+        List<NewCookie> cookies = new ArrayList<>(COOKIES_TO_CLEAR);
+
+        // clear cross-domain cookies
+        if (baseUri.getHost().contains(CROSS_DOMAIN)) {
+            cookies.add(newEmptyCookie(AuthenticatedUser.AUTH_TOKEN_COOKIE, CROSS_DOMAIN));
+            cookies.add(newEmptyCookie(AuthenticatedUser.EMAIL_COOKIE, CROSS_DOMAIN));
+            cookies.add(newEmptyCookie(AuthenticatedUser.USER_ID_COOKIE, CROSS_DOMAIN));
+            cookies.add(newEmptyCookie(AuthenticatedUser.USER_LOCAL_COOKIE, CROSS_DOMAIN));
+        }
+
+        // clear host domain cookies
+        cookies.add(newEmptyCookie(AuthenticatedUser.AUTH_TOKEN_COOKIE, null));
+        cookies.add(newEmptyCookie(AuthenticatedUser.EMAIL_COOKIE, null));
+        cookies.add(newEmptyCookie(AuthenticatedUser.USER_ID_COOKIE, null));
+        cookies.add(newEmptyCookie(AuthenticatedUser.USER_LOCAL_COOKIE, null));
+
+        NewCookie[] cookieArray = new NewCookie[cookies.size()];
+        return cookies.toArray(cookieArray);
     }
+
+    private NewCookie newEmptyCookie(String name, String domain) {
+        return new NewCookie(name, null, null, domain, null, DEFAULT_MAX_AGE, false);
+    }
+
 }
