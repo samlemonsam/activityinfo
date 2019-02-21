@@ -48,7 +48,6 @@ public class AnalysisView implements IsWidget, HasTitle {
     private AnalysisViewModel model;
     private PivotTableView pivotTableView;
     private SubscriptionSet subscriptions = new SubscriptionSet();
-    private final TextButton savedButton;
 
     public AnalysisView(AnalysisViewModel model) {
         this.model = model;
@@ -57,10 +56,6 @@ public class AnalysisView implements IsWidget, HasTitle {
         createPanes();
 
         AnalysisBundle.INSTANCE.getStyles().ensureInjected();
-
-        savedButton = pivotTableView.getSaveButton();
-        savedButton.addSelectHandler(this::save);
-
     }
 
     private void onAttachEvent(AttachEvent attachEvent) {
@@ -77,7 +72,6 @@ public class AnalysisView implements IsWidget, HasTitle {
             this.container.mask();
         } else {
             this.container.unmask();
-            savedButton.setEnabled(workingModel.get().isDirty());
         }
     }
 

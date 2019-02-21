@@ -25,7 +25,6 @@ import com.googlecode.objectify.Work;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonMappingException;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
-import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.model.analysis.Analysis;
 import org.activityinfo.model.analysis.AnalysisUpdate;
 import org.activityinfo.model.database.UserDatabaseMeta;
@@ -87,18 +86,21 @@ public class AnalysesResource {
 
         final AnalysisUpdate update = Json.fromJson(AnalysisUpdate.class, Json.parse(jsonString));
 
-        assertUpdateAuthorized(update);
-
-        // TODO: verify json
-        Hrd.ofy().transact(new Runnable() {
+        return Hrd.ofy().transact(new Work<Response>() {
             @Override
-            public void run() {
+            public Response run() {
 
                 LoadResult<AnalysisEntity> existingEntity = Hrd.ofy().load().key(Key.create(AnalysisEntity.class, update.getId()));
                 long newVersion;
                 if(existingEntity.now() == null) {
+                    if (!canCreateAnalysis(update)) {
+                        return Response.status(Response.Status.FORBIDDEN).build();
+                    }
                     newVersion = 1;
                 } else {
+                    if (!canUpdateAnalysis(update)) {
+                        return Response.status(Response.Status.FORBIDDEN).build();
+                    }
                     newVersion = existingEntity.now().getVersion() + 1;
                 }
 
@@ -120,36 +122,38 @@ public class AnalysesResource {
                 snapshot.setUserId(userProvider.get().getId());
 
                 Hrd.ofy().save().entities(entity, snapshot);
+
+                return Response.status(Response.Status.OK).build();
             }
         });
 
-        return Response.status(Response.Status.OK).build();
     }
-
 
     private boolean isVisible(AnalysisEntity entity) {
-        ResourceId databaseId = ResourceId.valueOf(entity.getParentId());
-        if (!CuidAdapter.isValidLegacyId(databaseId) || databaseId.getDomain() != CuidAdapter.DATABASE_DOMAIN) {
+        ResourceId parentId = ResourceId.valueOf(entity.getParentId());
+        if (!CuidAdapter.isValidLegacyId(parentId)) {
             return false;
         }
-        Optional<UserDatabaseMeta> database = databaseProvider.getDatabaseMetadata(databaseId, userProvider.get().getId());
-        return database.isPresent() && PermissionOracle.canView(database.get());
+        Optional<UserDatabaseMeta> database = databaseProvider.getDatabaseMetadataByResource(parentId, userProvider.get().getUserId());
+        return database.isPresent() && PermissionOracle.canView(parentId, database.get());
     }
 
-    private void assertUpdateAuthorized(AnalysisUpdate update) {
-        ResourceId databaseId = ResourceId.valueOf(update.getParentId());
-        if(!CuidAdapter.isValidLegacyId(databaseId) || databaseId.getDomain() != CuidAdapter.DATABASE_DOMAIN) {
-            throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).entity("No such folder: " + databaseId).build());
+    private boolean canCreateAnalysis(AnalysisUpdate create) {
+        ResourceId parentId = ResourceId.valueOf(create.getParentId());
+        if (!CuidAdapter.isValidLegacyId(parentId)) {
+            return false;
         }
-        Optional<UserDatabaseMeta> database = databaseProvider.getDatabaseMetadata(databaseId, userProvider.get().getId());
-        if (!database.isPresent()) {
-            throw new IllegalArgumentException("Database must exist");
-        }
-        if (!PermissionOracle.canEditResource(databaseId, database.get())) {
-            throw new IllegalAccessCommandException("Not authorized to modify report");
-        }
+        Optional<UserDatabaseMeta> database = databaseProvider.getDatabaseMetadataByResource(parentId, userProvider.get().getUserId());
+        return database.isPresent() && PermissionOracle.canCreateResource(parentId, database.get());
     }
 
-
+    private boolean canUpdateAnalysis(AnalysisUpdate update) {
+        ResourceId parentId = ResourceId.valueOf(update.getParentId());
+        if (!CuidAdapter.isValidLegacyId(parentId)) {
+            return false;
+        }
+        Optional<UserDatabaseMeta> database = databaseProvider.getDatabaseMetadataByResource(parentId, userProvider.get().getUserId());
+        return database.isPresent() && PermissionOracle.canEditResource(parentId, database.get());
+    }
 
 }

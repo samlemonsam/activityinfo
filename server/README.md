@@ -8,7 +8,7 @@ The server component is responsible for:
 
 * Sign up, Login, and Authentication
 * Serving API requests (GWT-RPC, REST, and ODK, etc)
-* Serving KML, GeoJson
+* Serving GeoJson
 * Rending PDF/Word/Doc Reports and Exports
 * Sending daily/weekly email digests and scheduled reports
 

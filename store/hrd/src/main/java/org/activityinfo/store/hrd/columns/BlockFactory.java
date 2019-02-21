@@ -31,6 +31,10 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
         return field.getType().accept(new BlockFactory(field));
     }
 
+    public static BlockManager forParentId() {
+        return new StringBlock("parent", new ViewBuilderFactory.TextFieldReader());
+    }
+
     @Override
     public BlockManager visitAttachment(AttachmentType attachmentType) {
         return new StringBlock(fieldName, new ViewBuilderFactory.AttachmentBlobIdReader());

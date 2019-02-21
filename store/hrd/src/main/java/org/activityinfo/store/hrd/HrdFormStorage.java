@@ -49,9 +49,11 @@ public class HrdFormStorage implements VersionedFormStorage, FormStorageV2 {
     private static final boolean COLUMN_STORAGE_ENABLED = false;
 
     private long version;
+    private final FormEntity rootEntity;
     private FormClass formClass;
 
-    public HrdFormStorage(FormClass formClass) {
+    public HrdFormStorage(FormEntity rootEntity, FormClass formClass) {
+        this.rootEntity = rootEntity;
         this.formClass = formClass;
     }
 
@@ -106,13 +108,16 @@ public class HrdFormStorage implements VersionedFormStorage, FormStorageV2 {
 
     @Override
     public ColumnQueryBuilderV2 newColumnQueryV2() {
-        return null;
+        if(rootEntity.isColumnStorageActive()) {
+            return new HrdQueryColumnBlockBuilder(rootEntity, getFormClass());
+        } else {
+            return null;
+        }
     }
 
     @Override
     public long cacheVersion() {
-        FormEntity entity = ofy().load().type(FormEntity.class).id(formClass.getId().asString()).now();
-        return entity.getVersion();
+        return rootEntity.getVersion();
     }
 
     @Override

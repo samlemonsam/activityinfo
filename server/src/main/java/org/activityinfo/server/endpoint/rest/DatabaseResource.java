@@ -309,7 +309,7 @@ public class DatabaseResource {
         UsageTracker.track(newOwner.getId(), "db_transfer_complete", database.getResourceId());
 
         return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/app").fragment("db/" + databaseId).build())
-                .cookie(authTokenProvider.createNewAuthCookies(newOwner))
+                .cookie(authTokenProvider.createNewAuthCookies(newOwner, uri.getBaseUri()))
                 .build();
     }
 

@@ -271,7 +271,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Enter the coordinates in any format, or drag the marker on the map")
     String coordinateToolTip();
 
-    @DefaultStringValue("copy")
+    @DefaultStringValue("Copy")
     String copy();
 
     @DefaultStringValue("Country")
@@ -1834,8 +1834,8 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("The folder is not empty. Please delete all forms before deleting the folder.")
     String folderNotEmpty();
 
-    @DefaultStringValue("Try our new reporting interface! (BETA)")
-    String tryNewReportingInterface();
+    @DefaultStringValue("Try the new reporting interface in ActivityInfo 4.0!")
+    String tryV4ReportingInterface();
 
     @DefaultStringValue("This entry references a site which has been deleted. Please update the location to avoid loss of data.")
     String deletedLocation();

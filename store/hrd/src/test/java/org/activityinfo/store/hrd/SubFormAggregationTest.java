@@ -147,6 +147,10 @@ public class SubFormAggregationTest {
         monthCollection.get().add(month2);
         monthCollection.get().add(month3);
 
+        monthCollection = catalog.getForm(monthlyForm.getId());
+        assertThat(monthCollection.get().cacheVersion(), equalTo(4L));
+
+
         QueryModel queryModel = new QueryModel(siteForm.getId());
         queryModel.selectRecordId().as("id");
         queryModel.selectField("Village Name").as("village");

@@ -58,28 +58,6 @@ public class LoginController {
         return model.asViewable();
     }
 
-    @POST 
-    @Path("ajax")
-    public Response ajaxLogin(@FormParam("email") String email,
-                              @FormParam("password") String password) throws Exception {
-
-        User user;
-        try {
-            user = userDAO.get().findUserByEmail(email);
-        } catch(NoResultException e) {
-            LOGGER.warning("Failed login attempt for unknown user: " + email);
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-        try {
-            checkPassword(password, user);
-        } catch (LoginException e) {
-            LOGGER.warning("Failed login attempt for user " + user.getEmail());
-            return Response.status(Response.Status.BAD_REQUEST).build();
-        }
-
-        return Response.ok().cookie(authTokenProvider.get().createNewAuthCookies(user)).build();
-    }
-
     @POST
     public Response login(@Context UriInfo uri,
                           @FormParam("email") String email,
@@ -107,7 +85,7 @@ public class LoginController {
         URI appUri = UriBuilder.fromUri(baseUri).replacePath(HostController.ENDPOINT).build();
 
         return Response.seeOther(appUri)
-                       .cookie(authTokenProvider.get().createNewAuthCookies(user))
+                       .cookie(authTokenProvider.get().createNewAuthCookies(user, baseUri))
                        .build();
     }
 

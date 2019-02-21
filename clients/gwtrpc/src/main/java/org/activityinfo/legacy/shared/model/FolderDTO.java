@@ -29,15 +29,17 @@ public class FolderDTO extends BaseModelData implements ProvidesKey, EntityDTO, 
 
     public static final String ENTITY_NAME = "Folder";
 
+    private static final int DEFULT_CATEGORY_ID = 0;                // Give the folder a default id for usage as a category
+
     private List<ActivityDTO> activities = new ArrayList<>();
     private Set<LockedPeriodDTO> lockedPeriods = new HashSet<>();
 
     public FolderDTO() {
+        setId(DEFULT_CATEGORY_ID);
     }
 
     public FolderDTO(int databaseId, String name) {
-        setDatabaseId(databaseId);
-        setName(name);
+        this(databaseId, DEFULT_CATEGORY_ID, name);
     }
 
     public FolderDTO(int databaseId, int folderId, String name) {
@@ -98,17 +100,20 @@ public class FolderDTO extends BaseModelData implements ProvidesKey, EntityDTO, 
 
         FolderDTO that = (FolderDTO) o;
 
-        return Objects.equals(this.getName(), that.getName());
+        return Objects.equals(this.getId(), that.getId())
+                && Objects.equals(this.getName(), that.getName());
     }
 
     @Override
     public int hashCode() {
-        return getName() != null ? getName().hashCode() : 0;
+        int idCode = getId();
+        int nameCode = getName() != null ? getName().hashCode() : 0;
+        return idCode + nameCode;
     }
 
     @Override
     public String getKey() {
-        return "activity_category_" + getDatabaseId() + "_" + getName();
+        return "activity_category_" + getDatabaseId() + "_" + getId() + "_" + getName();
     }
 
     @Override

@@ -2,15 +2,14 @@ package org.activityinfo.store.hrd;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.googlecode.objectify.LoadResult;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.hrd.columns.*;
 import org.activityinfo.store.hrd.entity.FieldDescriptor;
 import org.activityinfo.store.hrd.entity.FormEntity;
-import org.activityinfo.store.hrd.entity.FormSchemaEntity;
 import org.activityinfo.store.spi.ColumnQueryBuilderV2;
 import org.activityinfo.store.spi.FieldComponent;
 import org.activityinfo.store.spi.PendingSlot;
@@ -28,13 +27,16 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
     private static final Logger LOGGER = Logger.getLogger(HrdQueryColumnBuilder.class.getName());
 
     private final FormEntity formEntity;
+    private final FormClass formClass;
     private Multimap<FieldComponent, PendingSlot<ColumnView>> fieldTargets = HashMultimap.create();
     private Set<ResourceId> fields = new HashSet<>();
     private List<PendingSlot<ColumnView>> idTargets = new ArrayList<>();
+    private List<PendingSlot<ColumnView>> parentIdTargets = new ArrayList<>();
     private List<PendingSlot<Integer>> rowCountTargets = new ArrayList<>();
 
-    public HrdQueryColumnBlockBuilder(FormEntity formEntity) {
+    public HrdQueryColumnBlockBuilder(FormEntity formEntity, FormClass formClass) {
         this.formEntity = formEntity;
+        this.formClass = formClass;
     }
 
     @Override
@@ -49,14 +51,17 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
 
     @Override
     public void addField(FieldComponent fieldComponent, PendingSlot<ColumnView> target) {
-        fieldTargets.put(fieldComponent, target);
-        fields.add(fieldComponent.getFieldId());
+        if(fieldComponent.getFieldId().asString().equals("@parent")) {
+            parentIdTargets.add(target);
+        } else {
+            fieldTargets.put(fieldComponent, target);
+            fields.add(fieldComponent.getFieldId());
+        }
     }
 
     @Override
     public void execute() {
 
-        LoadResult<FormSchemaEntity> schema = Hrd.ofy().load().key(FormSchemaEntity.key(formEntity.getResourceId()));
 
         // Provide row counts
         for (PendingSlot<Integer> rowCountTarget : rowCountTargets) {
@@ -67,6 +72,9 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
         blockResolver.fetchRecordIds();
         blockResolver.fetchTombstones();
 
+        if(!parentIdTargets.isEmpty()) {
+            blockResolver.fetchParentIds();
+        }
 
         // Determine which column-blocks we need to fetch for this query
         Set<String> columnBlocks = new HashSet<>();
@@ -88,8 +96,6 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
 
         // Now construct column views from blocks
 
-        FormClass formSchema = schema.now().readFormClass();
-
         TombstoneIndex tombstoneIndex = new TombstoneIndex(formEntity, blockResolver.getTombstoneBlocks());
 
         if(!idTargets.isEmpty()) {
@@ -102,14 +108,18 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
             }
         }
 
-        for (FieldComponent fieldComponent : fieldTargets.keySet()) {
-            FormField field = formSchema.getField(fieldComponent.getFieldId());
-            FieldDescriptor descriptor = formEntity.getFieldDescriptor(field.getName());
-            BlockManager blockManager = BlockFactory.get(field);
-
+        if(!parentIdTargets.isEmpty()) {
+            BlockManager blockManager = BlockFactory.forParentId();
             ColumnView columnView = blockManager.buildView(formEntity, tombstoneIndex,
-                    blockResolver.getBlocks(descriptor),
-                    fieldComponent.getComponent());
+                    blockResolver.getBlocks(ColumnModel.PARENT_SYMBOL));
+
+            for (PendingSlot<ColumnView> parentIdTarget : parentIdTargets) {
+                parentIdTarget.set(columnView);
+            }
+        }
+
+        for (FieldComponent fieldComponent : fieldTargets.keySet()) {
+            ColumnView columnView = buildFieldColumnView(blockResolver, tombstoneIndex, fieldComponent);
 
             for (PendingSlot<ColumnView> fieldTarget : fieldTargets.get(fieldComponent)) {
                 fieldTarget.set(columnView);
@@ -120,6 +130,23 @@ public class HrdQueryColumnBlockBuilder implements ColumnQueryBuilderV2 {
             caching.get();
         } catch (Exception e ){
             LOGGER.log(Level.SEVERE, "Failed to cache fetched blocks", e);
+        }
+    }
+
+    private ColumnView buildFieldColumnView(BlockResolver blockResolver, TombstoneIndex tombstoneIndex, FieldComponent fieldComponent) {
+        try {
+
+            FormField field = formClass.getField(fieldComponent.getFieldId());
+            FieldDescriptor descriptor = formEntity.getFieldDescriptor(field.getName());
+            BlockManager blockManager = BlockFactory.get(field);
+
+            return blockManager.buildView(formEntity, tombstoneIndex,
+                    blockResolver.getBlocks(descriptor),
+                    fieldComponent.getComponent());
+
+
+        } catch (Exception e) {
+            throw new RuntimeException("Exception building view from " + fieldComponent, e);
         }
     }
 }

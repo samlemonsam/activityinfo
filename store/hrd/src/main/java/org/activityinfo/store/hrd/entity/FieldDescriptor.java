@@ -1,7 +1,5 @@
 package org.activityinfo.store.hrd.entity;
 
-import com.googlecode.objectify.annotation.Entity;
-
 public class FieldDescriptor {
 
     private String columnId;
@@ -28,5 +26,13 @@ public class FieldDescriptor {
 
     public boolean hasBlockAssignment() {
         return columnId != null;
+    }
+
+    @Override
+    public String toString() {
+        return "FieldDescriptor{" +
+                "columnId='" + columnId + '\'' +
+                ", version=" + version +
+                '}';
     }
 }

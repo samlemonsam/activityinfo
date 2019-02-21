@@ -259,7 +259,7 @@ public class SiteExporter {
 
         for (AttributeGroupDTO group : activity.getAttributeGroups()) {
             if (group.getAttributes().size() != 0) {
-                if (group.isMultipleAllowed()) {
+                if (group.isMultipleAllowed() && group.getAttributes().size() > 1) {
                     createHeaderCell(headerRow1, column, group.getName(), CellStyle.ALIGN_CENTER);
                     sheet.addMergedRegion(new CellRangeAddress(0, 0, column, column + group.getAttributes().size() - 1));
 

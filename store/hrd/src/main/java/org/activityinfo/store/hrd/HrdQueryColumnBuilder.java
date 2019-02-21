@@ -102,7 +102,7 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
         // For this reason, we use the raw datastore API rather than the Objectify API which
         // adds a layer of abstraction and additional memory allocation.
 
-        LOGGER.info("Starting query: " + megabytesFree() + "mb");
+        LOGGER.info("HRDQueryColumnBuilder starting for " + formClass.getId());
 
         DatastoreService datastoreService = DatastoreServiceFactory.getDatastoreService();
         PreparedQuery preparedQuery = datastoreService.prepare(
@@ -112,7 +112,10 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
         FetchOptions fetchOptions = FetchOptions.Builder.withChunkSize(500).prefetchSize(500);
         Iterator<Entity> it = preparedQuery.asIterator(fetchOptions);
 
+        long count = 0;
+
         while(it.hasNext()) {
+            count ++;
             Entity entity = it.next();
             ResourceId recordId = ResourceId.valueOf(entity.getKey().getName());
 
@@ -143,7 +146,11 @@ class HrdQueryColumnBuilder implements ColumnQueryBuilder {
             observer.done();
         }
 
-        LOGGER.info("Finished query: " + megabytesFree() + "mb");
+        LOGGER.info("HRDQueryColumnBuilder finished " + formClass.getId() + ", read " + count + " entities.");
+
+        if(count > 1000) {
+            LOGGER.severe("HRD READ EXPLOSION ALERT: " + count + " on form " + formClass.getId());
+        }
     }
 
     private long megabytesFree() {

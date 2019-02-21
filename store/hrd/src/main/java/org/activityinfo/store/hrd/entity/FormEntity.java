@@ -85,7 +85,7 @@ public class FormEntity {
     private Blob tombstoneVersionMap;
 
     /**
-     * The version number of last record od block version. Only the (currently)
+     * The version number of last record of the block version. Only the (currently)
      * last record block will change, the rest are essentially immutable.
      */
     private long tailIdBlockVersion;
@@ -167,6 +167,7 @@ public class FormEntity {
     }
 
     public FieldDescriptor getFieldDescriptor(String fieldName) {
+
         if(fields == null) {
             fields = new HashMap<>();
         }

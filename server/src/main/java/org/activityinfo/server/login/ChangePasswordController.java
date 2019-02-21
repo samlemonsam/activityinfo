@@ -91,7 +91,7 @@ public class ChangePasswordController {
         changePassword(user, password);
 
         return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/").build())
-                       .cookie(authTokenProvider.createNewAuthCookies(user))
+                       .cookie(authTokenProvider.createNewAuthCookies(user, uri.getBaseUri()))
                        .build();
     }
 

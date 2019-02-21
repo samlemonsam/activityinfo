@@ -5,6 +5,7 @@ import com.google.appengine.api.memcache.AsyncMemcacheService;
 import com.google.appengine.api.memcache.Expiration;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
+import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.store.hrd.entity.ColumnDescriptor;
 import org.activityinfo.store.hrd.entity.FieldDescriptor;
 import org.activityinfo.store.hrd.entity.FormEntity;
@@ -64,6 +65,27 @@ public class BlockResolver {
             // to pay attention to the version
             toFetch.add(new Fetch(
                     blockId(RecordIdBlock.BLOCK_NAME, numBlocks - 1),
+                    formEntity.getTailIdBlockVersion()));
+        }
+    }
+
+
+    public void fetchParentIds() {
+        if(formEntity.getNumberedRecordCount() > 0) {
+            BlockManager parentIdBlock = BlockFactory.forParentId();
+            int numBlocks = numBlocks(parentIdBlock.getBlockSize());
+
+            // parent ids cannot change, so all blocks except the last one
+            // do not change and we use a static version number "0"
+
+            for (int i = 0; i < numBlocks - 1; i++) {
+                toFetch.add(new Fetch(blockId(ColumnModel.PARENT_SYMBOL, i), 0));
+            }
+
+            // The last, or "tail" block is changing as records are added, so we need
+            // to pay attention to the version
+            toFetch.add(new Fetch(
+                    blockId(ColumnModel.PARENT_SYMBOL, numBlocks - 1),
                     formEntity.getTailIdBlockVersion()));
         }
     }
