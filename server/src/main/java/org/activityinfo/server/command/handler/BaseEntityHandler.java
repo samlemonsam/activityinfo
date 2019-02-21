@@ -272,7 +272,7 @@ public class BaseEntityHandler {
     void assertCreateFolderRights(User user, Database database) {
         ResourceId databaseId = CuidAdapter.databaseId(database.getId());
         Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, user.getId());
-        if (!databaseMeta.isPresent() || !PermissionOracle.canCreateForm(databaseId, databaseMeta.get())) {
+        if (!databaseMeta.isPresent() || !PermissionOracle.canCreateResource(databaseId, databaseMeta.get())) {
             throw new IllegalAccessCommandException();
         }
     }
@@ -304,7 +304,7 @@ public class BaseEntityHandler {
     void assertEditProjectRights(User user, Project project) {
         ResourceId projectFormId = CuidAdapter.projectFormClass(project.getId());
         Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(project.getDatabase().getId(), user.getId());
-        if (!databaseMeta.isPresent() || !PermissionOracle.canEditResource(projectFormId, databaseMeta.get())) {
+        if (!databaseMeta.isPresent() || !PermissionOracle.canEditRecord(projectFormId, databaseMeta.get())) {
             throw new IllegalAccessCommandException();
         }
     }
