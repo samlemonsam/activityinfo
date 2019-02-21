@@ -179,7 +179,7 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
      */
     public static void verifyAuthority(UpdateUserPermissions cmd,
                                        UserPermission executingUserPermissions) {
-        if (!executingUserPermissions.isAllowView()) {
+        if (executingUserPermissions == null || !executingUserPermissions.isAllowView()) {
             throw new IllegalAccessCommandException("Current user does not have rights on this database");
         }
         if (!executingUserPermissions.isAllowManageUsers()) {
