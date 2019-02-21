@@ -36,6 +36,7 @@ public class PermissionOracle {
         if (db.isPublished()) {
             switch (query.getOperation()) {
                 case VIEW:
+                case EXPORT_RECORDS:
                     return allow(query.getOperation());
 
                 case CREATE_RECORD:
