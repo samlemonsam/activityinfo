@@ -29,17 +29,17 @@ public class FolderDTO extends BaseModelData implements ProvidesKey, EntityDTO, 
 
     public static final String ENTITY_NAME = "Folder";
 
-    private static final int DEFULT_CATEGORY_ID = 0;                // Give the folder a default id for usage as a category
+    private static final int DEFAULT_CATEGORY_ID = 0;                // Give the folder a default id for usage as a category
 
     private List<ActivityDTO> activities = new ArrayList<>();
     private Set<LockedPeriodDTO> lockedPeriods = new HashSet<>();
 
     public FolderDTO() {
-        setId(DEFULT_CATEGORY_ID);
+        setId(DEFAULT_CATEGORY_ID);
     }
 
     public FolderDTO(int databaseId, String name) {
-        this(databaseId, DEFULT_CATEGORY_ID, name);
+        this(databaseId, DEFAULT_CATEGORY_ID, name);
     }
 
     public FolderDTO(int databaseId, int folderId, String name) {
