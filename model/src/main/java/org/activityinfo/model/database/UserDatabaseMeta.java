@@ -83,10 +83,6 @@ public class UserDatabaseMeta implements JsonSerializable {
         return databaseId;
     }
 
-    public int getLegacyDatabaseId() {
-        return CuidAdapter.getLegacyIdFromCuid(databaseId);
-    }
-
     public int getUserId() {
         return userId;
     }
@@ -197,7 +193,7 @@ public class UserDatabaseMeta implements JsonSerializable {
         }
         // Return the catalog entries for the this nodes _direct_ children
         return parentNode.getChildNodes().stream()
-                .filter(node -> !node.getResource().getId().equals(CuidAdapter.partnerFormId(getLegacyDatabaseId())))
+                .filter(node -> !node.getResource().getId().equals(CuidAdapter.partnerFormId(CuidAdapter.getLegacyIdFromCuid(databaseId))))
                 .map(UserDatabaseMeta::buildCatalogEntry)
                 .collect(Collectors.toList());
     }

@@ -244,9 +244,9 @@ public class DeleteHandler implements CommandHandler<Delete> {
         if (!PermissionOracle.canManageTargets(databaseId, databaseMeta.get())) {
             LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.MANAGE_TARGETS.name()
-                            + " rights on Database %d",
+                            + " rights on Database %s",
                     databaseMeta.get().getUserId(),
-                    databaseMeta.get().getLegacyDatabaseId()));
+                    databaseMeta.get().getDatabaseId()));
             throw new IllegalAccessCommandException();
         }
     }
@@ -262,9 +262,9 @@ public class DeleteHandler implements CommandHandler<Delete> {
         if (!PermissionOracle.canDeleteForm(locationTypeForm, databaseMeta.get())) {
             LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.DELETE_RESOURCE.name()
-                            + " rights on Database %d",
+                            + " rights on Database %s",
                     databaseMeta.get().getUserId(),
-                    databaseMeta.get().getLegacyDatabaseId()));
+                    databaseMeta.get().getDatabaseId()));
             throw new IllegalAccessCommandException();
         }
     }

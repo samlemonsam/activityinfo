@@ -105,9 +105,9 @@ public class ActivityInfoApiBackend implements ApiBackend {
         if (!PermissionOracle.canCreateForm(databaseMeta.getDatabaseId(), databaseMeta)) {
             LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.CREATE_RESOURCE.name()
-                            + " rights on Database %d",
+                            + " rights on Database %s",
                     databaseMeta.getUserId(),
-                    databaseMeta.getLegacyDatabaseId()));
+                    databaseMeta.getDatabaseId()));
             throw new IllegalAccessCommandException();
         }
     }

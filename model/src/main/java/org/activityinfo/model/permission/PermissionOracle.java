@@ -452,7 +452,7 @@ public class PermissionOracle {
     private static boolean filterAllowsPartner(Permission permission, int partnerId, UserDatabaseMeta db) {
         return !permission.isFiltered()
                 || filterContainsPartner(permission.getFilter(),
-                    CuidAdapter.partnerFormId(db.getLegacyDatabaseId()),
+                    CuidAdapter.partnerFormId(CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId())),
                     CuidAdapter.partnerRecordId(partnerId));
     }
 
@@ -498,7 +498,7 @@ public class PermissionOracle {
 
     public static Permission view(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.VIEW,
                 resourceId);
         return query(query, db);
@@ -506,7 +506,7 @@ public class PermissionOracle {
 
     public static Permission createRecord(ResourceId formId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.CREATE_RECORD,
                 formId);
         return query(query, db);
@@ -514,7 +514,7 @@ public class PermissionOracle {
 
     public static Permission deleteRecord(ResourceId formId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.DELETE_RECORD,
                 formId);
         return query(query, db);
@@ -522,7 +522,7 @@ public class PermissionOracle {
 
     public static Permission editRecord(ResourceId formId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.EDIT_RECORD,
                 formId);
         return query(query, db);
@@ -530,7 +530,7 @@ public class PermissionOracle {
 
     public static Permission manageUsers(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.MANAGE_USERS,
                 resourceId);
         return query(query, db);
@@ -538,7 +538,7 @@ public class PermissionOracle {
 
     public static Permission createResource(ResourceId containerResourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.CREATE_RESOURCE,
                 containerResourceId);
         return query(query, db);
@@ -546,7 +546,7 @@ public class PermissionOracle {
 
     public static Permission deleteResource(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.DELETE_RESOURCE,
                 resourceId);
         return query(query, db);
@@ -554,7 +554,7 @@ public class PermissionOracle {
 
     public static Permission editResource(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.EDIT_RESOURCE,
                 resourceId);
         return query(query, db);
@@ -562,7 +562,7 @@ public class PermissionOracle {
 
     public static Permission lockRecords(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.LOCK_RECORDS,
                 resourceId);
         return query(query, db);
@@ -570,7 +570,7 @@ public class PermissionOracle {
 
     public static Permission exportRecords(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.EXPORT_RECORDS,
                 resourceId);
         return query(query, db);
@@ -578,7 +578,7 @@ public class PermissionOracle {
 
     public static Permission manageTargets(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.MANAGE_TARGETS,
                 resourceId);
         return query(query, db);
@@ -788,6 +788,14 @@ public class PermissionOracle {
     }
 
     ////////////////////////////////////////////// MANAGE_USERS Methods ////////////////////////////////////////////////
+
+    /**
+     * <p>The current User can manage a user with given Partner on the specified Resource on this Database.</p>
+     */
+    public static boolean canManageUser(ResourceId resourceId, int partnerId, UserDatabaseMeta db) {
+        Permission manageUser = manageUsers(resourceId, db);
+        return manageUser.isPermitted() && filterAllowsPartner(manageUser, partnerId, db);
+    }
 
     /**
      * <p>The current User can manage users for any Resource on this Database.</p>

@@ -101,9 +101,9 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         if (!PermissionOracle.canCreateForm(databaseMeta.getDatabaseId(), databaseMeta)) {
             LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.CREATE_RESOURCE.name()
-                            + " rights on Database %d",
+                            + " rights on Database %s",
                     databaseMeta.getUserId(),
-                    databaseMeta.getLegacyDatabaseId()));
+                    databaseMeta.getDatabaseId()));
             throw new IllegalAccessCommandException();
         }
     }
@@ -116,9 +116,9 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         if (!PermissionOracle.canEditForm(formId, databaseMeta)) {
             LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.EDIT_RESOURCE.name()
-                            + " rights on Database %d",
+                            + " rights on Database %s",
                     databaseMeta.getUserId(),
-                    databaseMeta.getLegacyDatabaseId()));
+                    databaseMeta.getDatabaseId()));
             throw new IllegalAccessCommandException();
         }
     }
