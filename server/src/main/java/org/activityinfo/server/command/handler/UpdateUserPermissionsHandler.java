@@ -179,27 +179,41 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
      */
     public static void verifyAuthority(UpdateUserPermissions cmd,
                                        UserPermission executingUserPermissions) {
+        if (executingUserPermissions == null || !executingUserPermissions.isAllowView()) {
+            throw new IllegalAccessCommandException("Current user does not have rights on this database");
+        }
         if (!executingUserPermissions.isAllowManageUsers()) {
             throw new IllegalAccessCommandException("Current user does not have the right to manage other users");
         }
-
         List<Integer> allowedPartnerIds = executingUserPermissions.getPartners().stream()
                 .map(Partner::getId).collect(Collectors.toList());
-
         if (!executingUserPermissions.isAllowManageAllUsers()
                 && !allowedPartnerIds.containsAll(cmd.getModel().getPartnerIds())) {
-            throw new IllegalAccessCommandException(
-                    "Current user does not have the right to manage users from other partners");
+            throw new IllegalAccessCommandException("Current user does not have the right to manage users from other partners");
         }
-
-        if (!executingUserPermissions.isAllowDesign() && cmd.getModel().getAllowDesign()) {
+        if ((cmd.getModel().getAllowCreate() || cmd.getModel().getAllowCreateAll()) && !executingUserPermissions.isAllowCreate()) {
+            throw new IllegalAccessCommandException("Current user does not have the right to grant create privileges");
+        }
+        if ((cmd.getModel().getAllowEdit() || cmd.getModel().getAllowEditAll()) && !executingUserPermissions.isAllowEdit()) {
+            throw new IllegalAccessCommandException("Current user does not have the right to grant edit privileges");
+        }
+        if ((cmd.getModel().getAllowDelete() || cmd.getModel().getAllowDeleteAll()) && !executingUserPermissions.isAllowDelete()) {
+            throw new IllegalAccessCommandException("Current user does not have the right to grant delete privileges");
+        }
+        if (cmd.getModel().getAllowExport() && !executingUserPermissions.isAllowExport()) {
+            throw new IllegalAccessCommandException("Current user does not have the right to grant export privileges");
+        }
+        if (cmd.getModel().getAllowDesign() && !executingUserPermissions.isAllowDesign() ) {
             throw new IllegalAccessCommandException("Current user does not have the right to grant design privileges");
         }
-
         if (!executingUserPermissions.isAllowManageAllUsers() &&
-            (cmd.getModel().getAllowViewAll() || cmd.getModel().getAllowEditAll() || cmd.getModel().getAllowManageAllUsers())) {
-            throw new IllegalAccessCommandException(
-                    "Current user does not have the right to grant viewAll, editAll, or manageAllUsers privileges");
+                (cmd.getModel().getAllowViewAll()
+                        || cmd.getModel().getAllowCreateAll()
+                        || cmd.getModel().getAllowEditAll()
+                        || cmd.getModel().getAllowDeleteAll()
+                        || cmd.getModel().getAllowManageAllUsers())) {
+            throw new IllegalAccessCommandException("Current user does not have the right to grant viewAll, createAll, " +
+                    "editAll, deleteAll or manageAllUsers privileges");
         }
     }
 

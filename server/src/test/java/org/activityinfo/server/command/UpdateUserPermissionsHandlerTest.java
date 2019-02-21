@@ -129,6 +129,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
 
         UserPermission executingUserPermissions = new UserPermission();
         executingUserPermissions.addPartner(NRC);
+        executingUserPermissions.setAllowView(true);
         executingUserPermissions.setAllowManageUsers(true);
 
         UserPermissionDTO dto = new UserPermissionDTO();
@@ -150,6 +151,8 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
 
         UserPermission executingUserPermissions = new UserPermission();
         executingUserPermissions.addPartner(NRC);
+        executingUserPermissions.setAllowView(true);
+        executingUserPermissions.setAllowEdit(true);
         executingUserPermissions.setAllowManageUsers(true);
 
         UserPermissionDTO dto = new UserPermissionDTO();
@@ -186,6 +189,8 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
 
         UserPermission executingUserPermissions = new UserPermission();
         executingUserPermissions.addPartner(IRC);
+        executingUserPermissions.setAllowView(true);
+        executingUserPermissions.setAllowEdit(true);
         executingUserPermissions.setAllowManageUsers(true);
         executingUserPermissions.setAllowManageAllUsers(true);
 

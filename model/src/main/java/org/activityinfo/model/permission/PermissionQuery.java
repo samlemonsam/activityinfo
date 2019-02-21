@@ -16,16 +16,16 @@ import org.activityinfo.model.resource.ResourceId;
 public class PermissionQuery implements JsonSerializable {
 
     private int user;
-    private ResourceId database;
+    private ResourceId databaseId;
     private Operation operation;
     private ResourceId resourceId;
 
     private PermissionQuery() {
     }
 
-    public PermissionQuery(int user, ResourceId database, Operation operation, ResourceId resourceId) {
+    public PermissionQuery(int user, ResourceId databaseId, Operation operation, ResourceId resourceId) {
         this.user = user;
-        this.database = database;
+        this.databaseId = databaseId;
         this.operation = operation;
         this.resourceId = resourceId;
     }
@@ -34,8 +34,8 @@ public class PermissionQuery implements JsonSerializable {
         return user;
     }
 
-    public ResourceId getDatabase() {
-        return database;
+    public ResourceId getDatabaseId() {
+        return databaseId;
     }
 
     public Operation getOperation() {
@@ -49,7 +49,7 @@ public class PermissionQuery implements JsonSerializable {
     public static PermissionQuery fromJson(JsonValue object) {
         PermissionQuery query = new PermissionQuery();
         query.user = object.get("user").asInt();
-        query.database = ResourceId.valueOf(object.get("database").asString());
+        query.databaseId = ResourceId.valueOf(object.get("database").asString());
         query.operation = Operation.valueOf(object.get("operation").asString());
         query.resourceId = ResourceId.valueOf(object.get("resource").asString());
         return query;
@@ -59,7 +59,7 @@ public class PermissionQuery implements JsonSerializable {
     public JsonValue toJson() {
         JsonValue object = Json.createObject();
         object.put("user", user);
-        object.put("database", database.asString());
+        object.put("database", databaseId.asString());
         object.put("operation", operation.name());
         object.put("resource", resourceId.asString());
         return object;

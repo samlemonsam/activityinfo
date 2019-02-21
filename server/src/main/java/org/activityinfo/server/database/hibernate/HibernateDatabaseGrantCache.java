@@ -47,7 +47,7 @@ public class HibernateDatabaseGrantCache implements DatabaseGrantCache {
     private static final Logger LOGGER = Logger.getLogger(HibernateDatabaseGrantCache.class.getName());
 
     private static final String CACHE_PREFIX = "dbGrant";
-    private static final String CACHE_VERSION = "2";
+    private static final String CACHE_VERSION = "3";
 
     private static final long MAX_CACHE_SIZE = 1000;
     private static final long EXPIRES_IN = 10;
@@ -285,14 +285,11 @@ public class HibernateDatabaseGrantCache implements DatabaseGrantCache {
             partnerFormGrant.addOperation(Operation.VIEW, getPartnerFilter(userPermission));
             partnerFormGrant.addOperation(Operation.EXPORT_RECORDS, getPartnerFilter(userPermission));
         }
-        if (userPermission.isAllowManageAllUsers()) {
+        // To edit Partners, user must have Design rights and have root folder access
+        if (userPermission.isAllowDesign() && userPermission.getModel() == null) {
             partnerFormGrant.addOperation(Operation.CREATE_RECORD);
             partnerFormGrant.addOperation(Operation.EDIT_RECORD);
             partnerFormGrant.addOperation(Operation.DELETE_RECORD);
-        } else if (userPermission.isAllowManageUsers()) {
-            partnerFormGrant.addOperation(Operation.CREATE_RECORD, getPartnerFilter(userPermission));
-            partnerFormGrant.addOperation(Operation.EDIT_RECORD, getPartnerFilter(userPermission));
-            partnerFormGrant.addOperation(Operation.DELETE_RECORD, getPartnerFilter(userPermission));
         }
     }
 

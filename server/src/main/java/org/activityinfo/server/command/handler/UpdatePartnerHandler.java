@@ -25,7 +25,9 @@ import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.command.result.DuplicateCreateResult;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.PermissionOracle;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
@@ -63,27 +65,28 @@ public class UpdatePartnerHandler implements CommandHandler<UpdatePartner> {
         Optional<UserDatabaseMeta> dbMeta = provider.getDatabaseMetadata(cmd.getDatabaseId(), user.getId());
 
         assert db != null && dbMeta.isPresent();
+        ResourceId partnerFormId = CuidAdapter.partnerFormId(db.getId());
 
         // Does this partner already exist?
         if (cmd.getPartner().hasId()) {
-            assertManagePartnerAllowed(dbMeta.get(), cmd.getPartner().getId());
+            assertEditPartnerAllowed(dbMeta.get(), partnerFormId, cmd.getPartner().getId());
             return updatePartner(db, cmd);
         } else {
-            assertManageAllPartnersAllowed(dbMeta.get());
+            assertCreatePartnerAllowed(dbMeta.get(), partnerFormId);
             return addNewPartner(cmd, db);
         }
     }
 
-    private void assertManagePartnerAllowed(UserDatabaseMeta dbMeta, int partnerId) {
-        if (!PermissionOracle.canManagePartner(dbMeta.getDatabaseId(), partnerId, dbMeta)) {
-            LOGGER.severe(String.format("User %d is not authorized to modify partner %d", dbMeta.getUserId(), partnerId));
+    private void assertCreatePartnerAllowed(UserDatabaseMeta dbMeta, ResourceId partnerFormId) {
+        if (!PermissionOracle.canCreatePartner(partnerFormId, dbMeta)) {
+            LOGGER.severe(() -> String.format("User %d is not authorized to create partners", dbMeta.getUserId()));
             throw new IllegalAccessCommandException();
         }
     }
 
-    private void assertManageAllPartnersAllowed(UserDatabaseMeta dbMeta) {
-        if (!PermissionOracle.canManageAllPartners(dbMeta.getDatabaseId(), dbMeta)) {
-            LOGGER.severe(String.format("User %d is not authorized to modify all partners", dbMeta.getUserId()));
+    private void assertEditPartnerAllowed(UserDatabaseMeta dbMeta, ResourceId partnerFormId, int partnerId) {
+        if (!PermissionOracle.canEditPartner(partnerFormId, partnerId, dbMeta)) {
+            LOGGER.severe(() -> String.format("User %d is not authorized to edit partner %d", dbMeta.getUserId(), partnerId));
             throw new IllegalAccessCommandException();
         }
     }

@@ -138,9 +138,9 @@ public class UserDatabasePolicy implements EntityPolicy<Database> {
         }
         UserDatabaseMeta databaseMeta = dbMeta.get();
         if (!PermissionOracle.canEditDatabase(databaseMeta)) {
-            LOGGER.severe(() -> String.format("User %d does not have edit privileges on database %d",
+            LOGGER.severe(() -> String.format("User %d does not have edit privileges on database %s",
                     databaseMeta.getUserId(),
-                    databaseMeta.getLegacyDatabaseId()));
+                    databaseMeta.getDatabaseId()));
             throw new IllegalAccessCommandException();
         }
     }

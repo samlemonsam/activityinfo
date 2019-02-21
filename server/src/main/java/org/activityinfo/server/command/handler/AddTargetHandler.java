@@ -107,9 +107,9 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
         if (!PermissionOracle.canManageTargets(databaseMeta.getDatabaseId(), databaseMeta)) {
             LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.MANAGE_TARGETS.name()
-                            + " rights on Database %d",
+                            + " rights on Database %s",
                     databaseMeta.getUserId(),
-                    databaseMeta.getLegacyDatabaseId()));
+                    databaseMeta.getDatabaseId()));
             throw new IllegalAccessCommandException();
         }
     }

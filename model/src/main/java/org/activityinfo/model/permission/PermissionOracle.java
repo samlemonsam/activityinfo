@@ -37,6 +37,7 @@ public class PermissionOracle {
         if (db.isPublished()) {
             switch (query.getOperation()) {
                 case VIEW:
+                case EXPORT_RECORDS:
                     return allow(query.getOperation());
 
                 case CREATE_RECORD:
@@ -417,7 +418,7 @@ public class PermissionOracle {
     private static boolean filterAllowsPartner(Permission permission, int partnerId, UserDatabaseMeta db) {
         return !permission.isFiltered()
                 || filterContainsPartner(permission.getFilter(),
-                    CuidAdapter.partnerFormId(db.getLegacyDatabaseId()),
+                    CuidAdapter.partnerFormId(CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId())),
                     CuidAdapter.partnerRecordId(partnerId));
     }
 
@@ -763,6 +764,14 @@ public class PermissionOracle {
     ////////////////////////////////////////////// MANAGE_USERS Methods ////////////////////////////////////////////////
 
     /**
+     * <p>The current User can manage a user with given Partner on the specified Resource on this Database.</p>
+     */
+    public static boolean canManageUser(ResourceId resourceId, int partnerId, UserDatabaseMeta db) {
+        Permission manageUser = manageUsers(resourceId, db);
+        return manageUser.isPermitted() && filterAllowsPartner(manageUser, partnerId, db);
+    }
+
+    /**
      * <p>The current User can manage users for any Resource on this Database.</p>
      * <p>Does not account for any filters which may be applied/enforced.</p>
      */
@@ -776,24 +785,6 @@ public class PermissionOracle {
      */
     public static boolean canManageUsersOnResource(ResourceId resourceId, UserDatabaseMeta db) {
         return manageUsers(resourceId,db).isPermitted();
-    }
-
-    /**
-     * <p>The current User can manage users, with given Partner Id, on the specified Resource in this Database.</p>
-     * <p>Explicitly checks the filter to ensure that User is permitted to manage users <b>for this Partner.</b></p>
-     */
-    public static boolean canManagePartner(ResourceId resourceId, int partnerId, UserDatabaseMeta db) {
-        Permission manageUsers = manageUsers(resourceId, db);
-        return manageUsers.isPermitted() && filterAllowsPartner(manageUsers, partnerId, db);
-    }
-
-    /**
-     * <p>The current User can manage users, with <i>any</i> Partner Id, on the specified Resource in this Database.</p>
-     * <p>Explicitly checks to ensure User has <b>no filters</b> associated with this Permission.</p>
-     */
-    public static boolean canManageAllPartners(ResourceId resourceId, UserDatabaseMeta db) {
-        Permission manageUsers = manageUsers(resourceId, db);
-        return manageUsers.isPermitted() && !manageUsers.isFiltered();
     }
 
     /**
@@ -836,6 +827,49 @@ public class PermissionOracle {
                 .filter(Permission::isPermitted)
                 .map(Permission::getOptionalFilter)
                 .findFirst().orElse(Optional.empty());
+    }
+
+    ///////////////////////////////////////////// MANAGE_PARTNER Methods ///////////////////////////////////////////////
+
+    /**
+     * <p>The current User can create partners in this Database.</p>
+     */
+    public static boolean canCreatePartner(ResourceId partnerFormId, UserDatabaseMeta db) {
+        Permission createPartner = createRecord(partnerFormId, db);
+        return createPartner.isPermitted() && !createPartner.isFiltered();
+    }
+
+    /**
+     * <p>The current User can edit partners in this Database.</p>
+     * <p>Explicitly checks the filter to ensure that User is permitted to edit <b>this Partner.</b></p>
+     */
+    public static boolean canEditPartner(ResourceId partnerFormId, int partnerId, UserDatabaseMeta db) {
+        Permission editPartner = editRecord(partnerFormId, db);
+        return editPartner.isPermitted() && filterAllowsPartner(editPartner, partnerId, db);
+    }
+
+    /**
+     * <p>The current User can delete partners in this Database.</p>
+     * <p>Explicitly checks the filter to ensure that User is permitted to delete <b>this Partner.</b></p>
+     */
+    public static boolean canDeletePartner(ResourceId partnerFormId, int partnerId, UserDatabaseMeta db) {
+        Permission deletePartner = deleteRecord(partnerFormId, db);
+        return deletePartner.isPermitted() && filterAllowsPartner(deletePartner, partnerId, db);
+    }
+
+    /**
+     * <p>The current User can manage partners in this Database.</p>
+     *
+     * <p>A User can manage partners if they have CREATE_RECORD, EDIT_RECORD or DELETE_RECORD rights on the
+     * Partner form.</p>
+     *
+     * <p>Does not account for any filters which may be applied/enforced.</p>
+     */
+    public static boolean canManagePartners(ResourceId partnerFormId, UserDatabaseMeta db) {
+        Permission createPartner = createRecord(partnerFormId, db);
+        Permission editPartner = editRecord(partnerFormId, db);
+        Permission deletePartner = deleteRecord(partnerFormId, db);
+        return createPartner.isPermitted() || editPartner.isPermitted() || deletePartner.isPermitted();
     }
 
 }
