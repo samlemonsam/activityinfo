@@ -89,9 +89,12 @@ public class DatabaseResource {
         this.mailSender = mailSender;
         this.billingOracle = billingOracle;
 
-        // Id could be an Integer or a ResourceId (to comply with older version of /resources/database endpoint)
+        // Id could be:
+        // - an Integer (to comply with older version of /resources/database endpoint)
+        // - a ResourceId
+        // - a Geodb reference
         ResourceId dbResourceId = ResourceId.valueOf(id);
-        if (!CuidAdapter.isValidLegacyId(dbResourceId)) {
+        if (!CuidAdapter.isValidLegacyId(dbResourceId) && !GeoDatabaseProvider.GEODB_ID.equals(dbResourceId)) {
             dbResourceId = CuidAdapter.databaseId(Integer.valueOf(id));
         }
         this.databaseId = dbResourceId;
