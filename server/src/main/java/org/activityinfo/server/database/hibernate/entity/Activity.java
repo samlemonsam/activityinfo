@@ -79,6 +79,8 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
 
     private boolean classicView = true;
 
+    private boolean hrd;
+
     private String formClassJson;
     private byte[] gzFormClassJson;
 
@@ -103,6 +105,14 @@ public class Activity implements Serializable, Deleteable, Orderable, HasJson {
         this.mapIcon = sourceActivity.mapIcon;
         this.published = sourceActivity.published;
         this.classicView = sourceActivity.classicView;
+    }
+
+    public boolean isHrd() {
+        return hrd;
+    }
+
+    public void setHrd(boolean hrd) {
+        this.hrd = hrd;
     }
 
     @Id

@@ -80,12 +80,18 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         activity.setSortOrder(calculateNextSortOrderIndex(database.getId()));
         activity.setLocationType(getLocationType(properties));
         
-        
-        // activity should be classic by default
+
         activity.setClassicView(true);
 
         applyProperties(activity, properties);
 
+        // If this is not marked as a classic form, then start
+        // delegating to HRD straightaway
+        if(!activity.isClassicView()) {
+            activity.setHrd(true);
+        }
+
+        // activity should be classic by default
         activityDAO.persist(activity);
 
         UsageTracker.track(user.getId(), "create_activity", database.getResourceId());
