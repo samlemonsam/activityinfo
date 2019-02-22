@@ -1,28 +1,22 @@
 package org.activityinfo.store.migrate;
 
-import com.google.appengine.api.datastore.QueryResultIterable;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.mapreduce.MapJob;
 import com.google.appengine.tools.mapreduce.MapSpecification;
+import com.google.appengine.tools.mapreduce.inputs.DatastoreInput;
 import com.google.appengine.tools.pipeline.Job0;
 import com.google.appengine.tools.pipeline.Value;
-import com.googlecode.objectify.Key;
-import com.googlecode.objectify.ObjectifyService;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.hrd.Hrd;
 import org.activityinfo.store.hrd.columns.BlockResolver;
 import org.activityinfo.store.hrd.columns.RecordIdBlock;
 import org.activityinfo.store.hrd.columns.TombstoneIndex;
 import org.activityinfo.store.hrd.entity.FormEntity;
-import org.activityinfo.store.hrd.entity.FormRecordEntity;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class BlockJob extends Job0<Void> {
@@ -40,52 +34,23 @@ public class BlockJob extends Job0<Void> {
     @Override
     public Value<Void> run() throws Exception {
 
-        List<String> toNumber = new ArrayList<>();
+        // Before activating column block storage, we need to ensure that
+        // all records are numbered.
 
-        try(Closeable o = ObjectifyService.begin()) {
+        Query query = new Query("FormRecord")
+                .setAncestor(FormEntity.key(formId).getRaw())
+                .setKeysOnly();
 
-            // First read in the array of blocks that DO have record numbers
-            // Based on the ID block
-            FormEntity formEntity = Hrd.ofy().load().key(FormEntity.key(formId)).safe();
-            Set<String> numberedRecords = queryAssignedRecordIds(formEntity);
-
-            // Now query all the record keys
-            QueryResultIterable<Key<FormRecordEntity>> keys = Hrd.ofy().load()
-                    .type(FormRecordEntity.class)
-                    .ancestor(formEntity)
-                    .chunk(5000)
-                    .keys()
-                    .iterable();
-
-            for (Key<FormRecordEntity> key : keys) {
-                if(!numberedRecords.contains(key.getName())) {
-                    if(toNumber.size() > 100) {
-                        break;
-                    }
-                    toNumber.add(key.getName());
-                }
-            }
-
-            LOGGER.info("Found " + toNumber.size() + " records without number");
-
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, e.getMessage(), e);
-        }
-
-        ActivateColumnStorage activateJob = new ActivateColumnStorage(formId);
-
-        if(toNumber.isEmpty()) {
-            LOGGER.info("All records are numbered, activating column storage");
-            return futureCall(activateJob);
-        }
-
-        RecordBatchInput input = new RecordBatchInput(formId.asString(), toNumber, BATCH_SIZE);
-        BlockBuilder builder = new BlockBuilder();
-        MapSpecification<RecordBatch, Void, Void> spec = new MapSpecification.Builder<RecordBatch, Void, Void>(input, builder)
-                .setJobName("Migrate MapReduce entities")
+        DatastoreInput datastoreInput = new DatastoreInput(query, 1);
+        BatchingInput<Entity> batchingInput = new BatchingInput<>(datastoreInput, 10);
+        BlockBuilder builder = new BlockBuilder(formId);
+        MapSpecification<List<Entity>, Void, Void> spec = new MapSpecification.Builder<List<Entity>, Void, Void>(batchingInput, builder)
+                .setJobName("Construct column blocks")
                 .build();
 
-        MapJob<RecordBatch, Void, Void> mapJob = new MapJob<>(spec, MigrationServlet.getSettings());
+        MapJob<List<Entity>, Void, Void> mapJob = new MapJob<>(spec, MigrationServlet.getSettings());
+
+        ActivateColumnStorage activateJob = new ActivateColumnStorage(formId);
 
         return futureCall(activateJob, waitFor(futureCall(mapJob)));
     }

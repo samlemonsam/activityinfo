@@ -19,16 +19,16 @@
 package org.activityinfo.store.migrate;
 
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.tools.mapreduce.GoogleCloudStorageFileSet;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.mapreduce.MapJob;
 import com.google.appengine.tools.mapreduce.MapSettings;
 import com.google.appengine.tools.mapreduce.MapSpecification;
 import com.google.appengine.tools.mapreduce.inputs.DatastoreInput;
-import com.google.appengine.tools.mapreduce.outputs.GoogleCloudStorageFileOutput;
 import com.google.appengine.tools.pipeline.PipelineService;
 import com.google.appengine.tools.pipeline.PipelineServiceFactory;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.VoidWork;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.hrd.Hrd;
 import org.activityinfo.store.hrd.entity.FormEntity;
 
@@ -37,7 +37,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.ByteBuffer;
 
 /**
  * Starts Map/Reduce jobs
@@ -76,22 +75,25 @@ public class MigrationServlet extends HttpServlet {
         switch (job) {
             case "partners":
                 return startPartnerMigration();
-            case "snapshots":
-                return reindexSnapshots();
+            case "schema":
+                return migrateSchema(Integer.parseInt(req.getParameter("activityId")));
             case "sites":
                 return migrateSites(Integer.parseInt(req.getParameter("activityId")), fix);
             case "deleted-sites":
                 return fixDeletedSites(fix);
-            case "usage":
-                return usageExport();
+            case "hrdprimary":
+                return hrdPrimary(Integer.parseInt(req.getParameter("activityId")));
             case "blocks":
                 return buildBlocks(req.getParameter("formId"));
+            case "zero":
+                return zeroRecords(req.getParameter("formId"));
             case "listsubforms":
                 return listsubforms(resp);
             default:
                 throw new IllegalArgumentException("Unknown job: " + job);
         }
     }
+
 
     private String listsubforms(HttpServletResponse resp) {
         ObjectifyService.run(new VoidWork() {
@@ -135,17 +137,6 @@ public class MigrationServlet extends HttpServlet {
         return MapJob.start(spec, getSettings());
     }
 
-    private String reindexSnapshots() {
-        DatastoreInput input = new DatastoreInput("FormRecordSnapshot", 10);
-        SnapshotReindexer reindexer = new SnapshotReindexer();
-
-        MapSpecification<Entity, Void, Void> spec = new MapSpecification.Builder<Entity, Void, Void>(input, reindexer)
-                .setJobName("Reindex snapshot indexes")
-                .build();
-
-        return MapJob.start(spec, getSettings());
-    }
-
     private String startPartnerMigration() {
         DatabaseInput input = new DatabaseInput();
         ProjectMigrator mapper = new ProjectMigrator();
@@ -155,29 +146,32 @@ public class MigrationServlet extends HttpServlet {
                 .build();
 
         return MapJob.start(spec, getSettings());
-
     }
 
-    private String usageExport() {
-        DatastoreInput input = new DatastoreInput("FormRecordSnapshot",10);
+    private String migrateSchema(int activityId) {
+        return pipelineService.startNewPipeline(new MigrateSchema(activityId));
+    }
 
-        SnapshotExporter mapper = new SnapshotExporter();
-        GoogleCloudStorageFileOutput output = new GoogleCloudStorageFileOutput(
-                "activityinfoeu-bq-import",
-                "update-snapshots-%d.csv", "text/csv");
+    private String hrdPrimary(int activityId) {
+        return pipelineService.startNewPipeline(new HrdPrimary(activityId));
+    }
 
-        MapSpecification<Entity, ByteBuffer, GoogleCloudStorageFileSet> spec = new MapSpecification.Builder<>(input, mapper, output)
-                .setJobName("Export snapshot events")
+    private String buildBlocks(String formId) {
+        return pipelineService.startNewPipeline(new BlockJob(formId));
+    }
+
+    private String zeroRecords(String formId) {
+
+        Query query = new Query("FormRecord", FormEntity.key(ResourceId.valueOf(formId)).getRaw());
+        DatastoreInput input = new DatastoreInput(query, 10);
+        ZeroOutRecords mapper = new ZeroOutRecords();
+
+        MapSpecification<Entity, Void, Void> spec = new MapSpecification.Builder<Entity, Void, Void>(input, mapper)
+                .setJobName("Reindex snapshot indexes")
                 .build();
 
         return MapJob.start(spec, getSettings());
     }
-
-
-    private String buildBlocks(String formId) {
-        return PipelineServiceFactory.newPipelineService().startNewPipeline(new BlockJob(formId));
-    }
-
 
     public static MapSettings getSettings() {
         MapSettings settings = new MapSettings.Builder()

@@ -26,7 +26,10 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
+import org.activityinfo.model.type.NarrativeType;
+import org.activityinfo.model.type.NarrativeValue;
 import org.activityinfo.model.type.RecordRef;
+import org.activityinfo.model.type.primitive.TextValue;
 import org.activityinfo.store.hrd.FieldConverter;
 import org.activityinfo.store.hrd.FieldConverters;
 
@@ -122,6 +125,9 @@ public class FormRecordEntity {
                 if(value == null) {
                     fieldValues.removeProperty(field.getName());
                 } else {
+                    if(field.getType() instanceof NarrativeType && value instanceof TextValue) {
+                        value = NarrativeValue.valueOf(((TextValue) value).asString());
+                    }
                     FieldConverter converter = FieldConverters.forType(field.getType());
                     fieldValues.setUnindexedProperty(field.getName(), converter.toHrdProperty(value));
                 }

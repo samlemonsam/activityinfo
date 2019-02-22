@@ -36,11 +36,14 @@ public class TextValue implements FieldValue, HasStringValue {
      * {@code value} is {@code null} or empty.
      */
     public static TextValue valueOf(String value) {
-        if(value == null || value.isEmpty()) {
+        if(value == null) {
             return null;
-        } else {
-            return new TextValue(value.trim());
         }
+        String trimmedValue = value.trim();
+        if(trimmedValue.isEmpty()) {
+            return null;
+        }
+        return new TextValue(trimmedValue);
     }
 
     @Override

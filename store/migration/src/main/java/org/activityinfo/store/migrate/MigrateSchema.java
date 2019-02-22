@@ -1,6 +1,5 @@
 package org.activityinfo.store.migrate;
 
-import com.google.appengine.tools.pipeline.ImmediateValue;
 import com.google.appengine.tools.pipeline.Job0;
 import com.google.appengine.tools.pipeline.Value;
 import com.googlecode.objectify.ObjectifyService;
@@ -19,6 +18,10 @@ import java.sql.SQLException;
 public class MigrateSchema extends Job0<Void> {
 
     private ResourceId formId;
+
+    public MigrateSchema(int activityId) {
+        this.formId = CuidAdapter.activityFormClass(activityId);
+    }
 
     public MigrateSchema(ResourceId formId) {
         this.formId = formId;
@@ -54,6 +57,6 @@ public class MigrateSchema extends Job0<Void> {
                 }
             });
         }
-        return new ImmediateValue<>(null);
+        return futureCall(new HrdPrimary(CuidAdapter.getLegacyIdFromCuid(formId)));
     }
 }

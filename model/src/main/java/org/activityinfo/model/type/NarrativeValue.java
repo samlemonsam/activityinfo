@@ -18,7 +18,6 @@
  */
 package org.activityinfo.model.type;
 
-import com.google.common.base.Strings;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.primitive.HasStringValue;
@@ -31,12 +30,15 @@ public class NarrativeValue implements FieldValue, HasStringValue {
         this.text = text;
     }
 
-    public static NarrativeValue valueOf(String text) {
-        if(Strings.isNullOrEmpty(text)) {
+    public static NarrativeValue valueOf(String value) {
+        if(value == null) {
             return null;
-        } else {
-            return new NarrativeValue(text);
         }
+        String trimmedValue = value.trim();
+        if(trimmedValue.isEmpty()) {
+            return null;
+        }
+        return new NarrativeValue(trimmedValue);
     }
 
     public String getText() {

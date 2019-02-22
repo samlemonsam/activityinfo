@@ -24,7 +24,17 @@
 
     </form>
 
-    <h2>Migrate Activity Sites to HRD</h2>
+    <h1>Migrate Sites to HRD</h1>
+
+
+    <h2>Step 0. Ensure Schema is copied</h2>
+    <form action="/migrate" method="post">
+        <input type="hidden" name="job" value="schema">
+        ActivityId: <input type="text" name="activityId">
+        <input type="submit" value="submit">
+    </form>
+
+    <h2>Step 1. Copy/Verify Form Records to HRD</h2>
     <form action="/migrate" method="post">
         <input type="hidden" name="job" value="sites">
         ActivityId: <input type="text" name="activityId">
@@ -33,23 +43,41 @@
         <input type="submit" value="submit">
     </form>
 
-    <h2>Fix unsynced deleted sites in HRD</h2>
+    <!--<h2>Fix unsynced deleted sites in HRD</h2>-->
+    <!--<form action="/migrate" method="post">-->
+        <!--<input type="hidden" name="job" value="deleted-sites">-->
+        <!--ActivityId: <input type="text" name="activityId">-->
+        <!--<label>-->
+            <!--<input type="checkbox" name="fix" value="true">Writes fixes</label>-->
+        <!--<input type="submit" value="submit">-->
+    <!--</form>-->
+
+    <h2>Step 2. Final validation, make HRD primary</h2>
     <form action="/migrate" method="post">
-        <input type="hidden" name="job" value="deleted-sites">
+        <input type="hidden" name="job" value="hrdprimary">
         ActivityId: <input type="text" name="activityId">
-        <label>
-            <input type="checkbox" name="fix" value="true">Writes fixes</label>
         <input type="submit" value="submit">
     </form>
 
-
-    <h2>Build column blocks</h2>
+    <h2>Step 3. Build column blocks</h2>
     <form action="/migrate" method="post">
         <input type="hidden" name="job" value="blocks">
         FormId: <input type="text" name="formId">
         <input type="submit" value="submit">
     </form>
 
+
+
+
+
+    <h1>Danger</h1>
+
+    <h2>Zero out record numbers (rollback column blocks)</h2>
+    <form action="/migrate" method="post">
+        <input type="hidden" name="job" value="zero">
+        FormId: <input type="text" name="formId">
+        <input type="submit" value="submit">
+    </form>
 
 </body>
 </html>
