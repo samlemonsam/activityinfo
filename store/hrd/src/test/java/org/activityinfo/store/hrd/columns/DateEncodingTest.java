@@ -1,5 +1,6 @@
 package org.activityinfo.store.hrd.columns;
 
+import org.activityinfo.model.type.time.EpiWeek;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.model.type.time.Month;
 import org.junit.Test;
@@ -34,6 +35,25 @@ public class DateEncodingTest {
 
         assertThat(jan2012, lessThan(dec2012));
         assertThat(jan2012, greaterThan(mar2010));
+    }
+
+    @Test
+    public void formatting() {
+        MonthStringRenderer renderer = new MonthStringRenderer();
+        int jan2012 = DateEncoding.encodeMonth(new Month(2012, 1));
+
+        assertThat(renderer.apply(jan2012), equalTo("2012-01"));
+    }
+
+    @Test
+    public void epiWeeks() {
+        int week = DateEncoding.encodeWeek(new EpiWeek(2014, 50));
+        assertThat(DateEncoding.getYear(week), equalTo(2014));
+        assertThat(DateEncoding.getYearPart(week), equalTo(50));
+
+        WeekColumnRenderer renderer = new WeekColumnRenderer();
+        assertThat(renderer.apply(week), equalTo(new EpiWeek(2014, 50).toString()));
+
     }
 
     private void checkRoundTrip(Month month) {
