@@ -34,6 +34,7 @@ import org.activityinfo.model.form.*;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.FormulaParser;
 import org.activityinfo.model.permission.FormPermissions;
+import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.*;
 import org.activityinfo.model.type.Cardinality;
@@ -451,13 +452,13 @@ public class Updater {
 
             if (existingTypedRecord.isPresent()) {
                 if (update.isDeleted()) {
-                    authorizeDelete(existingTypedRecord.get(), formPermissions, formClass);
+                    authorize(existingTypedRecord.get(), formPermissions, formClass, Operation.DELETE_RECORD);
                 } else {
-                    authorizeEdit(existingTypedRecord.get(), formPermissions, formClass);
-                    authorizeEdit(applyUpdates(existingTypedRecord, update), formPermissions, formClass);
+                    authorize(existingTypedRecord.get(), formPermissions, formClass, Operation.EDIT_RECORD);
+                    authorize(applyUpdates(existingTypedRecord, update), formPermissions, formClass, Operation.EDIT_RECORD);
                 }
             } else {
-                authorizeCreate(applyUpdates(existingTypedRecord, update), formPermissions, formClass);
+                authorize(applyUpdates(existingTypedRecord, update), formPermissions, formClass, Operation.CREATE_RECORD);
             }
         }
 
@@ -471,38 +472,44 @@ public class Updater {
         }
     }
 
-    private void authorizeCreate(TypedFormRecord record, FormPermissions formPermissions, FormClass formClass) {
-        if (formClass.isSubForm()){
-            if (!formPermissions.isCreateAllowed()) {
-                throw new InvalidUpdateException("Unauthorized creation");
+    private void authorize(TypedFormRecord record, FormPermissions formPermissions, FormClass formClass, Operation operation) {
+        if (formClass.isSubForm()) {
+            authorizeOnParentForm(record, formPermissions, formClass, operation);
+        } else {
+            if (!PermissionOracle.can(record, formPermissions, formClass, operation)) {
+                throw new InvalidUpdateException("Unauthorized " + operation.toString());
             }
-        } else if (!PermissionOracle.canCreate(record, formPermissions, formClass)) {
-            throw new InvalidUpdateException("Unauthorized creation");
         }
     }
 
-    private void authorizeEdit(TypedFormRecord record, FormPermissions formPermissions, FormClass formClass) {
-        if (formClass.isSubForm()){
-            if (!formPermissions.isEditAllowed()) {
-                throw new InvalidUpdateException("Unauthorized modification");
-            }
-        } else if (!PermissionOracle.canEdit(record, formPermissions, formClass)) {
-            throw new InvalidUpdateException("Unauthorized modification");
+    // For subforms, we need to evaluate the _parent record_ against our current form permission
+    private void authorizeOnParentForm(TypedFormRecord record,
+                                       FormPermissions formPermissions,
+                                       FormClass formClass,
+                                       Operation operation) {
+        if (!formClass.getParentFormId().isPresent()) {
+            throw new InvalidUpdateException("Unauthorized " + operation.toString());
         }
-    }
-
-    private void authorizeDelete(TypedFormRecord record, FormPermissions formPermissions, FormClass formClass) {
-        if (formClass.isSubForm()){
-            if (!formPermissions.isDeleteAllowed()) {
-                throw new InvalidUpdateException("Unauthorized deletion");
-            }
-        } else if (!PermissionOracle.canDelete(record, formPermissions, formClass)) {
-            throw new InvalidUpdateException("Unauthorized deletion");
+        Optional<FormStorage> parentForm = catalog.getForm(formClass.getParentFormId().get());
+        if (!parentForm.isPresent()) {
+            throw new InvalidUpdateException("Unauthorized " + operation.toString());
+        }
+        FormClass parentFormClass = parentForm.get().getFormClass();
+        Optional<FormRecord> parentRecord = parentForm.get().get(record.getParentRecordId());
+        if (!parentRecord.isPresent()) {
+            throw new InvalidUpdateException("Unauthorized " + operation.toString());
+        }
+        TypedFormRecord parentTypedFormRecord = TypedFormRecord.toTypedFormRecord(parentFormClass, parentRecord.get());
+        if (!PermissionOracle.can(parentTypedFormRecord, formPermissions, parentFormClass, operation)) {
+            throw new InvalidUpdateException("Unauthorized " + operation.toString());
         }
     }
 
     private TypedFormRecord applyUpdates(Optional<TypedFormRecord> existingRecord, TypedRecordUpdate update) {
         TypedFormRecord updated = new TypedFormRecord(update.getRecordId(), update.getFormId());
+        if (update.getParentId() != null) {
+            updated.setParentRecordId(update.getParentId());
+        }
 
         if(existingRecord.isPresent()) {
             updated.setAll(existingRecord.get().getFieldValueMap());
