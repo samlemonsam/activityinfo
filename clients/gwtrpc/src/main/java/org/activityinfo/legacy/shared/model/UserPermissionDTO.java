@@ -23,12 +23,13 @@ import org.activityinfo.legacy.shared.validation.Required;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonSetter;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Data Transfer Object (DTO) for a single user's permission on a database.
@@ -37,6 +38,8 @@ import java.util.List;
  */
 @JsonAutoDetect(JsonMethod.NONE)
 public final class UserPermissionDTO extends BaseModelData implements DTO {
+
+    private List<PartnerDTO> partners = new ArrayList<>(0);
 
     private boolean hasFolderLimitation = false;
     private List<FolderDTO> folders = new ArrayList<>(0);
@@ -217,13 +220,24 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
         return (Boolean) get("allowExport");
     }
 
-    @JsonProperty
-    public PartnerDTO getPartner() {
-        return get("partner");
+    public List<PartnerDTO> getPartners() {
+        return partners;
     }
 
-    public void setPartner(PartnerDTO value) {
-        set("partner", value);
+    public List<Integer> getPartnerIds() {
+        return partners.stream().map(PartnerDTO::getId).collect(Collectors.toList());
+    }
+
+    public void setPartners(List<PartnerDTO> partners) {
+        this.partners = partners;
+    }
+
+    public void addPartner(PartnerDTO partner) {
+        this.partners.add(partner);
+    }
+
+    public void addPartners(Collection<PartnerDTO> partners) {
+        this.partners.addAll(partners);
     }
 
     /**
@@ -247,17 +261,10 @@ public final class UserPermissionDTO extends BaseModelData implements DTO {
         return hasFolderLimitation;
     }
 
-    @JsonSetter
-    public void setPartnerId(int partnerId) {
-        PartnerDTO partner = new PartnerDTO();
-        partner.setId(partnerId);
-        setPartner(partner);
-    }
-
     public String toString() {
         return "{email=" + getEmail() +
                 ",name=" + getName() +
-                ",partner=" + getPartner() +
+                ",partners=" + getPartners() +
                 ",view=" + getAllowView() +
                 ",viewAll=" + getAllowViewAll() +
                 ",create=" + getAllowCreate() +

@@ -35,13 +35,15 @@ import java.util.Set;
 @JsonAutoDetect(JsonMethod.NONE)
 public class UserDatabaseDTOWithForms extends BaseModelData implements EntityDTO {
 
+    public final static String ENTITY_NAME = "UserDatabase";
+
     private CountryDTO country;
-    private List<PartnerDTO> partners = new ArrayList<PartnerDTO>(0);
     private List<ActivityFormDTO> activities = new ArrayList<>(0);
     private Set<LockedPeriodDTO> lockedPeriods = new HashSet<LockedPeriodDTO>(0);
     private List<ProjectDTO> projects = new ArrayList<>(0);
 
-    public final static String ENTITY_NAME = "UserDatabase";
+    private List<PartnerDTO> databasePartners = new ArrayList<>(0);
+    private List<PartnerDTO> assignedPartners = new ArrayList<>(0);
 
     public UserDatabaseDTOWithForms() {
     }
@@ -53,10 +55,10 @@ public class UserDatabaseDTOWithForms extends BaseModelData implements EntityDTO
         setCountry(userDatabaseDTO.getCountry());
         setFullName(userDatabaseDTO.getFullName());
         setLockedPeriods(userDatabaseDTO.getLockedPeriods());
-        setMyPartnerId(userDatabaseDTO.getMyPartnerId());
+        setDatabasePartners(userDatabaseDTO.getDatabasePartners());
+        setAssignedPartners(userDatabaseDTO.getAssignedPartners());
         setOwnerEmail(userDatabaseDTO.getOwnerEmail());
         setOwnerName(userDatabaseDTO.getOwnerName());
-        setPartners(userDatabaseDTO.getPartners());
         setProjects(userDatabaseDTO.getProjects());
         setAllowNestedValues(userDatabaseDTO.isAllowNestedValues());
     }
@@ -176,15 +178,30 @@ public class UserDatabaseDTOWithForms extends BaseModelData implements EntityDTO
      * @return the list of Partners who belong to this UserDatabase
      */
     @JsonProperty @JsonView(DTOViews.Schema.class)
-    public List<PartnerDTO> getPartners() {
-        return partners;
+    public List<PartnerDTO> getDatabasePartners() {
+        return databasePartners;
     }
 
     /**
      * Sets the list of Partners who belong to this UserDatabase
      */
-    public void setPartners(List<PartnerDTO> partners) {
-        this.partners = partners;
+    public void setDatabasePartners(List<PartnerDTO> databasePartners) {
+        this.databasePartners = databasePartners;
+    }
+
+    /**
+     * @return the list of Partners to which the current user belongs
+     */
+    @JsonProperty @JsonView(DTOViews.Schema.class)
+    public List<PartnerDTO> getAssignedPartners() {
+        return assignedPartners;
+    }
+
+    /**
+     * Sets the list of Partners to which the current user belongs
+     */
+    public void setAssignedPartners(List<PartnerDTO> assignedPartners) {
+        this.assignedPartners = assignedPartners;
     }
 
     @JsonProperty @JsonView(DTOViews.Schema.class)
@@ -194,20 +211,6 @@ public class UserDatabaseDTOWithForms extends BaseModelData implements EntityDTO
 
     public void setProjects(List<ProjectDTO> projects) {
         this.projects = projects;
-    }
-
-    /**
-     * @return the id of the Partner to which the client belongs
-     */
-    public int getMyPartnerId() {
-        return (Integer) get("myPartnerId");
-    }
-
-    /**
-     * Sets the id of the Partner to which the current user belongs
-     */
-    public void setMyPartnerId(int partnerId) {
-        set("myPartnerId", partnerId);
     }
 
     /**

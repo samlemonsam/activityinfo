@@ -32,6 +32,7 @@ import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.database.hibernate.dao.*;
 import org.activityinfo.server.database.hibernate.entity.Database;
+import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
 import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
@@ -40,11 +41,10 @@ import org.activityinfo.server.mail.MailSender;
 import org.activityinfo.server.mail.Message;
 import org.activityinfo.store.query.UsageTracker;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author Alex Bertram
@@ -185,8 +185,10 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
         if (!executingUserPermissions.isAllowManageUsers()) {
             throw new IllegalAccessCommandException("Current user does not have the right to manage other users");
         }
+        List<Integer> allowedPartnerIds = executingUserPermissions.getPartners().stream()
+                .map(Partner::getId).collect(Collectors.toList());
         if (!executingUserPermissions.isAllowManageAllUsers()
-                && executingUserPermissions.getPartner().getId() != cmd.getModel().getPartner().getId()) {
+                && !allowedPartnerIds.containsAll(cmd.getModel().getPartnerIds())) {
             throw new IllegalAccessCommandException("Current user does not have the right to manage users from other partners");
         }
         if ((cmd.getModel().getAllowCreate() || cmd.getModel().getAllowCreateAll()) && !executingUserPermissions.isAllowCreate()) {
@@ -220,10 +222,14 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
                             boolean isOwner,
                             UserPermission executingUserPermissions) {
 
-        perm.setPartner(partnerDAO.findById(dto.getPartner().getId()));
-        if(perm.getPartner() == null) {
-            throw new CommandException("Partner with id " + dto.getPartner().getId() + " does not exist");
+        Set<Partner> partners = dto.getPartners().stream()
+                .map(p -> partnerDAO.findById(p.getId()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (partners.isEmpty()) {
+            throw new CommandException("Partners " + dto.getPartnerIds() + " do not exist");
         }
+        perm.setPartners(partners);
         perm.setAllowView(dto.getAllowView());
         perm.setAllowCreate(dto.getAllowCreate());
         perm.setAllowEdit(dto.getAllowEdit());

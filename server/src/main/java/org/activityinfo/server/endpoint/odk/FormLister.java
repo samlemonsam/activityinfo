@@ -60,7 +60,7 @@ public class FormLister {
             if (dbIdFilter.isPresent() && db.getId() != dbIdFilter.get()) {
                 continue; // skip
             }
-            if (db.isEditAllowed()) {
+            if (db.isCreateAllowed()) {
                 for (ActivityDTO activity : db.getActivities()) {
                     if(hasAdminLevelLocation(activity)) {
                         // Admin Level Locations are invalid for ODK forms - do not show

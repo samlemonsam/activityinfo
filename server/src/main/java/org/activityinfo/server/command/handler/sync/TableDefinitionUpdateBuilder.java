@@ -28,7 +28,7 @@ public class TableDefinitionUpdateBuilder implements UpdateBuilder {
 
     public static final String REGION_TYPE = "site-tables";
     
-    public static final String CURRENT_VERSION = "3";
+    public static final String CURRENT_VERSION = "4";
     
     private final JpaUpdateBuilder builder = new JpaUpdateBuilder();
 
@@ -89,6 +89,8 @@ public class TableDefinitionUpdateBuilder implements UpdateBuilder {
                     "CREATE TABLE IF NOT EXISTS  target (targetId int, name text, date1 text, date2 text, projectId int, " +
                             "partnerId int, adminEntityId int, databaseId int)");
             builder.executeStatement("CREATE TABLE IF NOT EXISTS  targetvalue (targetId int, IndicatorId int, value real)");
+
+            builder.executeStatement("CREATE TABLE IF NOT EXISTS groupassignment (UserPermissionId int, PartnerId int)");
             
             update.setSql(builder.asJson());
         }
