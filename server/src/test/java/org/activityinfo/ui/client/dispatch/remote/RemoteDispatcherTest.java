@@ -31,6 +31,7 @@ import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.util.BackOff;
 import org.activityinfo.legacy.shared.util.ExponentialBackOff;
 import org.activityinfo.legacy.shared.util.NanoClock;
+import org.activityinfo.ui.client.AppCacheMonitor;
 import org.activityinfo.ui.client.MockEventBus;
 import org.activityinfo.ui.client.dispatch.CommandCache;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
@@ -78,7 +79,7 @@ public class RemoteDispatcherTest {
                 .build();
         dispatcher = new CachingDispatcher(proxyManager,
                 new MergingDispatcher(
-                        new RemoteDispatcher(auth, service, "en"),
+                        new RemoteDispatcher(auth, service, "en", createNiceMock(AppCacheMonitor.class)),
                         scheduler,
                         backOff));
     }

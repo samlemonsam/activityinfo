@@ -664,6 +664,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("A new version of ActivityInfo has been downloaded. Do you want to reload now?")
     String newVersionChoice();
 
+    @DefaultStringValue("A new version of ActivityInfo is available. You must reload to continue.")
+    String newVersionChoiceForce();
+
     @DefaultStringValue("No data.")
     String noData();
 
