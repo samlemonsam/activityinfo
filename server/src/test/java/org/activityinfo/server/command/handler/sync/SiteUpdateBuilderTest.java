@@ -56,6 +56,7 @@ public class SiteUpdateBuilderTest {
 
         User user = new User();
         user.setId(1);
+        user.setEmail("akbertram@gmail.com");
 
         // update one of the sites so we have a realistic nano value type stamp
         EntityManager em = emf.createEntityManager();

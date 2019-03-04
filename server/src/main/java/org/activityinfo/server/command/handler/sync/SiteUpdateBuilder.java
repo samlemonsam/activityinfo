@@ -62,7 +62,7 @@ public class SiteUpdateBuilder implements UpdateBuilder {
         localVersion = request.getLocalVersionNumber();
 
         Preconditions.checkArgument(isOwner || (userPermission != null && userPermission.isAllowView()),
-                "User cannot sync sites for activity " + activity.getId());
+                "User " + user.getId() + " cannot sync sites for activity " + activity.getId());
 
         if (activity.getSiteVersion() > localVersion) {
             if(localVersion > 0) {
