@@ -150,7 +150,7 @@ public class GetSchemaTest extends CommandTestCase2 {
 
         assertThat(schema.getDatabases().size(), equalTo(2));
         assertThat("BAVON in PEAR", schema.getDatabaseById(1), is(not(nullValue())));
-        assertThat(schema.getDatabaseById(1).getAssignedPartners().get(0).getId(), equalTo(1));
+        assertThat(schema.getDatabaseById(1).getMyPartnerId(), equalTo(1));
         assertThat(schema.getDatabaseById(1).isEditAllowed(), equalTo(true));
         assertThat(schema.getDatabaseById(1).isEditAllAllowed(), equalTo(false));
     }
@@ -248,7 +248,7 @@ public class GetSchemaTest extends CommandTestCase2 {
         // Add bavon, but only give him access to the education folder
         UserPermissionDTO bavon = new UserPermissionDTO();
         bavon.setEmail("bavon@nrc.org");
-        bavon.addPartner(new PartnerDTO(1, "NRC"));
+        bavon.setPartner(new PartnerDTO(1, "NRC"));
         bavon.setAllowView(true);
         bavon.setFolders(Arrays.asList(new FolderDTO(databaseId, healthFolderId, "Health")));
         bavon.setFolderLimitation(true);

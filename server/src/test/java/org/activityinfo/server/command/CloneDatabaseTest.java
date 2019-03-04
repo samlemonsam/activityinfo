@@ -140,12 +140,12 @@ public class CloneDatabaseTest extends CommandTestCase2 {
         assertFormClassesCloned(sourceDb, targetDb);
 
         if (cloneDatabase.isCopyPartners()) {
-            for (PartnerDTO sourcePartner : sourceDb.getDatabasePartners()) {
+            for (PartnerDTO sourcePartner : sourceDb.getPartners()) {
                 String name = sourcePartner.get("name");
                 if (name.equals("Default")) {
                     continue;
                 }
-                PartnerDTO targetPartner = entityByName(targetDb.getDatabasePartners(), name);
+                PartnerDTO targetPartner = entityByName(targetDb.getPartners(), name);
                 assertThat("partner " + name + " has same id", sourcePartner.getId(), equalTo(targetPartner.getId()));
             }
         }

@@ -4,14 +4,15 @@ import com.google.appengine.api.memcache.MemcacheService;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.json.Json;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.database.DatabaseGrant;
-import org.activityinfo.model.formula.*;
+import org.activityinfo.model.formula.ConstantNode;
+import org.activityinfo.model.formula.FunctionCallNode;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.formula.functions.EqualFunction;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.GrantModel;
@@ -365,24 +366,8 @@ public class HibernateDatabaseGrantCache implements DatabaseGrantCache {
     }
 
     private static String getPartnerFilter(@NotNull UserPermission userPermission) {
-        List<FormulaNode> partnerNodes = mapPartnersToNodes(userPermission);
-        if (partnerNodes.size() == 1) {
-            return Iterables.getOnlyElement(partnerNodes).asExpression();
-        }
-        return Formulas.anyTrue(partnerNodes).asExpression();
+        SymbolNode partnerForm = new SymbolNode(CuidAdapter.partnerFormId(userPermission.getDatabase().getId()));
+        ConstantNode partnerRecord = new ConstantNode(CuidAdapter.partnerRecordId(userPermission.getPartner().getId()).asString());
+        return new FunctionCallNode(EqualFunction.INSTANCE, partnerForm, partnerRecord).asExpression();
     }
-
-    private static List<FormulaNode> mapPartnersToNodes(@NotNull UserPermission userPermission) {
-        return userPermission.getPartners().stream()
-                .map(partner -> partnerNode(userPermission.getDatabase().getId(), partner.getId()))
-                .collect(Collectors.toList());
-    }
-
-    private static FormulaNode partnerNode(int databaseId, int partnerId) {
-        SymbolNode partnerForm = new SymbolNode(CuidAdapter.partnerFormId(databaseId));
-        ConstantNode partnerRecord = new ConstantNode(CuidAdapter.partnerRecordId(partnerId).asString());
-        return new FunctionCallNode(EqualFunction.INSTANCE, partnerForm, partnerRecord);
-    }
-
-
 }

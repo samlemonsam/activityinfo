@@ -20,7 +20,6 @@ package org.activityinfo.ui.client.component.form;
 
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.UpdateUserPermissions;
-import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
@@ -198,7 +197,7 @@ public class SubFormEntryTest extends CommandTestCase2 {
         UserPermissionDTO model = new UserPermissionDTO();
         model.setName("Stefan");
         model.setEmail("stefan@irc.org");
-        model.addPartner(new PartnerDTO(1,"NRC"));
+        model.setPartnerId(1);
         model.setAllowView(true);
         model.setAllowViewAll(true);
         model.setAllowCreate(true);

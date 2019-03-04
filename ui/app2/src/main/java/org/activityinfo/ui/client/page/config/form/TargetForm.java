@@ -88,7 +88,7 @@ public class TargetForm extends FormPanel {
 
         MappingComboBox<Integer> partnerCombo = new MappingComboBox<Integer>();
         partnerCombo.addNone();
-        for (PartnerDTO partner : database.getDatabasePartners()) {
+        for (PartnerDTO partner : database.getPartners()) {
             partnerCombo.add(partner.getId(), partner.getName());
         }
         partnerCombo.setAllowBlank(true);

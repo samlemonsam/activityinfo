@@ -252,53 +252,42 @@
 
   <!-- Bavon at NRC has access to PEAR -->
   <userPermission userPermissionId="1" databaseId="1"
-                  userId="2"
-                  allowView="1" allowViewAll="0" allowEdit="1"
+                  userId="2" partnerId="1" allowView="1" allowViewAll="0" allowEdit="1"
                   allowEditAll="0" allowManageUsers="1" allowManageAllUsers="1"
                   allowDesign="0" lastSchemaUpdate="2009-01-01"/>
-  <groupAssignment userPermissionId="1" partnerId="1" />
+
 
 
   <!-- Christian at NRC had access, but has been fired -->
 
   <userPermission userPermissionId="2" databaseId="1"
-                  userId="5"
-                  allowView="0" allowViewAll="0" allowEdit="0"
+                  userId="5" partnerId="1" allowView="0" allowViewAll="0" allowEdit="0"
                   allowEditAll="0" allowDesign="0" allowManageUsers="0"
                   allowManageAllUsers="0" lastSchemaUpdate="2009-01-01"/>
-  <groupAssignment userPermissionId="2" partnerId="1" />
 
   <userPermission userPermissionId="3" databaseId="1"
-                  userId="3"
-                  allowView="1" allowViewAll="0" allowEdit="1"
+                  userId="3" partnerId="2" allowView="1" allowViewAll="0" allowEdit="1"
                   allowEditAll="1" allowDesign="1" allowManageUsers="1"
                   allowManageAllUsers="0" lastSchemaUpdate="2009-01-01"/>
-  <groupAssignment userPermissionId="3" partnerId="2" />
 
   <userPermission userPermissionId="4" databaseId="1"
-                  userId="4"
-                  allowView="1" allowViewAll="0" allowEdit="0"
+                  userId="4" partnerId="2" allowView="1" allowViewAll="0" allowEdit="0"
                   allowEditAll="1" allowDesign="1" allowManageUsers="0"
                   allowManageAllUsers="0" lastSchemaUpdate="2009-01-01"/>
-  <groupAssignment userPermissionId="4" partnerId="2" />
 
   <!-- PEAR PLUS Permissions -->
 
   <!-- Bavon at NRC has edit all permissions -->
   <userPermission userPermissionId="91" databaseId="2"
-                  userId="2"
-                  allowView="1" allowViewAll="1" allowEdit="1"
+                  userId="2" partnerId="1" allowView="1" allowViewAll="1" allowEdit="1"
                   allowEditAll="1" allowManageUsers="1" allowManageAllUsers="1"
                   allowDesign="0" lastSchemaUpdate="2009-01-01"/>
-  <groupAssignment userPermissionId="91" partnerId="1" />
 
   <!-- Pacifique at NRC has only edit all permissions -->
   <userPermission userPermissionId="8884" databaseId="2"
-                  userId="21"
-                  allowView="1" allowViewAll="1" allowEdit="1"
+                  userId="21" partnerId="1" allowView="1" allowViewAll="1" allowEdit="1"
                   allowEditAll="0" allowManageUsers="0" allowManageAllUsers="0"
                   allowDesign="0" lastSchemaUpdate="2009-01-01"/>
-  <groupAssignment userPermissionId="8884" partnerId="1" />
 
 
   <!-- id=1 NFI Distribution at Penekusu, Sud Kivu 2 jan 2009 -->

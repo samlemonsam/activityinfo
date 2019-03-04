@@ -88,16 +88,14 @@
           DateEdited="2009-01-01" timeEdited="420"/>
 
     <!-- Lisa@solidarites, initially at the default partner -->
-    <userPermission userPermissionId="1" databaseId="1" userId="3"
+    <userPermission databaseId="1" partnerId="1" userId="3"
                     allowView="1"  allowViewAll="0" allowEdit="0" allowEditAll="0" allowManageUsers="0" allowManageAllUsers="0"
                     allowDesign="0" lastSchemaUpdate="2009-01-02"/>
-    <groupAssignment userPermissionId="1" partnerId="1" />
 
     <!-- Bavon at NRC -->
-    <userPermission userPermissionId="2" databaseId="1" userId="2"
+    <userPermission databaseId="1" partnerId="2" userId="2"
                     allowView="1"  allowViewAll="0" allowEdit="0" allowEditAll="0" allowManageUsers="0" allowManageAllUsers="0"
                     allowDesign="0" lastSchemaUpdate="2009-01-02"/>
-    <groupAssignment userPermissionId="2" partnerId="2" />
 
     <!-- Database: Health Cluster -->
 
@@ -113,9 +111,8 @@
           Date1="2009-01-01" Date2="2009-12-31" DateCreated="2009-01-01"
           DateEdited="2009-01-01" timeEdited="420"/>
 
-    <userPermission userPermissionId="3" databaseId="2" userId="2"
+    <userPermission databaseId="2" partnerId="1" userId="2"
                     allowView="1" allowViewAll="0" allowEdit="0" allowEditAll="0" allowManageUsers="0" allowManageAllUsers="0"
-                    allowDesign="0" lastSchemaUpdate="2009-01-02"/>
-    <groupAssignment userPermissionId="3" partnerId="1" />
+                    allowDesign="0" lastSchemaUpdate="2009-01-02"/>/>
 
 </dataset>

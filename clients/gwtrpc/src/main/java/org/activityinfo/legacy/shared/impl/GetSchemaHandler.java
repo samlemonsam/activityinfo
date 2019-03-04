@@ -257,6 +257,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                     .appendColumn("p.AllowManageAllUsers", "allowManageAllUsers")
                     .appendColumn("p.AllowDesign", "allowDesign")
                     .appendColumn("p.AllowExport", "allowExport")
+                    .appendColumn("p.PartnerId", "partnerId")
                     .appendColumn("p.model", "permissionsModel")
                     .from("userdatabase d")
                     .leftJoin(SqlQuery.selectAll()
@@ -368,7 +369,9 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                             db.setManageAllUsersAllowed(row.getBoolean("allowManageAllUsers"));
                             db.setDesignAllowed(row.getBoolean("allowDesign"));
                             db.setExportAllowed(row.getBoolean("allowExport"));
+                            db.setMyPartnerId(row.getInt("partnerId"));
                         }
+
 
                         SchemaFilter schemaFilter = buildFilter(db, row.getString("permissionsModel"));
                         if(db.isDesignAllowed() && !schemaFilter.hasFolderLimitations()) {
@@ -390,8 +393,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                         promise.resolve(null);
                     } else {
                         Promise.waitAll(
-                                joinDatabasePartners(),
-                                joinAssignedPartners(),
+                                joinPartnersToDatabases(),
                                 loadProjects(),
                                 loadFolders(),
                                 loadActivities(),
@@ -538,7 +540,7 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
             return promise;
         }
 
-        private Promise<Void> joinDatabasePartners() {
+        private Promise<Void> joinPartnersToDatabases() {
             SqlQuery query = SqlQuery.select("d.databaseId", "d.partnerId", "p.name", "p.fullName")
                     .from(Tables.PARTNER_IN_DATABASE, "d")
                     .leftJoin(Tables.PARTNER, "p")
@@ -559,52 +561,18 @@ public class GetSchemaHandler implements CommandHandlerAsync<GetSchema, SchemaDT
                 public void handleRow(SqlResultSetRow row) {
 
                     int partnerId = row.getInt("partnerId");
-                    PartnerDTO partner = partners.computeIfAbsent(partnerId, id -> {
-                        PartnerDTO newPartner = new PartnerDTO();
-                        newPartner.setId(id);
-                        newPartner.setName(row.getString("name"));
-                        newPartner.setFullName(row.getString("fullName"));
-                        return newPartner;
-                    });
-
-                    UserDatabaseDTO db = databaseMap.get(row.getInt("databaseId"));
-                    if (db != null) { // databases can be deleted
-                        db.addDatabasePartner(partner);
-                    }
-                }
-            });
-        }
-
-        private Promise<Void> joinAssignedPartners() {
-            SqlQuery query = SqlQuery.select("g.partnerId", "up.databaseId")
-                    .from(Tables.GROUP_ASSIGNMENT, "g")
-                    .leftJoin(Tables.USER_PERMISSION, "up")
-                    .on("up.UserPermissionId = g.UserPermissionId");
-
-            // Only allow results that are visible to this user if we are on the
-            // server,
-            // otherwise permissions have already been taken into account during
-            // synchronization
-            if (context.isRemote()) {
-                query.where("up.databaseId").in(databaseMap.keySet())
-                        .where("up.UserId").equalTo(context.getUser().getId());
-            }
-
-            return execute(query, new RowHandler() {
-
-                @Override
-                public void handleRow(SqlResultSetRow row) {
-
-                    int assignedPartnerId = row.getInt("partnerId");
-                    PartnerDTO assignedPartner = partners.get(assignedPartnerId);
-                    if (assignedPartner == null) {
-                        // Partner should have been extracted earlier. This group has been removed from database.
-                        return;
+                    PartnerDTO partner = partners.get(partnerId);
+                    if (partner == null) {
+                        partner = new PartnerDTO();
+                        partner.setId(partnerId);
+                        partner.setName(row.getString("name"));
+                        partner.setFullName(row.getString("fullName"));
+                        partners.put(partnerId, partner);
                     }
 
                     UserDatabaseDTO db = databaseMap.get(row.getInt("databaseId"));
                     if (db != null) { // databases can be deleted
-                       db.addAssignedPartner(assignedPartner);
+                        db.getPartners().add(partner);
                     }
                 }
             });

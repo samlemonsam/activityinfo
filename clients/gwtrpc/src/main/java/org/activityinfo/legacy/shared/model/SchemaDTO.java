@@ -82,7 +82,7 @@ public final class SchemaDTO extends BaseModelData implements DTO {
 
     public PartnerDTO getPartnerById(int partnerId) {
         for (UserDatabaseDTO database : databases) {
-            PartnerDTO partner = getById(database.getDatabasePartners(), partnerId);
+            PartnerDTO partner = getById(database.getPartners(), partnerId);
             if (partner != null) {
                 return partner;
             }

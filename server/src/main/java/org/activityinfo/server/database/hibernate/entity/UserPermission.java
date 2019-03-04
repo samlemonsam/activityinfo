@@ -20,7 +20,7 @@ package org.activityinfo.server.database.hibernate.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Date;
 
 /**
  * Defines a given user's access to a given database.
@@ -40,30 +40,22 @@ import java.util.*;
 public class UserPermission implements Serializable {
 
     private int id;
+    private Partner partner;
     private Database database;
     private User user;
-    private long version;
-
-    private Set<Partner> partners = new HashSet<>(0);
-
     private boolean allowView;
     private boolean allowViewAll;
-
     private boolean allowCreate;
     private boolean allowCreateAll;
-
     private boolean allowEdit;
     private boolean allowEditAll;
-
     private boolean allowDelete;
     private boolean allowDeleteAll;
-
+    private boolean allowDesign;
     private boolean allowManageUsers;
     private boolean allowManageAllUsers;
-
     private boolean allowExport;
-    private boolean allowDesign;
-
+    private long version;
     private String model;
 
     public UserPermission() {
@@ -75,7 +67,7 @@ public class UserPermission implements Serializable {
     }
 
     public UserPermission(UserPermission sourcePermission) {
-        this.partners = sourcePermission.partners;
+        this.partner = sourcePermission.partner;
         this.database = sourcePermission.database;
         this.user = sourcePermission.user;
         this.allowView = sourcePermission.allowView;
@@ -104,20 +96,23 @@ public class UserPermission implements Serializable {
         this.id = id;
     }
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "GroupAssignment",
-        joinColumns = { @JoinColumn(name = "UserPermissionId", nullable = false, updatable = false) },
-        inverseJoinColumns = { @JoinColumn(name = "PartnerId", nullable = false, updatable = false) })
-    public Set<Partner> getPartners() {
-        return this.partners;
+    /**
+     * Gets the Partner to which the <code>user</code> belongs.
+     *
+     * @return The <code>Partner</code> to which the <code>user</code> belongs
+     */
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "PartnerId", nullable = false)
+    public Partner getPartner() {
+        return this.partner;
     }
 
-    public void setPartners(Set<Partner> partners) {
-        this.partners = partners;
-    }
-
-    public void addPartner(Partner partner) {
-        this.partners.add(partner);
+    /**
+     * Sets the Partner to which the <code>user</code> belongs.
+     *
+     * @param partner The Partner to which the <code>user</code> belongs.
+     */
+    public void setPartner(Partner partner) {
+        this.partner = partner;
     }
 
     /**

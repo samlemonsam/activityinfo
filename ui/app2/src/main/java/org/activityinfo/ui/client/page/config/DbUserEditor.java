@@ -61,10 +61,10 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
     public static final PageId PAGE_ID = new PageId("dbusers");
 
     private static final int VIEW_COL_INDEX = 4;
-    private static final int CREATE_COL_INDEX = VIEW_COL_INDEX + 2;
-    private static final int EDIT_COL_INDEX = CREATE_COL_INDEX + 2;
-    private static final int DELETE_COL_INDEX = EDIT_COL_INDEX + 2;
-    private static final int MANAGE_USERS_COL_INDEX = DELETE_COL_INDEX + 2;
+    private static final int CREATE_COL_INDEX = 6;
+    private static final int EDIT_COL_INDEX = 8;
+    private static final int DELETE_COL_INDEX = 10;
+    private static final int MANAGE_USERS_COL_INDEX = 12;
 
     private static final SafeHtml ALL_CATEGORIES = new SafeHtmlBuilder()
             .appendHtmlConstant("<i>").appendEscaped(I18N.CONSTANTS.all()).appendHtmlConstant("</i>").toSafeHtml();
@@ -154,28 +154,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
 
         columns.add(new ColumnConfig("name", I18N.CONSTANTS.name(), 100));
         columns.add(new ColumnConfig("email", I18N.CONSTANTS.email(), 150));
-
-        ColumnConfig partnersColumn = new ColumnConfig("partners", I18N.CONSTANTS.partners(), 150);
-        partnersColumn.setSortable(true);
-        partnersColumn.setRenderer(new GridCellRenderer() {
-            @Override
-            public SafeHtml render(ModelData modelData, String s, ColumnData columnData, int i, int i1, ListStore listStore, Grid grid) {
-                SafeHtmlBuilder html = new SafeHtmlBuilder();
-                if (modelData instanceof UserPermissionDTO) {
-                    UserPermissionDTO permission = (UserPermissionDTO) modelData;
-                    boolean needsComma = false;
-                    for (PartnerDTO partner : permission.getPartners()) {
-                        if (needsComma) {
-                            html.appendHtmlConstant(", ");
-                        }
-                        html.appendEscaped(partner.getName());
-                        needsComma = true;
-                    }
-                }
-                return html.toSafeHtml();
-            }
-        });
-        columns.add(partnersColumn);
+        columns.add(new ColumnConfig("partner.name", I18N.CONSTANTS.partner(), 150));
 
         ColumnConfig folderColumn = new ColumnConfig("category", I18N.CONSTANTS.folders(), 150);
         folderColumn.setSortable(false);
@@ -315,13 +294,13 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
             return false;
         }
 
-        // if the user is only allowed to manage their own partners, then make
+        // if the user is only allowed to manager their own partners, then make
         // sure they're changing someone from their own organisation
-        if (!db.canManageUser(user)) {
+        if (!db.isManageAllUsersAllowed() && db.getMyPartner().getId() != user.getPartner().getId()) {
             return false;
         }
 
-        // check if database user has a greater permission set than user - if not, then we cannot change permissions
+        // check if database user has a greater permission set than user - if not, then we cnanot change permissions
         if (!db.hasGreaterPermissions(user)) {
             return false;
         }
@@ -390,11 +369,21 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
     }
 
     private void onSelectionChanged(UserPermissionDTO selectedItem) {
+
         if (selectedItem != null) {
-            toolBar.setActionEnabled(UIActions.DELETE, db.canManageUser(selectedItem));
-        } else {
-            toolBar.setActionEnabled(UIActions.DELETE, false);
+            PartnerDTO selectedPartner = selectedItem.getPartner();
+
+            toolBar.setActionEnabled(UIActions.DELETE,
+                    db.isManageAllUsersAllowed() ||
+                    (db.isManageUsersAllowed() && db.getMyPartnerId() == selectedPartner.getId()));
         }
+        toolBar.setActionEnabled(UIActions.DELETE, selectedItem != null);
+        toolBar.setActionEnabled(UIActions.DELETE, selectedItem != null);
+    }
+
+
+    private void edit(UserPermissionDTO model) {
+        actions.edit(model);
     }
 
     @Override

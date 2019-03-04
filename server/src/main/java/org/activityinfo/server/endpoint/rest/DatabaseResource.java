@@ -345,7 +345,7 @@ public class DatabaseResource {
         userPermission.setAllowManageUsers(false);
         userPermission.setAllowManageAllUsers(false);
         userPermission.setAllowExport(false);
-        userPermission.addPartner(defaultPartner);
+        userPermission.setPartner(defaultPartner);
         entityManagerProvider.get().persist(userPermission);
     }
 
