@@ -231,7 +231,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
     }
 
     private void insert(Class<?> entityClass, String criteria) {
-        if(!database.isDeleted() && databaseMeta.isPresent() && PermissionOracle.canView(databaseMeta.get())) {
+        if(!database.isDeleted() && databaseMeta.isPresent() && databaseMeta.get().isVisible()) {
             LOGGER.fine(() -> entityClass.getName() + " Criteria: " + criteria.toLowerCase());
             batch.insert(entityClass, criteria.toLowerCase());
         }
