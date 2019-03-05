@@ -79,10 +79,9 @@
   <userLogin userId="2" name="Bavon" email="bavon@nrcdrc.org"
              locale="fr" emailnotification="0"/>
   <userPermission userPermissionId="1" databaseId="1"
-                  userId="2" allowView="1" allowViewAll="0" allowEdit="1"
+                  partnerId="1" userId="2" allowView="1" allowViewAll="0" allowEdit="1"
                   allowEditAll="0" allowManageUsers="1" allowManageAllUsers="0"
                   allowDesign="0" lastSchemaUpdate="2009-01-02"/>
-  <groupAssignment userPermissionId="1" partnerId="1" />
 
 
   <userLogin userId="3" name="Stefan" email="stefan@irc.org"

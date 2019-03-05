@@ -36,7 +36,6 @@ import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
-import org.activityinfo.legacy.shared.command.GetActivityForm;
 import org.activityinfo.legacy.shared.command.GetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.model.*;
@@ -397,8 +396,8 @@ public class OldGetSitesHandler implements CommandHandlerAsync<GetSites, SiteRes
                             "db.DatabaseId in " +
                             "(SELECT p.DatabaseId from userpermission p where p.UserId = ? and p.AllowViewAll) or " +
                             "db.DatabaseId in " +
-                            "(select p.DatabaseId from userpermission p where (p.UserId = ?) and p.AllowView and site" +
-                            ".PartnerId in (select ga.PartnerId from groupassignment ga where ga.UserPermissionId=p.UserPermissionId)) " +
+                            "(select p.DatabaseId from userpermission p where (p.UserId = ?) and p.AllowView and p" +
+                            ".PartnerId = site.PartnerId) " +
                             " OR (select count(*) from activity pa where pa.published>0 and pa.ActivityId = site" +
                             ".ActivityId) > 0 )");
 

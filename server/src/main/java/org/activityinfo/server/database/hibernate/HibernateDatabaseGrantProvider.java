@@ -12,15 +12,9 @@ import org.activityinfo.store.spi.DatabaseGrantProvider;
 import javax.persistence.EntityManager;
 import javax.validation.constraints.NotNull;
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
-
-    private static final Logger LOGGER = Logger.getLogger(HibernateDatabaseGrantProvider.class.getName());
-
-    private static final String CACHE_PREFIX = "dbGrant";
-    private static final String CACHE_VERSION = "2";
 
     private final Provider<EntityManager> entityManager;
     private final DatabaseGrantCache cache;

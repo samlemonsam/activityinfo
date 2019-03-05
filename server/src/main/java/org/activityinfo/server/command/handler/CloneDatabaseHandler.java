@@ -60,7 +60,6 @@ import javax.inject.Provider;
 import javax.persistence.EntityManager;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static org.activityinfo.model.legacy.CuidAdapter.BUILTIN_FIELDS;
 import static org.activityinfo.model.legacy.CuidAdapter.activityFormClass;
@@ -151,27 +150,19 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             UserPermission newPermission = new UserPermission(sourcePermission);
             newPermission.setDatabase(targetDb);
             newPermission.setLastSchemaUpdate(new Date());
-            newPermission.setPartners(copyPartnerAssignment(copyPartnerAssignment(sourcePermission.getPartners(), defaultPartner), defaultPartner));
+            newPermission.setPartner(copyPartnerAssignment(sourcePermission.getPartner(), defaultPartner));
 
             em.persist(newPermission);
             targetDb.getUserPermissions().add(newPermission);
         }
     }
 
-    private Set<Partner> copyPartnerAssignment(Set<Partner> partners, Partner defaultPartner) {
-        Set<Partner> copiedPartners = new HashSet<>(partners.size());
-
-        // Add the new default partner if the user has been assigned to the default partner
-        if (partners.stream().map(Partner::getName).anyMatch(PartnerDTO.DEFAULT_PARTNER_NAME::equals)) {
-            copiedPartners.add(defaultPartner);
+    private Partner copyPartnerAssignment(Partner partner, Partner defaultPartner) {
+        if (PartnerDTO.DEFAULT_PARTNER_NAME.equals(partner.getName())) {
+            return defaultPartner;
         }
 
-        // Add the remaining partners, filtering out the old default partner
-        copiedPartners.addAll(partners.stream()
-                .filter(partner -> !PartnerDTO.DEFAULT_PARTNER_NAME.equals(partner.getName()))
-                .collect(Collectors.toSet()));
-
-        return copiedPartners;
+        return partner;
     }
 
     private void mapFolderPermissions() {
@@ -300,7 +291,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
             targetFormClass.setSubFormKind(sourceFormClass.getSubFormKind());
             ResourceId targetParentFormId = this.typeIdMapping.get(sourceFormClass.getParentFormId().get());
             if(targetParentFormId == null) {
-                LOGGER.severe(() -> String.format("Parent (%s) of subform (%s) was not copied",
+                LOGGER.severe(String.format("Parent (%s) of subform (%s) was not copied",
                     sourceFormClass.getParentFormId(),
                     sourceFormId));
                 throw new IllegalStateException("Parent form has not been copied!");

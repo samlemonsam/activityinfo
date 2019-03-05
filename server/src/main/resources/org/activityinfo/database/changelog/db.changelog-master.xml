@@ -78,5 +78,4 @@ xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liqui
   <include file="org/activityinfo/database/changelog/db.changelog-053-export-records-permission.xml"/>
   <include file="org/activityinfo/database/changelog/db.changelog-054-create-delete-records-permission.xml"/>
   <include file="org/activityinfo/database/changelog/db.changelog-055-database-meta-version.xml"/>
-  <include file="org/activityinfo/database/changelog/db.changelog-056-group-assignment.xml"/>
 </databaseChangeLog>

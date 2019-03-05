@@ -121,7 +121,7 @@ public class DbUserEditorActions {
         final FormDialogImpl dlg = new FormDialogImpl(form);
         dlg.setHeadingText(newUser ? I18N.CONSTANTS.newUser() : I18N.CONSTANTS.editUser());
         dlg.setWidth(400);
-        dlg.setHeight(460);
+        dlg.setHeight(425);
         dlg.getCancelButton().addSelectionListener(new SelectionListener<ButtonEvent>() {
             @Override
             public void componentSelected(ButtonEvent buttonEvent) {
