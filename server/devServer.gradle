@@ -125,6 +125,10 @@ appengine {
 
 appengineRun {
 
+    dependsOn {
+        migrateDatabaseDev
+    }
+
     doFirst {
         logger.lifecycle("Configuring database...")
         writeConfiguration  mysql.localDev, file("$buildDir/exploded-server/WEB-INF/activityinfo.properties")
