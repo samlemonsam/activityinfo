@@ -26,12 +26,13 @@ import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.legacy.shared.impl.Tables;
 import org.activityinfo.server.database.hibernate.dao.UserPermissionDAO;
 import org.activityinfo.server.database.hibernate.entity.Activity;
+import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class SiteUpdateBuilder implements UpdateBuilder {
 
@@ -169,7 +170,9 @@ public class SiteUpdateBuilder implements UpdateBuilder {
                        .where("s.activityId").equalTo(activity.getId())
                        .whereTrue("s.dateDeleted IS NULL");
         if (!isOwner && !userPermission.isAllowViewAll()) {
-            query.where("PartnerId").in(Collections.singleton(userPermission.getPartner().getId()));
+            query.where("PartnerId").in(userPermission.getPartners().stream()
+                    .map(Partner::getId)
+                    .collect(Collectors.toList()));
         }
         return query;
     }
