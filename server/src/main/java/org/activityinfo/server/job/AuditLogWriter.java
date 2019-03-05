@@ -86,6 +86,7 @@ public class AuditLogWriter {
                 .ancestor(parentKey)
                 .chunk(CHUNK_SIZE);
 
+        int numRecords = 0;
         for (FormRecordSnapshotEntity snapshot : query) {
 
             User user;
@@ -109,6 +110,11 @@ public class AuditLogWriter {
                     snapshot.getRecordId().asString(),
                     partner()
             );
+
+            numRecords++;
+            if ((numRecords % CHUNK_SIZE) == 0) {
+                Hrd.ofy().clear();
+            }
         }
 
     }
