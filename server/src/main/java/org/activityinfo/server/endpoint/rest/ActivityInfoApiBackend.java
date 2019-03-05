@@ -26,6 +26,7 @@ import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.permission.PermissionOracle;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
@@ -90,23 +91,26 @@ public class ActivityInfoApiBackend implements ApiBackend {
                 formClass.getDatabaseId(),
                 authenticatedUser.getUserId());
 
-        assertCreateFormRights(databaseMeta);
+        assertCreateFormRights(formClass, databaseMeta);
 
         ((MySqlStorageProvider) getStorage()).createOrUpdateFormSchema(formClass);
 
         UsageTracker.track(getAuthenticatedUserId(), "create_form", formClass);
     }
 
-    private void assertCreateFormRights(Optional<UserDatabaseMeta> dbMeta) {
+    private void assertCreateFormRights(FormClass formClass, Optional<UserDatabaseMeta> dbMeta) {
         if (!dbMeta.isPresent()) {
             throw new IllegalArgumentException("Database must exist");
         }
         UserDatabaseMeta databaseMeta = dbMeta.get();
-        if (!PermissionOracle.canCreateForm(databaseMeta.getDatabaseId(), databaseMeta)) {
+        ResourceId containerResource = formClass.getParentFormId().or(formClass.getDatabaseId());
+        if (!PermissionOracle.canCreateForm(containerResource, databaseMeta)) {
             LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.CREATE_RESOURCE.name()
-                            + " rights on Database %s",
+                            + " rights in container resource %s"
+                            + " on Database %s",
                     databaseMeta.getUserId(),
+                    containerResource,
                     databaseMeta.getDatabaseId()));
             throw new IllegalAccessCommandException();
         }
