@@ -114,10 +114,10 @@ public class DTOs {
             DATABASE.setManageUsersAllowed(true);
             DATABASE.setManageAllUsersAllowed(false);
             DATABASE.setDesignAllowed(true);
-            DATABASE.setMyPartnerId(88);
             DATABASE.setCountry(DRC);
 
-            DATABASE.getPartners().add(NRC);
+            DATABASE.addDatabasePartner(NRC);
+            DATABASE.addAssignedPartner(NRC);
 
             NFI_DISTRIBUTION = new ActivityFormDTO(91, "NFI Distributions");
             NFI_DISTRIBUTION.setDatabase(DATABASE);

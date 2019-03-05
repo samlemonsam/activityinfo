@@ -165,7 +165,8 @@ public class UpdatePartnerHandler implements CommandHandler<UpdatePartner> {
                 .setParameter(1, cmd.getDatabaseId())
                 .executeUpdate();
 
-        em.createNativeQuery("UPDATE userpermission SET partnerId = ? where partnerId = ? and databaseId = ?")
+        em.createNativeQuery("UPDATE groupassignment SET partnerId = ? WHERE partnerId = ? AND userPermissionId IN " +
+                                    "(SELECT userPermissionId FROM userpermission WHERE databaseId = ?)")
                 .setParameter(1, newPartner.getId())
                 .setParameter(2, sharedPartner.getId())
                 .setParameter(3, cmd.getDatabaseId())

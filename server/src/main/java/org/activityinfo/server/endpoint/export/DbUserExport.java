@@ -74,7 +74,7 @@ public class DbUserExport extends Exporter {
         int column = 0;
         createHeaderCell(headerRow, column++, I18N.CONSTANTS.name(), CellStyle.ALIGN_RIGHT);
         createHeaderCell(headerRow, column++, I18N.CONSTANTS.email(), CellStyle.ALIGN_RIGHT);
-        createHeaderCell(headerRow, column++, I18N.CONSTANTS.partner(), CellStyle.ALIGN_RIGHT);
+        createHeaderCell(headerRow, column++, I18N.CONSTANTS.partners(), CellStyle.ALIGN_RIGHT);
         createHeaderCell(headerRow, column++, I18N.CONSTANTS.allowView(), CellStyle.ALIGN_RIGHT);
         createHeaderCell(headerRow, column++, I18N.CONSTANTS.allowViewAll(), CellStyle.ALIGN_RIGHT);
         createHeaderCell(headerRow, column++, I18N.CONSTANTS.allowDesign(), CellStyle.ALIGN_RIGHT);
@@ -103,7 +103,7 @@ public class DbUserExport extends Exporter {
             int column = 0;
             createCell(row, column++, user.getName());
             createCell(row, column++, user.getEmail());
-            createCell(row, column++, String.valueOf(user.getPartner()));
+            createCell(row, column++, String.valueOf(user.getPartners()));
             createCell(row, column++, String.valueOf(user.getAllowView()));
             createCell(row, column++, String.valueOf(user.getAllowViewAll()));
             createCell(row, column++, String.valueOf(user.getAllowDesign()));
