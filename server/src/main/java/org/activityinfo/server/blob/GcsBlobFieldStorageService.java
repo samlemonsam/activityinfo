@@ -275,29 +275,11 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
     }
 
     private boolean hasAccessToResource(ResourceId userId, ResourceId formId) {
-        java.util.Optional<UserDatabaseMeta> databaseMeta;
         int user = CuidAdapter.getLegacyIdFromCuid(userId);
-        if (formId.getDomain() == CuidAdapter.ACTIVITY_DOMAIN) {
-            Activity activity = em.get().find(Activity.class, CuidAdapter.getLegacyIdFromCuid(formId));
-            databaseMeta = databaseProvider.getDatabaseMetadata(activity.getDatabase().getId(), user);
-            if (databaseMeta.isPresent()) {
-                return PermissionOracle.canView(formId, databaseMeta.get());
-            }
-        } else if (formId.getDomain() == ResourceId.GENERATED_ID_DOMAIN) {
-            // As Sub-Form is stored in HRD, FormPermissions are not set (only returns owner permissions),
-            // so check user against database via PermissionOracle
-            Optional<FormStorage> subFormStorage = formStorage.get().getForm(formId);
-            if (subFormStorage.isPresent()) {
-                FormStorage subForm = subFormStorage.get();
-                databaseMeta = databaseProvider.getDatabaseMetadata(subForm.getFormClass().getDatabaseId(), user);
-                if (databaseMeta.isPresent()) {
-                    return PermissionOracle.canView(databaseMeta.get());
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException("Blob owner is not supported, ownerId: " + formId);
-        }
-        return false;
+        java.util.Optional<UserDatabaseMeta> dbMeta = databaseProvider.getDatabaseMetadataByResource(formId, user);
+        return dbMeta
+                .map(db -> PermissionOracle.canView(formId, db))
+                .orElse(false);
     }
 
     public void assertNotAnonymousUser(@InjectParam AuthenticatedUser user) {
