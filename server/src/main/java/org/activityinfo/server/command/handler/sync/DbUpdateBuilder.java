@@ -238,7 +238,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
     }
 
     private void insert(String tableName, String criteria) {
-        if(!database.isDeleted() && databaseMeta.isPresent() && PermissionOracle.canView(databaseMeta.get())) {
+        if(!database.isDeleted() && databaseMeta.isPresent() && databaseMeta.get().isVisible()) {
             SqlQuery query = SqlQuery.selectAll().from(tableName).whereTrue(criteria.toLowerCase());
             LOGGER.fine(query.sql());
             batch.insert()
