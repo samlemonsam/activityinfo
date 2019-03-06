@@ -150,7 +150,9 @@ public class LocationType implements Serializable, Deleteable {
 
     @Override
     public void delete() {
-        setDateDeleted(new Date());
+        Date now = new Date();
+        setDateDeleted(now);
+        database.setLastMetaAndSchemaUpdate(now);
     }
 
     @Override @Transient

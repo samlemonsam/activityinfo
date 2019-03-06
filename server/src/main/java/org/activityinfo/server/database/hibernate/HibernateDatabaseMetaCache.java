@@ -52,7 +52,7 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
     private static final Logger LOGGER = Logger.getLogger(HibernateDatabaseMetaCache.class.getName());
 
     private static final String CACHE_PREFIX = "dbMeta";
-    private static final String CACHE_VERSION = "5";
+    private static final String CACHE_VERSION = "6";
 
     private static final long MAX_CACHE_SIZE = 50;
     private static final long EXPIRES_IN = 10;
@@ -281,6 +281,7 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
         List<Resource> monthlyReportingResources = fetchMonthlyReportingSubForms(database);
         List<Resource> subFormResources = fetchSubForms(formResources);
         List<Resource> folderResources = fetchFolders(database);
+        List<Resource> locationTypeResources = fetchLocationTypes(database);
 
         Resource partnerResource = partnerFormResource(database);
 
@@ -289,6 +290,7 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
         resources.addAll(subFormResources);
         resources.addAll(folderResources);
         resources.add(partnerResource);
+        resources.addAll(locationTypeResources);
 
         return resources;
     }
@@ -367,6 +369,28 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
                 .getResultList().stream()
                 .map(Folder::asResource)
                 .collect(Collectors.toList());
+    }
+
+    private List<Resource> fetchLocationTypes(@NotNull Database database) {
+        return entityManager.get().createQuery("SELECT lt " +
+                "FROM LocationType lt " +
+                "WHERE lt.database=:database " +
+                "AND lt.dateDeleted IS NULL", LocationType.class)
+                .setParameter("database", database)
+                .getResultList().stream()
+                .filter(Objects::nonNull)
+                .map(lt -> buildLocationTypeResource(database, lt))
+                .collect(Collectors.toList());
+    }
+
+    private static Resource buildLocationTypeResource(@NotNull Database database, @NotNull LocationType locationType) {
+        return new Resource.Builder()
+                .setId(CuidAdapter.locationFormClass(locationType.getId()))
+                .setLabel(locationType.getName())
+                .setParentId(database.getResourceId())
+                .setType(ResourceType.FORM)
+                .setVisibleAsReference()
+                .build();
     }
 
     private List<RecordLock> fetchLocks(@NotNull Database database) {

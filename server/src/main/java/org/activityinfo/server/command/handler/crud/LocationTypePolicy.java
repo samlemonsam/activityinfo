@@ -75,8 +75,9 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
         locationType.setDatabase(database);
 
         em.persist(locationType);
-        
-        
+
+        locationType.getDatabase().setLastMetaAndSchemaUpdate(new Date());
+
         return locationType.getId();
     }
 
@@ -137,6 +138,6 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
             Preconditions.checkArgument(LocationDTO.isValidWorkflowId(workflowId), "invalid workflow id %s", workflowId);
             locationType.setWorkflowId(workflowId);
         }
-        locationType.getDatabase().setLastSchemaUpdate(new Date());
+        locationType.getDatabase().setLastMetaAndSchemaUpdate(new Date());
     }
 }
