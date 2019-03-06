@@ -55,7 +55,7 @@ public class CreateDatabaseTest extends CommandTestCase {
         assertEquals(db.getFullName(), newdb.getFullName());
         assertNotNull(newdb.getCountry());
         assertEquals("Alex", newdb.getOwnerName());
-        assertThat(newdb.getPartners(), hasSize(1));
+        assertThat(newdb.getDatabasePartners(), hasSize(1));
     }
 
     @Test

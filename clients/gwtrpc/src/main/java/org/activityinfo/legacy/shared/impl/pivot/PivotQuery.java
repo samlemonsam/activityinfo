@@ -358,7 +358,10 @@ public class PivotQuery implements WorkItem {
                 .append(" OR Activity.Published > 0")
                         // databases with allowviewall
                 .append(" OR UP.AllowViewAll")
-                .append(" OR (UP.AllowView AND UP.PartnerId=Site.PartnerId)")
+                .append(" OR (UP.AllowView " +
+                        "AND Site.PartnerId IN " +
+                        "(SELECT GA.PartnerId FROM GroupAssignment GA WHERE UP.UserPermissionId=GA.UserPermissionId)" +
+                        ")")
                 .append(")").toString());
     }
 

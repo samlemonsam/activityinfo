@@ -155,7 +155,7 @@ public class SignUpConfirmationController {
             return;
         }
         UserPermission permission = new UserPermission(database, user);
-        permission.setPartner(partner);
+        permission.addPartner(partner);
         permission.setAllowView(true);
         permission.setAllowViewAll(true);
         permission.setLastSchemaUpdate(new Date());

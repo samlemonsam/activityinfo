@@ -13,6 +13,7 @@ import org.activityinfo.model.formula.*;
 import org.activityinfo.model.formula.diagnostic.FormulaException;
 import org.activityinfo.model.formula.eval.EvalContext;
 import org.activityinfo.model.formula.functions.EqualFunction;
+import org.activityinfo.model.formula.functions.OrFunction;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
@@ -268,42 +269,6 @@ public class PermissionOracle {
     ///////////////////////////////////////////// FORM PERMISSION METHODS //////////////////////////////////////////////
 
     public static FormPermissions formPermissions(ResourceId formId, UserDatabaseMeta db) {
-        if (!db.isVisible() || db.isDeleted()) {
-            return FormPermissions.none();
-        }
-        if (db.isOwner()) {
-            return FormPermissions.owner(db.getEffectiveLocks(formId));
-        }
-        if (db.isPublished()) {
-            if(formId.getDomain() == CuidAdapter.LOCATION_TYPE_DOMAIN) {
-                return FormPermissions.readWrite(db.getEffectiveLocks(formId));
-            } else {
-                return FormPermissions.readonly();
-            }
-        }
-        if (isProjectForm(formId)) {
-            return computeFormPermissions(formId, db);
-        }
-        if (!db.hasResource(formId)) {
-            return FormPermissions.none();
-        }
-        if (!isFormOrSubFormResource(db.getResource(formId).get())) {
-            return FormPermissions.none();
-        }
-        return computeFormPermissions(formId, db);
-    }
-
-    private static boolean isFormOrSubFormResource(Resource resource) {
-        switch(resource.getType()) {
-            case FORM:
-            case SUB_FORM:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    private static FormPermissions computeFormPermissions(ResourceId formId, UserDatabaseMeta db) {
         FormPermissions.Builder permissionsBuilder = new FormPermissions.Builder();
         computeViewFormPermissions(permissionsBuilder, formId, db);
         if (!permissionsBuilder.isAllowedView()) {
@@ -457,42 +422,50 @@ public class PermissionOracle {
                     CuidAdapter.partnerRecordId(partnerId));
     }
 
+    /**
+     * <p>Parses the provided filter and checks whether it contains a node allowing the provided partner record.
+     * It will return TRUE if a node in the binary tree of FormaulaNodes equals the Partner Record FormulaNode, in the
+     * form of {@code P0000000000 == "p0000000000"}</p>
+     *
+     * <p><b>NB:</b> Assumes that filter contains <b>only</b> Partner restrictions and that all restrictions are defined
+     * as a binary tree of OR operations. </p>
+     */
     private static boolean filterContainsPartner(String filter, ResourceId partnerFormId, ResourceId partnerId) {
         FormulaNode filterFormula = FormulaParser.parse(filter);
+        List<FormulaNode> partnerNodes =  Formulas.findBinaryTree(filterFormula, OrFunction.INSTANCE);
 
         SymbolNode expectedPartnerForm = new SymbolNode(partnerFormId);
         ConstantNode expectedPartnerRecord = new ConstantNode(partnerId.asString());
+        FormulaNode expectedPartnerNode = new FunctionCallNode(EqualFunction.INSTANCE, expectedPartnerForm, expectedPartnerRecord);
 
-        if (!(filterFormula instanceof FunctionCallNode)) {
-            return false;
-        }
-        if (!(((FunctionCallNode) filterFormula).getFunction() instanceof EqualFunction)) {
-            return false;
-        }
-        if (((FunctionCallNode) filterFormula).getArgumentCount() != 2) {
-            return false;
-        }
+        return partnerNodes.stream().anyMatch(expectedPartnerNode::equals);
+    }
 
-        FunctionCallNode equalFunctionCall = (FunctionCallNode) filterFormula;
+    /**
+     * <p>Parses the provided filter and maps each Partner Record FormulaNode, in the form of
+     * {@code P0000000000 == "p0000000000"}, to the Partner Record Integer id.</p>
+     *
+     * <p><b>NB:</b> Assumes that filter contains <b>only</b> Partner restrictions and that all restrictions are defined
+     * as a binary tree of OR operations. </p>
+     */
+    public static List<Integer> allowedPartnersFromFilter(String filter) {
+        FormulaNode filterFormula = FormulaParser.parse(filter);
+        List<FormulaNode> partnerNodes = Formulas.findBinaryTree(filterFormula, OrFunction.INSTANCE);
+        return partnerNodes.stream()
+                .filter(PermissionOracle::isEqualFunctionCallNode)
+                .map(PermissionOracle::partnerFromNode)
+                .collect(Collectors.toList());
+    }
 
-        if (!(equalFunctionCall.getArgument(0 ) instanceof SymbolNode)) {
-            return false;
-        }
-        if (!(equalFunctionCall.getArgument(1) instanceof ConstantNode)) {
-            return false;
-        }
+    private static boolean isEqualFunctionCallNode(FormulaNode node) {
+        return node instanceof FunctionCallNode
+                && ((FunctionCallNode) node).getFunction() instanceof EqualFunction;
+    }
 
-        SymbolNode partnerFormNode = (SymbolNode) equalFunctionCall.getArgument(0);
-        ConstantNode partnerFieldNode = (ConstantNode) equalFunctionCall.getArgument(1);
-
-        if (!partnerFormNode.equals(expectedPartnerForm)) {
-            return false;
-        }
-        if (!partnerFieldNode.equals(expectedPartnerRecord)) {
-            return false;
-        }
-
-        return true;
+    private static int partnerFromNode(FormulaNode partnerNode) {
+        FunctionCallNode equalFunctionCall = (FunctionCallNode) partnerNode;
+        ConstantNode partnerRecordNode = (ConstantNode) equalFunctionCall.getArgument(1);
+        return CuidAdapter.getLegacyIdFromCuid(partnerRecordNode.getValue().toString());
     }
 
     ///////////////////////////////////////////// BASIC PERMISSION QUERIES /////////////////////////////////////////////
