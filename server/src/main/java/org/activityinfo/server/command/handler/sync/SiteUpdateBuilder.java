@@ -172,10 +172,9 @@ public class SiteUpdateBuilder implements UpdateBuilder {
                        .whereTrue("s.dateDeleted IS NULL");
         if (!isOwner && !userPermission.isAllowViewAll()) {
             query.where("PartnerId")
-                    .in(Collections.singleton(userPermission.getPartner().getId()));
-//                    .in(userPermission.getPartners().stream()
-//                    .map(Partner::getId)
-//                    .collect(Collectors.toList()));
+                    .in(userPermission.getPartners().stream()
+                    .map(Partner::getId)
+                    .collect(Collectors.toList()));
         }
         return query;
     }
