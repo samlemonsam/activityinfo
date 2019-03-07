@@ -313,7 +313,7 @@ public class UserForm extends FormPanel {
     }
 
     private boolean showMultiplePartnerEditor(String ownerEmail) {
-        if (ownerEmail.contains("@bedatadriven.com") || ownerEmail.contains("@unrwa.org")) {
+        if (ownerEmail.toLowerCase().contains("@bedatadriven.com") || ownerEmail.toLowerCase().contains("@unrwa.org")) {
             return true;
         }
         return false;
