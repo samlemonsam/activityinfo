@@ -31,6 +31,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * DatabaseProvider implementation.
+ *
+ * Delegates to the {@link GeoDatabaseProvider} for all GeoDatabase requests.
+ * Delegates to the {@link UserDatabaseProvider} for all other database requests.
+ */
 public class DatabaseProviderImpl implements DatabaseProvider {
 
     private final GeoDatabaseProvider geoDbProvider;

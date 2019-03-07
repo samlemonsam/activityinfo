@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * <p>Caching mechanism for DatabaseMeta. The cache has three components:
+ * <p>Caching mechanism for DatabaseMeta stored in MySQL. The cache has three components:
  * <ol>
  *     <li>Request-level in-memory cache for DatabaseMeta, using Guava LoadingCache as backing cache.</li>
  *     <li>Distributed in-memory cache, using Appengine Memcache.</li>

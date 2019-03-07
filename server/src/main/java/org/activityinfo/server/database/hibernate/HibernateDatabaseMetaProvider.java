@@ -17,6 +17,9 @@ import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * DatabaseMetaProvider for DatabaseMeta stored in MySQL.
+ */
 public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
 
     private final Provider<EntityManager> entityManager;

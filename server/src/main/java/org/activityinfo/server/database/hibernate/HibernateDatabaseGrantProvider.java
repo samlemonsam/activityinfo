@@ -15,6 +15,9 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+/**
+ * DatabaseGrantProvider for DatabaseGrants stored in MySQL.
+ */
 public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
 
     private static final Logger LOGGER = Logger.getLogger(HibernateDatabaseGrantProvider.class.getName());

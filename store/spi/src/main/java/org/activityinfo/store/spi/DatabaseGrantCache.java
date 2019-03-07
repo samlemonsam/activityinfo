@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Cache interface for DatabaseGrants
+ * Cache interface for DatabaseGrants. DatabaseGrants are keyed by {@link DatabaseGrantKey}s.
  */
 public interface DatabaseGrantCache {
 

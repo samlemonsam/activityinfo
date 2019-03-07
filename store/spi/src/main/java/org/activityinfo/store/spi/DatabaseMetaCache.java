@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Cache interface for DatabaseMeta
+ * Cache interface for DatabaseMeta. DatabaseMeta are keyed by database {@link ResourceId}.
  */
 public interface DatabaseMetaCache {
 

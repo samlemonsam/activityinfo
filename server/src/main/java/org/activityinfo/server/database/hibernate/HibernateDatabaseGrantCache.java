@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * <p>Caching mechanism for DatabaseGrants. The cache has three components:
+ * <p>Caching mechanism for DatabaseGrants stored in MySQL. The cache has three components:
  * <ol>
  *     <li>Request-level in-memory cache for DatabaseGrant, using Guava LoadingCache as backing cache.</li>
  *     <li>Distributed in-memory cache, using Appengine Memcache.</li>

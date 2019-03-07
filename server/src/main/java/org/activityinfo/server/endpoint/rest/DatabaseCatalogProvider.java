@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Provides the CatalogEntries for a database
+ * Provides the CatalogEntries for database(s) stored in MySQL.
  */
 public class DatabaseCatalogProvider implements FormCatalog {
 
