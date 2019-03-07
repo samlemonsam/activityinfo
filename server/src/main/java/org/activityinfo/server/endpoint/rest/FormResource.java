@@ -51,6 +51,7 @@ import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
 import org.activityinfo.store.query.server.InvalidUpdateException;
 import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.FormNotFoundException;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.VersionedFormStorage;
 
@@ -92,8 +93,14 @@ public class FormResource {
                                             @QueryParam("localVersion") Long localVersion) {
 
         BatchingFormTreeBuilder builder = backend.newBatchingTreeBuilder();
-
-        return builder.queryFormMetadata(formId);
+        try {
+            return builder.queryFormMetadata(formId);
+        } catch (FormNotFoundException notFound) {
+            throw new WebApplicationException(
+                    Response.status(Response.Status.NOT_FOUND)
+                            .entity(format("Form %s does not exist.", formId.asString()))
+                            .build());
+        }
     }
 
     /**
