@@ -418,6 +418,7 @@ public class DatabaseResource {
 
     private void transferDatabase(Database database, User newOwner) {
         database.setOwner(newOwner);
+        database.setLastMetaAndSchemaUpdate(new Date());
         entityManagerProvider.get().persist(database);
     }
 
