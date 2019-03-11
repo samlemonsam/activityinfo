@@ -239,14 +239,14 @@ public class DbUpdateBuilder implements UpdateBuilder {
     }
 
     private void insert(Class<?> entityClass, String criteria) {
-        if(!database.isDeleted() && databaseMeta.isPresent() && databaseMeta.get().isVisible()) {
+        if(!database.isDeleted() && databaseMeta.isPresent() && PermissionOracle.canSyncClassicDatabase(databaseMeta.get())) {
             LOGGER.fine(() -> entityClass.getName() + " Criteria: " + criteria.toLowerCase());
             batch.insert(entityClass, criteria.toLowerCase());
         }
     }
 
     private void insert(String tableName, String criteria) {
-        if(!database.isDeleted() && databaseMeta.isPresent() && databaseMeta.get().isVisible()) {
+        if(!database.isDeleted() && databaseMeta.isPresent() && PermissionOracle.canSyncClassicDatabase(databaseMeta.get())) {
             SqlQuery query = SqlQuery.selectAll().from(tableName).whereTrue(criteria.toLowerCase());
             LOGGER.fine(query.sql());
             batch.insert()

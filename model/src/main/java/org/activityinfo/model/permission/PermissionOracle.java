@@ -585,6 +585,28 @@ public class PermissionOracle {
         return db.isOwner();
     }
 
+    /////////////////////////////////////////////////// SYNC Methods ///////////////////////////////////////////////////
+
+    /**
+     * <p>The current User can synchronise this Database.</p>
+     *
+     * <p><b>NB:</b> This is a specially handled permission method for CLASSIC databases. Databases which were
+     * <i>previously</i> synced but whose permissions have been removed must be prevented from synchronizing even if the
+     * database contains public resources. Routine checks to see whether there are <i>any</i> grants for current user.</p>
+     */
+    public static boolean canSyncClassicDatabase(UserDatabaseMeta db) {
+        if (!db.isVisible() || db.isDeleted()) {
+            return false;
+        }
+        if (db.isOwner()) {
+            return true;
+        }
+        if (!db.getGrants().isEmpty()) {
+            return true;
+        }
+        return false;
+    }
+
     /////////////////////////////////////////////////// VIEW Methods ///////////////////////////////////////////////////
 
     /**
