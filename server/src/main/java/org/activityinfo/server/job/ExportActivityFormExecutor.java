@@ -25,7 +25,7 @@ import org.activityinfo.server.command.handler.AttributeFilterMap;
 import org.activityinfo.server.command.handler.QueryFilterBuilder;
 import org.activityinfo.server.generated.StorageProvider;
 import org.activityinfo.store.query.shared.FormSource;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -39,26 +39,26 @@ public class ExportActivityFormExecutor implements JobExecutor<ExportActivityFor
 
     private FormSource formSource;
     private StorageProvider storageProvider;
-    private DatabaseProvider databaseProvider;
+    private UserDatabaseProvider userDatabaseProvider;
     private Provider<DispatcherSync> dispatcher;
     private Provider<AuthenticatedUser> authUser;
 
     @Inject
     public ExportActivityFormExecutor(FormSource formSource,
                                       StorageProvider storageProvider,
-                                      DatabaseProvider databaseProvider,
+                                      UserDatabaseProvider userDatabaseProvider,
                                       Provider<DispatcherSync> dispatcher,
                                       Provider<AuthenticatedUser> authUser) {
         this.formSource = formSource;
         this.storageProvider = storageProvider;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
         this.dispatcher = dispatcher;
         this.authUser = authUser;
     }
 
     @Override
     public ExportResult execute(ExportActivityFormJob descriptor) throws IOException {
-        ExportFormExecutor formExporter = new ExportFormExecutor(formSource, storageProvider, databaseProvider, authUser.get());
+        ExportFormExecutor formExporter = new ExportFormExecutor(formSource, storageProvider, userDatabaseProvider, authUser.get());
 
         Filter filter = FilterUrlSerializer.fromUrlFragment(descriptor.getFilter());
         ResourceId activityFormId = fetchFormId(filter);

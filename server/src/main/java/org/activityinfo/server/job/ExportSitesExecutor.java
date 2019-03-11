@@ -25,7 +25,7 @@ import org.activityinfo.server.endpoint.export.SiteExporter;
 import org.activityinfo.server.endpoint.export.TaskContext;
 import org.activityinfo.server.generated.GeneratedResource;
 import org.activityinfo.server.generated.StorageProvider;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -42,17 +42,17 @@ public class ExportSitesExecutor implements JobExecutor<ExportSitesJob, ExportRe
     private static final Logger LOGGER = Logger.getLogger(ExportSitesExecutor.class.getName());
 
     private StorageProvider storageProvider;
-    private DatabaseProvider databaseProvider;
+    private UserDatabaseProvider userDatabaseProvider;
     private Provider<DispatcherSync> dispatcher;
     private Provider<AuthenticatedUser> authUser;
 
     @Inject
     public ExportSitesExecutor(StorageProvider storageProvider,
-                               DatabaseProvider databaseProvider,
+                               UserDatabaseProvider userDatabaseProvider,
                                Provider<DispatcherSync> dispatcher,
                                Provider<AuthenticatedUser> authUser) {
         this.storageProvider = storageProvider;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
         this.dispatcher = dispatcher;
         this.authUser = authUser;
     }
@@ -101,7 +101,7 @@ public class ExportSitesExecutor implements JobExecutor<ExportSitesJob, ExportRe
     }
 
     private void checkExportRightsOnAllResources(ResourceId databaseId) {
-        Optional<UserDatabaseMeta> dbMeta = databaseProvider.getDatabaseMetadata(databaseId, authUser.get().getUserId());
+        Optional<UserDatabaseMeta> dbMeta = userDatabaseProvider.getDatabaseMetadata(databaseId, authUser.get().getUserId());
 
         if (!dbMeta.isPresent()) {
             ApiError error = new ApiError(ApiErrorType.INVALID_REQUEST_ERROR, ApiErrorCode.DATABASE_NOT_FOUND);
@@ -116,7 +116,7 @@ public class ExportSitesExecutor implements JobExecutor<ExportSitesJob, ExportRe
     }
 
     private void checkExportRightsOnActivity(ResourceId activityId) {
-        Optional<UserDatabaseMeta> dbMeta = databaseProvider.getDatabaseMetadataByResource(activityId, authUser.get().getUserId());
+        Optional<UserDatabaseMeta> dbMeta = userDatabaseProvider.getDatabaseMetadataByResource(activityId, authUser.get().getUserId());
 
         if (!dbMeta.isPresent()) {
             ApiError error = new ApiError(ApiErrorType.INVALID_REQUEST_ERROR, ApiErrorCode.DATABASE_NOT_FOUND);

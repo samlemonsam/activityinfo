@@ -41,7 +41,6 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.endpoint.odk.build.XFormBuilder;
-import org.activityinfo.store.spi.DatabaseProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

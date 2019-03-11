@@ -35,7 +35,7 @@ import org.activityinfo.model.type.FieldTypeClass;
 import org.activityinfo.model.type.TypeRegistry;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.query.UsageTracker;
 
 import javax.persistence.EntityManager;
@@ -57,12 +57,12 @@ import static org.activityinfo.legacy.shared.util.StringUtil.truncate;
 public class BaseEntityHandler {
 
     protected final EntityManager em;
-    protected final DatabaseProvider databaseProvider;
+    protected final UserDatabaseProvider userDatabaseProvider;
 
     public BaseEntityHandler(EntityManager em,
-                             DatabaseProvider databaseProvider) {
+                             UserDatabaseProvider userDatabaseProvider) {
         this.em = em;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
     }
 
     protected void updateIndicatorProperties(Indicator indicator, Map<String, Object> changeMap) {
@@ -263,7 +263,7 @@ public class BaseEntityHandler {
 
     void assertCreateFormRights(User user, Database database) {
         ResourceId databaseId = CuidAdapter.databaseId(database.getId());
-        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, user.getId());
+        Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(databaseId, user.getId());
         if (!databaseMeta.isPresent() || !PermissionOracle.canCreateForm(databaseId, databaseMeta.get())) {
             throw new IllegalAccessCommandException();
         }
@@ -271,14 +271,14 @@ public class BaseEntityHandler {
 
     void assertCreateFolderRights(User user, Database database) {
         ResourceId databaseId = CuidAdapter.databaseId(database.getId());
-        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, user.getId());
+        Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(databaseId, user.getId());
         if (!databaseMeta.isPresent() || !PermissionOracle.canCreateResource(databaseId, databaseMeta.get())) {
             throw new IllegalAccessCommandException();
         }
     }
 
     void assertEditFormRights(User user, Activity activity) {
-        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(activity.getDatabase().getId(), user.getId());
+        Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(activity.getDatabase().getId(), user.getId());
         if (!databaseMeta.isPresent() || !PermissionOracle.canEditForm(activity.getFormId(), databaseMeta.get())) {
             throw new IllegalAccessCommandException();
         }
@@ -295,7 +295,7 @@ public class BaseEntityHandler {
 
     void assertEditFolderRights(User user, Folder folder) {
         ResourceId folderId = CuidAdapter.folderId(folder.getId());
-        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(folder.getDatabase().getId(), user.getId());
+        Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(folder.getDatabase().getId(), user.getId());
         if (!databaseMeta.isPresent() || !PermissionOracle.canEditFolder(folderId, databaseMeta.get())) {
             throw new IllegalAccessCommandException();
         }
@@ -303,14 +303,14 @@ public class BaseEntityHandler {
 
     void assertEditProjectRights(User user, Project project) {
         ResourceId projectFormId = CuidAdapter.projectFormClass(project.getId());
-        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(project.getDatabase().getId(), user.getId());
+        Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(project.getDatabase().getId(), user.getId());
         if (!databaseMeta.isPresent() || !PermissionOracle.canEditRecord(projectFormId, databaseMeta.get())) {
             throw new IllegalAccessCommandException();
         }
     }
 
     void assertLockRecordsRights(User user, LockedPeriod lockedPeriod) {
-        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(lockedPeriod.getDatabase().getId(), user.getId());
+        Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(lockedPeriod.getDatabase().getId(), user.getId());
         if (!databaseMeta.isPresent() || !PermissionOracle.canLockRecords(lockedPeriod.getResourceId(), databaseMeta.get())) {
             throw new IllegalAccessCommandException();
         }
@@ -318,7 +318,7 @@ public class BaseEntityHandler {
 
     void assertManageTargetsRights(User user, Database database) {
         ResourceId databaseId = CuidAdapter.databaseId(database.getId());
-        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, user.getId());
+        Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(databaseId, user.getId());
         if (!databaseMeta.isPresent() || !PermissionOracle.canManageTargets(databaseId, databaseMeta.get())) {
             throw new IllegalAccessCommandException();
         }

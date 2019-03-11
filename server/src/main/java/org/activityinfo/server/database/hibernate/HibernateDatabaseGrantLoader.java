@@ -18,7 +18,7 @@ import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
-import org.activityinfo.store.spi.DatabaseGrantCache;
+import org.activityinfo.store.spi.DatabaseGrantLoader;
 import org.activityinfo.model.database.DatabaseGrantKey;
 
 import javax.persistence.EntityManager;
@@ -29,22 +29,22 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * <p>Caching mechanism for DatabaseGrants stored in MySQL. The cache has three components:
+ * <p>Loading and caching mechanism for DatabaseGrants stored in MySQL. The cache has three components:
  * <ol>
  *     <li>Request-level in-memory cache for DatabaseGrant, using Guava LoadingCache as backing cache.</li>
  *     <li>Distributed in-memory cache, using Appengine Memcache.</li>
- *     <li>Database Loader, using Hibernate EntityManager.</li>
+ *     <li>MySQL Database Loader, using Hibernate EntityManager.</li>
  * </ol>
- *     The cache will attempt to retrieve DatabaseGrant from the request cache first, then Memcache, and if that
+ *     The loader will attempt to retrieve DatabaseGrant from the request cache first, then Memcache, and if that
  *     fails then loads and builds the DatabaseGrant from the MySQL Database. DatabaseGrants, when constructed, will be
  *     stored in Memcache and request cache.
  * </p>
  *
  * <p>DatabaseGrants are keyed in the request cache by a DatabaseGrantKey.</p>
  */
-public class HibernateDatabaseGrantCache implements DatabaseGrantCache {
+public class HibernateDatabaseGrantLoader implements DatabaseGrantLoader {
 
-    private static final Logger LOGGER = Logger.getLogger(HibernateDatabaseGrantCache.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(HibernateDatabaseGrantLoader.class.getName());
 
     private static final String CACHE_PREFIX = "dbGrant";
     private static final String CACHE_VERSION = "3";
@@ -58,8 +58,8 @@ public class HibernateDatabaseGrantCache implements DatabaseGrantCache {
     private final LoadingCache<DatabaseGrantKey,Optional<DatabaseGrant>> cache;
 
     @Inject
-    public HibernateDatabaseGrantCache(Provider<EntityManager> entityManager,
-                                       MemcacheService memcacheService) {
+    public HibernateDatabaseGrantLoader(Provider<EntityManager> entityManager,
+                                        MemcacheService memcacheService) {
         this.entityManager = entityManager;
         this.memcacheService = memcacheService;
         this.cache = CacheBuilder.newBuilder()
@@ -227,7 +227,7 @@ public class HibernateDatabaseGrantCache implements DatabaseGrantCache {
                 .setParameter("grantKeys", toFetch.stream().map(DatabaseGrantKey::toString).collect(Collectors.toSet()))
                 .getResultList().stream()
                 .filter(Objects::nonNull)
-                .map(HibernateDatabaseGrantCache::buildDatabaseGrant)
+                .map(HibernateDatabaseGrantLoader::buildDatabaseGrant)
                 .collect(Collectors.toMap(
                         grant -> DatabaseGrantKey.of(grant.getUserId(), grant.getDatabaseId()),
                         grant -> grant));

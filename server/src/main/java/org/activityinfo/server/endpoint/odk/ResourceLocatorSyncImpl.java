@@ -39,7 +39,7 @@ import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.BlobAuthorizer;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.FormStorageProvider;
 
@@ -51,17 +51,17 @@ import java.util.List;
 public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
 
     private Provider<FormStorageProvider> catalog;
-    private DatabaseProvider databaseProvider;
+    private UserDatabaseProvider userDatabaseProvider;
     private Provider<AuthenticatedUser> authenticatedUser;
     private BlobAuthorizer blobAuthorizer;
 
     @Inject
     public ResourceLocatorSyncImpl(Provider<FormStorageProvider> catalog,
-                                   DatabaseProvider databaseProvider,
+                                   UserDatabaseProvider userDatabaseProvider,
                                    Provider<AuthenticatedUser> authenticatedUser,
                                    BlobAuthorizer blobAuthorizer) {
         this.catalog = catalog;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
         this.authenticatedUser = authenticatedUser;
         this.blobAuthorizer = blobAuthorizer;
     }
@@ -123,7 +123,7 @@ public class ResourceLocatorSyncImpl implements ResourceLocatorSync {
     @Override
     public void persist(TypedFormRecord typedFormRecord, TransactionMode transactionMode) {
         Updater updater = new Updater(catalog.get(),
-                databaseProvider,
+                userDatabaseProvider,
                 blobAuthorizer,
                 new HrdSerialNumberProvider(),
                 authenticatedUser.get().getUserId(),

@@ -73,18 +73,18 @@ public class Updater {
     private final int userId;
     private final BlobAuthorizer blobAuthorizer;
     private final SerialNumberProvider serialNumberProvider;
-    private final DatabaseProvider databaseProvider;
+    private final UserDatabaseProvider userDatabaseProvider;
 
     private boolean enforcePermissions = true;
 
 
     public Updater(FormStorageProvider catalog,
-                   DatabaseProvider databaseProvider,
+                   UserDatabaseProvider userDatabaseProvider,
                    BlobAuthorizer blobAuthorizer,
                    SerialNumberProvider serialNumberProvider,
                    int userId, TransactionMode mode) {
         this.catalog = catalog;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
         this.userId = userId;
         this.blobAuthorizer = blobAuthorizer;
         this.serialNumberProvider = serialNumberProvider;
@@ -435,7 +435,7 @@ public class Updater {
         // Check form-level permissions
         if(enforcePermissions) {
             FormClass formClass = form.getFormClass();
-            java.util.Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(formClass.getDatabaseId(), userId);
+            java.util.Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(formClass.getDatabaseId(), userId);
             if (!databaseMeta.isPresent()) {
                 throw new IllegalArgumentException("DatabaseMeta must exist");
             }

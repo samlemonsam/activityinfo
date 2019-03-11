@@ -5,7 +5,7 @@ import com.google.inject.Provider;
 import org.activityinfo.model.database.DatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.spi.DatabaseMetaCache;
+import org.activityinfo.store.spi.DatabaseMetaLoader;
 import org.activityinfo.store.spi.DatabaseMetaProvider;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.FormStorageProvider;
@@ -24,12 +24,12 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
 
     private final Provider<EntityManager> entityManager;
     private final FormStorageProvider formStorageProvider;
-    private final DatabaseMetaCache cache;
+    private final DatabaseMetaLoader cache;
 
     @Inject
     public HibernateDatabaseMetaProvider(Provider<EntityManager> entityManager,
                                          FormStorageProvider formStorageProvider,
-                                         DatabaseMetaCache cache) {
+                                         DatabaseMetaLoader cache) {
         this.entityManager = entityManager;
         this.formStorageProvider = formStorageProvider;
         this.cache = cache;

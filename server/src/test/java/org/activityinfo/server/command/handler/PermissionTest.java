@@ -13,7 +13,7 @@ import org.activityinfo.model.permission.PermissionQuery;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.DatabaseModule;
 import org.activityinfo.server.database.OnDataSet;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
 public class PermissionTest {
 
     @Inject
-    protected DatabaseProvider provider;
+    protected UserDatabaseProvider provider;
 
     private static final ResourceId DB_ID = CuidAdapter.databaseId(2);
     private static final ResourceId FORM_ID = CuidAdapter.activityFormClass(3);

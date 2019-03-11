@@ -9,12 +9,12 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Cache interface for DatabaseMeta. DatabaseMeta are keyed by database {@link ResourceId}.
+ * Loader interface for DatabaseMeta. DatabaseMeta are keyed by database {@link ResourceId}.
  */
-public interface DatabaseMetaCache {
+public interface DatabaseMetaLoader {
 
     /**
-     * Load requested DatabaseMeta from Cache.
+     * Load requested DatabaseMeta from store.
      *
      * @param toLoad ResourceId of DatabaseMeta to load
      * @return Optional DatabaseMeta
@@ -22,7 +22,7 @@ public interface DatabaseMetaCache {
     @NotNull Optional<DatabaseMeta> load(@NotNull ResourceId toLoad);
 
     /**
-     * Load all requested DatabaseMeta from Cache.
+     * Load all requested DatabaseMeta from store.
      *
      * @param toLoad Set of ResourceId of DatabaseMeta to load
      * @return Map of ResourceId of DatabaseMeta -> DatabaseMeta (if present)

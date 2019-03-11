@@ -25,7 +25,7 @@ import org.activityinfo.legacy.shared.exception.UnexpectedCommandException;
 import org.activityinfo.server.command.handler.pivot.PivotAdapter;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -41,14 +41,14 @@ public class PivotSitesHandler implements CommandHandler<PivotSites> {
     private Provider<MySqlStorageProvider> catalog;
 
     @Inject
-    private DatabaseProvider databaseProvider;
+    private UserDatabaseProvider userDatabaseProvider;
 
     @Override
     public CommandResult execute(final PivotSites cmd, final User user) throws CommandException {
 
         PivotAdapter adapter;
         try {
-            adapter = new PivotAdapter(catalog.get(), databaseProvider, user.getId(), cmd);
+            adapter = new PivotAdapter(catalog.get(), userDatabaseProvider, user.getId(), cmd);
             return adapter.execute();
 
         } catch (InterruptedException e) {

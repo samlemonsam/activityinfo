@@ -23,7 +23,7 @@ import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.FormSupervisor;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.FormCatalog;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.RecordHistoryProvider;
@@ -51,6 +51,6 @@ public interface ApiBackend {
 
     RecordHistoryProvider getRecordHistoryProvider();
 
-    DatabaseProvider getDatabaseProvider();
+    UserDatabaseProvider getDatabaseProvider();
 
 }

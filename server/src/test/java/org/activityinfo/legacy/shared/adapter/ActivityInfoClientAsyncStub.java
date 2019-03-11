@@ -52,7 +52,7 @@ import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.BlobAuthorizer;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.FormStorageProvider;
 
@@ -66,15 +66,15 @@ import static org.activityinfo.json.Json.createObject;
 public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
 
     private Provider<EntityManager> entityManager;
-    private DatabaseProvider databaseProvider;
+    private UserDatabaseProvider userDatabaseProvider;
     private BlobAuthorizer blobAuthorizer;
 
     @Inject
     public ActivityInfoClientAsyncStub(Provider<EntityManager> entityManager,
-                                       DatabaseProvider databaseProvider,
+                                       UserDatabaseProvider userDatabaseProvider,
                                        BlobAuthorizer blobAuthorizer) {
         this.entityManager = entityManager;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
         this.blobAuthorizer = blobAuthorizer;
     }
 
@@ -181,7 +181,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     public Promise<Void> updateRecord(String formId, String recordId, FormRecordUpdateBuilder query) {
         try {
             FormStorageProvider catalog = newCatalog();
-            Updater updater = new Updater(catalog, databaseProvider, blobAuthorizer, new SerialNumberProviderStub(), currentUserId(), TransactionMode.STRICT);
+            Updater updater = new Updater(catalog, userDatabaseProvider, blobAuthorizer, new SerialNumberProviderStub(), currentUserId(), TransactionMode.STRICT);
             updater.execute(ResourceId.valueOf(formId), ResourceId.valueOf(recordId), query.toJsonObject());
 
             return Promise.resolved(null);
@@ -204,7 +204,7 @@ public class ActivityInfoClientAsyncStub implements ActivityInfoClientAsync {
     public Promise<Void> createRecord(String formId, NewFormRecordBuilder query) {
         try {
             FormStorageProvider catalog = newCatalog();
-            Updater updater = new Updater(catalog, databaseProvider, blobAuthorizer, new SerialNumberProviderStub(), currentUserId(), TransactionMode.STRICT);
+            Updater updater = new Updater(catalog, userDatabaseProvider, blobAuthorizer, new SerialNumberProviderStub(), currentUserId(), TransactionMode.STRICT);
             updater.create(ResourceId.valueOf(formId), query.toJsonObject());
 
             return Promise.resolved(null);

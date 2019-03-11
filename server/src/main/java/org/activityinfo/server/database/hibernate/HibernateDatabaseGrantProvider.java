@@ -6,7 +6,7 @@ import org.activityinfo.model.database.DatabaseGrant;
 import org.activityinfo.model.database.DatabaseGrantKey;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.spi.DatabaseGrantCache;
+import org.activityinfo.store.spi.DatabaseGrantLoader;
 import org.activityinfo.store.spi.DatabaseGrantProvider;
 
 import javax.persistence.EntityManager;
@@ -26,11 +26,11 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
     private static final String CACHE_VERSION = "2";
 
     private final Provider<EntityManager> entityManager;
-    private final DatabaseGrantCache cache;
+    private final DatabaseGrantLoader cache;
 
     @Inject
     public HibernateDatabaseGrantProvider(Provider<EntityManager> entityManager,
-                                          DatabaseGrantCache cache) {
+                                          DatabaseGrantLoader cache) {
         this.entityManager = entityManager;
         this.cache = cache;
     }

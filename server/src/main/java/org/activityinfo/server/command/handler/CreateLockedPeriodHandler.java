@@ -30,7 +30,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -42,12 +42,12 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
     private static final Logger LOGGER = Logger.getLogger(CreateLockedPeriodHandler.class.getName());
 
     private EntityManager em;
-    private DatabaseProvider databaseProvider;
+    private UserDatabaseProvider userDatabaseProvider;
 
     @Inject
-    public CreateLockedPeriodHandler(EntityManager em, DatabaseProvider databaseProvider) {
+    public CreateLockedPeriodHandler(EntityManager em, UserDatabaseProvider userDatabaseProvider) {
         this.em = em;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
     }
 
     @Override
@@ -117,7 +117,7 @@ public class CreateLockedPeriodHandler implements CommandHandler<CreateLockedPer
     }
 
     private Optional<UserDatabaseMeta> getDatabaseMeta(int databaseId, int userId) {
-        return databaseProvider.getDatabaseMetadata(
+        return userDatabaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(databaseId),
                 userId);
     }

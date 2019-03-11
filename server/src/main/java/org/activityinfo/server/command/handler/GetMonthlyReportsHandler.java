@@ -31,7 +31,7 @@ import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.type.time.LocalDateInterval;
 import org.activityinfo.model.type.time.Month;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
@@ -49,12 +49,12 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
     private static final Logger LOGGER = Logger.getLogger(GetMonthlyReportsHandler.class.getName());
 
     private final EntityManager em;
-    private final DatabaseProvider databaseProvider;
+    private final UserDatabaseProvider userDatabaseProvider;
 
     @Inject
-    public GetMonthlyReportsHandler(EntityManager em, DatabaseProvider databaseProvider) {
+    public GetMonthlyReportsHandler(EntityManager em, UserDatabaseProvider userDatabaseProvider) {
         this.em = em;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class GetMonthlyReportsHandler implements CommandHandler<GetMonthlyReport
                 .getSingleResult();
 
         int databaseId = site.getActivity().getDatabase().getId();
-        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(databaseId),
                 user.getId());
 

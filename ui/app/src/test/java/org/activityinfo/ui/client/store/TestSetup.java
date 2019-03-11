@@ -37,7 +37,7 @@ import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
  */
 public class TestSetup {
 
-    private final TestingDatabaseProvider databases;
+    private final TestingUserDatabaseProvider databases;
     private final TestingStorageProvider catalog;
     private final AsyncClientStub client;
     private final HttpStore httpStore;
@@ -51,7 +51,7 @@ public class TestSetup {
     }
 
     public TestSetup(IDBFactoryStub database, boolean connected) {
-        databases = new TestingDatabaseProvider();
+        databases = new TestingUserDatabaseProvider();
         catalog = new TestingStorageProvider();
         client = new AsyncClientStub(catalog, databases);
         client.setConnected(connected);

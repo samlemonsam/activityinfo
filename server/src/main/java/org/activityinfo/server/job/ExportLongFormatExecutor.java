@@ -28,7 +28,7 @@ import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.generated.StorageProvider;
 import org.activityinfo.store.query.shared.FormSource;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import java.io.IOException;
 import java.util.List;
@@ -42,7 +42,7 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
     private final AuthenticatedUser authenticatedUser;
     private final DispatcherSync dispatcher;
     private final FormSource formSource;
-    private final DatabaseProvider databaseProvider;
+    private final UserDatabaseProvider userDatabaseProvider;
     private final ExportPivotTableExecutor pivotTableExporter;
 
     private static Predicate<ActivityDTO> activity() {
@@ -70,11 +70,11 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
                                     StorageProvider storageProvider,
                                     DispatcherSync dispatcher,
                                     FormSource formSource,
-                                    DatabaseProvider databaseProvider) {
+                                    UserDatabaseProvider userDatabaseProvider) {
         this.authenticatedUser = authenticatedUser;
         this.dispatcher = dispatcher;
         this.formSource = formSource;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
         this.pivotTableExporter = new ExportPivotTableExecutor(storageProvider, formSource);
     }
 
@@ -82,7 +82,7 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
     public ExportResult execute(ExportLongFormatJob descriptor) throws IOException {
         int databaseId = descriptor.getDatabaseId();
         UserDatabaseDTO database = dispatcher.execute(new GetSchema()).getDatabaseById(databaseId);
-        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(CuidAdapter.databaseId(databaseId), authenticatedUser.getUserId());
+        Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(CuidAdapter.databaseId(databaseId), authenticatedUser.getUserId());
 
         if (database == null || !databaseMeta.isPresent()) {
             ApiError error = new ApiError(ApiErrorType.INVALID_REQUEST_ERROR, ApiErrorCode.DATABASE_NOT_FOUND);

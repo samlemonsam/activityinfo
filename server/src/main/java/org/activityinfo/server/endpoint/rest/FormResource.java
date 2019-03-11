@@ -50,7 +50,7 @@ import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
 import org.activityinfo.store.query.server.InvalidUpdateException;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.FormNotFoundException;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.VersionedFormStorage;
@@ -87,7 +87,7 @@ public class FormResource {
     @GET
     @NoCache
     @Produces(JSON_CONTENT_TYPE)
-    public FormMetadata getMetadataResponse(@InjectParam DatabaseProvider databaseProvider,
+    public FormMetadata getMetadataResponse(@InjectParam UserDatabaseProvider userDatabaseProvider,
                                             @InjectParam BillingAccountOracle billingOracle,
                                             @InjectParam AuthenticatedUser user,
                                             @QueryParam("localVersion") Long localVersion) {
@@ -150,9 +150,9 @@ public class FormResource {
     public FormRecord getRecord(@PathParam("recordId") String recordId) {
 
         FormStorage form = assertVisible(formId);
-        DatabaseProvider databaseProvider = backend.getDatabaseProvider();
+        UserDatabaseProvider userDatabaseProvider = backend.getDatabaseProvider();
         int userId = backend.getAuthenticatedUserId();
-        java.util.Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(form.getFormClass().getDatabaseId(), userId);
+        java.util.Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(form.getFormClass().getDatabaseId(), userId);
         if (!databaseMeta.isPresent()) {
             throw new NotFoundException("DatabaseMeta must exist");
         }

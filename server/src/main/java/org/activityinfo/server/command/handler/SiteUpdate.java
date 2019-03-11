@@ -37,7 +37,7 @@ import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.store.query.UsageTracker;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -57,14 +57,14 @@ public class SiteUpdate {
     private static final String LOCATION_ID = "locationId";
 
     private final EntityManager entityManager;
-    private final DatabaseProvider provider;
+    private final UserDatabaseProvider provider;
     private final DispatcherSync dispatcher;
     
     
     private static final Logger LOGGER = Logger.getLogger(SiteUpdate.class.getName());
 
     @Inject
-    public SiteUpdate(EntityManager entityManager, DatabaseProvider provider, DispatcherSync dispatcher) {
+    public SiteUpdate(EntityManager entityManager, UserDatabaseProvider provider, DispatcherSync dispatcher) {
         this.entityManager = entityManager;
         this.provider = provider;
         this.dispatcher = dispatcher;

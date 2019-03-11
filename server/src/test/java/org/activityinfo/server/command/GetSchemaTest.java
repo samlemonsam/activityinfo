@@ -32,7 +32,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.endpoint.rest.SchemaCsvWriter;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -133,7 +133,7 @@ public class GetSchemaTest extends CommandTestCase2 {
 
     @Test
     public void testDatabaseMetadata() {
-        DatabaseProvider impl = injector.getInstance(DatabaseProvider.class);
+        UserDatabaseProvider impl = injector.getInstance(UserDatabaseProvider.class);
         UserDatabaseMeta metadata = impl.getDatabaseMetadata(CuidAdapter.databaseId(1), 1).get();
 
         System.out.println(Json.stringify(metadata.toJson(), 4));

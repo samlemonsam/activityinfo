@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * <p>Provides UserDatabaseMeta for all requests for user databases.
+ * <p>Provides UserDatabaseMeta for all requests for <b>user-designed</b> databases.
  * <b>Is not tied to a specific store implementation.</b></p>
  *
  * <p>Retrieves DatabaseMeta and DatabaseGrants using their respective providers. Returned DatabaseMeta and
@@ -50,11 +50,11 @@ import java.util.stream.Stream;
  * </ol>
  * </p>
  */
-public class UserDatabaseProvider {
+public class DesignedDatabaseProvider {
 
     public static final String ROOT_ID = "databases";
 
-    private static final Logger LOGGER = Logger.getLogger(UserDatabaseProvider.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DesignedDatabaseProvider.class.getName());
 
     private static final Predicate<DatabaseMeta> deleted() {
         return DatabaseMeta::isDeleted;
@@ -68,8 +68,8 @@ public class UserDatabaseProvider {
     private final DatabaseMetaProvider metaProvider;
 
     @Inject
-    public UserDatabaseProvider(DatabaseGrantProvider grantProvider,
-                                DatabaseMetaProvider metaProvider) {
+    public DesignedDatabaseProvider(DatabaseGrantProvider grantProvider,
+                                    DatabaseMetaProvider metaProvider) {
         this.grantProvider = grantProvider;
         this.metaProvider = metaProvider;
     }

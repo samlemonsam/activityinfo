@@ -20,10 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @RunWith(InjectionSupport.class)
@@ -85,7 +82,7 @@ public class DatabaseCatalogProviderTest {
         List<CatalogEntry> rootEntries = catalog.getRootEntries();
         assert rootEntries.size() == 2;
         assert rootEntries.get(0).getId().equals(GeoDatabaseProvider.GEODB_ID.asString());
-        assert rootEntries.get(1).getId().equals(UserDatabaseProvider.ROOT_ID);
+        assert rootEntries.get(1).getId().equals(DesignedDatabaseProvider.ROOT_ID);
     }
 
     @Test
@@ -119,7 +116,7 @@ public class DatabaseCatalogProviderTest {
     @Test
     public void databases_alex() {
         // should have 2 databases for alex
-        List<CatalogEntry> databases = catalog.getChildren(UserDatabaseProvider.ROOT_ID, ALEX);
+        List<CatalogEntry> databases = catalog.getChildren(DesignedDatabaseProvider.ROOT_ID, ALEX);
         List<String> expectedEntries = Lists.newArrayList(
                 CuidAdapter.databaseId(IRAQ_DB).asString(),
                 CuidAdapter.databaseId(SYRIA_DB).asString());
@@ -156,7 +153,7 @@ public class DatabaseCatalogProviderTest {
     @Test
     public void databases_bavon() {
         // should have 1 database for bavon
-        List<CatalogEntry> databases = catalog.getChildren(UserDatabaseProvider.ROOT_ID, BAVON);
+        List<CatalogEntry> databases = catalog.getChildren(DesignedDatabaseProvider.ROOT_ID, BAVON);
         List<String> expectedEntries = Lists.newArrayList(CuidAdapter.databaseId(LEBANON_DB).asString());
         matchEntries(databases, expectedEntries, CatalogEntryType.FOLDER, false);
 
@@ -185,7 +182,7 @@ public class DatabaseCatalogProviderTest {
     @Test
     public void databases_john() {
         // should have 2 databases for john
-        List<CatalogEntry> databases = catalog.getChildren(UserDatabaseProvider.ROOT_ID, JOHN);
+        List<CatalogEntry> databases = catalog.getChildren(DesignedDatabaseProvider.ROOT_ID, JOHN);
         List<String> expectedEntries = Lists.newArrayList(
                 CuidAdapter.databaseId(SYRIA_DB).asString(),
                 CuidAdapter.databaseId(LEBANON_DB).asString());
@@ -226,7 +223,7 @@ public class DatabaseCatalogProviderTest {
     @Test
     public void databases_jacob() {
         // should have 0 databases for jacob
-        List<CatalogEntry> databases = catalog.getChildren(UserDatabaseProvider.ROOT_ID, JACOB);
+        List<CatalogEntry> databases = catalog.getChildren(DesignedDatabaseProvider.ROOT_ID, JACOB);
         assert databases.size() == 0;
     }
 

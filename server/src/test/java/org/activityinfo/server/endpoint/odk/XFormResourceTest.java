@@ -40,7 +40,7 @@ import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.store.spi.BlobAuthorizerStub;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.junit.After;
 import org.junit.Before;
@@ -90,7 +90,7 @@ public class XFormResourceTest extends CommandTestCase2 {
     private XFormResources formResource;
     private XFormSubmissionResource formSubmissionResource;
     private ResourceLocatorSyncImpl resourceLocator;
-    private DatabaseProvider databaseProvider;
+    private UserDatabaseProvider userDatabaseProvider;
 
     @Before
     public void setUp() throws IOException {
@@ -98,10 +98,10 @@ public class XFormResourceTest extends CommandTestCase2 {
         objectifyService = ObjectifyService.begin();
 
         Provider<AuthenticatedUser> authProvider = Providers.of(new AuthenticatedUser("", USER_ID, "jorden@bdd.com"));
-        databaseProvider = injector.getInstance(DatabaseProvider.class);
+        userDatabaseProvider = injector.getInstance(UserDatabaseProvider.class);
         resourceLocator = new ResourceLocatorSyncImpl(
                 injector.getProvider(FormStorageProvider.class),
-                databaseProvider,
+                userDatabaseProvider,
                 authProvider,
                 new BlobAuthorizerStub());
 
@@ -112,12 +112,12 @@ public class XFormResourceTest extends CommandTestCase2 {
         TestBlobstoreService blobstore = new TestBlobstoreService(injector.getInstance(DeploymentConfiguration.class),
                 injector.getInstance(EntityManager.class),
                 injector.getInstance(FormStorageProvider.class),
-                injector.getInstance(DatabaseProvider.class));
+                injector.getInstance(UserDatabaseProvider.class));
         TestInstanceIdService idService = new TestInstanceIdService();
         SubmissionArchiver backupService = new SubmissionArchiver(
                 new DeploymentConfiguration(new Properties()));
 
-        formResource = new XFormResources(resourceLocator, authProvider, fieldFactory, tokenService, databaseProvider);
+        formResource = new XFormResources(resourceLocator, authProvider, fieldFactory, tokenService, userDatabaseProvider);
         formSubmissionResource = new XFormSubmissionResource(
                 getDispatcherSync(), resourceLocator, tokenService, blobstore, idService, backupService);
     }

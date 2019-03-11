@@ -29,7 +29,7 @@ import java.util.Set;
 /**
  * Provides metadata for a database, dependent on user's assigned permissions.
  */
-public interface DatabaseProvider {
+public interface UserDatabaseProvider {
 
   /**
    * Retrieves the UserDatabaseMeta for the given user and database.

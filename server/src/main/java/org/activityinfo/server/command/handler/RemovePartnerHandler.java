@@ -31,7 +31,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -47,10 +47,10 @@ public class RemovePartnerHandler implements CommandHandler<RemovePartner> {
     private static final Logger LOGGER = Logger.getLogger(RemovePartnerHandler.class.getName());
 
     private EntityManager em;
-    private DatabaseProvider provider;
+    private UserDatabaseProvider provider;
 
     @Inject
-    public RemovePartnerHandler(EntityManager em, DatabaseProvider provider) {
+    public RemovePartnerHandler(EntityManager em, UserDatabaseProvider provider) {
         this.em = em;
         this.provider = provider;
     }

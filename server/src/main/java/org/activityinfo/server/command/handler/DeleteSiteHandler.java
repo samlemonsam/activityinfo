@@ -29,7 +29,7 @@ import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.Site;
 import org.activityinfo.server.database.hibernate.entity.SiteHistory;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.json.JSONObject;
 
 import javax.persistence.EntityManager;
@@ -40,19 +40,19 @@ import java.util.Optional;
 public class DeleteSiteHandler implements CommandHandler<DeleteSite> {
     
     private final EntityManager entityManager;
-    private final DatabaseProvider databaseProvider;
+    private final UserDatabaseProvider userDatabaseProvider;
 
     @Inject
-    public DeleteSiteHandler(EntityManager entityManager, DatabaseProvider databaseProvider) {
+    public DeleteSiteHandler(EntityManager entityManager, UserDatabaseProvider userDatabaseProvider) {
         this.entityManager = entityManager;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
     }
 
     @Override
     public VoidResult execute(DeleteSite cmd, User user) throws CommandException {
 
         Site site = entityManager.find(Site.class, cmd.getSiteId());
-        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(site.getActivity().getDatabase().getId()),
                 user.getId());
 

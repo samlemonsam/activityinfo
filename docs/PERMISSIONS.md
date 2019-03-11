@@ -40,21 +40,33 @@ The Database and User Permission Providers retrieve DatabaseMeta, DatabaseGrants
 
 There are three primary Providers:
 
-**DatabaseMetaProvider/DatabaseMetaCache**
+**DatabaseMetaProvider/DatabaseMetaLoader**
 
-The [DatabaseMetaProvider](../store/spi/src/main/java/org/activityinfo/store/spi/DatabaseMetaProvider.java) retrieves the DatabaseMeta for a given database; or for a set of databases. The [DatabaseMetaCache](../store/spi/src/main/java/org/activityinfo/store/spi/DatabaseMetaCache.java) defines the store loading and caching mechanisms.
+The [DatabaseMetaProvider](../store/spi/src/main/java/org/activityinfo/store/spi/DatabaseMetaProvider.java) retrieves the DatabaseMeta for a given database; or for a set of databases. It organises requests for DatabaseMeta, retrieves extra information from the store required to fetch DatabaseMeta, delegates to the loader, and provides an appropriate response based on the state of the loaded DatabaseMeta. 
 
-**DatabaseGrantProvider/DatabaseGrantCache**
+The [DatabaseMetaLoader](../store/spi/src/main/java/org/activityinfo/store/spi/DatabaseMetaLoader.java) defines the store loading and caching mechanisms.
 
-The [DatabaseGrantProvider](../store/spi/src/main/java/org/activityinfo/store/spi/DatabaseGrantProvider.java) retrieves the DatabaseGrant(s) for a specific user on a given database; for all assigned users on a given database; or for a specific user on all assigned databases. The [DatabaseGrantCache](../store/spi/src/main/java/org/activityinfo/store/spi/DatabaseGrantProvider.java) defines the store loading and caching mechanisms.
+Implementations of these interfaces are tied to a specific store implementation (e.g. [HibernateDatabaseMetaProvider](../server/src/main/java/org/activityinfo/server/database/hibernate/HibernateDatabaseMetaProvider.java) and  [HibernateDatabaseMetaLoader](../server/src/main/java/org/activityinfo/server/database/hibernate/HibernateDatabaseMetaLoader.java) are implementations for the MySQL store accessed via the Hibernate API). 
 
-**DatabaseProvider**
+**DatabaseGrantProvider/DatabaseGrantLoader**
 
-The [DatabaseProvider](../store/spi/src/main/java/org/activityinfo/store/spi/DatabaseProvider.java) retrieves the full UserDatabaseMeta for a specific user on a given database; for a specific user on a set of databases; or for all databases visible to a specific user. 
+The [DatabaseGrantProvider](../store/spi/src/main/java/org/activityinfo/store/spi/DatabaseGrantProvider.java) retrieves the DatabaseGrant(s) for a specific user on a given database; for all assigned users on a given database; or for a specific user on all assigned databases. It organises requests for DatabaseGrants,retrieves extra information from the store required to fetch DatabaseGrants, delegates to the loader, and provides an appropriate response based on the state of the loaded DatabaseGrants. 
 
-The DatabaseProvider delegates to both the DatabaseMetaProvider and DatabaseGrantProvider in order to retrieve the appropriate DatabaseMeta and DatabaseGrant(s) required to construct the UserDatabaseMeta. UserDatabaseMeta are not cached themselves, but constructed on-demand from the (potentially) cached DatabaseMeta and DatabaseGrant.
+The [DatabaseGrantLoader](../store/spi/src/main/java/org/activityinfo/store/spi/DatabaseGrantLoader.java) defines the store loading and caching mechanisms. 
 
-The DatabaseProvider is exposed as an endpoint in [DatabaseResource](../server/src/main/java/org/activityinfo/server/endpoint/rest/DatabaseResource.java). The client can call to the DatabaseProvider by implementing this interface and sending a REST request to this endpoint.
+Implementations of these interfaces are tied to a specific store implementation (e.g. [HibernateDatabaseGrantProvider](../server/src/main/java/org/activityinfo/server/database/hibernate/HibernateDatabaseGrantProvider.java) and  [HibernateDatabaseGrantLoader](../server/src/main/java/org/activityinfo/server/database/hibernate/HibernateDatabaseGrantLoader.java) are implementations for the MySQL store accessed via the Hibernate API). 
+
+**UserDatabaseProvider**
+
+The [UserDatabaseProvider](../store/spi/src/main/java/org/activityinfo/store/spi/UserDatabaseProvider.java) retrieves the full UserDatabaseMeta for a specific user on a given database; for a specific user on a set of databases; or for all databases visible to a specific user. 
+
+The UserDatabaseProvider is exposed as an endpoint in [DatabaseResource](../server/src/main/java/org/activityinfo/server/endpoint/rest/DatabaseResource.java). The client can call to the UserDatabaseProvider by implementing this interface and sending a REST request to this endpoint.
+
+The current implementation of the UserDatabaseProvider, [UserDatabaseProviderImpl](../server/src/main/java/org/activityinfo/server/endpoint/rest/UserDatabaseProviderImpl.java), acts as a control flow node for all UserDatabaseMeta requests:
+* When the GeoDatabase or a GeoDatabase resource is requested, the implementation delegates to the [GeoDatabaseProvider](../server/src/main/java/org/activityinfo/server/endpoint/rest/GeoDatabaseProvider.java) to retrieve the UserDatabaseMeta for GeoDatabases. 
+* Otherwise, the implementation delegates to the [DesignedDatabaseProvider](../server/src/main/java/org/activityinfo/server/endpoint/rest/DesignedDatabaseProvider.java) to retrieve UserDatabaseMeta for user-designed databases. To do so, it delegates to a DatabaseMetaProvider and DatabaseGrantProvider. It then uses the the retrieved DatabaseMeta and DatabaseGrant(s) to construct the UserDatabaseMeta.
+
+UserDatabaseMeta are not cached themselves, but constructed on-demand from the (potentially) cached DatabaseMeta and DatabaseGrant.
 
 ## Shared Permission Evaluation Class
 

@@ -53,7 +53,7 @@ import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.*;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 
 import javax.inject.Provider;
@@ -73,7 +73,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
     private static final Logger LOGGER = Logger.getLogger(CloneDatabaseHandler.class.getName());
 
     private final EntityManager em;
-    private final DatabaseProvider databaseProvider;
+    private final UserDatabaseProvider userDatabaseProvider;
     private final KeyGenerator generator = new KeyGenerator();
     private final Provider<FormStorageProvider> formCatalog;
 
@@ -90,10 +90,10 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
     @Inject
     public CloneDatabaseHandler(Provider<EntityManager> entityManager,
-                                DatabaseProvider databaseProvider,
+                                UserDatabaseProvider userDatabaseProvider,
                                 Provider<FormStorageProvider> formCatalog) {
         this.em = entityManager.get();
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
         this.formCatalog = formCatalog;
     }
 
@@ -102,7 +102,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
 
         this.targetDb = createDatabase(command, user);
         this.sourceDb = em.find(Database.class, command.getSourceDatabaseId());
-        Optional<UserDatabaseMeta> sourceMetadata = databaseProvider.getDatabaseMetadata(command.getSourceDatabaseId(), user.getId());
+        Optional<UserDatabaseMeta> sourceMetadata = userDatabaseProvider.getDatabaseMetadata(command.getSourceDatabaseId(), user.getId());
 
         assert sourceDb != null && sourceMetadata.isPresent();
         this.sourceDbMeta = sourceMetadata.get();
@@ -141,7 +141,7 @@ public class CloneDatabaseHandler implements CommandHandler<CloneDatabase> {
         PartnerDTO partner = new PartnerDTO();
         partner.setName("Default");
 
-        CommandResult newPartnerId = new UpdatePartnerHandler(em, databaseProvider).execute(new UpdatePartner(targetDb.getId(), partner), user);
+        CommandResult newPartnerId = new UpdatePartnerHandler(em, userDatabaseProvider).execute(new UpdatePartner(targetDb.getId(), partner), user);
         return ((CreateResult) newPartnerId).getNewId();
     }
 

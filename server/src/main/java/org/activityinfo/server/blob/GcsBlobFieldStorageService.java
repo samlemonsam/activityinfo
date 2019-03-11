@@ -26,7 +26,6 @@ import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.images.*;
 import com.google.appengine.tools.cloudstorage.*;
 import com.google.appengine.tools.cloudstorage.GcsFileOptions.Builder;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
@@ -40,7 +39,6 @@ import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.DeploymentEnvironment;
-import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.util.blob.DevAppIdentityService;
 import org.activityinfo.store.spi.*;
 import org.apache.commons.io.IOUtils;
@@ -70,7 +68,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
 
     private AppIdentityService appIdentityService;
     private final Provider<EntityManager> em;
-    private final DatabaseProvider databaseProvider;
+    private final UserDatabaseProvider userDatabaseProvider;
     private final Provider<FormStorageProvider> formStorage;
 
     private String bucketName;
@@ -79,10 +77,10 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
     public GcsBlobFieldStorageService(DeploymentConfiguration config,
                                       Provider<EntityManager> em,
                                       Provider<FormStorageProvider> formStorage,
-                                      DatabaseProvider databaseProvider) {
+                                      UserDatabaseProvider userDatabaseProvider) {
         this.bucketName = config.getBlobServiceBucketName();
         this.em = em;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
         this.formStorage = formStorage;
 
         if (Strings.isNullOrEmpty(bucketName)) {
@@ -276,7 +274,7 @@ public class GcsBlobFieldStorageService implements BlobFieldStorageService, Blob
 
     private boolean hasAccessToResource(ResourceId userId, ResourceId formId) {
         int user = CuidAdapter.getLegacyIdFromCuid(userId);
-        java.util.Optional<UserDatabaseMeta> dbMeta = databaseProvider.getDatabaseMetadataByResource(formId, user);
+        java.util.Optional<UserDatabaseMeta> dbMeta = userDatabaseProvider.getDatabaseMetadataByResource(formId, user);
         return dbMeta
                 .map(db -> PermissionOracle.canView(formId, db))
                 .orElse(false);

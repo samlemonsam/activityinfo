@@ -12,7 +12,7 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.server.endpoint.rest.DatabaseResource;
 import org.activityinfo.server.mail.MailSender;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.spi.FormStorageProvider;
 
@@ -39,7 +39,7 @@ public class ApprovalResource {
     private Provider<FormStorageProvider> catalog;
     private MailSender mailSender;
     private AuthTokenProvider authTokenProvider;
-    private DatabaseProvider databaseProvider;
+    private UserDatabaseProvider userDatabaseProvider;
     private BillingAccountOracle billingOracle;
 
     @Inject
@@ -48,14 +48,14 @@ public class ApprovalResource {
                             Provider<FormStorageProvider> catalog,
                             MailSender mailSender,
                             AuthTokenProvider authTokenProvider,
-                            DatabaseProvider databaseProvider,
+                            UserDatabaseProvider userDatabaseProvider,
                             BillingAccountOracle billingOracle) {
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
         this.catalog = catalog;
         this.mailSender = mailSender;
         this.authTokenProvider = authTokenProvider;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
         this.billingOracle = billingOracle;
     }
 
@@ -82,7 +82,7 @@ public class ApprovalResource {
 
         DatabaseResource resource = new DatabaseResource(catalog,
                 dispatcher,
-                databaseProvider,
+                userDatabaseProvider,
                 entityManager,
                 mailSender,
                 billingOracle,
@@ -111,7 +111,7 @@ public class ApprovalResource {
 
         DatabaseResource resource = new DatabaseResource(catalog,
                 dispatcher,
-                databaseProvider,
+                userDatabaseProvider,
                 entityManager,
                 mailSender,
                 billingOracle,

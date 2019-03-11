@@ -31,7 +31,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -49,10 +49,10 @@ public class UpdatePartnerHandler implements CommandHandler<UpdatePartner> {
     private static final Logger LOGGER = Logger.getLogger(UpdatePartnerHandler.class.getName());
 
     private final EntityManager em;
-    private final DatabaseProvider provider;
+    private final UserDatabaseProvider provider;
 
     @Inject
-    public UpdatePartnerHandler(EntityManager em, DatabaseProvider provider) {
+    public UpdatePartnerHandler(EntityManager em, UserDatabaseProvider provider) {
         this.em = em;
         this.provider = provider;
     }

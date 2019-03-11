@@ -11,7 +11,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.DatabaseModule;
 import org.activityinfo.server.database.OnDataSet;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +29,7 @@ import static org.junit.Assert.*;
         DatabaseModule.class
 })
 @OnDataSet("/dbunit/schema4.db.xml")
-public class DatabaseProviderTest {
+public class DesignedDatabaseProviderTest {
 
     private final LocalServiceTestHelper helper = new LocalServiceTestHelper(new LocalDatastoreServiceTestConfig());
 
@@ -48,7 +48,7 @@ public class DatabaseProviderTest {
     private static final int JACOB = 4;
 
     @Inject
-    private DatabaseProvider databaseProvider;
+    private UserDatabaseProvider userDatabaseProvider;
 
     @Before
     public void setUp() {
@@ -63,25 +63,25 @@ public class DatabaseProviderTest {
     @Test
     public void visibleDatabasesTest() {
         // Alex owns two databases
-        List<UserDatabaseMeta> visibleDatabases = databaseProvider.getVisibleDatabases(ALEX);
+        List<UserDatabaseMeta> visibleDatabases = userDatabaseProvider.getVisibleDatabases(ALEX);
         assertThat(visibleDatabases.size(), equalTo(2));
 
         // Bavon owns 1 database
-        visibleDatabases = databaseProvider.getVisibleDatabases(BAVON);
+        visibleDatabases = userDatabaseProvider.getVisibleDatabases(BAVON);
         assertThat(visibleDatabases.size(), equalTo(1));
 
         // John is assigned to 2 databases
-        visibleDatabases = databaseProvider.getVisibleDatabases(JOHN);
+        visibleDatabases = userDatabaseProvider.getVisibleDatabases(JOHN);
         assertThat(visibleDatabases.size(), equalTo(2));
 
         // Jacob has no assigned or owned databases
-        visibleDatabases = databaseProvider.getVisibleDatabases(JACOB);
+        visibleDatabases = userDatabaseProvider.getVisibleDatabases(JACOB);
         assertThat(visibleDatabases.size(), equalTo(0));
     }
 
     @Test
     public void geodb() {
-        Optional<UserDatabaseMeta> geodb = databaseProvider.getDatabaseMetadata(GeoDatabaseProvider.GEODB_ID, ALEX);
+        Optional<UserDatabaseMeta> geodb = userDatabaseProvider.getDatabaseMetadata(GeoDatabaseProvider.GEODB_ID, ALEX);
         assertTrue(geodb.isPresent());
         assertThat(geodb.get().getDatabaseId(), equalTo(GeoDatabaseProvider.GEODB_ID));
         assertTrue(geodb.get().isPublished());
@@ -90,31 +90,31 @@ public class DatabaseProviderTest {
     @Test
     public void getDatabaseByResource() {
         // Admin level form
-        Optional<UserDatabaseMeta> geodb = databaseProvider.getDatabaseMetadataByResource(PROVINCE_CODE, ALEX);
+        Optional<UserDatabaseMeta> geodb = userDatabaseProvider.getDatabaseMetadataByResource(PROVINCE_CODE, ALEX);
         assertTrue(geodb.isPresent());
         assertThat(geodb.get().getDatabaseId(), equalTo(GeoDatabaseProvider.GEODB_ID));
 
         // Form
-        Optional<UserDatabaseMeta> db = databaseProvider.getDatabaseMetadataByResource(CuidAdapter.activityFormClass(1), ALEX);
+        Optional<UserDatabaseMeta> db = userDatabaseProvider.getDatabaseMetadataByResource(CuidAdapter.activityFormClass(1), ALEX);
         assertTrue(db.isPresent());
         assertThat(db.get().getDatabaseId(), equalTo(CuidAdapter.databaseId(1)));
 
         // Folder
-        db = databaseProvider.getDatabaseMetadataByResource(CuidAdapter.folderId(1), ALEX);
+        db = userDatabaseProvider.getDatabaseMetadataByResource(CuidAdapter.folderId(1), ALEX);
         assertTrue(db.isPresent());
         assertThat(db.get().getDatabaseId(), equalTo(CuidAdapter.databaseId(1)));
     }
 
     @Test
     public void missingDatabase() {
-        Optional<UserDatabaseMeta> db = databaseProvider.getDatabaseMetadata(NON_EXISTENT_DB, ALEX);
+        Optional<UserDatabaseMeta> db = userDatabaseProvider.getDatabaseMetadata(NON_EXISTENT_DB, ALEX);
         // Missing database should not be present
         assertFalse(db.isPresent());
     }
 
     @Test
     public void deletedDatabase() {
-        Optional<UserDatabaseMeta> db = databaseProvider.getDatabaseMetadata(DELETED_DB, ALEX);
+        Optional<UserDatabaseMeta> db = userDatabaseProvider.getDatabaseMetadata(DELETED_DB, ALEX);
         // Deleted database should be present but marked as deleted with no data
         assertTrue(db.isPresent());
         assertTrue(db.get().isDeleted());
@@ -127,8 +127,8 @@ public class DatabaseProviderTest {
 
     @Test
     public void database_alex() {
-        Optional<UserDatabaseMeta> iraqDb = databaseProvider.getDatabaseMetadata(IRAQ_DB, ALEX);
-        Optional<UserDatabaseMeta> syriaDb = databaseProvider.getDatabaseMetadata(SYRIA_DB, ALEX);
+        Optional<UserDatabaseMeta> iraqDb = userDatabaseProvider.getDatabaseMetadata(IRAQ_DB, ALEX);
+        Optional<UserDatabaseMeta> syriaDb = userDatabaseProvider.getDatabaseMetadata(SYRIA_DB, ALEX);
 
         // IRAQ: Should have a returned UserDatabaseMeta which is entirely visible. Owner has no grants.
         // Database has 7 resources in total
@@ -151,9 +151,9 @@ public class DatabaseProviderTest {
 
     @Test
     public void database_bavon() {
-        Optional<UserDatabaseMeta> iraqDb = databaseProvider.getDatabaseMetadata(IRAQ_DB, BAVON);
-        Optional<UserDatabaseMeta> syriaDb = databaseProvider.getDatabaseMetadata(SYRIA_DB, BAVON);
-        Optional<UserDatabaseMeta> lebanonDb = databaseProvider.getDatabaseMetadata(LEBANON_DB, BAVON);
+        Optional<UserDatabaseMeta> iraqDb = userDatabaseProvider.getDatabaseMetadata(IRAQ_DB, BAVON);
+        Optional<UserDatabaseMeta> syriaDb = userDatabaseProvider.getDatabaseMetadata(SYRIA_DB, BAVON);
+        Optional<UserDatabaseMeta> lebanonDb = userDatabaseProvider.getDatabaseMetadata(LEBANON_DB, BAVON);
 
         // IRAQ: Should have a returned UserDatabaseMeta which is invisible as user has no grants and no public resources
         assertTrue(iraqDb.isPresent());
@@ -179,9 +179,9 @@ public class DatabaseProviderTest {
 
     @Test
     public void database_john() {
-        Optional<UserDatabaseMeta> iraqDb = databaseProvider.getDatabaseMetadata(IRAQ_DB, JOHN);
-        Optional<UserDatabaseMeta> syriaDb = databaseProvider.getDatabaseMetadata(SYRIA_DB, JOHN);
-        Optional<UserDatabaseMeta> lebanonDb = databaseProvider.getDatabaseMetadata(LEBANON_DB, JOHN);
+        Optional<UserDatabaseMeta> iraqDb = userDatabaseProvider.getDatabaseMetadata(IRAQ_DB, JOHN);
+        Optional<UserDatabaseMeta> syriaDb = userDatabaseProvider.getDatabaseMetadata(SYRIA_DB, JOHN);
+        Optional<UserDatabaseMeta> lebanonDb = userDatabaseProvider.getDatabaseMetadata(LEBANON_DB, JOHN);
 
         // IRAQ: Should have a returned UserDatabaseMeta which is invisible as user has no grants and no public resources
         assertTrue(iraqDb.isPresent());
@@ -208,9 +208,9 @@ public class DatabaseProviderTest {
 
     @Test
     public void database_jacob() {
-        Optional<UserDatabaseMeta> iraqDb = databaseProvider.getDatabaseMetadata(IRAQ_DB, JACOB);
-        Optional<UserDatabaseMeta> syriaDb = databaseProvider.getDatabaseMetadata(SYRIA_DB, JACOB);
-        Optional<UserDatabaseMeta> lebanonDb = databaseProvider.getDatabaseMetadata(LEBANON_DB, JACOB);
+        Optional<UserDatabaseMeta> iraqDb = userDatabaseProvider.getDatabaseMetadata(IRAQ_DB, JACOB);
+        Optional<UserDatabaseMeta> syriaDb = userDatabaseProvider.getDatabaseMetadata(SYRIA_DB, JACOB);
+        Optional<UserDatabaseMeta> lebanonDb = userDatabaseProvider.getDatabaseMetadata(LEBANON_DB, JACOB);
 
         // IRAQ: Should have a returned UserDatabaseMeta which is invisible as user has no grants and no public resources
         assertTrue(iraqDb.isPresent());

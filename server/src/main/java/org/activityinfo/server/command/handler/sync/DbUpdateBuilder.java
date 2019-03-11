@@ -30,7 +30,7 @@ import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.json.JSONException;
 
 import javax.persistence.EntityManager;
@@ -47,7 +47,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
     private static final long MINIMUM_DB_VERSION = 1L;
 
     private final EntityManager entityManager;
-    private final DatabaseProvider provider;
+    private final UserDatabaseProvider provider;
 
     private JpaBatchBuilder batch;
     private Database database;
@@ -55,9 +55,9 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
     @Inject
     public DbUpdateBuilder(EntityManager entityManager,
-                           DatabaseProvider databaseProvider) {
+                           UserDatabaseProvider userDatabaseProvider) {
         this.entityManager = entityManager;
-        this.provider = databaseProvider;
+        this.provider = userDatabaseProvider;
     }
 
     @SuppressWarnings("unchecked") @Override

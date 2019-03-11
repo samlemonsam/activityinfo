@@ -21,7 +21,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
-import org.activityinfo.store.spi.DatabaseMetaCache;
+import org.activityinfo.store.spi.DatabaseMetaLoader;
 import org.activityinfo.store.spi.FormStorageProvider;
 
 import javax.annotation.Nullable;
@@ -34,22 +34,22 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * <p>Caching mechanism for DatabaseMeta stored in MySQL. The cache has three components:
+ * <p>Loading and caching mechanism for DatabaseMeta stored in MySQL. The loader has three components:
  * <ol>
  *     <li>Request-level in-memory cache for DatabaseMeta, using Guava LoadingCache as backing cache.</li>
  *     <li>Distributed in-memory cache, using Appengine Memcache.</li>
- *     <li>Database Loader, using Hibernate EntityManager.</li>
+ *     <li>MySQL Database Loader, using Hibernate EntityManager.</li>
  * </ol>
- *     The cache will attempt to retrieve DatabaseMeta from the request cache first, then Memcache, and if that
+ *     The laoder will attempt to retrieve DatabaseMeta from the request cache first, then Memcache, and if that
  *     fails then loads and builds the DatabaseMeta from the MySQL Database. DatabaseMeta, when constructed, will be
  *     stored in Memcache and request cache.
  * </p>
  *
  * <p>DatabaseMeta are keyed in the request cache by the ResourceId of the Database.</p>
  */
-public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
+public class HibernateDatabaseMetaLoader implements DatabaseMetaLoader {
 
-    private static final Logger LOGGER = Logger.getLogger(HibernateDatabaseMetaCache.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(HibernateDatabaseMetaLoader.class.getName());
 
     private static final String CACHE_PREFIX = "dbMeta";
     private static final String CACHE_VERSION = "6";
@@ -65,10 +65,10 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
     private final LoadingCache<ResourceId,Optional<DatabaseMeta>> cache;
 
     @Inject
-    public HibernateDatabaseMetaCache(Provider<EntityManager> entityManager,
-                                      FormStorageProvider formStorageProvider,
-                                      MemcacheService memcacheService,
-                                      BillingAccountOracle billingAccountOracle) {
+    public HibernateDatabaseMetaLoader(Provider<EntityManager> entityManager,
+                                       FormStorageProvider formStorageProvider,
+                                       MemcacheService memcacheService,
+                                       BillingAccountOracle billingAccountOracle) {
         this.entityManager = entityManager;
         this.formStorageProvider = formStorageProvider;
         this.memcacheService = memcacheService;
@@ -317,7 +317,7 @@ public class HibernateDatabaseMetaCache implements DatabaseMetaCache {
                 .filter(a -> !a.isDeleted())
                 .filter(Activity::isClassicView)
                 .filter(a -> a.getReportingFrequency() == ActivityFormDTO.REPORT_MONTHLY)
-                .map(HibernateDatabaseMetaCache::buildMonthlyReportResource)
+                .map(HibernateDatabaseMetaLoader::buildMonthlyReportResource)
                 .collect(Collectors.toList());
     }
 

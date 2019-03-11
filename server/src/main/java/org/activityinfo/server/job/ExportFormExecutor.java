@@ -38,11 +38,10 @@ import org.activityinfo.model.job.ExportFormJob;
 import org.activityinfo.model.job.ExportResult;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.query.ColumnSet;
-import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.generated.GeneratedResource;
 import org.activityinfo.server.generated.StorageProvider;
 import org.activityinfo.store.query.shared.FormSource;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -55,17 +54,17 @@ public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResu
 
     private final FormSource formSource;
     private final StorageProvider storageProvider;
-    private final DatabaseProvider databaseProvider;
+    private final UserDatabaseProvider userDatabaseProvider;
     private final AuthenticatedUser authUser;
 
     @Inject
     public ExportFormExecutor(FormSource formSource,
                               StorageProvider storageProvider,
-                              DatabaseProvider databaseProvider,
+                              UserDatabaseProvider userDatabaseProvider,
                               AuthenticatedUser authUser) {
         this.formSource = formSource;
         this.storageProvider = storageProvider;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
         this.authUser = authUser;
     }
 
@@ -96,7 +95,7 @@ public class ExportFormExecutor implements JobExecutor<ExportFormJob, ExportResu
     }
 
     private void authorizeExport(ExportFormJob descriptor) {
-        Optional<UserDatabaseMeta> db = databaseProvider.getDatabaseMetadataByResource(descriptor.getFormId(), authUser.getUserId());
+        Optional<UserDatabaseMeta> db = userDatabaseProvider.getDatabaseMetadataByResource(descriptor.getFormId(), authUser.getUserId());
         if (!db.isPresent()) {
             ApiError error = new ApiError(ApiErrorType.INVALID_REQUEST_ERROR, ApiErrorCode.DATABASE_NOT_FOUND);
             throw new ApiException(error.toJson().toJson());

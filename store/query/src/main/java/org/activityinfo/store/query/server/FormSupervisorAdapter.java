@@ -25,7 +25,7 @@ import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.query.shared.FormSupervisor;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.model.permission.FormPermissions;
 
@@ -38,14 +38,14 @@ public class FormSupervisorAdapter implements FormSupervisor {
     private static final Logger LOGGER = Logger.getLogger(FormSupervisor.class.getName());
 
     private final FormStorageProvider catalog;
-    private final DatabaseProvider databaseProvider;
+    private final UserDatabaseProvider userDatabaseProvider;
     private final int userId;
 
     private final Map<ResourceId,FormPermissions> formPermissionsCache = Maps.newHashMap();
 
-    public FormSupervisorAdapter(FormStorageProvider catalog, DatabaseProvider databaseProvider, int userId) {
+    public FormSupervisorAdapter(FormStorageProvider catalog, UserDatabaseProvider userDatabaseProvider, int userId) {
         this.catalog = catalog;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
         this.userId = userId;
     }
 
@@ -70,7 +70,7 @@ public class FormSupervisorAdapter implements FormSupervisor {
                 .collect(Collectors.toMap(
                         FormClass::getId,
                         FormClass::getDatabaseId));
-        Map<ResourceId,UserDatabaseMeta> dbs = databaseProvider.getDatabaseMetadata(Sets.newHashSet(formDbMap.values()), userId);
+        Map<ResourceId,UserDatabaseMeta> dbs = userDatabaseProvider.getDatabaseMetadata(Sets.newHashSet(formDbMap.values()), userId);
         Map<ResourceId,FormPermissions> fetchedPermissions = formDbMap.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,

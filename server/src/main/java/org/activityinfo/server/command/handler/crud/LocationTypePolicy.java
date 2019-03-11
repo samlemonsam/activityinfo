@@ -32,7 +32,7 @@ import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.LocationType;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -48,19 +48,19 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
     private static final Logger LOGGER = Logger.getLogger(LocationTypePolicy.class.getName());
 
     private final EntityManager em;
-    private final DatabaseProvider databaseProvider;
+    private final UserDatabaseProvider userDatabaseProvider;
 
     @Inject
-    public LocationTypePolicy(EntityManager em, DatabaseProvider databaseProvider) {
+    public LocationTypePolicy(EntityManager em, UserDatabaseProvider userDatabaseProvider) {
         this.em = em;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
     }
 
     @Override
     public Integer create(User user, PropertyMap properties) {
         int databaseId = properties.get(DATABASE_ID_PROPERTY);
         Database database = em.find(Database.class, databaseId);
-        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(databaseId),
                 user.getId());
 
@@ -85,7 +85,7 @@ public class LocationTypePolicy implements EntityPolicy<Activity> {
     public void update(User user, Object entityId, PropertyMap changes) {
         LocationType locationType = em.find(LocationType.class, entityId);
         int databaseId = locationType.getDatabase().getId();
-        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(databaseId),
                 user.getId());
 

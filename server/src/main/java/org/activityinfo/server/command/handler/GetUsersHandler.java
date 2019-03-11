@@ -39,7 +39,7 @@ import org.activityinfo.server.database.hibernate.entity.Folder;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
 import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -58,14 +58,14 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
     private static final Logger LOGGER = Logger.getLogger(GetUsersHandler.class.getName());
 
     private final EntityManager em;
-    private final DatabaseProvider provider;
+    private final UserDatabaseProvider provider;
 
     @Inject
     public GetUsersHandler(EntityManager em,
-                           DatabaseProvider databaseProvider,
+                           UserDatabaseProvider userDatabaseProvider,
                            BillingAccountOracle billingAccounts) {
         this.em = em;
-        this.provider = databaseProvider;
+        this.provider = userDatabaseProvider;
     }
 
     @Override
