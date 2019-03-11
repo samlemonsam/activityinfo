@@ -14,7 +14,10 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -24,20 +27,20 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
 
     private final Provider<EntityManager> entityManager;
     private final FormStorageProvider formStorageProvider;
-    private final DatabaseMetaLoader cache;
+    private final DatabaseMetaLoader loader;
 
     @Inject
     public HibernateDatabaseMetaProvider(Provider<EntityManager> entityManager,
                                          FormStorageProvider formStorageProvider,
-                                         DatabaseMetaLoader cache) {
+                                         DatabaseMetaLoader loader) {
         this.entityManager = entityManager;
         this.formStorageProvider = formStorageProvider;
-        this.cache = cache;
+        this.loader = loader;
     }
 
     @Override
     public Optional<DatabaseMeta> getDatabaseMeta(@NotNull ResourceId databaseId) {
-        return cache.load(databaseId);
+        return loader.load(databaseId);
     }
 
     @Override
@@ -45,7 +48,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         if (databases.isEmpty()) {
             return Collections.emptyMap();
         }
-        return cache.loadAll(databases);
+        return loader.loadAll(databases);
     }
 
     @Override
