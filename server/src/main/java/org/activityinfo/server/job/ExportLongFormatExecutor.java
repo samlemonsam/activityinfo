@@ -26,7 +26,6 @@ import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.server.command.DispatcherSync;
-import org.activityinfo.server.generated.StorageProvider;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.store.spi.UserDatabaseProvider;
 
@@ -67,15 +66,15 @@ public class ExportLongFormatExecutor implements JobExecutor<ExportLongFormatJob
 
     @Inject
     public ExportLongFormatExecutor(AuthenticatedUser authenticatedUser,
-                                    StorageProvider storageProvider,
                                     DispatcherSync dispatcher,
                                     FormSource formSource,
-                                    UserDatabaseProvider userDatabaseProvider) {
+                                    UserDatabaseProvider userDatabaseProvider,
+                                    ExportPivotTableExecutor pivotTableExecutor) {
         this.authenticatedUser = authenticatedUser;
         this.dispatcher = dispatcher;
         this.formSource = formSource;
         this.userDatabaseProvider = userDatabaseProvider;
-        this.pivotTableExporter = new ExportPivotTableExecutor(storageProvider, formSource);
+        this.pivotTableExporter = pivotTableExecutor;
     }
 
     @Override
