@@ -39,7 +39,8 @@ public class MigrateSchema extends Job0<Void> {
                     FormEntity rootEntity = Hrd.ofy().load().key(FormEntity.key(formId)).now();
                     FormSchemaEntity schemaEntity = Hrd.ofy().load().key(FormSchemaEntity.key(formId)).now();
 
-                    if (schemaEntity == null) {
+
+                    if (schemaEntity == null || rootEntity == null) {
                         Activity activity;
                         try {
                             ActivityLoader loader = new ActivityLoader(new MySqlQueryExecutor());
@@ -48,10 +49,19 @@ public class MigrateSchema extends Job0<Void> {
                             throw new RuntimeException(e);
                         }
 
-                        schemaEntity = new FormSchemaEntity(activity.getSerializedFormClass());
-                        schemaEntity.setSchemaVersion(rootEntity.getSchemaVersion());
+                        if(schemaEntity == null) {
+                            schemaEntity = new FormSchemaEntity(activity.getSerializedFormClass());
+                            schemaEntity.setSchemaVersion(rootEntity.getSchemaVersion());
+                            Hrd.ofy().save().entity(schemaEntity).now();
+                        }
+                        if(rootEntity == null) {
+                            rootEntity = new FormEntity();
+                            rootEntity.setSchemaVersion(schemaEntity.getSchemaVersion());
+                            rootEntity.setId(activity.getSiteFormClassId());
+                            rootEntity.setVersion(activity.getVersion());
+                            Hrd.ofy().save().entity(rootEntity).now();
+                        }
 
-                        Hrd.ofy().save().entity(schemaEntity).now();
                     }
 
                 }
