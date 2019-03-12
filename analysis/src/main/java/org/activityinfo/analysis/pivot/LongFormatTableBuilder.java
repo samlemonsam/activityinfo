@@ -1,11 +1,16 @@
 package org.activityinfo.analysis.pivot;
 
-import com.google.common.collect.*;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import org.activityinfo.model.analysis.pivot.*;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormTree;
+import org.activityinfo.model.formula.CompoundExpr;
+import org.activityinfo.model.formula.SymbolNode;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.query.ColumnModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.NarrativeType;
@@ -19,7 +24,9 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.util.Pair;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -70,6 +77,8 @@ public class LongFormatTableBuilder {
                 .measures(extractAllMeasures(formScope))
                 .addDimensions(extractFormNameDimension(formScope))
                 .addDimensions(extractFormIdDimension(formScope))
+                .addDimensions(extractParentFormNameDimension(formScope))
+                .addDimensions(extractParentFormIdDimension(formScope))
                 .addDimensions(extractIdDimension(formScope))
                 .addAllDimensions(extractAllDimensions(formScope))
                 .build();
@@ -104,8 +113,13 @@ public class LongFormatTableBuilder {
     private static List<DimensionMapping> extractIdMappings(List<FormTree> formScope) {
         return formScope.stream()
                 .map(FormTree::getRootFormClass)
-                .map(form -> new DimensionMapping(form.getId(), "_id"))
+                .map(FormClass::getId)
+                .map(LongFormatTableBuilder::recordIdMapping)
                 .collect(Collectors.toList());
+    }
+
+    private static DimensionMapping recordIdMapping(ResourceId formId) {
+        return new DimensionMapping(formId, ColumnModel.RECORD_ID_SYMBOL);
     }
 
     private static ImmutableDimensionModel extractFormNameDimension(List<FormTree> formScope) {
@@ -126,11 +140,42 @@ public class LongFormatTableBuilder {
                 .build();
     }
 
+    private static ImmutableDimensionModel extractParentFormNameDimension(List<FormTree> formScope) {
+        return ImmutableDimensionModel.builder()
+                .id(ResourceId.generateCuid())
+                .label("ParentForm")
+                .addMappings(parentFormNameMapping())
+                .axis(Axis.ROW)
+                .build();
+    }
+
+    private static DimensionMapping parentFormNameMapping() {
+        return new DimensionMapping(new CompoundExpr(new SymbolNode(ColumnModel.PARENT_SYMBOL), new SymbolNode(ColumnModel.FORM_NAME_SYMBOL)));
+    }
+
+    private static ImmutableDimensionModel extractParentFormIdDimension(List<FormTree> formScope) {
+        return ImmutableDimensionModel.builder()
+                .id(ResourceId.generateCuid())
+                .label("ParentFormId")
+                .addMappings(parentFormIdMapping())
+                .axis(Axis.ROW)
+                .build();
+    }
+
+    private static DimensionMapping parentFormIdMapping() {
+        return new DimensionMapping(new CompoundExpr(new SymbolNode(ColumnModel.PARENT_SYMBOL), new SymbolNode(ColumnModel.FORM_ID_SYMBOL)));
+    }
+
     private static List<DimensionMapping> extractFormIdMappings(List<FormTree> formScope) {
         return formScope.stream()
                 .map(FormTree::getRootFormClass)
-                .map(form -> new DimensionMapping(form.getId(), "_class"))
+                .map(FormClass::getId)
+                .map(LongFormatTableBuilder::formIdMapping)
                 .collect(Collectors.toList());
+    }
+
+    private static DimensionMapping formIdMapping(ResourceId formId) {
+        return new DimensionMapping(formId, ColumnModel.FORM_ID_SYMBOL);
     }
 
     private static List<ImmutableDimensionModel> extractAllDimensions(List<FormTree> formScope) {
