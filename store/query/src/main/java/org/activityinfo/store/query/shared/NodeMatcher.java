@@ -252,8 +252,17 @@ public class NodeMatcher {
             if(childForm.isPresent()) {
                 Iterable<FormTree.Node> childFields = parentField.getChildren(childFormId);
 
-                if (path.matches(childForm.get()) && path.peek().equals(ColumnModel.RECORD_ID_SYMBOL)) {
+                if ((path.matches(childForm.get()) || path.matches(parentField)) && path.peek().equals(ColumnModel.RECORD_ID_SYMBOL)) {
                     results.add(NodeMatch.forId(parentField, childForm.get()));
+
+                } else if (path.matches(parentField) && path.peek().equals(ColumnModel.RECORD_ID_SYMBOL)) {
+                    results.add(NodeMatch.forFormId(parentField, childForm.get()));
+
+                } else if (path.matches(parentField) && path.peek().equals(ColumnModel.FORM_ID_SYMBOL)) {
+                    results.add(NodeMatch.forFormId(parentField, childForm.get()));
+
+                } else if (path.matches(parentField) && path.peek().equals(ColumnModel.FORM_NAME_SYMBOL)) {
+                    results.add(NodeMatch.forLabel(parentField, childForm.get()));
 
                 } else if (path.matches(childForm.get()) || path.matches(parentField)) {
                     results.addAll(matchNodes(path.next(), childFields));

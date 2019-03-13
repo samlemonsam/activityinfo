@@ -22,13 +22,13 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.model.form.FormClass;
-import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.formTree.FormClassProvider;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.FormulaParser;
 import org.activityinfo.model.formula.functions.SumFunction;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
@@ -177,6 +177,12 @@ public class FormScanBatch {
                 break;
             case RECORD_ID:
                 column = addRecordIdColumn(filterLevel, match.getFormClass().getId());
+                break;
+            case FORM_ID:
+                column = addConstantColumn(filterLevel, match.getFormClass(), match.getFormClass().getId().asString());
+                break;
+            case FORM_NAME:
+                column = addConstantColumn(filterLevel, match.getFormClass(), match.getFormClass().getLabel());
                 break;
             default:
                 throw new UnsupportedOperationException("type: " + match.getType());

@@ -155,6 +155,42 @@ public class NodeMatch {
         return match;
     }
 
+    public static NodeMatch forFormId(FormTree.Node parent, FormClass formClass) {
+
+        List<List<FormTree.Node>> partitions = partitionOnJoins(parent);
+
+        List<FormTree.Node> leaf = partitions.get(partitions.size() - 1);
+
+        // Embedded records are not independent resources, and so
+        // do not have their own ID. So the leaf field MUST be a reference field
+        Preconditions.checkArgument(leaf.get(0).isReference());
+
+        NodeMatch match = new NodeMatch();
+        match.joins = joinsTo(partitions, Optional.<StatFunction>absent());
+        match.joins.add(new JoinNode(JoinType.REFERENCE, leaf.get(0).getDefiningFormClass().getId(), toExpr(leaf), formClass.getId()));
+        match.formClass = formClass;
+        match.type = Type.FORM_ID;
+        return match;
+    }
+
+    public static NodeMatch forLabel(FormTree.Node parent, FormClass formClass) {
+
+        List<List<FormTree.Node>> partitions = partitionOnJoins(parent);
+
+        List<FormTree.Node> leaf = partitions.get(partitions.size() - 1);
+
+        // Embedded records are not independent resources, and so
+        // do not have their own ID. So the leaf field MUST be a reference field
+        Preconditions.checkArgument(leaf.get(0).isReference());
+
+        NodeMatch match = new NodeMatch();
+        match.joins = joinsTo(partitions, Optional.<StatFunction>absent());
+        match.joins.add(new JoinNode(JoinType.REFERENCE, leaf.get(0).getDefiningFormClass().getId(), toExpr(leaf), formClass.getId()));
+        match.formClass = formClass;
+        match.type = Type.FORM_NAME;
+        return match;
+    }
+
     /**
      * For a compound expression like A.B, A can <em>either</em> to a reference field or 
      * a record-valued field like a geographic point. However, we need to join <em>only</em> on 
