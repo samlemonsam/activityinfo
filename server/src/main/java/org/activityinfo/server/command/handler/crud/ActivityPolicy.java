@@ -20,20 +20,26 @@ package org.activityinfo.server.command.handler.crud;
 
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
+import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.json.JsonParser;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.LocationTypeDTO;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
+import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.server.command.handler.json.JsonHelper;
 import org.activityinfo.server.database.hibernate.dao.ActivityDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
 import org.activityinfo.server.database.hibernate.entity.*;
+import org.activityinfo.store.hrd.Hrd;
+import org.activityinfo.store.hrd.op.CreateOrUpdateForm;
 import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.spi.UserDatabaseProvider;
 
@@ -79,8 +85,8 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         activity.setDatabase(database);
         activity.setSortOrder(calculateNextSortOrderIndex(database.getId()));
         activity.setLocationType(getLocationType(properties));
-        
 
+        // activity should be classic by default
         activity.setClassicView(true);
 
         applyProperties(activity, properties);
@@ -91,12 +97,33 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
             activity.setHrd(true);
         }
 
-        // activity should be classic by default
         activityDAO.persist(activity);
+
+        if(!activity.isClassicView()) {
+            Hrd.ofy().transact(new CreateOrUpdateForm(defaultFormSchema(activity)));
+        }
 
         UsageTracker.track(user.getId(), "create_activity", database.getResourceId());
 
         return activity.getId();
+    }
+
+    private FormClass defaultFormSchema(Activity activity) {
+        FormClass formClass = new FormClass(activity.getFormId());
+        formClass.setLabel(activity.getName());
+        formClass.setDatabaseId(activity.getDatabase().getResourceId());
+        formClass.setSchemaVersion(1L);
+
+        FormField partnerField = new FormField(CuidAdapter.partnerField(activity.getId()));
+        partnerField.setLabel(I18N.CONSTANTS.partner());
+        partnerField.setRequired(true);
+        partnerField.setType(new ReferenceType(Cardinality.SINGLE,
+                CuidAdapter.partnerFormId(activity.getDatabase().getId())));
+        partnerField.setVisible(true);
+        partnerField.setCode("partner");
+        formClass.addElement(partnerField);
+
+        return formClass;
     }
 
     private void assertCreateFormRights(Optional<UserDatabaseMeta> dbMeta) {
