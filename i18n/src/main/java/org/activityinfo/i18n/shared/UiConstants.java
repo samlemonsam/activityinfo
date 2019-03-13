@@ -271,7 +271,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Enter the coordinates in any format, or drag the marker on the map")
     String coordinateToolTip();
 
-    @DefaultStringValue("Copy")
+    @DefaultStringValue("copy")
     String copy();
 
     @DefaultStringValue("Country")
@@ -1363,7 +1363,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Try the new (BETA) form layout")
     String tryNewFormLayout();
 
-    @DefaultStringValue("New Form (Beta)")
+    @DefaultStringValue("Add form")
     String newForm();
 
     @DefaultStringValue("Please enter a name for the new form")
@@ -2004,5 +2004,4 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("User must be assigned to at least 1 Partner.")
     String minOnePartnerWarning();
-
 }
