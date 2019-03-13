@@ -48,7 +48,7 @@ public final class ClientContext {
     }
 
     public static boolean isV4Enabled() {
-        String flags = Strings.nullToEmpty(DICTIONARY.get("featureflags"));
+        String flags = Strings.nullToEmpty(DICTIONARY.get("featureFlags"));
         return flags.contains("v4");
     }
 
