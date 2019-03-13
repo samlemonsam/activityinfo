@@ -18,6 +18,7 @@
  */
 package org.activityinfo.ui.client;
 
+import com.google.common.base.Strings;
 import com.google.gwt.i18n.client.Dictionary;
 
 public final class ClientContext {
@@ -46,5 +47,9 @@ public final class ClientContext {
         return DICTIONARY.get("commitId");
     }
 
+    public static boolean isV4Enabled() {
+        String flags = Strings.nullToEmpty(DICTIONARY.get("featureflags"));
+        return flags.contains("v4");
+    }
 
 }

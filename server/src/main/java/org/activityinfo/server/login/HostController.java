@@ -55,7 +55,6 @@ public class HostController {
     @Produces(MediaType.TEXT_HTML)
     public Response getHostPage(@Context UriInfo uri,
                                 @Context HttpServletRequest req,
-                                @QueryParam("redirect") boolean redirect,
                                 @QueryParam("ui") String ui,
                                 @QueryParam("locale") String locale,
                                 @QueryParam("logging") String logging,
@@ -66,8 +65,10 @@ public class HostController {
             return Response.temporaryRedirect(uri.getAbsolutePathBuilder().replacePath("/login").build()).build();
         }
 
-        if (redirect) {
-            return Response.seeOther(uri.getAbsolutePathBuilder().replacePath(ENDPOINT).build()).build();
+        User authenticatedUser = entityManager.get().find(User.class, authProvider.get().getUserId());
+        if(authenticatedUser.getFeatures().contains("v4")) {
+            return Response.temporaryRedirect(UriBuilder.fromUri("https://v4.activityinfo.org/app").build())
+                    .build();
         }
 
         String appUri = uri.getAbsolutePathBuilder().replaceQuery("").build().toString();
@@ -75,7 +76,6 @@ public class HostController {
         HostPageModel model = new HostPageModel(appUri);
 
 
-        User authenticatedUser = entityManager.get().find(User.class, authProvider.get().getUserId());
         model.setFeatureFlags(authenticatedUser.getFeatures());
         model.setNewUI("3".equals(ui) || "3dev".equals(ui));
 

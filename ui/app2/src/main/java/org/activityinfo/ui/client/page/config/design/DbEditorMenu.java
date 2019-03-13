@@ -24,6 +24,7 @@ import com.extjs.gxt.ui.client.widget.menu.Menu;
 import com.extjs.gxt.ui.client.widget.menu.MenuItem;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import org.activityinfo.i18n.shared.I18N;
+import org.activityinfo.ui.client.ClientContext;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
 class DbEditorMenu {
@@ -38,6 +39,7 @@ class DbEditorMenu {
 
 
     public DbEditorMenu(SelectionListener<MenuEvent> listener) {
+
         newFolder = new MenuItem(I18N.CONSTANTS.newFolder(), IconImageBundle.ICONS.folder(), listener);
         newFolder.setItemId("Folder");
         newFolder.setEnabled(false);
@@ -76,12 +78,15 @@ class DbEditorMenu {
 
         menu = new Menu();
         menu.add(newFolder);
-        menu.add(newActivity);
         menu.add(newForm);
-        menu.add(newLocationType);
-        menu.add(newAttributeGroup);
-        menu.add(newAttribute);
-        menu.add(newIndicator);
+
+        if(!ClientContext.isV4Enabled()) {
+            menu.add(newActivity);
+            menu.add(newLocationType);
+            menu.add(newAttributeGroup);
+            menu.add(newAttribute);
+            menu.add(newIndicator);
+        }
     }
 
 

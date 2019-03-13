@@ -74,7 +74,7 @@ public class HostControllerTest extends ControllerTestCase {
 
         Response response = resource.getHostPage(
                 RestMockUtils.mockUriInfo("http://www.activityinfo.org/app"), req,
-                false, "oldui", null, null, null);
+                "oldui", null, null, null);
 
         assertThat(response.getStatus(), equalTo(Response.Status.TEMPORARY_REDIRECT.getStatusCode()));
     }
@@ -92,7 +92,7 @@ public class HostControllerTest extends ControllerTestCase {
 
         Response response = resource.getHostPage(
                 RestMockUtils.mockUriInfo("http://www.activityinfo.org"), req,
-                false, "oldui", null, null, null);
+                "oldui", null, null, null);
 
         assertThat(response.getEntity(), instanceOf(Viewable.class));
         assertThat(((Viewable) response.getEntity()).getModel(),
