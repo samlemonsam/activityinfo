@@ -15,6 +15,15 @@ import javax.persistence.EntityManager;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * <p>Provides UserDatabaseMeta for all requests for <b>GeoDatabase</b>.</p>
+ * <p>Accepts requests for the GeoDatabase ({@code "geodb"}) or requests for the following GeoDatabase Resources:
+ * <ul>
+ *     <li>Country Resources ({@code "FXXXXXXXXXX"}) </li>
+ *     <li>Admin Level Resources ({@code "EXXXXXXXXXX"}) </li>
+ *     <li>Location Type Resources ({@code "LXXXXXXXXXX"}) </li>
+ * </ul></p>
+ **/
 public class GeoDatabaseProvider {
 
     public static final ResourceId GEODB_ID = ResourceId.valueOf("geodb");

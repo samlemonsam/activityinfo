@@ -21,7 +21,7 @@ import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.shared.FormScanCache;
 import org.activityinfo.store.query.shared.NullFormScanCache;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.FormStorage;
 import org.hamcrest.CoreMatchers;
 import org.junit.After;
@@ -52,7 +52,7 @@ public class LegacyMySqlCatalogPermissionTest {
     MySqlStorageProvider catalog;
 
     @Inject
-    DatabaseProvider databaseProvider;
+    UserDatabaseProvider udbProvider;
 
     private ColumnSet columnSet;
     private FormScanCache cache;
@@ -217,7 +217,7 @@ public class LegacyMySqlCatalogPermissionTest {
 
     private FormPermissions fetchFormPermissions() {
         FormStorage formStorage = catalog.getForm(getActivityId()).get();
-        UserDatabaseMeta dbMeta = databaseProvider.getDatabaseMetadata(formStorage.getFormClass().getDatabaseId(), userId).get();
+        UserDatabaseMeta dbMeta = udbProvider.getDatabaseMetadata(formStorage.getFormClass().getDatabaseId(), userId).get();
         return PermissionOracle.formPermissions(getActivityId(), dbMeta);
     }
 
@@ -248,7 +248,7 @@ public class LegacyMySqlCatalogPermissionTest {
         ColumnSetBuilder builder = new ColumnSetBuilder(
                 catalog,
                 cache,
-                new FormSupervisorAdapter(catalog, databaseProvider, userId));
+                new FormSupervisorAdapter(catalog, udbProvider, userId));
 
         columnSet = builder.build(queryModel);
 

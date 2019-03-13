@@ -36,7 +36,7 @@ import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
 import org.activityinfo.store.query.UsageTracker;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -50,17 +50,17 @@ public class UserDatabasePolicy implements EntityPolicy<Database> {
     private final EntityManager em;
     private final UserDatabaseDAO databaseDAO;
     private final CountryDAO countryDAO;
-    private final DatabaseProvider databaseProvider;
+    private final UserDatabaseProvider userDatabaseProvider;
     private final BillingAccountOracle billingAccounts;
 
     @Inject
     public UserDatabasePolicy(EntityManager em,
-                              DatabaseProvider databaseProvider,
+                              UserDatabaseProvider userDatabaseProvider,
                               UserDatabaseDAO databaseDAO,
                               CountryDAO countryDAO,
                               BillingAccountOracle billingAccounts) {
         this.em = em;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
         this.databaseDAO = databaseDAO;
         this.countryDAO = countryDAO;
         this.billingAccounts = billingAccounts;
@@ -100,7 +100,7 @@ public class UserDatabasePolicy implements EntityPolicy<Database> {
 
         UpdatePartner command = new UpdatePartner(databaseId, partner);
 
-        new UpdatePartnerHandler(em, databaseProvider).execute(command, user);
+        new UpdatePartnerHandler(em, userDatabaseProvider).execute(command, user);
     }
 
     public Database findById(int dbId) {
@@ -125,7 +125,7 @@ public class UserDatabasePolicy implements EntityPolicy<Database> {
     @Override
     public void update(User user, Object entityId, PropertyMap changes) {
         Database database = em.find(Database.class, entityId);
-        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(database.getId()),
                 user.getId());
         assertEditDatabaseRights(databaseMeta);
@@ -138,9 +138,9 @@ public class UserDatabasePolicy implements EntityPolicy<Database> {
         }
         UserDatabaseMeta databaseMeta = dbMeta.get();
         if (!PermissionOracle.canEditDatabase(databaseMeta)) {
-            LOGGER.severe(() -> String.format("User %d does not have edit privileges on database %d",
+            LOGGER.severe(() -> String.format("User %d does not have edit privileges on database %s",
                     databaseMeta.getUserId(),
-                    databaseMeta.getLegacyDatabaseId()));
+                    databaseMeta.getDatabaseId()));
             throw new IllegalAccessCommandException();
         }
     }

@@ -37,7 +37,7 @@ import org.activityinfo.promise.Maybe;
 import org.activityinfo.store.query.shared.FormScanCache;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.store.query.shared.NullFormScanCache;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.store.spi.FormStorage;
@@ -50,18 +50,18 @@ public class FormSourceSyncImpl implements FormSource {
 
     private FormStorageProvider formCatalog;
     private FormScanCache formScanCache;
-    private DatabaseProvider databaseProvider;
+    private UserDatabaseProvider userDatabaseProvider;
     private int userId;
 
-    public FormSourceSyncImpl(FormStorageProvider formCatalog, FormScanCache cache, DatabaseProvider databaseProvider, int userId) {
+    public FormSourceSyncImpl(FormStorageProvider formCatalog, FormScanCache cache, UserDatabaseProvider userDatabaseProvider, int userId) {
         this.formCatalog = formCatalog;
         this.formScanCache = cache;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
         this.userId = userId;
     }
 
-    public FormSourceSyncImpl(FormStorageProvider formCatalog, DatabaseProvider databaseProvider, int userId) {
-        this(formCatalog, new NullFormScanCache(), databaseProvider, userId);
+    public FormSourceSyncImpl(FormStorageProvider formCatalog, UserDatabaseProvider userDatabaseProvider, int userId) {
+        this(formCatalog, new NullFormScanCache(), userDatabaseProvider, userId);
     }
 
     public FormMetadata getFormMetadata(ResourceId formId) {
@@ -71,7 +71,7 @@ public class FormSourceSyncImpl implements FormSource {
         }
 
         ResourceId databaseId = storage.get().getFormClass().getDatabaseId();
-        java.util.Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(databaseId, userId);
+        java.util.Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(databaseId, userId);
         if (!databaseMeta.isPresent()) {
             return FormMetadata.notFound(formId);
         }
@@ -112,7 +112,7 @@ public class FormSourceSyncImpl implements FormSource {
     @Override
     public Observable<ColumnSet> query(QueryModel queryModel) {
         ColumnSetBuilder builder = new ColumnSetBuilder(formCatalog, formScanCache,
-                new FormSupervisorAdapter(formCatalog, databaseProvider, userId));
+                new FormSupervisorAdapter(formCatalog, userDatabaseProvider, userId));
         return Observable.just(builder.build(queryModel));
     }
 

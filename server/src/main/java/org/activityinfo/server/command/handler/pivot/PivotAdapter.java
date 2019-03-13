@@ -62,7 +62,7 @@ import org.activityinfo.store.mysql.metadata.LinkedActivity;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.shared.FormScanBatch;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.activityinfo.store.spi.Slot;
 
@@ -80,7 +80,7 @@ public class PivotAdapter {
     public static final String SITE_ID_KEY = "__site_id";
 
     private final MySqlStorageProvider catalog;
-    private final DatabaseProvider databaseProvider;
+    private final UserDatabaseProvider userDatabaseProvider;
     private final PivotSites command;
     private final Filter filter;
     private final int userId;
@@ -114,14 +114,14 @@ public class PivotAdapter {
     private final FormSupervisorAdapter supervisor;
 
 
-    public PivotAdapter(FormStorageProvider catalog, DatabaseProvider databaseProvider, int userId, PivotSites command) throws InterruptedException, SQLException {
+    public PivotAdapter(FormStorageProvider catalog, UserDatabaseProvider userDatabaseProvider, int userId, PivotSites command) throws InterruptedException, SQLException {
         this.catalog = (MySqlStorageProvider) catalog;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
         this.command = command;
         this.filter = command.getFilter();
         this.userId = userId;
 
-        supervisor = new FormSupervisorAdapter(catalog, databaseProvider, userId);
+        supervisor = new FormSupervisorAdapter(catalog, userDatabaseProvider, userId);
         builder = new ColumnSetBuilder(
                 catalog,
                 new AppEngineFormScanCache(),

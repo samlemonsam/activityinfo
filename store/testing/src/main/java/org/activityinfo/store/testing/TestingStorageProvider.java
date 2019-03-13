@@ -52,7 +52,7 @@ public class TestingStorageProvider implements FormStorageProvider, Transactiona
     private final LocaliteForm localiteForm;
     private Map<ResourceId, TestingFormStorage> formMap = new HashMap<>();
 
-    private TestingDatabaseProvider databaseProvider = new TestingDatabaseProvider();
+    private TestingUserDatabaseProvider databaseProvider = new TestingUserDatabaseProvider();
 
     private SerialNumberProvider serialNumberProvider = new SerialNumberProvider() {
         @Override
@@ -208,7 +208,7 @@ public class TestingStorageProvider implements FormStorageProvider, Transactiona
         databaseProvider.add(dbBuilder.build());
     }
 
-    public TestingDatabaseProvider getDatabaseProvider() {
+    public TestingUserDatabaseProvider getDatabaseProvider() {
         return databaseProvider;
     }
 

@@ -18,12 +18,14 @@
  */
 package org.activityinfo.ui.client.component.form;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.activityinfo.fixtures.InjectionSupport;
+import org.activityinfo.legacy.shared.command.UpdateUserPermissions;
+import org.activityinfo.legacy.shared.model.PartnerDTO;
+import org.activityinfo.legacy.shared.model.UserPermissionDTO;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.form.SubFormKind;
+import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.RecordRef;
@@ -37,75 +39,34 @@ import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.model.type.time.Month;
 import org.activityinfo.server.command.CommandTestCase2;
 import org.activityinfo.server.database.OnDataSet;
-import org.activityinfo.ui.client.component.form.subform.SubFormInstanceLoader;
 import org.activityinfo.ui.client.dispatch.state.GxtStateProvider;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Map;
-import java.util.Set;
-
 import static org.activityinfo.promise.PromiseMatchers.assertResolves;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * @author yuriyz on 02/19/2015.
  */
 @RunWith(InjectionSupport.class)
 @OnDataSet("/dbunit/schema1.db.xml")
-public class FormModelTest extends CommandTestCase2 {
+public class SubFormEntryTest extends CommandTestCase2 {
 
-    private static final ResourceId DATABASE_ID = CuidAdapter.databaseId(1);
-    
+    private static final int OWNER = 1;
+    private static final int STEFAN = 3;
+
+    private static final int DATABASE = 1; // PEAR
+
+    private static final int ALLOWED_PARTNER = 1;
+    private static final int FORBIDDEN_PARTNER = 3;
+
+    private static final ResourceId DATABASE_ID = CuidAdapter.databaseId(DATABASE);
+
     private FormClass masterFormClass;
     private FormClass subFormClass;
     private FormField subFormChildField;
     private FormField subFormField;
-
-    @Test
-    public void modelState() {
-        
-        setupForms();
-        
-        FormModel formModel = new FormModel(locator, new GxtStateProvider());
-        assertResolves(formModel.loadFormClassWithDependentSubForms(masterFormClass.getId()));
-
-        assertEquals(formModel.getRootFormClass().getId(), masterFormClass.getId());
-        assertEquals(formModel.getRootFormClass().getDatabaseId(), masterFormClass.getDatabaseId());
-
-        assertNotNull(formModel.getSubFormByOwnerFieldId(subFormField.getId()));
-        assertNotNull(formModel.getClassByField(subFormChildField.getId()));
-    }
-
-    @Ignore
-    @Test
-    public void doNotPersistFormClassWithStaleSubformReference() {
-        
-        setupForms();
-        
-        FormClass formClass = new FormClass(ResourceId.generateId());
-        formClass.setDatabaseId(DATABASE_ID);
-
-        FormClass subform = new FormClass(ResourceId.generateId());
-        subform.setDatabaseId(DATABASE_ID);
-
-        FormField subformOwnerField = formClass.addField(CuidAdapter.generateIndicatorId());
-        subformOwnerField.setType(new SubFormReferenceType(subform.getId()));
-
-        locator.persist(formClass).then(new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                // expected result
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-                throw new RuntimeException("FormClass is persisted with stale (non-existent) SubFormClass reference.");
-            }
-        });
-    }
 
     private FormModel newFormModel() {
         FormModel model = new FormModel(locator, new GxtStateProvider());
@@ -114,19 +75,15 @@ public class FormModelTest extends CommandTestCase2 {
         return model;
     }
 
-    @Test
-    public void subformInstancesPersistence() {
-        
-        setupForms();
-
+    private TypedFormRecord createRootFormRecord(int partnerId) {
         TypedFormRecord rootInstance = new TypedFormRecord(ResourceId.generateSubmissionId(masterFormClass), masterFormClass.getId());
         rootInstance.set(CuidAdapter.field(masterFormClass.getId(), CuidAdapter.START_DATE_FIELD), new LocalDate(2016,1,1));
         rootInstance.set(CuidAdapter.field(masterFormClass.getId(), CuidAdapter.END_DATE_FIELD), new LocalDate(2016,1,1));
         rootInstance.set(CuidAdapter.field(masterFormClass.getId(), CuidAdapter.PARTNER_FIELD),
                 new ReferenceValue(
                         new RecordRef(
-                            CuidAdapter.partnerFormId(1),
-                            CuidAdapter.partnerRecordId(1))));
+                                CuidAdapter.partnerFormId(1),
+                                CuidAdapter.partnerRecordId(partnerId))));
         rootInstance.set(CuidAdapter.field(masterFormClass.getId(), CuidAdapter.LOCATION_FIELD),
                 new ReferenceValue(
                         new RecordRef(
@@ -135,68 +92,120 @@ public class FormModelTest extends CommandTestCase2 {
 
         assertResolves(locator.persist(rootInstance));
 
+        return rootInstance;
+    }
+
+    @Test
+    public void testAllowedPartnerRecord() {
+        setUser(OWNER);
+
+        setupForms();
+        setupPermissions();
+
+        // User stefan should be allowed to create/edit/delete this record or its subform records
+        TypedFormRecord allowedRootRecord = createRootFormRecord(ALLOWED_PARTNER);
+
+        setUser(STEFAN);
+        create(allowedRootRecord);
+        edit(allowedRootRecord);
+    }
+
+    @Test
+    public void testForbiddenPartnerRecord() {
+        setUser(OWNER);
+
+        setupForms();
+        setupPermissions();
+
+        // User stefan should NOT be allowed to create/edit/delete this record or its subform records
+        TypedFormRecord forbiddenRootRecord = createRootFormRecord(FORBIDDEN_PARTNER);
+
+        setUser(STEFAN);
+        try {
+            create(forbiddenRootRecord);
+            throw new AssertionError("Illegal Sub-Form Record created");
+        } catch (RuntimeException expected) {
+            // This is expected, as the user should not be allowed to create a subform record on this parent record
+            expected.getCause();
+        }
+
+        try {
+            edit(forbiddenRootRecord);
+            throw new AssertionError("Illegal Sub-Form Record edit");
+        } catch (RuntimeException expected) {
+            // This is expected, as the user should not be allowed to edit a subform record on this parent record
+            expected.getCause();
+        }
+    }
+
+    public void create(TypedFormRecord rootRecord) {
         FormModel formModel = newFormModel();
-        formModel.setWorkingRootInstance(rootInstance);
+        formModel.setWorkingRootInstance(rootRecord);
 
-        String tab1 = new Month(2015, 3).toString();
-        String tab2 = new Month(2015, 8).toString();
-
-        // Tab1
-        TypedFormRecord valueInstance1 = formModel.getWorkingInstance(subFormChildField.getId(), tab1).get();
-        valueInstance1.set(subFormChildField.getId(), TextValue.valueOf("tab1"));
-
-        // Tab2
-        TypedFormRecord valueInstance2 = formModel.getWorkingInstance(subFormChildField.getId(), tab2).get();
-        valueInstance2.set(subFormChildField.getId(), TextValue.valueOf("tab2"));
-
-        formModel.getChangedInstances().add(valueInstance1);
-        formModel.getChangedInstances().add(valueInstance2);
+        String tab = new Month(2015, 3).toString();
+        TypedFormRecord valueInstance = formModel.getWorkingInstance(subFormChildField.getId(), tab).get();
+        valueInstance.set(subFormChildField.getId(), TextValue.valueOf("tab"));
+        formModel.getChangedInstances().add(valueInstance);
 
         // persist all value and tab/key instances
         FormActions actions = new FormActions(locator, formModel);
         assertResolves(actions.save());
 
         // make sure instances are persisted
-        TypedFormRecord fetchedInstance1 = assertResolves(locator.getFormInstance(subFormClass.getId(), valueInstance1.getId()));
-        TypedFormRecord fetchedInstance2 = assertResolves(locator.getFormInstance(subFormClass.getId(), valueInstance2.getId()));
+        TypedFormRecord fetchedInstance = assertResolves(locator.getFormInstance(subFormClass.getId(), valueInstance.getId()));
+        assertEquals(fetchedInstance.get(subFormChildField.getId()), TextValue.valueOf("tab"));
+    }
 
-        assertEquals(fetchedInstance1.get(subFormChildField.getId()), TextValue.valueOf("tab1"));
-        assertEquals(fetchedInstance2.get(subFormChildField.getId()), TextValue.valueOf("tab2"));
+    public void edit(TypedFormRecord rootRecord) {
+        // Set the initial record value as owner
+        setUser(OWNER);
+
+        FormModel formModel = newFormModel();
+        formModel.setWorkingRootInstance(rootRecord);
+
+        String tab = new Month(2015, 3).toString();
+        TypedFormRecord valueInstance = formModel.getWorkingInstance(subFormChildField.getId(), tab).get();
+        valueInstance.set(subFormChildField.getId(), TextValue.valueOf("tab"));
+        formModel.getChangedInstances().add(valueInstance);
+
+        // persist all value and tab/key instances
+        FormActions actions = new FormActions(locator, formModel);
+        assertResolves(actions.save());
+
+        // make sure instances are persisted
+        TypedFormRecord fetchedInstance1 = assertResolves(locator.getFormInstance(subFormClass.getId(), valueInstance.getId()));
+        assertEquals(fetchedInstance1.get(subFormChildField.getId()), TextValue.valueOf("tab"));
 
         // Update value instances
+        setUser(STEFAN);
 
         // Tab1
-        valueInstance1 = formModel.getWorkingInstance(subFormChildField.getId(), tab1).get();
-        valueInstance1.set(subFormChildField.getId(), TextValue.valueOf("tab11"));
-
-        // Tab2
-        valueInstance2 = formModel.getWorkingInstance(subFormChildField.getId(), tab2).get();
-        valueInstance2.set(subFormChildField.getId(), TextValue.valueOf("tab22"));
-
-        formModel.getChangedInstances().add(valueInstance1);
-        formModel.getChangedInstances().add(valueInstance2);
+        valueInstance = formModel.getWorkingInstance(subFormChildField.getId(), tab).get();
+        valueInstance.set(subFormChildField.getId(), TextValue.valueOf("tab11"));
+        formModel.getChangedInstances().add(valueInstance);
 
         // persist updates
         assertResolves(actions.save());
 
         // make sure instances are persisted
-        fetchedInstance1 = assertResolves(locator.getFormInstance(subFormClass.getId(), valueInstance1.getId()));
-        fetchedInstance2 = assertResolves(locator.getFormInstance(subFormClass.getId(), valueInstance2.getId()));
-
+        fetchedInstance1 = assertResolves(locator.getFormInstance(subFormClass.getId(), valueInstance.getId()));
         assertEquals(fetchedInstance1.get(subFormChildField.getId()), TextValue.valueOf("tab11"));
-        assertEquals(fetchedInstance2.get(subFormChildField.getId()), TextValue.valueOf("tab22"));
+    }
 
-        // check subform loader
-        FormModel emptyModel = new FormModel(locator, new GxtStateProvider());
-        emptyModel.setWorkingRootInstance(rootInstance);
+    private void setupPermissions() {
+        // we give Stefan rights to VIEW ALL on the database, but restrict his ability to CREATE, EDIT and DELETE to a
+        // single partner (1)
+        UserPermissionDTO model = new UserPermissionDTO();
+        model.setName("Stefan");
+        model.setEmail("stefan@irc.org");
+        model.addPartner(new PartnerDTO(1,"NRC"));
+        model.setAllowView(true);
+        model.setAllowViewAll(true);
+        model.setAllowCreate(true);
+        model.setAllowEdit(true);
+        model.setAllowDelete(true);
 
-        // load subform instances into empty model
-        assertResolves(new SubFormInstanceLoader(emptyModel).load(subFormClass));
-        Map<FormModel.SubformValueKey, Set<TypedFormRecord>> loadedInstances = emptyModel.getSubFormInstances();
-
-        assertEquals(1, loadedInstances.size());
-        assertEquals(emptyModel.getSubformValueInstance(subFormClass, rootInstance, tab1).get(), valueInstance1);
-        assertEquals(emptyModel.getSubformValueInstance(subFormClass, rootInstance, tab2).get(), valueInstance2);
+        this.execute(new UpdateUserPermissions(DATABASE, model));
     }
 
     /**
@@ -204,8 +213,6 @@ public class FormModelTest extends CommandTestCase2 {
      * the dbunit setup
      */
     public void setupForms() {
-        
-        
         ResourceId masterFormId = CuidAdapter.activityFormClass(3);
         
         masterFormClass = new FormClass(masterFormId);

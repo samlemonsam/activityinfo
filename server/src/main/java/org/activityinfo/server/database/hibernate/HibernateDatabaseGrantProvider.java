@@ -6,7 +6,7 @@ import org.activityinfo.model.database.DatabaseGrant;
 import org.activityinfo.model.database.DatabaseGrantKey;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.spi.DatabaseGrantCache;
+import org.activityinfo.store.spi.DatabaseGrantLoader;
 import org.activityinfo.store.spi.DatabaseGrantProvider;
 
 import javax.persistence.EntityManager;
@@ -14,21 +14,24 @@ import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * DatabaseGrantProvider for DatabaseGrants stored in MySQL.
+ */
 public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
 
     private final Provider<EntityManager> entityManager;
-    private final DatabaseGrantCache cache;
+    private final DatabaseGrantLoader loader;
 
     @Inject
     public HibernateDatabaseGrantProvider(Provider<EntityManager> entityManager,
-                                          DatabaseGrantCache cache) {
+                                          DatabaseGrantLoader loader) {
         this.entityManager = entityManager;
-        this.cache = cache;
+        this.loader = loader;
     }
 
     @Override
     public Optional<DatabaseGrant> getDatabaseGrant(int userId, @NotNull ResourceId databaseId) {
-        return cache.load(DatabaseGrantKey.of(userId,databaseId));
+        return loader.load(DatabaseGrantKey.of(userId,databaseId));
     }
 
     @Override
@@ -36,7 +39,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         Set<DatabaseGrantKey> keys = databaseIds.stream()
                 .map(dbId -> DatabaseGrantKey.of(userId, dbId))
                 .collect(Collectors.toSet());
-        return cache.loadAll(keys).entrySet().stream()
+        return loader.loadAll(keys).entrySet().stream()
                 .collect(Collectors.toMap(
                         grant -> grant.getKey().getDatabaseId(),
                         Map.Entry::getValue));
@@ -50,7 +53,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         if (grantedDatabases.isEmpty()) {
             return Collections.emptyList();
         }
-        return new ArrayList<>(cache.loadAll(grantedDatabases).values());
+        return new ArrayList<>(loader.loadAll(grantedDatabases).values());
     }
 
     @Override
@@ -61,7 +64,7 @@ public class HibernateDatabaseGrantProvider implements DatabaseGrantProvider {
         if (grantedUsers.isEmpty()) {
             return Collections.emptyList();
         }
-        return new ArrayList<>(cache.loadAll(grantedUsers).values());
+        return new ArrayList<>(loader.loadAll(grantedUsers).values());
     }
 
     private Set<ResourceId> queryGrantedDatabases(int userId) {

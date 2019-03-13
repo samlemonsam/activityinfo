@@ -22,11 +22,12 @@ import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.Style.SortDir;
 import com.extjs.gxt.ui.client.event.BaseEvent;
 import com.extjs.gxt.ui.client.event.Events;
+import com.extjs.gxt.ui.client.event.ListViewEvent;
+import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.store.ListStore;
-import com.extjs.gxt.ui.client.widget.ModelPropertyRenderer;
+import com.extjs.gxt.ui.client.widget.*;
 import com.extjs.gxt.ui.client.widget.form.*;
-import com.extjs.gxt.ui.client.widget.form.ComboBox.TriggerAction;
-import com.extjs.gxt.ui.client.widget.layout.FormLayout;
+import com.extjs.gxt.ui.client.widget.layout.*;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -38,6 +39,7 @@ import org.activityinfo.ui.client.page.config.design.BlankValidator;
 import org.activityinfo.ui.client.page.entry.form.field.MultilineRenderer;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
 
@@ -108,6 +110,8 @@ import java.util.*;
  */
 public class UserForm extends FormPanel {
 
+    private static final Logger LOGGER = Logger.getLogger(UserForm.class.getName());
+
     private final CheckBox allFolderCheckbox;
     private final CheckBoxGroup permissionsGroup;
     private final CheckBoxGroup operationsGroup;
@@ -133,6 +137,7 @@ public class UserForm extends FormPanel {
 
     private CheckBoxGroup folderGroup = new CheckBoxGroup();
     private WarningBar permissionWarning  = new WarningBar();
+    private WarningBar partnerWarning  = new WarningBar();
 
     interface Templates extends SafeHtmlTemplates {
 
@@ -146,6 +151,10 @@ public class UserForm extends FormPanel {
     private TextField<String> nameField;
     private TextField<String> emailField;
     private ComboBox<PartnerDTO> partnerCombo;
+
+    private ListStore<PartnerDTO> partnerStore;
+    private CheckBoxListView<PartnerDTO> partnerCheckList;
+
     private Map<Integer, CheckBox> folderCheckBoxMap = new HashMap<>();
 
     public UserForm(UserDatabaseDTO database) {
@@ -171,20 +180,15 @@ public class UserForm extends FormPanel {
         emailField.setRegex("\\S+@\\S+\\.\\S+");
         this.add(emailField);
 
-        ListStore<PartnerDTO> partnerStore = new ListStore<>();
-        partnerStore.add(database.getPartners());
+        partnerStore = new ListStore<>();
+        partnerStore.add(database.getAllowablePartners());
         partnerStore.sort("name", SortDir.ASC);
 
-        partnerCombo = new ComboBox<>();
-        partnerCombo.setName("partner");
-        partnerCombo.setFieldLabel(constants.partner());
-        partnerCombo.setDisplayField("name");
-        partnerCombo.setStore(partnerStore);
-        partnerCombo.setForceSelection(true);
-        partnerCombo.setTriggerAction(TriggerAction.ALL);
-        partnerCombo.setAllowBlank(false);
-        partnerCombo.setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<>("name")));
-        this.add(partnerCombo);
+        if (showMultiplePartnerEditor(database.getOwnerEmail())) {
+            this.add(multiPartnerEditor());
+        } else {
+            this.add(singlePartnerEditor());
+        }
 
         permissionsGroup = new CheckBoxGroup();
         permissionsGroup.setFieldLabel(I18N.CONSTANTS.permissions());
@@ -257,14 +261,62 @@ public class UserForm extends FormPanel {
         }
         this.add(folderGroup);
 
-        if(!database.isManageAllUsersAllowed()) {
-            partnerCombo.setValue(database.getMyPartner());
-            partnerCombo.setReadOnly(true);
-        }
-
         permissionWarning.setWarning(I18N.CONSTANTS.permissionEditingLockedWarning());
         permissionWarning.hide();
         this.add(permissionWarning);
+
+        partnerWarning.setWarning(I18N.CONSTANTS.permissionEditingLockedPartnerWarning());
+        partnerWarning.hide();
+        this.add(partnerWarning);
+    }
+
+    private Field singlePartnerEditor() {
+        partnerCombo = new ComboBox<>();
+        partnerCombo.setName("partner");
+        partnerCombo.setFieldLabel(I18N.CONSTANTS.partner());
+        partnerCombo.setDisplayField("name");
+        partnerCombo.setStore(partnerStore);
+        partnerCombo.setForceSelection(true);
+        partnerCombo.setTriggerAction(ComboBox.TriggerAction.ALL);
+        partnerCombo.setAllowBlank(false);
+        partnerCombo.setItemRenderer(new MultilineRenderer<>(new ModelPropertyRenderer<>("name")));
+        return partnerCombo;
+    }
+
+    private Field multiPartnerEditor() {
+        partnerCheckList = new CheckBoxListView<>();
+        partnerCheckList.setStore(partnerStore);
+        partnerCheckList.setDisplayProperty("name");
+        partnerCheckList.setChecked(getDefaultOrFirstPartner(database), true);
+        partnerCheckList.addListener(Events.Select, new Listener<ListViewEvent<PartnerDTO>>() {
+            @Override
+            public void handleEvent(ListViewEvent<PartnerDTO> baseEvent) {
+                if (partnerCheckList.getChecked().size() != 1) {
+                    return;
+                }
+                if (!partnerCheckList.getChecked().contains(baseEvent.getModel())) {
+                    return;
+                }
+                baseEvent.setCancelled(true);
+                MessageBox.alert(I18N.CONSTANTS.error(), I18N.CONSTANTS.minOnePartnerWarning(), null);
+            }
+        });
+        partnerCheckList.setHeight(75);
+        AdapterField adapter = new AdapterField(partnerCheckList);
+        adapter.setFieldLabel(I18N.CONSTANTS.partners());
+        return adapter;
+    }
+
+    private PartnerDTO getDefaultOrFirstPartner(UserDatabaseDTO database) {
+        return UserDatabaseDTO.getDefaultPartner(database.getAllowablePartners())
+                .or(database.getAllowablePartners().get(0));
+    }
+
+    private boolean showMultiplePartnerEditor(String ownerEmail) {
+        if (ownerEmail.toLowerCase().contains("@bedatadriven.com") || ownerEmail.toLowerCase().contains("@unrwa.org")) {
+            return true;
+        }
+        return false;
     }
 
     // Set up the propagation logic when users select checkboxes
@@ -385,9 +437,7 @@ public class UserForm extends FormPanel {
         nameField.setValue(user.getName());
         nameField.setReadOnly(true);
 
-        partnerCombo.setValue(user.getPartner());
-        partnerCombo.setReadOnly(!database.getAmOwner() && !database.isAllowed(PermissionType.MANAGE_ALL_USERS, user));
-
+        addEditPartners(user);
         addEditPermissionsGroup(user);
         addEditFolderPermissions(user);
 
@@ -395,6 +445,30 @@ public class UserForm extends FormPanel {
             permissionWarning.hide();
         } else {
             permissionWarning.show();
+        }
+
+        if (database.canManageUser(user)) {
+            partnerWarning.hide();
+        } else {
+            partnerWarning.show();
+        }
+    }
+
+    private void addEditPartners(UserPermissionDTO user) {
+        if (showMultiplePartnerEditor(database.getOwnerEmail())) {
+            // slight hack to uncheck the default selected partner first (no way to deselect all in a CheckBoxListView...)
+            partnerCheckList.getChecked().forEach(checked -> {
+                LOGGER.info("PARTNERS - UNCHECK " + checked.toString());
+                partnerCheckList.setChecked(checked, false);
+            });
+            user.getPartners().forEach(p -> {
+                LOGGER.info("PARTNERS - CHECK " + p.toString());
+                partnerCheckList.setChecked(p, true);
+            });
+            partnerCheckList.setEnabled(database.canManageUser(user));
+        } else {
+            partnerCombo.setValue(user.getPartners().get(0));
+            partnerCombo.setReadOnly(!database.getAmOwner() && !database.isAllowed(PermissionType.MANAGE_ALL_USERS, user));
         }
     }
 
@@ -433,10 +507,14 @@ public class UserForm extends FormPanel {
         // Set checkbox enabled status if database user has permission to assign a given folder and the database user
         // has an identical or greater set of permissions
         if (allFolderCheckbox != null) {
-            allFolderCheckbox.setEnabled(database.hasGreaterPermissions(user));
+            boolean enabled = database.hasGreaterPermissions(user)
+                    && database.canManageUser(user);
+            allFolderCheckbox.setEnabled(enabled);
         }
         folderCheckBoxMap.forEach((folderId, checkBox) -> {
-            boolean enabled = database.canAssignFolder(folderId, user) && database.hasGreaterPermissions(user);
+            boolean enabled = database.canAssignFolder(folderId, user)
+                    && database.hasGreaterPermissions(user)
+                    && database.canManageUser(user);
             checkBox.setEnabled(enabled);
         });
     }
@@ -462,7 +540,16 @@ public class UserForm extends FormPanel {
         UserPermissionDTO user = new UserPermissionDTO();
         user.setEmail(emailField.getValue());
         user.setName(nameField.getValue());
-        user.setPartner(partnerCombo.getValue());
+
+        if (showMultiplePartnerEditor(database.getOwnerEmail())) {
+            user.addPartners(partnerCheckList.getChecked());
+        } else {
+            user.addPartner(partnerCombo.getValue());
+        }
+
+        if (user.getPartners().isEmpty()) {
+            throw new PermissionAssignmentException(I18N.CONSTANTS.minOnePartnerWarning());
+        }
 
         for (Field field : permissionsGroup.getAll()) {
             if (field instanceof CheckBoxGroup) {

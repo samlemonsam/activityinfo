@@ -19,43 +19,59 @@
 package org.activityinfo.server.command.handler.sync;
 
 import com.bedatadriven.rebar.sql.client.query.SqlQuery;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.command.GetSyncRegionUpdates;
 import org.activityinfo.legacy.shared.command.result.SyncRegionUpdate;
 import org.activityinfo.legacy.shared.impl.Tables;
+import org.activityinfo.server.database.hibernate.dao.UserPermissionDAO;
 import org.activityinfo.server.database.hibernate.entity.Activity;
+import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.server.database.hibernate.entity.UserPermission;
 
 import javax.persistence.EntityManager;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 public class SiteUpdateBuilder implements UpdateBuilder {
 
     public static final String REGION_TYPE = "form-submissions";
     
     private final EntityManager entityManager;
+    private final UserPermissionDAO permDAO;
 
     private Activity activity;
+    private UserPermission userPermission;
     private JpaBatchBuilder batch;
     private long localVersion;
 
     @Inject
-    public SiteUpdateBuilder(EntityManager entityManager) {
+    public SiteUpdateBuilder(EntityManager entityManager, UserPermissionDAO permDAO) {
         this.entityManager = entityManager;
+        this.permDAO = permDAO;
     }
 
     @Override
     public SyncRegionUpdate build(User user, GetSyncRegionUpdates request) throws IOException {
         batch = new JpaBatchBuilder(entityManager, request.getRegionPath());
         activity = entityManager.find(Activity.class, request.getRegionId());
+        boolean isOwner = activity.getDatabase().getOwner().equals(user);
+        if (!isOwner) {
+            userPermission = permDAO.findUserPermissionByUserIdAndDatabaseId(user.getId(), activity.getDatabase().getId());
+        }
         localVersion = request.getLocalVersionNumber();
+
+        Preconditions.checkArgument(isOwner || (userPermission != null && userPermission.isAllowView()),
+                "User " + user.getId() + " cannot sync sites for activity " + activity.getId());
 
         if (activity.getSiteVersion() > localVersion) {
             if(localVersion > 0) {
                 deleteUpdated();
             }
 
-            insert(Tables.SITE, updatedSitesQuery());
+            insert(Tables.SITE, updatedSitesQuery(isOwner, userPermission));
             insert(Tables.ATTRIBUTE_VALUE, updateAttributeValues());
             insert(Tables.REPORTING_PERIOD, updatedReportingPeriods());
             insert(Tables.INDICATOR_VALUE, updateIndicatorValues());
@@ -139,8 +155,8 @@ public class SiteUpdateBuilder implements UpdateBuilder {
                        .whereTrue("a.dateDeleted IS NULL");
     }
 
-    private SqlQuery updatedSitesQuery() {
-        return SqlQuery.select()
+    private SqlQuery updatedSitesQuery(boolean isOwner, UserPermission userPermission) {
+        SqlQuery query = SqlQuery.select()
                        .from(Tables.SITE, "s")
                        .appendColumn("s.SiteId")
                        .appendColumn("s.Date1")
@@ -154,6 +170,13 @@ public class SiteUpdateBuilder implements UpdateBuilder {
                        .where("s.version").greaterThan(localVersion)
                        .where("s.activityId").equalTo(activity.getId())
                        .whereTrue("s.dateDeleted IS NULL");
+        if (!isOwner && !userPermission.isAllowViewAll()) {
+            query.where("PartnerId")
+                    .in(userPermission.getPartners().stream()
+                    .map(Partner::getId)
+                    .collect(Collectors.toList()));
+        }
+        return query;
     }
 
 }

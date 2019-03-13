@@ -62,7 +62,7 @@ import org.activityinfo.store.mysql.metadata.CountryInstance;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.shared.FormScanBatch;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.Slot;
 
 import javax.inject.Provider;
@@ -83,7 +83,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
     private DispatcherSync dispatcher;
 
     @Inject
-    private DatabaseProvider databaseProvider;
+    private UserDatabaseProvider userDatabaseProvider;
 
     private GetSites command;
 
@@ -175,7 +175,7 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
 
         this.command = command;
 
-        FormSupervisorAdapter supervisor = new FormSupervisorAdapter(catalog, databaseProvider, user.getId());
+        FormSupervisorAdapter supervisor = new FormSupervisorAdapter(catalog, userDatabaseProvider, user.getId());
         builder = new ColumnSetBuilder(catalog, new AppEngineFormScanCache(), supervisor);
         batchFormTreeBuilder = new BatchingFormTreeBuilder(catalog, supervisor, user.getId());
 

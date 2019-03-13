@@ -9,12 +9,12 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Cache interface for DatabaseGrants
+ * Loader interface for DatabaseGrants. DatabaseGrants are keyed by {@link DatabaseGrantKey}s.
  */
-public interface DatabaseGrantCache {
+public interface DatabaseGrantLoader {
 
     /**
-     * Load requested DatabaseGrant from Cache.
+     * Load requested DatabaseGrant from store.
      *
      * @param toLoad DatabaseGrantKey of DatabaseGrant to load
      * @return Optional DatabaseGrant
@@ -22,7 +22,7 @@ public interface DatabaseGrantCache {
     @NotNull Optional<DatabaseGrant> load(@NotNull DatabaseGrantKey toLoad);
 
     /**
-     * Load all requested DatabaseGrants from Cache.
+     * Load all requested DatabaseGrants from store.
      *
      * @param toLoad Set of DatabaseGrantKey of DatabaseGrants to load
      * @return Map of DatabaseGrantKey -> DatabaseGrant (if present)

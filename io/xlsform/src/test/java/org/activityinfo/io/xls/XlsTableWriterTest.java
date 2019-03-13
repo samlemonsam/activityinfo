@@ -26,7 +26,7 @@ import org.activityinfo.model.analysis.TableModel;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.store.query.server.FormSourceSyncImpl;
-import org.activityinfo.store.testing.TestingDatabaseProvider;
+import org.activityinfo.store.testing.TestingUserDatabaseProvider;
 import org.activityinfo.store.testing.TestingStorageProvider;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -45,7 +45,7 @@ public class XlsTableWriterTest {
 
     private FormSourceSyncImpl formSource;
     private TestingStorageProvider catalog;
-    private TestingDatabaseProvider databaseProvider;
+    private TestingUserDatabaseProvider databaseProvider;
 
     @Before
     public void setup() {

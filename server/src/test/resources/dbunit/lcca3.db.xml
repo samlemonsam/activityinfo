@@ -35,16 +35,26 @@
   <locationtype locationtypeid="50598" Name="Country" Reuse="false" CountryId="317" workflowId="closed"/>
   <location LocationID="50598" Name="Ethiopia" X="40.493059158325195" Y="9.147995948791525" LocationTypeID="50598" timeEdited="1397595403000" workflowStatusId="validated"/>
   <userdatabase DatabaseId="1350" FullName="Cost per service level in Ethiopia and Chad" Name="UNHCR LCCA" CountryId="317" OwnerUserId="2195" version="1406315419739"/>
-  <userpermission UserPermissionId="6693" AllowDesign="true" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="true" allowManageUsers="true" AllowView="true" AllowViewAll="true" DatabaseId="1350" PartnerId="1612" UserId="4095" version="1404828205893"/>
-  <userpermission UserPermissionId="6698" AllowDesign="true" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="true" allowManageUsers="true" AllowView="true" AllowViewAll="true" DatabaseId="1350" PartnerId="1612" UserId="4099" version="1404828205865"/>
-  <userpermission UserPermissionId="6699" AllowDesign="true" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="false" allowManageUsers="false" AllowView="true" AllowViewAll="true" DatabaseId="1350" PartnerId="1612" UserId="4100" version="1402472195847"/>
-  <userpermission UserPermissionId="6842" AllowDesign="true" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="true" allowManageUsers="true" AllowView="true" AllowViewAll="true" DatabaseId="1350" PartnerId="1629" UserId="4143" version="1403172309355"/>
-  <userpermission UserPermissionId="6843" AllowDesign="true" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="false" allowManageUsers="false" AllowView="true" AllowViewAll="true" DatabaseId="1350" PartnerId="1629" UserId="4144" version="1403167727582"/>
-  <userpermission UserPermissionId="6909" AllowDesign="true" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="true" allowManageUsers="true" AllowView="true" AllowViewAll="true" DatabaseId="1350" PartnerId="1629" UserId="375" version="1403626545479"/>
-  <userpermission UserPermissionId="7141" AllowDesign="true" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="true" allowManageUsers="true" AllowView="true" AllowViewAll="true" DatabaseId="1350" PartnerId="1612" UserId="4145" version="1405478629664"/>
-  <userpermission UserPermissionId="7152" AllowDesign="false" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="false" allowManageUsers="false" AllowView="true" AllowViewAll="true" DatabaseId="1350" PartnerId="1612" UserId="4374" version="1406321234704"/>
-  <userpermission UserPermissionId="7153" AllowDesign="true" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="true" allowManageUsers="true" AllowView="true" AllowViewAll="true" DatabaseId="1350" PartnerId="1612" UserId="165" version="1405569654517"/>
-  <userpermission UserPermissionId="7188" AllowDesign="false" AllowEdit="true" AllowEditAll="false" allowManageAllUsers="false" allowManageUsers="false" AllowView="true" AllowViewAll="false" DatabaseId="1350" PartnerId="1612" UserId="3955" version="1406019215967"/>
+  <userpermission UserPermissionId="6693" AllowDesign="true" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="true" allowManageUsers="true" AllowView="true" AllowViewAll="true" DatabaseId="1350" UserId="4095" version="1404828205893"/>
+  <groupAssignment userPermissionId="6693" partnerId="1612" />
+  <userpermission UserPermissionId="6698" AllowDesign="true" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="true" allowManageUsers="true" AllowView="true" AllowViewAll="true" DatabaseId="1350" UserId="4099" version="1404828205865"/>
+  <groupAssignment userPermissionId="6698" partnerId="1612" />
+  <userpermission UserPermissionId="6699" AllowDesign="true" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="false" allowManageUsers="false" AllowView="true" AllowViewAll="true" DatabaseId="1350" UserId="4100" version="1402472195847"/>
+  <groupAssignment userPermissionId="6699" partnerId="1612" />
+  <userpermission UserPermissionId="6842" AllowDesign="true" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="true" allowManageUsers="true" AllowView="true" AllowViewAll="true" DatabaseId="1350" UserId="4143" version="1403172309355"/>
+  <groupAssignment userPermissionId="6842" partnerId="1629" />
+  <userpermission UserPermissionId="6843" AllowDesign="true" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="false" allowManageUsers="false" AllowView="true" AllowViewAll="true" DatabaseId="1350" UserId="4144" version="1403167727582"/>
+  <groupAssignment userPermissionId="6843" partnerId="1629" />
+  <userpermission UserPermissionId="6909" AllowDesign="true" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="true" allowManageUsers="true" AllowView="true" AllowViewAll="true" DatabaseId="1350" UserId="375" version="1403626545479"/>
+  <groupAssignment userPermissionId="6909" partnerId="1629" />
+  <userpermission UserPermissionId="7141" AllowDesign="true" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="true" allowManageUsers="true" AllowView="true" AllowViewAll="true" DatabaseId="1350" UserId="4145" version="1405478629664"/>
+  <groupAssignment userPermissionId="7141" partnerId="1612" />
+  <userpermission UserPermissionId="7152" AllowDesign="false" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="false" allowManageUsers="false" AllowView="true" AllowViewAll="true" DatabaseId="1350" UserId="4374" version="1406321234704"/>
+  <groupAssignment userPermissionId="7152" partnerId="1612" />
+  <userpermission UserPermissionId="7153" AllowDesign="true" AllowEdit="true" AllowEditAll="true" allowManageAllUsers="true" allowManageUsers="true" AllowView="true" AllowViewAll="true" DatabaseId="1350" UserId="165" version="1405569654517"/>
+  <groupAssignment userPermissionId="7153" partnerId="1612" />
+  <userpermission UserPermissionId="7188" AllowDesign="false" AllowEdit="true" AllowEditAll="false" allowManageAllUsers="false" allowManageUsers="false" AllowView="true" AllowViewAll="false" DatabaseId="1350" UserId="3955" version="1406019215967"/>
+  <groupAssignment userPermissionId="7188" partnerId="1612" />
   <activity ActivityId="6464" AllowEdit="false" Name="Bambasi Water Service Ladders Survey" ReportingFrequency="0" SortOrder="4" DatabaseId="1350" LocationTypeId="50598" published="0"/>
   <indicator IndicatorId="36080" Aggregation="0" dateDeleted="2014-07-08 10:54:43.0" description="Choose the name of the camp from Drop Down Menu" ListHeader="CampName" name="Camp Name" SortOrder="1" units="" ActivityId="6464" mandatory="true" Type="FREE_TEXT" calculatedAutomatically="false"/>
   <indicator IndicatorId="36082" Aggregation="0" dateDeleted="2014-07-08 10:54:46.0" description="Choose the water point number or code from drop down menu" ListHeader="WaterPointNumber" name="Water Point Number" SortOrder="1" units="" ActivityId="6464" mandatory="true" Type="FREE_TEXT" calculatedAutomatically="false"/>

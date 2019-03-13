@@ -23,6 +23,7 @@ package org.activityinfo.ui.client.inject;
 
 import com.google.gwt.inject.client.GinModules;
 import com.google.gwt.inject.client.Ginjector;
+import org.activityinfo.ui.client.AppCacheMonitor;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.UsageTracker;
 import org.activityinfo.ui.client.component.report.editor.map.MapModule;
@@ -80,5 +81,7 @@ public interface AppInjector extends Ginjector {
     FormPageLoader createFormLoader();
 
     ResourceLocator getResourceLocator();
+
+    AppCacheMonitor getAppCacheMonitor();
 
 }

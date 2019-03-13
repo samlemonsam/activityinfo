@@ -31,11 +31,30 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class UserDatabaseProvider {
+/**
+ * <p>Provides UserDatabaseMeta for all requests for <b>user-designed</b> databases.
+ * <b>Is not tied to a specific store implementation.</b></p>
+ *
+ * <p>Retrieves DatabaseMeta and DatabaseGrants using their respective providers. Returned DatabaseMeta and
+ * DatabaseGrants are then used to construct the final UserDatabaseMeta:
+ * <ol>
+ *     <li>If the database exists, and the user is the owner of the database, then the "owned" UserDatabaseMeta will be
+ *      returned (see {@link UserDatabaseMeta#buildOwnedUserDatabaseMeta})</li>
+ *     <li>If the database exists, and the user is assigned permission on the database, then the "granted"
+ *      UserDatabaseMeta will be returned (see {@link UserDatabaseMeta#buildUserDatabaseMeta})</li>
+ *     <li>If the database exists, but the user does not have an assigned permission on the database, then the
+ *      "grantless" UserDatabaseMeta will be returned (see {@link UserDatabaseMeta#buildGrantlessUserDatabaseMeta})</li>
+ *     <li>If the database previously existed but has been deleted, then the "deleted" UserDatabaseMeta will be
+ *      returned (see {@link UserDatabaseMeta#buildDeletedUserDatabaseMeta})</li>
+ *     <li>If the database does not exist, then no UserDatabaseMeta will be returned</li>
+ * </ol>
+ * </p>
+ */
+public class DesignedDatabaseProvider {
 
     public static final String ROOT_ID = "databases";
 
-    private static final Logger LOGGER = Logger.getLogger(UserDatabaseProvider.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DesignedDatabaseProvider.class.getName());
 
     private static final Predicate<DatabaseMeta> deleted() {
         return DatabaseMeta::isDeleted;
@@ -49,8 +68,8 @@ public class UserDatabaseProvider {
     private final DatabaseMetaProvider metaProvider;
 
     @Inject
-    public UserDatabaseProvider(DatabaseGrantProvider grantProvider,
-                                DatabaseMetaProvider metaProvider) {
+    public DesignedDatabaseProvider(DatabaseGrantProvider grantProvider,
+                                    DatabaseMetaProvider metaProvider) {
         this.grantProvider = grantProvider;
         this.metaProvider = metaProvider;
     }

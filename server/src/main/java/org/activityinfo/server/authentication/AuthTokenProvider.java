@@ -28,19 +28,22 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.store.hrd.Hrd;
 import org.activityinfo.store.hrd.entity.AuthTokenEntity;
 
-import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.ws.rs.core.NewCookie;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class AuthTokenProvider {
 
+    public static final String DOMAIN = "activityinfo.org";
+
     private static final String ROOT = "/";
-    private static final String DOMAIN = "activityinfo.org";
     private static final int THIS_SESSION = -1;
     private static final int ONE_YEAR = 365 * 24 * 60 * 60;
+    private static final int MAX_NEW_COOKIES = 6;           // Max is 2 sets of 3 cookies (host domain and cross domain)
 
     private final Provider<AuthenticationDAO> authDAO;
 
@@ -70,30 +73,30 @@ public class AuthTokenProvider {
 
     public NewCookie[] createNewAuthCookies(User user, URI baseUri) {
         Authentication token = createNewAuthToken(user);
+        List<NewCookie> newCookies = new ArrayList<>(MAX_NEW_COOKIES);
 
-        NewCookie cookie = newAuthCookie(AuthenticatedUser.AUTH_TOKEN_COOKIE, token.getId(), baseUri);
-        NewCookie userCookie = newAuthCookie(AuthenticatedUser.USER_ID_COOKIE,
-                Integer.toString(token.getUser().getId()), baseUri);
-        NewCookie emailCookie = newAuthCookie(AuthenticatedUser.EMAIL_COOKIE, user.getEmail(), baseUri);
+        if (baseUri.getHost().contains(DOMAIN)) {
+            // set cross domain cookies
+            newCookies.add(newAuthCookie(AuthenticatedUser.AUTH_TOKEN_COOKIE, token.getId(), DOMAIN));
+            newCookies.add(newAuthCookie(AuthenticatedUser.USER_ID_COOKIE, Integer.toString(token.getUser().getId()), DOMAIN));
+            newCookies.add(newAuthCookie(AuthenticatedUser.EMAIL_COOKIE, user.getEmail(), DOMAIN));
+        }
 
-        return new NewCookie[]{cookie, userCookie, emailCookie };
+        // set host domain cookies
+        newCookies.add(newAuthCookie(AuthenticatedUser.AUTH_TOKEN_COOKIE, token.getId(), null));
+        newCookies.add(newAuthCookie(AuthenticatedUser.USER_ID_COOKIE, Integer.toString(token.getUser().getId()), null));
+        newCookies.add(newAuthCookie(AuthenticatedUser.EMAIL_COOKIE, user.getEmail(), null));
+
+        NewCookie[] newCookieArray = new NewCookie[newCookies.size()];
+        return newCookies.toArray(newCookieArray);
     }
 
-    private NewCookie newAuthCookie(String name, String value, URI baseUri) {
+    private NewCookie newAuthCookie(String name, String value, String domain) {
         String path = ROOT;
-        String domain = domain(baseUri);
         String comment = null;
         int maxAge = THIS_SESSION;
         boolean onlySecure = DeploymentEnvironment.isAppEngineProduction();
         return new NewCookie(name, value, path, domain, comment, maxAge, onlySecure);
     }
 
-    private static String domain(URI baseUri) {
-        // If this is an xxx.activityinfo.org host, set a cross-domain cookie
-        if (baseUri.getHost().contains(DOMAIN)) {
-            return DOMAIN;
-        }
-        // If base URI is not an xxx.activityinfo.org host, then set just for this host
-        return null;
-    }
 }

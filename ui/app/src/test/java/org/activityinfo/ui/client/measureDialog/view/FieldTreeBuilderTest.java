@@ -25,7 +25,7 @@ import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.store.query.server.FormSourceSyncImpl;
 import org.activityinfo.store.query.shared.FormSource;
 import org.activityinfo.store.testing.ReferralSubForm;
-import org.activityinfo.store.testing.TestingDatabaseProvider;
+import org.activityinfo.store.testing.TestingUserDatabaseProvider;
 import org.activityinfo.store.testing.TestingStorageProvider;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,7 +33,7 @@ import org.junit.Test;
 public class FieldTreeBuilderTest {
 
     private TestingStorageProvider storageProvider;
-    private TestingDatabaseProvider databaseProvider;
+    private TestingUserDatabaseProvider databaseProvider;
 
     private final int userId = 1;
 

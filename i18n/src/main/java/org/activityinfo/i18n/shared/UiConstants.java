@@ -40,6 +40,9 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Permission/Folder editing locked as user has greater permissions than you have")
     String permissionEditingLockedWarning();
 
+    @DefaultStringValue("Permission/Folder editing locked as user is assigned to Partners you are not ")
+    String permissionEditingLockedPartnerWarning();
+
     @DefaultStringValue("Copy addresses to clipboard")
     String CopyAddressToClipBoard();
 
@@ -663,6 +666,9 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("A new version of ActivityInfo has been downloaded. Do you want to reload now?")
     String newVersionChoice();
+
+    @DefaultStringValue("A new version of ActivityInfo is available. You must reload to continue.")
+    String newVersionChoiceForce();
 
     @DefaultStringValue("No data.")
     String noData();
@@ -1995,4 +2001,8 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("This Partner")
     String forThisPartner();
+
+    @DefaultStringValue("User must be assigned to at least 1 Partner.")
+    String minOnePartnerWarning();
+
 }

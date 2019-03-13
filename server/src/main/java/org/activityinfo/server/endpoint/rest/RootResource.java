@@ -42,7 +42,7 @@ import org.activityinfo.server.mail.MailSender;
 import org.activityinfo.store.mysql.collections.CountryTable;
 import org.activityinfo.store.query.server.InvalidUpdateException;
 import org.activityinfo.store.query.server.Updater;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.codehaus.jackson.map.annotate.JsonView;
 
@@ -63,7 +63,7 @@ public class RootResource {
     private Provider<AuthenticatedUser> userProvider;
     private ServerSideAuthProvider authProvider;
     private MailSender mailSender;
-    private DatabaseProvider databaseProvider;
+    private UserDatabaseProvider userDatabaseProvider;
 
     private ApiBackend backend;
     private final BillingAccountOracle billingOracle;
@@ -77,7 +77,7 @@ public class RootResource {
                         ServerSideAuthProvider authProvider,
                         ApiBackend backend,
                         MailSender mailSender,
-                        DatabaseProvider databaseProvider,
+                        UserDatabaseProvider userDatabaseProvider,
                         BillingAccountOracle billingOracle) {
         super();
         this.entityManager = entityManager;
@@ -88,7 +88,7 @@ public class RootResource {
         this.authProvider = authProvider;
         this.backend = backend;
         this.mailSender = mailSender;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
         this.billingOracle = billingOracle;
     }
 
@@ -147,7 +147,7 @@ public class RootResource {
     public DatabaseResource getDatabaseSchema(@PathParam("id") String id) {
         return new DatabaseResource(catalog,
                 dispatcher,
-                databaseProvider,
+                userDatabaseProvider,
                 entityManager,
                 mailSender,
                 billingOracle,
@@ -237,7 +237,7 @@ public class RootResource {
 
     @Path("/analysis")
     public AnalysesResource getAnalysis() {
-        return new AnalysesResource(databaseProvider, userProvider);
+        return new AnalysesResource(userDatabaseProvider, userProvider);
     }
 
     @Path("/accounts")

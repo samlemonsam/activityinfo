@@ -5,7 +5,7 @@ import com.google.inject.Provider;
 import org.activityinfo.model.database.DatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.spi.DatabaseMetaCache;
+import org.activityinfo.store.spi.DatabaseMetaLoader;
 import org.activityinfo.store.spi.DatabaseMetaProvider;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.FormStorageProvider;
@@ -14,27 +14,33 @@ import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * DatabaseMetaProvider for DatabaseMeta stored in MySQL.
+ */
 public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
 
     private final Provider<EntityManager> entityManager;
     private final FormStorageProvider formStorageProvider;
-    private final DatabaseMetaCache cache;
+    private final DatabaseMetaLoader loader;
 
     @Inject
     public HibernateDatabaseMetaProvider(Provider<EntityManager> entityManager,
                                          FormStorageProvider formStorageProvider,
-                                         DatabaseMetaCache cache) {
+                                         DatabaseMetaLoader loader) {
         this.entityManager = entityManager;
         this.formStorageProvider = formStorageProvider;
-        this.cache = cache;
+        this.loader = loader;
     }
 
     @Override
     public Optional<DatabaseMeta> getDatabaseMeta(@NotNull ResourceId databaseId) {
-        return cache.load(databaseId);
+        return loader.load(databaseId);
     }
 
     @Override
@@ -42,7 +48,7 @@ public class HibernateDatabaseMetaProvider implements DatabaseMetaProvider {
         if (databases.isEmpty()) {
             return Collections.emptyMap();
         }
-        return cache.loadAll(databases);
+        return loader.loadAll(databases);
     }
 
     @Override

@@ -22,17 +22,17 @@ import org.activityinfo.model.database.Resource;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TestingDatabaseProvider implements DatabaseProvider {
+public class TestingUserDatabaseProvider implements UserDatabaseProvider {
 
     private Map<ResourceId, UserDatabaseMeta> databaseMap = new HashMap<>();
     private Map<ResourceId, UserDatabaseMeta> resourceMap = new HashMap<>();
 
-    public TestingDatabaseProvider() {
+    public TestingUserDatabaseProvider() {
     }
 
     public void add(UserDatabaseMeta database) {

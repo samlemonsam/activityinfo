@@ -31,7 +31,6 @@ import org.activityinfo.ui.client.page.entry.form.field.PartnerComboBox;
 import org.activityinfo.ui.client.page.entry.form.field.ProjectComboBox;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ActivitySection extends FormSectionWithFormLayout<SiteDTO> {
 
@@ -95,18 +94,12 @@ public class ActivitySection extends FormSectionWithFormLayout<SiteDTO> {
         if (isNewSite) {
             return activity.isCreateAllAllowed()
                     ? activity.getPartnerRange()
-                    : extractPartner(activity.getCurrentPartnerId(), activity.getPartnerRange());
+                    : activity.getAssignedPartners();
         } else {
             return activity.isEditAllAllowed()
                     ? activity.getPartnerRange()
-                    : extractPartner(activity.getCurrentPartnerId(), activity.getPartnerRange());
+                    : activity.getAssignedPartners();
         }
-    }
-
-    private List<PartnerDTO> extractPartner(int currentPartnerId, List<PartnerDTO> partnerRange) {
-        return partnerRange.stream()
-                .filter(p -> p.getId() == currentPartnerId)
-                .collect(Collectors.toList());
     }
 
     private String validateDateRange(LockedPeriodSet locks, ActivityFormDTO activity) {

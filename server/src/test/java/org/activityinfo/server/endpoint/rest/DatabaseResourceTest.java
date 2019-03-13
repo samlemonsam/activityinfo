@@ -25,7 +25,7 @@ import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.login.RestMockUtils;
 import org.activityinfo.server.mail.MailSender;
 import org.activityinfo.server.mail.MailSenderStubModule;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.junit.After;
 import org.junit.Before;
@@ -71,7 +71,7 @@ public class DatabaseResourceTest extends CommandTestCase {
     private AuthTokenProvider authTokenProvider;
 
     @Inject
-    private DatabaseProvider databaseProvider;
+    private UserDatabaseProvider userDatabaseProvider;
 
     @Inject
     private BillingAccountOracle billingOracle;
@@ -82,7 +82,7 @@ public class DatabaseResourceTest extends CommandTestCase {
     public void setUp() throws URISyntaxException {
         resource = new DatabaseResource(formStorageProvider,
                 dispatcher,
-                databaseProvider,
+                userDatabaseProvider,
                 Providers.of(em),
                 mailSender,
                 billingOracle,
@@ -104,7 +104,7 @@ public class DatabaseResourceTest extends CommandTestCase {
         // Must ensure both resolve to the same UserDatabaseMeta
         DatabaseResource intIdResource = new DatabaseResource(formStorageProvider,
                 dispatcher,
-                databaseProvider,
+                userDatabaseProvider,
                 Providers.of(em),
                 mailSender,
                 billingOracle,
@@ -113,7 +113,7 @@ public class DatabaseResourceTest extends CommandTestCase {
 
         DatabaseResource resourceIdResource = new DatabaseResource(formStorageProvider,
                 dispatcher,
-                databaseProvider,
+                userDatabaseProvider,
                 Providers.of(em),
                 mailSender,
                 billingOracle,

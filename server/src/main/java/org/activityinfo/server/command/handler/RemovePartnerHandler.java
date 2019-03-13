@@ -25,11 +25,13 @@ import org.activityinfo.legacy.shared.command.result.RemoveFailedResult;
 import org.activityinfo.legacy.shared.command.result.RemoveResult;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.model.database.UserDatabaseMeta;
+import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.PermissionOracle;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -45,10 +47,10 @@ public class RemovePartnerHandler implements CommandHandler<RemovePartner> {
     private static final Logger LOGGER = Logger.getLogger(RemovePartnerHandler.class.getName());
 
     private EntityManager em;
-    private DatabaseProvider provider;
+    private UserDatabaseProvider provider;
 
     @Inject
-    public RemovePartnerHandler(EntityManager em, DatabaseProvider provider) {
+    public RemovePartnerHandler(EntityManager em, UserDatabaseProvider provider) {
         this.em = em;
         this.provider = provider;
     }
@@ -59,8 +61,9 @@ public class RemovePartnerHandler implements CommandHandler<RemovePartner> {
         Optional<UserDatabaseMeta> dbMeta = provider.getDatabaseMetadata(cmd.getDatabaseId(), user.getId());
 
         assert db != null && dbMeta.isPresent();
+        ResourceId partnerFormId = CuidAdapter.partnerFormId(db.getId());
 
-        if (!PermissionOracle.canManagePartner(dbMeta.get().getDatabaseId(), cmd.getPartnerId(), dbMeta.get())) {
+        if (!PermissionOracle.canDeletePartner(partnerFormId, cmd.getPartnerId(), dbMeta.get())) {
             LOGGER.severe(() -> String.format("User %d is not authorized to remove partner %d", dbMeta.get().getUserId(), cmd.getPartnerId()));
             throw new IllegalAccessCommandException();
         }

@@ -29,7 +29,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -41,12 +41,12 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
     private static final Logger LOGGER = Logger.getLogger(AddTargetHandler.class.getName());
 
     private final EntityManager em;
-    private final DatabaseProvider databaseProvider;
+    private final UserDatabaseProvider userDatabaseProvider;
 
     @Inject
-    public AddTargetHandler(EntityManager em, DatabaseProvider databaseProvider) {
+    public AddTargetHandler(EntityManager em, UserDatabaseProvider userDatabaseProvider) {
         this.em = em;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
     }
 
     @Override
@@ -54,7 +54,7 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
 
         TargetDTO form = cmd.getTarget();
         Database db = em.find(Database.class, cmd.getDatabaseId());
-        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(db.getId()),
                 user.getId());
 
@@ -107,9 +107,9 @@ public class AddTargetHandler implements CommandHandler<AddTarget> {
         if (!PermissionOracle.canManageTargets(databaseMeta.getDatabaseId(), databaseMeta)) {
             LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.MANAGE_TARGETS.name()
-                            + " rights on Database %d",
+                            + " rights on Database %s",
                     databaseMeta.getUserId(),
-                    databaseMeta.getLegacyDatabaseId()));
+                    databaseMeta.getDatabaseId()));
             throw new IllegalAccessCommandException();
         }
     }

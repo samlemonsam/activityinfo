@@ -36,7 +36,7 @@ import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.store.spi.BlobAuthorizerStub;
 import org.activityinfo.store.spi.TypedRecordUpdate;
-import org.activityinfo.store.testing.MockDatabaseProvider;
+import org.activityinfo.store.testing.MockUserDatabaseProvider;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -53,7 +53,7 @@ public class UpdaterTest {
     @Before
     public void setUp() {
         MockFormStorageProvider catalog = new MockFormStorageProvider();
-        MockDatabaseProvider databaseProvider = new MockDatabaseProvider();
+        MockUserDatabaseProvider databaseProvider = new MockUserDatabaseProvider();
         updater = new Updater(catalog, databaseProvider, new BlobAuthorizerStub(), new SerialNumberProviderStub(), userId, TransactionMode.STRICT);
     }
 

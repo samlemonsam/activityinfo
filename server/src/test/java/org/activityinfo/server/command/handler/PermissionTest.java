@@ -13,7 +13,7 @@ import org.activityinfo.model.permission.PermissionQuery;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.DatabaseModule;
 import org.activityinfo.server.database.OnDataSet;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -29,9 +29,9 @@ import static org.junit.Assert.*;
 public class PermissionTest {
 
     @Inject
-    protected DatabaseProvider provider;
+    protected UserDatabaseProvider provider;
 
-    private static final int DB_ID = 2;
+    private static final ResourceId DB_ID = CuidAdapter.databaseId(2);
     private static final ResourceId FORM_ID = CuidAdapter.activityFormClass(3);
 
     private static final int OWNER_ID = 1;
@@ -47,7 +47,7 @@ public class PermissionTest {
     private static final int UNAUTH_USER_ID = 3;
 
     private UserDatabaseMeta getDb(int userId) {
-        return provider.getDatabaseMetadata(CuidAdapter.databaseId(DB_ID), userId).orElse(null);
+        return provider.getDatabaseMetadata(DB_ID, userId).orElse(null);
     }
 
     @Test
@@ -171,14 +171,14 @@ public class PermissionTest {
     @Test
     public void queryCreateFormPermission() {
         // Query for authorized user who can create forms on database
-        PermissionQuery query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.CREATE_RESOURCE, CuidAdapter.databaseId(DB_ID));
+        PermissionQuery query = new PermissionQuery(SUPERVISOR_USER_ID, DB_ID, Operation.CREATE_RESOURCE, DB_ID);
         Permission permission = PermissionOracle.query(query, getDb(SUPERVISOR_USER_ID));
         assertThat(permission.getOperation(), equalTo(Operation.CREATE_RESOURCE));
         assertTrue(permission.isPermitted());
         assertFalse(permission.isFiltered());
 
         // Query for user on database without permissions to create forms
-        query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.CREATE_RESOURCE, CuidAdapter.databaseId(DB_ID));
+        query = new PermissionQuery(AUTH_RESTRICTED_USER_ID, DB_ID, Operation.CREATE_RESOURCE, DB_ID);
         permission = PermissionOracle.query(query, getDb(AUTH_RESTRICTED_USER_ID));
         assertThat(permission.getOperation(), equalTo(Operation.CREATE_RESOURCE));
         assertFalse(permission.isPermitted());

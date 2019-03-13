@@ -20,12 +20,14 @@ package org.activityinfo.ui.client.dispatch.remote;
 
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.RemoteCommandServiceAsync;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
+import org.activityinfo.ui.client.AppCacheMonitor;
 
 import java.util.Collections;
 import java.util.List;
@@ -38,18 +40,21 @@ public class RemoteDispatcher extends AbstractDispatcher {
     private final AuthenticatedUser auth;
     private final RemoteCommandServiceAsync service;
     private final String locale;
+    private final AppCacheMonitor monitor;
 
     @Inject
-    public RemoteDispatcher(AuthenticatedUser auth, RemoteCommandServiceAsync service) {
+    public RemoteDispatcher(AuthenticatedUser auth, RemoteCommandServiceAsync service, AppCacheMonitor monitor) {
         this.auth = auth;
         this.service = service;
         this.locale = LocaleInfo.getCurrentLocale().getLocaleName();
+        this.monitor = monitor;
     }
 
-    public RemoteDispatcher(AuthenticatedUser auth, RemoteCommandServiceAsync service, String locale) {
+    public RemoteDispatcher(AuthenticatedUser auth, RemoteCommandServiceAsync service, String locale, AppCacheMonitor monitor) {
         this.auth = auth;
         this.service = service;
         this.locale = locale;
+        this.monitor = monitor;
     }
 
     @Override
@@ -62,6 +67,9 @@ public class RemoteDispatcher extends AbstractDispatcher {
                     new AsyncCallback<List<CommandResult>>() {
                         @Override
                         public void onFailure(Throwable throwable) {
+                            if (throwable instanceof IncompatibleRemoteServiceException) {
+                                monitor.onSerializationException();
+                            }
                             callback.onFailure(throwable);
                         }
 

@@ -47,7 +47,7 @@ import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
 import org.activityinfo.server.mail.*;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.codehaus.jackson.map.annotate.JsonView;
@@ -66,7 +66,7 @@ public class DatabaseResource {
 
     private Provider<FormStorageProvider> catalog;
     private final DispatcherSync dispatcher;
-    private final DatabaseProvider databaseProvider;
+    private final UserDatabaseProvider userDatabaseProvider;
     private final Provider<EntityManager> entityManagerProvider;
     private final MailSender mailSender;
     private final BillingAccountOracle billingOracle;
@@ -77,21 +77,24 @@ public class DatabaseResource {
 
     public DatabaseResource(Provider<FormStorageProvider> catalog,
                             DispatcherSync dispatcher,
-                            DatabaseProvider databaseProvider,
+                            UserDatabaseProvider userDatabaseProvider,
                             Provider<EntityManager> entityManagerProvider,
                             MailSender mailSender,
                             BillingAccountOracle billingOracle,
                             String id) {
         this.catalog = catalog;
         this.dispatcher = dispatcher;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
         this.entityManagerProvider = entityManagerProvider;
         this.mailSender = mailSender;
         this.billingOracle = billingOracle;
 
-        // Id could be an Integer or a ResourceId (to comply with older version of /resources/database endpoint)
+        // Id could be:
+        // - an Integer (to comply with older version of /resources/database endpoint)
+        // - a ResourceId
+        // - a Geodb reference
         ResourceId dbResourceId = ResourceId.valueOf(id);
-        if (!CuidAdapter.isValidLegacyId(dbResourceId)) {
+        if (!CuidAdapter.isValidLegacyId(dbResourceId) && !GeoDatabaseProvider.GEODB_ID.equals(dbResourceId)) {
             dbResourceId = CuidAdapter.databaseId(Integer.valueOf(id));
         }
         this.databaseId = dbResourceId;
@@ -100,7 +103,7 @@ public class DatabaseResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public UserDatabaseMeta getDatabaseMetadata(@InjectParam AuthenticatedUser user) {
-        Optional<UserDatabaseMeta> db = databaseProvider.getDatabaseMetadata(databaseId, user.getUserId());
+        Optional<UserDatabaseMeta> db = userDatabaseProvider.getDatabaseMetadata(databaseId, user.getUserId());
         if (!db.isPresent()) {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
@@ -342,7 +345,7 @@ public class DatabaseResource {
         userPermission.setAllowManageUsers(false);
         userPermission.setAllowManageAllUsers(false);
         userPermission.setAllowExport(false);
-        userPermission.setPartner(defaultPartner);
+        userPermission.addPartner(defaultPartner);
         entityManagerProvider.get().persist(userPermission);
     }
 
@@ -415,6 +418,7 @@ public class DatabaseResource {
 
     private void transferDatabase(Database database, User newOwner) {
         database.setOwner(newOwner);
+        database.setLastMetaAndSchemaUpdate(new Date());
         entityManagerProvider.get().persist(database);
     }
 

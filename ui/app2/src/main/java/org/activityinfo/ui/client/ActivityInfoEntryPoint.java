@@ -105,7 +105,7 @@ public class ActivityInfoEntryPoint implements EntryPoint {
 
             createCaches(injector);
 
-            AppCacheMonitor.start();
+            injector.getAppCacheMonitor().start();
 
             new BillingSupervisor().run();
         }

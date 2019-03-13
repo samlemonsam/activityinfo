@@ -30,7 +30,7 @@ import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Optional;
@@ -42,12 +42,12 @@ public class DeleteHandler implements CommandHandler<Delete> {
     private static final Logger LOGGER = Logger.getLogger(DeleteHandler.class.getName());
 
     private EntityManager em;
-    private DatabaseProvider provider;
+    private UserDatabaseProvider provider;
 
     @Inject
-    public DeleteHandler(EntityManager em, DatabaseProvider databaseProvider) {
+    public DeleteHandler(EntityManager em, UserDatabaseProvider userDatabaseProvider) {
         this.em = em;
-        this.provider = databaseProvider;
+        this.provider = userDatabaseProvider;
     }
 
     @Override
@@ -244,9 +244,9 @@ public class DeleteHandler implements CommandHandler<Delete> {
         if (!PermissionOracle.canManageTargets(databaseId, databaseMeta.get())) {
             LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.MANAGE_TARGETS.name()
-                            + " rights on Database %d",
+                            + " rights on Database %s",
                     databaseMeta.get().getUserId(),
-                    databaseMeta.get().getLegacyDatabaseId()));
+                    databaseMeta.get().getDatabaseId()));
             throw new IllegalAccessCommandException();
         }
     }
@@ -262,9 +262,9 @@ public class DeleteHandler implements CommandHandler<Delete> {
         if (!PermissionOracle.canDeleteForm(locationTypeForm, databaseMeta.get())) {
             LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.DELETE_RESOURCE.name()
-                            + " rights on Database %d",
+                            + " rights on Database %s",
                     databaseMeta.get().getUserId(),
-                    databaseMeta.get().getLegacyDatabaseId()));
+                    databaseMeta.get().getDatabaseId()));
             throw new IllegalAccessCommandException();
         }
     }

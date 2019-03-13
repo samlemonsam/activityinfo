@@ -33,8 +33,8 @@ import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.shared.FormScanCache;
 import org.activityinfo.store.query.shared.NullFormScanCache;
-import org.activityinfo.store.spi.DatabaseProvider;
-import org.activityinfo.store.testing.MockDatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
+import org.activityinfo.store.testing.MockUserDatabaseProvider;
 import org.junit.After;
 import org.junit.Before;
 
@@ -44,7 +44,7 @@ public abstract class AbstractMySqlTest {
 
     public static final int ADVOCACY = 4000;
 
-    public final DatabaseProvider databaseProvider = new MockDatabaseProvider();
+    public final UserDatabaseProvider userDatabaseProvider = new MockUserDatabaseProvider();
 
     private final LocalServiceTestHelper helper =
             new LocalServiceTestHelper(
@@ -122,7 +122,7 @@ public abstract class AbstractMySqlTest {
         ColumnSetBuilder builder = new ColumnSetBuilder(
                 catalog,
                 cache,
-                new FormSupervisorAdapter(catalog, databaseProvider, userId));
+                new FormSupervisorAdapter(catalog, userDatabaseProvider, userId));
 
         columnSet = builder.build(queryModel);
 

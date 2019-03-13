@@ -109,7 +109,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
         UserPermissionDTO user = new UserPermissionDTO();
         user.setEmail("other@foobar");
         user.setName("Foo Bar");
-        user.setPartner(NRC_DTO);
+        user.addPartner(NRC_DTO);
         user.setAllowView(true);
 
         UpdateUserPermissions cmd = new UpdateUserPermissions(1, user);
@@ -128,11 +128,12 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
             throws IllegalAccessCommandException {
 
         UserPermission executingUserPermissions = new UserPermission();
-        executingUserPermissions.setPartner(NRC);
+        executingUserPermissions.addPartner(NRC);
+        executingUserPermissions.setAllowView(true);
         executingUserPermissions.setAllowManageUsers(true);
 
         UserPermissionDTO dto = new UserPermissionDTO();
-        dto.setPartner(NRC_DTO);
+        dto.addPartner(NRC_DTO);
         dto.setAllowView(true);
 
         UpdateUserPermissions cmd = new UpdateUserPermissions(1, dto);
@@ -149,11 +150,13 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
             throws IllegalAccessCommandException {
 
         UserPermission executingUserPermissions = new UserPermission();
-        executingUserPermissions.setPartner(NRC);
+        executingUserPermissions.addPartner(NRC);
+        executingUserPermissions.setAllowView(true);
+        executingUserPermissions.setAllowEdit(true);
         executingUserPermissions.setAllowManageUsers(true);
 
         UserPermissionDTO dto = new UserPermissionDTO();
-        dto.setPartner(NRC_DTO);
+        dto.addPartner(NRC_DTO);
         dto.setAllowView(true);
         dto.setAllowEdit(true);
 
@@ -167,11 +170,11 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
             throws IllegalAccessCommandException {
 
         UserPermission executingUserPermissions = new UserPermission();
-        executingUserPermissions.setPartner(IRC);
+        executingUserPermissions.addPartner(IRC);
         executingUserPermissions.setAllowManageUsers(true);
 
         UserPermissionDTO dto = new UserPermissionDTO();
-        dto.setPartner(NRC_DTO);
+        dto.addPartner(NRC_DTO);
         dto.setAllowView(true);
         dto.setAllowEdit(true);
 
@@ -185,12 +188,14 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
             throws IllegalAccessCommandException {
 
         UserPermission executingUserPermissions = new UserPermission();
-        executingUserPermissions.setPartner(IRC);
+        executingUserPermissions.addPartner(IRC);
+        executingUserPermissions.setAllowView(true);
+        executingUserPermissions.setAllowEdit(true);
         executingUserPermissions.setAllowManageUsers(true);
         executingUserPermissions.setAllowManageAllUsers(true);
 
         UserPermissionDTO dto = new UserPermissionDTO();
-        dto.setPartner(NRC_DTO);
+        dto.addPartner(NRC_DTO);
         dto.setAllowView(true);
         dto.setAllowEdit(true);
 
@@ -212,7 +217,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
         UserPermissionDTO user = new UserPermissionDTO();
         user.setEmail("ralph@lauren.com");
         user.setName("Ralph");
-        user.setPartner(new PartnerDTO(1, "NRC"));
+        user.addPartner(new PartnerDTO(1, "NRC"));
         user.setAllowView(true);
         user.setAllowEdit(true);
 
@@ -239,7 +244,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
 
         UserPermissionDTO user = new UserPermissionDTO();
         user.setEmail("bavon@nrcdrc.org");
-        user.setPartner(new PartnerDTO(1, "NRC"));
+        user.addPartner(new PartnerDTO(1, "NRC"));
         user.setAllowView(true);
         user.setAllowViewAll(false);
         user.setAllowEdit(true);
@@ -263,7 +268,7 @@ public class UpdateUserPermissionsHandlerTest extends CommandTestCase {
         UserPermissionDTO newUser = new UserPermissionDTO();
         newUser.setName("Bavon");
         newUser.setEmail("bavon@nrcdrc.org");
-        newUser.setPartner(new PartnerDTO(1, "NRC"));
+        newUser.addPartner(new PartnerDTO(1, "NRC"));
         newUser.setAllowView(true);
         newUser.setAllowViewAll(false);
         newUser.setAllowEdit(true);

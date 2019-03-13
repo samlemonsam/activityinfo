@@ -22,7 +22,6 @@ import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import com.google.inject.util.Providers;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.legacy.shared.command.CreateLockedPeriod;
 import org.activityinfo.legacy.shared.command.GetSchema;
@@ -37,7 +36,7 @@ import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.endpoint.rest.BillingAccountOracle;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -107,7 +106,7 @@ public class LockedPeriodTest extends CommandTestCase {
         assertTrue(locks.isActivityLocked(1, new LocalDate(2011, 1,1)));
 
         // Verify that the new code works too...
-        DatabaseProvider provider = injector.getInstance(DatabaseProvider.class);
+        UserDatabaseProvider provider = injector.getInstance(UserDatabaseProvider.class);
         UserDatabaseMeta metadata = provider.getDatabaseMetadata(CuidAdapter.databaseId(1), 1).get();
 
         ArrayList<RecordLock> folderLocks = Lists.newArrayList(metadata.getEffectiveLocks(CuidAdapter.folderId(1)));

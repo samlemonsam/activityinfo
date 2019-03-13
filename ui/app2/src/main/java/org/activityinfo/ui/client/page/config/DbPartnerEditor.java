@@ -127,7 +127,7 @@ public class DbPartnerEditor implements IsWidget, ActionListener, DbPage {
         this.db = db;
         this.contentPanel.setHeadingText(db.getName() + " - " + I18N.CONSTANTS.partners());
         this.store.removeAll();
-        this.store.add(new ArrayList<>(db.getPartners()));
+        this.store.add(new ArrayList<>(db.getDatabasePartners()));
     }
 
     private ColumnModel createColumnModel() {

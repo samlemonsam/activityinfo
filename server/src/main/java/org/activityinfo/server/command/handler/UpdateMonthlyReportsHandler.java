@@ -35,7 +35,7 @@ import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.server.event.sitehistory.ChangeType;
 import org.activityinfo.server.event.sitehistory.SiteHistoryProcessor;
 import org.activityinfo.store.query.UsageTracker;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Calendar;
@@ -60,17 +60,17 @@ public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthly
     private final EntityManager em;
     private final KeyGenerator keyGenerator;
     private final SiteHistoryProcessor siteHistoryProcessor;
-    private final DatabaseProvider databaseProvider;
+    private final UserDatabaseProvider userDatabaseProvider;
 
     @Inject
     public UpdateMonthlyReportsHandler(EntityManager em,
                                        KeyGenerator keyGenerator,
                                        SiteHistoryProcessor siteHistoryProcessor,
-                                       DatabaseProvider databaseProvider) {
+                                       UserDatabaseProvider userDatabaseProvider) {
         this.em = em;
         this.keyGenerator = keyGenerator;
         this.siteHistoryProcessor = siteHistoryProcessor;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
     }
 
     @Override
@@ -91,7 +91,7 @@ public class UpdateMonthlyReportsHandler implements CommandHandler<UpdateMonthly
                 throw new CommandException(cmd, "site " + cmd.getSiteId() + " not found for user " + user.getEmail());
             }
 
-            Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
+            Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(
                     CuidAdapter.databaseId(site.getActivity().getDatabase().getId()),
                     user.getId());
 

@@ -20,19 +20,19 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Provides the CatalogEntries for a database
+ * Provides the CatalogEntries for database(s) stored in MySQL.
  */
 public class DatabaseCatalogProvider implements FormCatalog {
 
-    private final UserDatabaseProvider userDatabaseProvider;
+    private final DesignedDatabaseProvider designedDatabaseProvider;
     private final GeoDatabaseProvider geoDatabaseProvider;
     private final Provider<EntityManager> entityManager;
 
     @Inject
-    public DatabaseCatalogProvider(UserDatabaseProvider userDatabaseProvider,
+    public DatabaseCatalogProvider(DesignedDatabaseProvider designedDatabaseProvider,
                                    GeoDatabaseProvider geoDatabaseProvider,
                                    Provider<EntityManager> entityManager) {
-        this.userDatabaseProvider = userDatabaseProvider;
+        this.designedDatabaseProvider = designedDatabaseProvider;
         this.geoDatabaseProvider = geoDatabaseProvider;
         this.entityManager = entityManager;
     }
@@ -51,7 +51,7 @@ public class DatabaseCatalogProvider implements FormCatalog {
     }
 
     private static CatalogEntry databaseRootCatalogEntry() {
-        return new CatalogEntry(UserDatabaseProvider.ROOT_ID,
+        return new CatalogEntry(DesignedDatabaseProvider.ROOT_ID,
                 I18N.CONSTANTS.databases(),
                 CatalogEntryType.FOLDER);
     }
@@ -64,13 +64,13 @@ public class DatabaseCatalogProvider implements FormCatalog {
         }
 
         // check next if all databases visible to user are being requested
-        if (parentId.equals(UserDatabaseProvider.ROOT_ID)) {
+        if (parentId.equals(DesignedDatabaseProvider.ROOT_ID)) {
             return findDatabaseEntries(userId);
         }
 
         // Otherwise, the UserDatabaseMeta has sufficient data to construct the Catalog Entries
         ResourceId parentResourceId = ResourceId.valueOf(parentId);
-        Optional<UserDatabaseMeta> db = userDatabaseProvider.queryUserDatabaseMetaByResource(parentResourceId, userId);
+        Optional<UserDatabaseMeta> db = designedDatabaseProvider.queryUserDatabaseMetaByResource(parentResourceId, userId);
         if (!db.isPresent()) {
             return Collections.emptyList();
         }

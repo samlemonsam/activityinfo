@@ -67,7 +67,8 @@ public class SchemaMigration {
             "UPDATE location SET workflowStatusId='validated' WHERE workflowStatusId is null ",
             "ALTER TABLE indicator ADD COLUMN visible bit(1) NOT null DEFAULT 1",
             "CREATE TABLE IF NOT EXISTS folder (folderId INT, databaseId INT, name TEXT, sortOrder int)",
-            "ALTER TABLE activity ADD COLUMN folderId INT"
+            "ALTER TABLE activity ADD COLUMN folderId INT",
+            "CREATE TABLE IF NOT EXISTS groupassignment (userPermissionId INT, partnerId INT)"
     };
 
     @Inject

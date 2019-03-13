@@ -25,7 +25,7 @@ import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.VoidResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.logging.Logger;
@@ -36,9 +36,9 @@ public class UpdateTargetValueHandler extends BaseEntityHandler implements Comma
 
     @Inject
     public UpdateTargetValueHandler(EntityManager em,
-                                    DatabaseProvider databaseProvider,
+                                    UserDatabaseProvider userDatabaseProvider,
                                     Injector injector) {
-        super(em, databaseProvider);
+        super(em, userDatabaseProvider);
     }
 
     @Override

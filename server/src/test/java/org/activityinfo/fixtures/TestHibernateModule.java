@@ -58,8 +58,8 @@ public class TestHibernateModule extends AbstractModule {
 
         bind(DatabaseGrantProvider.class).to(HibernateDatabaseGrantProvider.class);
         bind(DatabaseMetaProvider.class).to(HibernateDatabaseMetaProvider.class);
-        bind(DatabaseMetaCache.class).to(HibernateDatabaseMetaCache.class);
-        bind(DatabaseGrantCache.class).to(HibernateDatabaseGrantCache.class);
+        bind(DatabaseMetaLoader.class).to(HibernateDatabaseMetaLoader.class);
+        bind(DatabaseGrantLoader.class).to(HibernateDatabaseGrantLoader.class);
 
         bind(SqlDialect.class).to(MySqlDialect.class);
         bind(Connection.class).toProvider(TestConnectionProvider.class);
@@ -106,7 +106,7 @@ public class TestHibernateModule extends AbstractModule {
     @Provides
     protected HibernateDatabaseMetaProvider provideHibernateDatabaseMetaProvider(Provider<EntityManager> entityManager,
                                                                                  FormStorageProvider formStorageProvider,
-                                                                                 HibernateDatabaseMetaCache databaseMetaCache) {
+                                                                                 HibernateDatabaseMetaLoader databaseMetaCache) {
         return new HibernateDatabaseMetaProvider(entityManager,
                 formStorageProvider,
                 databaseMetaCache);
@@ -114,24 +114,24 @@ public class TestHibernateModule extends AbstractModule {
 
     @Provides
     protected HibernateDatabaseGrantProvider provideHibernateDatabaseGrantProvider(Provider<EntityManager> entityManager,
-                                                                                   DatabaseGrantCache databaseGrantCache) {
+                                                                                   DatabaseGrantLoader databaseGrantLoader) {
         return new HibernateDatabaseGrantProvider(entityManager,
-                databaseGrantCache);
+                databaseGrantLoader);
     }
 
     @Provides
-    protected HibernateDatabaseMetaCache provideHibernateDatabaseMetaCache(Provider<EntityManager> entityManager,
-                                                                           FormStorageProvider formStorageProvider,
-                                                                           BillingAccountOracle billingAccountOracle) {
-        return new HibernateDatabaseMetaCache(entityManager,
+    protected HibernateDatabaseMetaLoader provideHibernateDatabaseMetaCache(Provider<EntityManager> entityManager,
+                                                                            FormStorageProvider formStorageProvider,
+                                                                            BillingAccountOracle billingAccountOracle) {
+        return new HibernateDatabaseMetaLoader(entityManager,
                 formStorageProvider,
                 MemcacheServiceFactory.getMemcacheService(),
                 billingAccountOracle);
     }
 
     @Provides
-    protected HibernateDatabaseGrantCache provideHibernateDatabaseGrantCache(Provider<EntityManager> entityManager) {
-        return new HibernateDatabaseGrantCache(entityManager,
+    protected HibernateDatabaseGrantLoader provideHibernateDatabaseGrantCache(Provider<EntityManager> entityManager) {
+        return new HibernateDatabaseGrantLoader(entityManager,
                 MemcacheServiceFactory.getMemcacheService());
     }
     

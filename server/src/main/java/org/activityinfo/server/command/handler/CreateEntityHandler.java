@@ -31,7 +31,7 @@ import org.activityinfo.server.command.handler.crud.LocationTypePolicy;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.command.handler.crud.UserDatabasePolicy;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.query.UsageTracker;
 
 import javax.persistence.EntityManager;
@@ -50,9 +50,9 @@ public class CreateEntityHandler extends BaseEntityHandler implements CommandHan
 
     @Inject
     public CreateEntityHandler(EntityManager em,
-                               DatabaseProvider databaseProvider,
+                               UserDatabaseProvider userDatabaseProvider,
                                Injector injector) {
-        super(em, databaseProvider);
+        super(em, userDatabaseProvider);
         this.injector = injector;
     }
 

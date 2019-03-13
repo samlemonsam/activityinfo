@@ -13,6 +13,7 @@ import org.activityinfo.model.formula.*;
 import org.activityinfo.model.formula.diagnostic.FormulaException;
 import org.activityinfo.model.formula.eval.EvalContext;
 import org.activityinfo.model.formula.functions.EqualFunction;
+import org.activityinfo.model.formula.functions.OrFunction;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.primitive.BooleanFieldValue;
@@ -36,6 +37,7 @@ public class PermissionOracle {
         if (db.isPublished()) {
             switch (query.getOperation()) {
                 case VIEW:
+                case EXPORT_RECORDS:
                     return allow(query.getOperation());
 
                 case CREATE_RECORD:
@@ -267,42 +269,6 @@ public class PermissionOracle {
     ///////////////////////////////////////////// FORM PERMISSION METHODS //////////////////////////////////////////////
 
     public static FormPermissions formPermissions(ResourceId formId, UserDatabaseMeta db) {
-        if (!db.isVisible() || db.isDeleted()) {
-            return FormPermissions.none();
-        }
-        if (db.isOwner()) {
-            return FormPermissions.owner(db.getEffectiveLocks(formId));
-        }
-        if (db.isPublished()) {
-            if(formId.getDomain() == CuidAdapter.LOCATION_TYPE_DOMAIN) {
-                return FormPermissions.readWrite(db.getEffectiveLocks(formId));
-            } else {
-                return FormPermissions.readonly();
-            }
-        }
-        if (isProjectForm(formId)) {
-            return computeFormPermissions(formId, db);
-        }
-        if (!db.hasResource(formId)) {
-            return FormPermissions.none();
-        }
-        if (!isFormOrSubFormResource(db.getResource(formId).get())) {
-            return FormPermissions.none();
-        }
-        return computeFormPermissions(formId, db);
-    }
-
-    private static boolean isFormOrSubFormResource(Resource resource) {
-        switch(resource.getType()) {
-            case FORM:
-            case SUB_FORM:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    private static FormPermissions computeFormPermissions(ResourceId formId, UserDatabaseMeta db) {
         FormPermissions.Builder permissionsBuilder = new FormPermissions.Builder();
         computeViewFormPermissions(permissionsBuilder, formId, db);
         if (!permissionsBuilder.isAllowedView()) {
@@ -452,53 +418,61 @@ public class PermissionOracle {
     private static boolean filterAllowsPartner(Permission permission, int partnerId, UserDatabaseMeta db) {
         return !permission.isFiltered()
                 || filterContainsPartner(permission.getFilter(),
-                    CuidAdapter.partnerFormId(db.getLegacyDatabaseId()),
+                    CuidAdapter.partnerFormId(CuidAdapter.getLegacyIdFromCuid(db.getDatabaseId())),
                     CuidAdapter.partnerRecordId(partnerId));
     }
 
+    /**
+     * <p>Parses the provided filter and checks whether it contains a node allowing the provided partner record.
+     * It will return TRUE if a node in the binary tree of FormaulaNodes equals the Partner Record FormulaNode, in the
+     * form of {@code P0000000000 == "p0000000000"}</p>
+     *
+     * <p><b>NB:</b> Assumes that filter contains <b>only</b> Partner restrictions and that all restrictions are defined
+     * as a binary tree of OR operations. </p>
+     */
     private static boolean filterContainsPartner(String filter, ResourceId partnerFormId, ResourceId partnerId) {
         FormulaNode filterFormula = FormulaParser.parse(filter);
+        List<FormulaNode> partnerNodes =  Formulas.findBinaryTree(filterFormula, OrFunction.INSTANCE);
 
         SymbolNode expectedPartnerForm = new SymbolNode(partnerFormId);
         ConstantNode expectedPartnerRecord = new ConstantNode(partnerId.asString());
+        FormulaNode expectedPartnerNode = new FunctionCallNode(EqualFunction.INSTANCE, expectedPartnerForm, expectedPartnerRecord);
 
-        if (!(filterFormula instanceof FunctionCallNode)) {
-            return false;
-        }
-        if (!(((FunctionCallNode) filterFormula).getFunction() instanceof EqualFunction)) {
-            return false;
-        }
-        if (((FunctionCallNode) filterFormula).getArgumentCount() != 2) {
-            return false;
-        }
+        return partnerNodes.stream().anyMatch(expectedPartnerNode::equals);
+    }
 
-        FunctionCallNode equalFunctionCall = (FunctionCallNode) filterFormula;
+    /**
+     * <p>Parses the provided filter and maps each Partner Record FormulaNode, in the form of
+     * {@code P0000000000 == "p0000000000"}, to the Partner Record Integer id.</p>
+     *
+     * <p><b>NB:</b> Assumes that filter contains <b>only</b> Partner restrictions and that all restrictions are defined
+     * as a binary tree of OR operations. </p>
+     */
+    public static List<Integer> allowedPartnersFromFilter(String filter) {
+        FormulaNode filterFormula = FormulaParser.parse(filter);
+        List<FormulaNode> partnerNodes = Formulas.findBinaryTree(filterFormula, OrFunction.INSTANCE);
+        return partnerNodes.stream()
+                .filter(PermissionOracle::isEqualFunctionCallNode)
+                .map(PermissionOracle::partnerFromNode)
+                .collect(Collectors.toList());
+    }
 
-        if (!(equalFunctionCall.getArgument(0 ) instanceof SymbolNode)) {
-            return false;
-        }
-        if (!(equalFunctionCall.getArgument(1) instanceof ConstantNode)) {
-            return false;
-        }
+    private static boolean isEqualFunctionCallNode(FormulaNode node) {
+        return node instanceof FunctionCallNode
+                && ((FunctionCallNode) node).getFunction() instanceof EqualFunction;
+    }
 
-        SymbolNode partnerFormNode = (SymbolNode) equalFunctionCall.getArgument(0);
-        ConstantNode partnerFieldNode = (ConstantNode) equalFunctionCall.getArgument(1);
-
-        if (!partnerFormNode.equals(expectedPartnerForm)) {
-            return false;
-        }
-        if (!partnerFieldNode.equals(expectedPartnerRecord)) {
-            return false;
-        }
-
-        return true;
+    private static int partnerFromNode(FormulaNode partnerNode) {
+        FunctionCallNode equalFunctionCall = (FunctionCallNode) partnerNode;
+        ConstantNode partnerRecordNode = (ConstantNode) equalFunctionCall.getArgument(1);
+        return CuidAdapter.getLegacyIdFromCuid(partnerRecordNode.getValue().toString());
     }
 
     ///////////////////////////////////////////// BASIC PERMISSION QUERIES /////////////////////////////////////////////
 
     public static Permission view(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.VIEW,
                 resourceId);
         return query(query, db);
@@ -506,7 +480,7 @@ public class PermissionOracle {
 
     public static Permission createRecord(ResourceId formId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.CREATE_RECORD,
                 formId);
         return query(query, db);
@@ -514,7 +488,7 @@ public class PermissionOracle {
 
     public static Permission deleteRecord(ResourceId formId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.DELETE_RECORD,
                 formId);
         return query(query, db);
@@ -522,7 +496,7 @@ public class PermissionOracle {
 
     public static Permission editRecord(ResourceId formId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.EDIT_RECORD,
                 formId);
         return query(query, db);
@@ -530,7 +504,7 @@ public class PermissionOracle {
 
     public static Permission manageUsers(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.MANAGE_USERS,
                 resourceId);
         return query(query, db);
@@ -538,7 +512,7 @@ public class PermissionOracle {
 
     public static Permission createResource(ResourceId containerResourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.CREATE_RESOURCE,
                 containerResourceId);
         return query(query, db);
@@ -546,7 +520,7 @@ public class PermissionOracle {
 
     public static Permission deleteResource(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.DELETE_RESOURCE,
                 resourceId);
         return query(query, db);
@@ -554,7 +528,7 @@ public class PermissionOracle {
 
     public static Permission editResource(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.EDIT_RESOURCE,
                 resourceId);
         return query(query, db);
@@ -562,7 +536,7 @@ public class PermissionOracle {
 
     public static Permission lockRecords(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.LOCK_RECORDS,
                 resourceId);
         return query(query, db);
@@ -570,7 +544,7 @@ public class PermissionOracle {
 
     public static Permission exportRecords(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.EXPORT_RECORDS,
                 resourceId);
         return query(query, db);
@@ -578,7 +552,7 @@ public class PermissionOracle {
 
     public static Permission manageTargets(ResourceId resourceId, UserDatabaseMeta db) {
         PermissionQuery query = new PermissionQuery(db.getUserId(),
-                db.getLegacyDatabaseId(),
+                db.getDatabaseId(),
                 Operation.MANAGE_TARGETS,
                 resourceId);
         return query(query, db);
@@ -609,6 +583,28 @@ public class PermissionOracle {
      */
     public static boolean canEditDatabase(UserDatabaseMeta db) {
         return db.isOwner();
+    }
+
+    /////////////////////////////////////////////////// SYNC Methods ///////////////////////////////////////////////////
+
+    /**
+     * <p>The current User can synchronise this Database.</p>
+     *
+     * <p><b>NB:</b> This is a specially handled permission method for CLASSIC databases. Databases which were
+     * <i>previously</i> synced but whose permissions have been removed must be prevented from synchronizing even if the
+     * database contains public resources. Routine checks to see whether there are <i>any</i> grants for current user.</p>
+     */
+    public static boolean canSyncClassicDatabase(UserDatabaseMeta db) {
+        if (!db.isVisible() || db.isDeleted()) {
+            return false;
+        }
+        if (db.isOwner()) {
+            return true;
+        }
+        if (!db.getGrants().isEmpty()) {
+            return true;
+        }
+        return false;
     }
 
     /////////////////////////////////////////////////// VIEW Methods ///////////////////////////////////////////////////
@@ -790,6 +786,14 @@ public class PermissionOracle {
     ////////////////////////////////////////////// MANAGE_USERS Methods ////////////////////////////////////////////////
 
     /**
+     * <p>The current User can manage a user with given Partner on the specified Resource on this Database.</p>
+     */
+    public static boolean canManageUser(ResourceId resourceId, int partnerId, UserDatabaseMeta db) {
+        Permission manageUser = manageUsers(resourceId, db);
+        return manageUser.isPermitted() && filterAllowsPartner(manageUser, partnerId, db);
+    }
+
+    /**
      * <p>The current User can manage users for any Resource on this Database.</p>
      * <p>Does not account for any filters which may be applied/enforced.</p>
      */
@@ -803,24 +807,6 @@ public class PermissionOracle {
      */
     public static boolean canManageUsersOnResource(ResourceId resourceId, UserDatabaseMeta db) {
         return manageUsers(resourceId,db).isPermitted();
-    }
-
-    /**
-     * <p>The current User can manage users, with given Partner Id, on the specified Resource in this Database.</p>
-     * <p>Explicitly checks the filter to ensure that User is permitted to manage users <b>for this Partner.</b></p>
-     */
-    public static boolean canManagePartner(ResourceId resourceId, int partnerId, UserDatabaseMeta db) {
-        Permission manageUsers = manageUsers(resourceId, db);
-        return manageUsers.isPermitted() && filterAllowsPartner(manageUsers, partnerId, db);
-    }
-
-    /**
-     * <p>The current User can manage users, with <i>any</i> Partner Id, on the specified Resource in this Database.</p>
-     * <p>Explicitly checks to ensure User has <b>no filters</b> associated with this Permission.</p>
-     */
-    public static boolean canManageAllPartners(ResourceId resourceId, UserDatabaseMeta db) {
-        Permission manageUsers = manageUsers(resourceId, db);
-        return manageUsers.isPermitted() && !manageUsers.isFiltered();
     }
 
     /**
@@ -863,6 +849,49 @@ public class PermissionOracle {
                 .filter(Permission::isPermitted)
                 .map(Permission::getOptionalFilter)
                 .findFirst().orElse(Optional.empty());
+    }
+
+    ///////////////////////////////////////////// MANAGE_PARTNER Methods ///////////////////////////////////////////////
+
+    /**
+     * <p>The current User can create partners in this Database.</p>
+     */
+    public static boolean canCreatePartner(ResourceId partnerFormId, UserDatabaseMeta db) {
+        Permission createPartner = createRecord(partnerFormId, db);
+        return createPartner.isPermitted() && !createPartner.isFiltered();
+    }
+
+    /**
+     * <p>The current User can edit partners in this Database.</p>
+     * <p>Explicitly checks the filter to ensure that User is permitted to edit <b>this Partner.</b></p>
+     */
+    public static boolean canEditPartner(ResourceId partnerFormId, int partnerId, UserDatabaseMeta db) {
+        Permission editPartner = editRecord(partnerFormId, db);
+        return editPartner.isPermitted() && filterAllowsPartner(editPartner, partnerId, db);
+    }
+
+    /**
+     * <p>The current User can delete partners in this Database.</p>
+     * <p>Explicitly checks the filter to ensure that User is permitted to delete <b>this Partner.</b></p>
+     */
+    public static boolean canDeletePartner(ResourceId partnerFormId, int partnerId, UserDatabaseMeta db) {
+        Permission deletePartner = deleteRecord(partnerFormId, db);
+        return deletePartner.isPermitted() && filterAllowsPartner(deletePartner, partnerId, db);
+    }
+
+    /**
+     * <p>The current User can manage partners in this Database.</p>
+     *
+     * <p>A User can manage partners if they have CREATE_RECORD, EDIT_RECORD or DELETE_RECORD rights on the
+     * Partner form.</p>
+     *
+     * <p>Does not account for any filters which may be applied/enforced.</p>
+     */
+    public static boolean canManagePartners(ResourceId partnerFormId, UserDatabaseMeta db) {
+        Permission createPartner = createRecord(partnerFormId, db);
+        Permission editPartner = editRecord(partnerFormId, db);
+        Permission deletePartner = deleteRecord(partnerFormId, db);
+        return createPartner.isPermitted() || editPartner.isPermitted() || deletePartner.isPermitted();
     }
 
 }

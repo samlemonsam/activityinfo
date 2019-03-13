@@ -35,7 +35,7 @@ import org.activityinfo.server.database.hibernate.dao.ActivityDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
 import org.activityinfo.server.database.hibernate.entity.*;
 import org.activityinfo.store.query.UsageTracker;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -51,17 +51,17 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
     private static final Logger LOGGER = Logger.getLogger(ActivityPolicy.class.getName());
 
     private final EntityManager em;
-    private final DatabaseProvider databaseProvider;
+    private final UserDatabaseProvider userDatabaseProvider;
     private final ActivityDAO activityDAO;
     private final UserDatabaseDAO databaseDAO;
 
     @Inject
     public ActivityPolicy(EntityManager em,
-                          DatabaseProvider databaseProvider,
+                          UserDatabaseProvider userDatabaseProvider,
                           ActivityDAO activityDAO,
                           UserDatabaseDAO databaseDAO) {
         this.em = em;
-        this.databaseProvider = databaseProvider;
+        this.userDatabaseProvider = userDatabaseProvider;
         this.activityDAO = activityDAO;
         this.databaseDAO = databaseDAO;
     }
@@ -107,9 +107,9 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         if (!PermissionOracle.canCreateForm(databaseMeta.getDatabaseId(), databaseMeta)) {
             LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.CREATE_RESOURCE.name()
-                            + " rights on Database %d",
+                            + " rights on Database %s",
                     databaseMeta.getUserId(),
-                    databaseMeta.getLegacyDatabaseId()));
+                    databaseMeta.getDatabaseId()));
             throw new IllegalAccessCommandException();
         }
     }
@@ -122,16 +122,16 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         if (!PermissionOracle.canEditForm(formId, databaseMeta)) {
             LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.EDIT_RESOURCE.name()
-                            + " rights on Database %d",
+                            + " rights on Database %s",
                     databaseMeta.getUserId(),
-                    databaseMeta.getLegacyDatabaseId()));
+                    databaseMeta.getDatabaseId()));
             throw new IllegalAccessCommandException();
         }
     }
 
     private Optional<UserDatabaseMeta> getDatabaseMeta(PropertyMap properties, User user) {
         ResourceId databaseId = CuidAdapter.databaseId(properties.getRequiredInt("databaseId"));
-        return databaseProvider.getDatabaseMetadata(databaseId, user.getId());
+        return userDatabaseProvider.getDatabaseMetadata(databaseId, user.getId());
     }
 
     public Activity persist(Activity activity) {
@@ -142,7 +142,7 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
     @Override
     public void update(User user, Object entityId, PropertyMap changes) {
         Activity activity = em.find(Activity.class, entityId);
-        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(
                 CuidAdapter.databaseId(activity.getDatabase().getId()),
                 user.getId());
 

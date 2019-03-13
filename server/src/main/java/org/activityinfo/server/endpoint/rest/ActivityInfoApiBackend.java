@@ -26,6 +26,7 @@ import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.permission.PermissionOracle;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.store.hrd.AppEngineFormScanCache;
 import org.activityinfo.store.hrd.HrdSerialNumberProvider;
@@ -37,6 +38,7 @@ import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.FormSupervisor;
 import org.activityinfo.store.spi.*;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -68,8 +70,8 @@ public class ActivityInfoApiBackend implements ApiBackend {
     }
 
     @Override
-    public DatabaseProvider getDatabaseProvider() {
-        return injector.getInstance(DatabaseProvider.class);
+    public UserDatabaseProvider getDatabaseProvider() {
+        return injector.getInstance(UserDatabaseProvider.class);
     }
 
     @Override
@@ -84,30 +86,33 @@ public class ActivityInfoApiBackend implements ApiBackend {
     @Override
     public void createNewForm(FormClass formClass) {
         // Check that we have the permission to create in this database
-        DatabaseProvider databaseProvider = injector.getInstance(DatabaseProvider.class);
+        UserDatabaseProvider userDatabaseProvider = injector.getInstance(UserDatabaseProvider.class);
         AuthenticatedUser authenticatedUser = getAuthenticatedUser();
-        Optional<UserDatabaseMeta> databaseMeta = databaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(
                 formClass.getDatabaseId(),
                 authenticatedUser.getUserId());
 
-        assertCreateFormRights(databaseMeta);
+        assertCreateFormRights(formClass, databaseMeta);
 
         ((MySqlStorageProvider) getStorage()).createOrUpdateFormSchema(formClass);
 
         UsageTracker.track(getAuthenticatedUserId(), "create_form", formClass);
     }
 
-    private void assertCreateFormRights(Optional<UserDatabaseMeta> dbMeta) {
+    private void assertCreateFormRights(FormClass formClass, Optional<UserDatabaseMeta> dbMeta) {
         if (!dbMeta.isPresent()) {
             throw new IllegalArgumentException("Database must exist");
         }
         UserDatabaseMeta databaseMeta = dbMeta.get();
-        if (!PermissionOracle.canCreateForm(databaseMeta.getDatabaseId(), databaseMeta)) {
+        ResourceId containerResource = formClass.getParentFormId().or(formClass.getDatabaseId());
+        if (!PermissionOracle.canCreateForm(containerResource, databaseMeta)) {
             LOGGER.severe(() -> String.format("User %d does not have "
                             + Operation.CREATE_RESOURCE.name()
-                            + " rights on Database %d",
+                            + " rights in container resource %s"
+                            + " on Database %s",
                     databaseMeta.getUserId(),
-                    databaseMeta.getLegacyDatabaseId()));
+                    containerResource,
+                    databaseMeta.getDatabaseId()));
             throw new IllegalAccessCommandException();
         }
     }

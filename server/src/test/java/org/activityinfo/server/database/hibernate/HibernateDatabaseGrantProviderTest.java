@@ -76,7 +76,7 @@ public class HibernateDatabaseGrantProviderTest {
         assertThat(databaseGrant.getUserId(), equalTo(userPermission.getUser().getId()));
         assertThat(databaseGrant.getVersion(), equalTo(userPermission.getVersion()));
 
-        List<GrantModel> expectedGrants = HibernateDatabaseGrantCache.buildGrants(userPermission);
+        List<GrantModel> expectedGrants = HibernateDatabaseGrantLoader.buildGrants(userPermission);
         assertThat(databaseGrant.getGrants().size(), equalTo(expectedGrants.size()));
         for (GrantModel expectedGrant : expectedGrants) {
             assertTrue(databaseGrant.getGrants().containsKey(expectedGrant.getResourceId()));
@@ -196,7 +196,7 @@ public class HibernateDatabaseGrantProviderTest {
         assert cachedDbGrant.isPresent();
         assert memcacheService.getStatistics().getItemCount() > 0;
         assert memcacheService.getStatistics().getHitCount() == 0;
-        assert memcacheService.contains(HibernateDatabaseGrantCache.memcacheKey(userId, databaseId(dbId), dbGrant.get().getVersion()));
+        assert memcacheService.contains(HibernateDatabaseGrantLoader.memcacheKey(userId, databaseId(dbId), dbGrant.get().getVersion()));
     }
 
     private UserPermission queryUserPermission(int userId, int databaseId) {

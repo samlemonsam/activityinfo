@@ -28,7 +28,7 @@ import org.activityinfo.server.command.handler.crud.LocationTypePolicy;
 import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.command.handler.crud.UserDatabasePolicy;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.persistence.EntityManager;
 import java.util.Date;
@@ -47,9 +47,9 @@ public class UpdateEntityHandler extends BaseEntityHandler implements CommandHan
 
     @Inject
     public UpdateEntityHandler(EntityManager em,
-                               DatabaseProvider databaseProvider,
+                               UserDatabaseProvider userDatabaseProvider,
                                Injector injector) {
-        super(em, databaseProvider);
+        super(em, userDatabaseProvider);
         this.injector = injector;
     }
 

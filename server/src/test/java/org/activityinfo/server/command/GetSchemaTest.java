@@ -32,7 +32,7 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.endpoint.rest.SchemaCsvWriter;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -133,7 +133,7 @@ public class GetSchemaTest extends CommandTestCase2 {
 
     @Test
     public void testDatabaseMetadata() {
-        DatabaseProvider impl = injector.getInstance(DatabaseProvider.class);
+        UserDatabaseProvider impl = injector.getInstance(UserDatabaseProvider.class);
         UserDatabaseMeta metadata = impl.getDatabaseMetadata(CuidAdapter.databaseId(1), 1).get();
 
         System.out.println(Json.stringify(metadata.toJson(), 4));
@@ -150,7 +150,7 @@ public class GetSchemaTest extends CommandTestCase2 {
 
         assertThat(schema.getDatabases().size(), equalTo(2));
         assertThat("BAVON in PEAR", schema.getDatabaseById(1), is(not(nullValue())));
-        assertThat(schema.getDatabaseById(1).getMyPartnerId(), equalTo(1));
+        assertThat(schema.getDatabaseById(1).getAssignedPartners().get(0).getId(), equalTo(1));
         assertThat(schema.getDatabaseById(1).isEditAllowed(), equalTo(true));
         assertThat(schema.getDatabaseById(1).isEditAllAllowed(), equalTo(false));
     }
@@ -248,7 +248,7 @@ public class GetSchemaTest extends CommandTestCase2 {
         // Add bavon, but only give him access to the education folder
         UserPermissionDTO bavon = new UserPermissionDTO();
         bavon.setEmail("bavon@nrc.org");
-        bavon.setPartner(new PartnerDTO(1, "NRC"));
+        bavon.addPartner(new PartnerDTO(1, "NRC"));
         bavon.setAllowView(true);
         bavon.setFolders(Arrays.asList(new FolderDTO(databaseId, healthFolderId, "Health")));
         bavon.setFolderLimitation(true);

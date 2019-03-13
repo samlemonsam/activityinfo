@@ -26,8 +26,6 @@ import com.google.common.escape.Escapers;
 import com.google.inject.Inject;
 import org.activityinfo.io.xform.form.BindingType;
 import org.activityinfo.io.xform.form.Item;
-import org.activityinfo.model.database.UserDatabaseMeta;
-import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
@@ -45,7 +43,6 @@ import org.activityinfo.model.type.primitive.InputMask;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
 import org.activityinfo.model.type.time.*;
-import org.activityinfo.store.spi.DatabaseProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,12 +1,8 @@
 import org.activityinfo.store.mysql.MySqlDatabase
 
 
-ext {
-    configFile = project.file("$buildDir/config.properties")
-}
-
 // Generate the server's configuration on-the-fly based on this build's properties
-def writeConfiguration(MySqlDatabase database) {
+def writeConfiguration(MySqlDatabase database, File outputFile) {
     Properties config = new Properties()
     config.setProperty("hibernate.connection.pool_size", "0")
     config.setProperty("hibernate.connection.driver_class", "com.mysql.jdbc.Driver")
@@ -18,7 +14,7 @@ def writeConfiguration(MySqlDatabase database) {
     config.setProperty("postmark.url", "http://localhost:${postmarkStubPort}/email")
     config.setProperty("postmark.key", "POSTMARK_API_TEST")
 
-    configFile.withOutputStream { OutputStream out ->
+    outputFile.withOutputStream { OutputStream out ->
         config.store(out, "Acceptance Test Configuration")
     }
 }
@@ -84,8 +80,6 @@ task appengineDevMode(type: JavaExec) {
 
     doFirst {
 
-        writeConfiguration  mysql.localAT
-
         def cloudSdkHome = new File('/usr/lib/google-cloud-sdk')
         if(!cloudSdkHome.exists()) {
             throw new RuntimeException("Google Cloud SDK not present in /usr/lib/google-cloud-sdk.\n" +
@@ -106,8 +100,10 @@ task appengineDevMode(type: JavaExec) {
 
         classpath "${cloudSdkGaeJava}/lib/agent/appengine-agent.jar"
 
+
         // Write the application configuration pointing to the development database
-        writeConfiguration mysql.localDev
+        def configFile = project.file("$buildDir/config.properties")
+        writeConfiguration mysql.localDev, configFile
         jvmArgs "-Dactivityinfo.config=${configFile}"
         jvmArgs "-Xdebug"
         jvmArgs "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000"
@@ -115,5 +111,26 @@ task appengineDevMode(type: JavaExec) {
         for(File classpathEntry : classpath) {
             logger.lifecycle("Classpath: " + classpathEntry)
         }
+    }
+}
+
+// When running the devServer WITHOUT Gwt development,
+// run on different port to avoid service worker messiness.
+
+appengine {
+    run {
+        port = 8081
+    }
+}
+
+appengineRun {
+
+    dependsOn {
+        migrateDatabaseDev
+    }
+
+    doFirst {
+        logger.lifecycle("Configuring database...")
+        writeConfiguration  mysql.localDev, file("$buildDir/exploded-server/WEB-INF/activityinfo.properties")
     }
 }

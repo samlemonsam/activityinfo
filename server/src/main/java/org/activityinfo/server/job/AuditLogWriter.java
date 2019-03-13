@@ -43,6 +43,9 @@ import java.util.concurrent.ExecutionException;
  * Writes an audit log
  */
 public class AuditLogWriter {
+
+    private static final int CHUNK_SIZE = 100;
+
     private final UserDatabaseDTO db;
     private CsvWriter csv;
     private EntityManager entityManager;
@@ -78,8 +81,12 @@ public class AuditLogWriter {
         FormClass formClass = formStorage.getFormClass();
 
         Key<FormEntity> parentKey = FormEntity.key(formId);
-        Query<FormRecordSnapshotEntity> query = Hrd.ofy().load().type(FormRecordSnapshotEntity.class).ancestor(parentKey);
+        Query<FormRecordSnapshotEntity> query = Hrd.ofy()
+                .load().type(FormRecordSnapshotEntity.class)
+                .ancestor(parentKey)
+                .chunk(CHUNK_SIZE);
 
+        int numRecords = 0;
         for (FormRecordSnapshotEntity snapshot : query) {
 
             User user;
@@ -103,6 +110,11 @@ public class AuditLogWriter {
                     snapshot.getRecordId().asString(),
                     partner()
             );
+
+            numRecords++;
+            if ((numRecords % CHUNK_SIZE) == 0) {
+                Hrd.ofy().clear();
+            }
         }
 
     }

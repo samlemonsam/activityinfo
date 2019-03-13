@@ -272,24 +272,33 @@
 
   <!-- ACCESS -->
   <userPermission userPermissionId="1" databaseId="1"
-                  userId="1" partnerId="1" allowView="1" allowViewAll="1" allowEdit="1"
+                  userId="1" allowView="1" allowViewAll="1" allowEdit="1"
                   allowEditAll="1" allowManageUsers="1" allowManageAllUsers="1"
                   allowDesign="1" lastSchemaUpdate="2009-01-01"/>
+  <groupAssignment userPermissionId="1" partnerId="1" />
+
   <userPermission userPermissionId="2" databaseId="2"
-                  userId="1" partnerId="1" allowView="1" allowViewAll="1" allowEdit="1"
+                  userId="1" allowView="1" allowViewAll="1" allowEdit="1"
                   allowEditAll="1" allowManageUsers="1" allowManageAllUsers="1"
                   allowDesign="1" lastSchemaUpdate="2009-01-01"/>
+  <groupAssignment userPermissionId="2" partnerId="1" />
+
   <userPermission userPermissionId="3" databaseId="3"
-                  userId="1" partnerId="1" allowView="1" allowViewAll="1" allowEdit="1"
+                  userId="1" allowView="1" allowViewAll="1" allowEdit="1"
                   allowEditAll="1" allowManageUsers="1" allowManageAllUsers="1"
                   allowDesign="1" lastSchemaUpdate="2009-01-01"/>
+  <groupAssignment userPermissionId="3" partnerId="1" />
+
   <userPermission userPermissionId="4" databaseId="4"
-                  userId="1" partnerId="1" allowView="1" allowViewAll="1" allowEdit="1"
+                  userId="1" allowView="1" allowViewAll="1" allowEdit="1"
                   allowEditAll="1" allowManageUsers="1" allowManageAllUsers="1"
                   allowDesign="1" lastSchemaUpdate="2009-01-01"/>
+  <groupAssignment userPermissionId="4" partnerId="1" />
+
   <userPermission userPermissionId="5" databaseId="5"
-                  userId="1" partnerId="1" allowView="1" allowViewAll="1" allowEdit="1"
+                  userId="1" allowView="1" allowViewAll="1" allowEdit="1"
                   allowEditAll="1" allowManageUsers="1" allowManageAllUsers="1"
                   allowDesign="1" lastSchemaUpdate="2009-01-01"/>
+  <groupAssignment userPermissionId="5" partnerId="1" />
 
 </dataset>

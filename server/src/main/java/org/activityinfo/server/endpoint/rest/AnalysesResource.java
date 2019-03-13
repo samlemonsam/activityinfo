@@ -34,7 +34,7 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.hrd.Hrd;
 import org.activityinfo.store.hrd.entity.AnalysisEntity;
 import org.activityinfo.store.hrd.entity.AnalysisSnapshotEntity;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -45,11 +45,11 @@ import static org.activityinfo.json.Json.parse;
 
 public class AnalysesResource {
 
-    private final DatabaseProvider databaseProvider;
+    private final UserDatabaseProvider userDatabaseProvider;
     private final Provider<AuthenticatedUser> userProvider;
 
-    public AnalysesResource(DatabaseProvider databaseProvider, Provider<AuthenticatedUser> userProvider) {
-        this.databaseProvider = databaseProvider;
+    public AnalysesResource(UserDatabaseProvider userDatabaseProvider, Provider<AuthenticatedUser> userProvider) {
+        this.userDatabaseProvider = userDatabaseProvider;
         this.userProvider = userProvider;
     }
 
@@ -134,7 +134,7 @@ public class AnalysesResource {
         if (!CuidAdapter.isValidLegacyId(parentId)) {
             return false;
         }
-        Optional<UserDatabaseMeta> database = databaseProvider.getDatabaseMetadataByResource(parentId, userProvider.get().getUserId());
+        Optional<UserDatabaseMeta> database = userDatabaseProvider.getDatabaseMetadataByResource(parentId, userProvider.get().getUserId());
         return database.isPresent() && PermissionOracle.canView(parentId, database.get());
     }
 
@@ -143,7 +143,7 @@ public class AnalysesResource {
         if (!CuidAdapter.isValidLegacyId(parentId)) {
             return false;
         }
-        Optional<UserDatabaseMeta> database = databaseProvider.getDatabaseMetadataByResource(parentId, userProvider.get().getUserId());
+        Optional<UserDatabaseMeta> database = userDatabaseProvider.getDatabaseMetadataByResource(parentId, userProvider.get().getUserId());
         return database.isPresent() && PermissionOracle.canCreateResource(parentId, database.get());
     }
 
@@ -152,7 +152,7 @@ public class AnalysesResource {
         if (!CuidAdapter.isValidLegacyId(parentId)) {
             return false;
         }
-        Optional<UserDatabaseMeta> database = databaseProvider.getDatabaseMetadataByResource(parentId, userProvider.get().getUserId());
+        Optional<UserDatabaseMeta> database = userDatabaseProvider.getDatabaseMetadataByResource(parentId, userProvider.get().getUserId());
         return database.isPresent() && PermissionOracle.canEditResource(parentId, database.get());
     }
 

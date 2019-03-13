@@ -21,6 +21,7 @@ package org.activityinfo.ui.client.dispatch.remote;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.legacy.shared.command.BatchCommand;
@@ -46,7 +47,7 @@ import java.util.List;
 public class MergingDispatcher extends AbstractDispatcher {
 
     public static final int ADVISORY_GET_LOCK_TIMEOUT = 10;
-    
+
     private Dispatcher dispatcher;
 
     private Scheduler scheduler;

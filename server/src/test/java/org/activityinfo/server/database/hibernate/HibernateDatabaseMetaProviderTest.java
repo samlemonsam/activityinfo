@@ -22,7 +22,6 @@ import org.junit.runner.RunWith;
 
 import javax.persistence.EntityManager;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -154,7 +153,7 @@ public class HibernateDatabaseMetaProviderTest {
         assert cachedDbMeta.isPresent();
         assert memcacheService.getStatistics().getItemCount() > 0;
         assert memcacheService.getStatistics().getHitCount() == 0;
-        assert memcacheService.contains(HibernateDatabaseMetaCache.memcacheKey(cachedDbMeta.get().getDatabaseId(), cachedDbMeta.get().getVersion()));
+        assert memcacheService.contains(HibernateDatabaseMetaLoader.memcacheKey(cachedDbMeta.get().getDatabaseId(), cachedDbMeta.get().getVersion()));
     }
 
 }

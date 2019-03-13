@@ -60,8 +60,8 @@ public class HibernateModule extends ServletModule {
         bind(FormStorageProvider.class).toProvider(HibernateCatalogProvider.class);
         bind(DatabaseMetaProvider.class).to(HibernateDatabaseMetaProvider.class);
         bind(DatabaseGrantProvider.class).to(HibernateDatabaseGrantProvider.class);
-        bind(DatabaseMetaCache.class).to(HibernateDatabaseMetaCache.class);
-        bind(DatabaseGrantCache.class).to(HibernateDatabaseGrantCache.class);
+        bind(DatabaseMetaLoader.class).to(HibernateDatabaseMetaLoader.class);
+        bind(DatabaseGrantLoader.class).to(HibernateDatabaseGrantLoader.class);
 
         /*
          * Important: the CloudSqlFilter must be listed before
@@ -109,17 +109,17 @@ public class HibernateModule extends ServletModule {
     @Provides
     protected HibernateDatabaseMetaProvider provideHibernateDatabaseMetaProvider(Provider<EntityManager> entityManager,
                                                                                  FormStorageProvider formStorageProvider,
-                                                                                 DatabaseMetaCache databaseMetaCache) {
+                                                                                 DatabaseMetaLoader databaseMetaCache) {
         return new HibernateDatabaseMetaProvider(entityManager,
                 formStorageProvider,
                 databaseMetaCache);
     }
 
     @Provides
-    protected HibernateDatabaseMetaCache provideHibernateDatabaseMetaCache(Provider<EntityManager> entityManager,
-                                                                           FormStorageProvider formStorageProvider,
-                                                                           BillingAccountOracle billingAccountOracle) {
-        return new HibernateDatabaseMetaCache(entityManager,
+    protected HibernateDatabaseMetaLoader provideHibernateDatabaseMetaCache(Provider<EntityManager> entityManager,
+                                                                            FormStorageProvider formStorageProvider,
+                                                                            BillingAccountOracle billingAccountOracle) {
+        return new HibernateDatabaseMetaLoader(entityManager,
                 formStorageProvider,
                 MemcacheServiceFactory.getMemcacheService(),
                 billingAccountOracle);
@@ -127,14 +127,14 @@ public class HibernateModule extends ServletModule {
 
     @Provides
     protected HibernateDatabaseGrantProvider provideHibernateDatabaseGrantProvider(Provider<EntityManager> entityManager,
-                                                                                   DatabaseGrantCache databaseGrantCache) {
+                                                                                   DatabaseGrantLoader databaseGrantLoader) {
         return new HibernateDatabaseGrantProvider(entityManager,
-                databaseGrantCache);
+                databaseGrantLoader);
     }
 
     @Provides
-    protected HibernateDatabaseGrantCache provideHibernateDatabaseGrantCache(Provider<EntityManager> entityManager) {
-        return new HibernateDatabaseGrantCache(entityManager,
+    protected HibernateDatabaseGrantLoader provideHibernateDatabaseGrantCache(Provider<EntityManager> entityManager) {
+        return new HibernateDatabaseGrantLoader(entityManager,
                 MemcacheServiceFactory.getMemcacheService());
     }
     

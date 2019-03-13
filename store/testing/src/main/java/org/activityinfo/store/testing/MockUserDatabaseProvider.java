@@ -3,7 +3,7 @@ package org.activityinfo.store.testing;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import java.util.List;
 import java.util.Map;
@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class MockDatabaseProvider implements DatabaseProvider {
+public class MockUserDatabaseProvider implements UserDatabaseProvider {
 
     @Override
     public Optional<UserDatabaseMeta> getDatabaseMetadata(ResourceId databaseId, int userId) {

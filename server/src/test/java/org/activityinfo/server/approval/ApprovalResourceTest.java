@@ -24,7 +24,7 @@ import org.activityinfo.server.endpoint.rest.DatabaseResource;
 import org.activityinfo.server.login.RestMockUtils;
 import org.activityinfo.server.mail.MailSender;
 import org.activityinfo.server.mail.MailSenderStubModule;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.FormStorageProvider;
 import org.junit.After;
 import org.junit.Before;
@@ -70,7 +70,7 @@ public class ApprovalResourceTest extends CommandTestCase {
     private AuthTokenProvider authTokenProvider;
 
     @Inject
-    private DatabaseProvider databaseProvider;
+    private UserDatabaseProvider userDatabaseProvider;
 
     @Inject
     private BillingAccountOracle billingOracle;
@@ -82,7 +82,7 @@ public class ApprovalResourceTest extends CommandTestCase {
     public void setUp() throws URISyntaxException {
         databaseResource = new DatabaseResource(formStorageProvider,
                 dispatcher,
-                databaseProvider,
+                userDatabaseProvider,
                 Providers.of(em),
                 mailSender,
                 billingOracle,
@@ -93,7 +93,7 @@ public class ApprovalResourceTest extends CommandTestCase {
                 formStorageProvider,
                 mailSender,
                 authTokenProvider,
-                databaseProvider,
+                userDatabaseProvider,
                 billingOracle);
 
         uri = RestMockUtils.mockUriInfo("https://activityinfo.org/");

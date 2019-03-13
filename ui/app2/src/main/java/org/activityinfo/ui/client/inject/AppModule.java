@@ -24,6 +24,7 @@ import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.legacy.shared.command.RemoteCommandServiceAsync;
+import org.activityinfo.ui.client.AppCacheMonitor;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.LoggingEventBus;
 import org.activityinfo.ui.client.dispatch.DispatchEventSource;

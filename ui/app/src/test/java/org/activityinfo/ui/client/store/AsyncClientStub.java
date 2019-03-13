@@ -47,7 +47,7 @@ import org.activityinfo.store.query.shared.NullFormScanCache;
 import org.activityinfo.store.query.shared.NullFormSupervisor;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.VersionedFormStorage;
-import org.activityinfo.store.testing.TestingDatabaseProvider;
+import org.activityinfo.store.testing.TestingUserDatabaseProvider;
 import org.activityinfo.store.testing.TestingStorageProvider;
 
 import java.util.List;
@@ -55,19 +55,19 @@ import java.util.List;
 public class AsyncClientStub implements ActivityInfoClientAsync {
 
     private TestingStorageProvider storageProvider;
-    private final TestingDatabaseProvider databaseProvider;
+    private final TestingUserDatabaseProvider databaseProvider;
     private boolean connected = true;
 
 
     public AsyncClientStub() {
-        this(new TestingStorageProvider(), new TestingDatabaseProvider());
+        this(new TestingStorageProvider(), new TestingUserDatabaseProvider());
     }
 
     public AsyncClientStub(TestingStorageProvider testingCatalog) {
-        this(testingCatalog, new TestingDatabaseProvider());
+        this(testingCatalog, new TestingUserDatabaseProvider());
     }
 
-    public AsyncClientStub(TestingStorageProvider storageProvider, TestingDatabaseProvider databaseProvider) {
+    public AsyncClientStub(TestingStorageProvider storageProvider, TestingUserDatabaseProvider databaseProvider) {
         this.storageProvider = storageProvider;
         this.databaseProvider = databaseProvider;
     }

@@ -30,7 +30,7 @@ import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.server.database.hibernate.entity.*;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.json.JSONException;
 
 import javax.persistence.EntityManager;
@@ -47,7 +47,7 @@ public class DbUpdateBuilder implements UpdateBuilder {
     private static final long MINIMUM_DB_VERSION = 1L;
 
     private final EntityManager entityManager;
-    private final DatabaseProvider provider;
+    private final UserDatabaseProvider provider;
 
     private JpaBatchBuilder batch;
     private Database database;
@@ -55,9 +55,9 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
     @Inject
     public DbUpdateBuilder(EntityManager entityManager,
-                           DatabaseProvider databaseProvider) {
+                           UserDatabaseProvider userDatabaseProvider) {
         this.entityManager = entityManager;
-        this.provider = databaseProvider;
+        this.provider = userDatabaseProvider;
     }
 
     @SuppressWarnings("unchecked") @Override
@@ -137,6 +137,9 @@ public class DbUpdateBuilder implements UpdateBuilder {
 
         insert(User.class, "userId = " + database.getOwner().getId());
         insert(UserPermission.class, "userId = " + userId);
+
+        delete(Tables.GROUP_ASSIGNMENT, inDatabaseUserPermission(userId));
+        insert(Tables.GROUP_ASSIGNMENT, inDatabaseUserPermission(userId));
     }
 
     private void insertIndicators() {
@@ -197,6 +200,11 @@ public class DbUpdateBuilder implements UpdateBuilder {
         return "DatabaseId = " + database.getId();
     }
 
+    private String inDatabaseUserPermission(int userId) {
+        return "UserPermissionId IN (SELECT up.UserPermissionId FROM userpermission up " +
+                "WHERE up.DatabaseId=" + database.getId() + " AND up.UserId=" + userId + ")";
+    }
+
     @SuppressWarnings("squid:S3400")
     private String notDeleted() {
         return "DateDeleted IS NULL";
@@ -231,14 +239,14 @@ public class DbUpdateBuilder implements UpdateBuilder {
     }
 
     private void insert(Class<?> entityClass, String criteria) {
-        if(!database.isDeleted() && databaseMeta.isPresent() && PermissionOracle.canView(databaseMeta.get())) {
+        if(!database.isDeleted() && databaseMeta.isPresent() && PermissionOracle.canSyncClassicDatabase(databaseMeta.get())) {
             LOGGER.fine(() -> entityClass.getName() + " Criteria: " + criteria.toLowerCase());
             batch.insert(entityClass, criteria.toLowerCase());
         }
     }
 
     private void insert(String tableName, String criteria) {
-        if(!database.isDeleted() && databaseMeta.isPresent() && PermissionOracle.canView(databaseMeta.get())) {
+        if(!database.isDeleted() && databaseMeta.isPresent() && PermissionOracle.canSyncClassicDatabase(databaseMeta.get())) {
             SqlQuery query = SqlQuery.selectAll().from(tableName).whereTrue(criteria.toLowerCase());
             LOGGER.fine(query.sql());
             batch.insert()

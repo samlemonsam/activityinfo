@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.activityinfo.legacy.shared.model.ActivityDTO.*;
 
@@ -73,7 +74,8 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, P
     private boolean deleteAllAllowed;
     private boolean exportAllowed;
     private boolean designAllowed;
-    private int currentPartnerId;
+
+    private List<PartnerDTO> assignedPartners = Lists.newArrayList();
 
     public ActivityFormDTO() {
         setReportingFrequency(REPORT_ONCE);
@@ -466,20 +468,26 @@ public final class ActivityFormDTO extends BaseModelData implements EntityDTO, P
         this.deleteAllAllowed = deleteAllAllowed;
     }
 
-    public int getCurrentPartnerId() {
-        return currentPartnerId;
+    public List<PartnerDTO> getAssignedPartners() {
+        return assignedPartners;
     }
 
-    public void setCurrentPartnerId(int currentPartnerId) {
-        this.currentPartnerId = currentPartnerId;
+    public void setAssignedPartners(List<PartnerDTO> assignedPartners) {
+        this.assignedPartners = assignedPartners;
+    }
+
+    public List<Integer> getAssignedPartnerIds() {
+        return getAssignedPartners().stream()
+                .map(PartnerDTO::getId)
+                .collect(Collectors.toList());
     }
 
     public boolean isAllowedToEdit(SiteDTO site) {
-        return editAllAllowed || (isEditAllowed() && site.getPartnerId() == currentPartnerId);
+        return editAllAllowed || (isEditAllowed() && getAssignedPartnerIds().contains(site.getPartnerId()));
     }
 
     public boolean isAllowedToDelete(SiteDTO site) {
-        return deleteAllAllowed || (isDeleteAllowed() && site.getPartnerId() == currentPartnerId);
+        return deleteAllAllowed || (isDeleteAllowed() && getAssignedPartnerIds().contains(site.getPartnerId()));
     }
 
     public boolean isExportAllowed() {

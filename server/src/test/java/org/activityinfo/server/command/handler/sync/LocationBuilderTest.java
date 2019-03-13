@@ -19,7 +19,6 @@
 package org.activityinfo.server.command.handler.sync;
 
 import com.google.inject.Inject;
-import com.google.inject.util.Providers;
 import org.activityinfo.fixtures.InjectionSupport;
 import org.activityinfo.fixtures.Modules;
 import org.activityinfo.fixtures.TestHibernateModule;
@@ -34,7 +33,7 @@ import org.activityinfo.server.command.handler.crud.PropertyMap;
 import org.activityinfo.server.database.DatabaseModule;
 import org.activityinfo.server.database.OnDataSet;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.store.spi.DatabaseProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -57,7 +56,7 @@ public class LocationBuilderTest {
     private EntityManagerFactory emf;
 
     @Inject
-    private DatabaseProvider databaseProvider;
+    private UserDatabaseProvider userDatabaseProvider;
 
     @Test
     @OnDataSet("/dbunit/sites-simple1.db.xml")
@@ -120,7 +119,7 @@ public class LocationBuilderTest {
         changes.put("name", "Ishamael");
         
         em.getTransaction().begin();
-        LocationTypePolicy locationTypePolicy = new LocationTypePolicy(em, databaseProvider);
+        LocationTypePolicy locationTypePolicy = new LocationTypePolicy(em, userDatabaseProvider);
         locationTypePolicy.update(user, 1, new PropertyMap(changes)); 
         em.getTransaction().commit();
 
