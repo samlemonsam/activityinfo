@@ -286,4 +286,7 @@ public class User implements java.io.Serializable {
         return new AuthenticatedUser("XYZ", getId(), getEmail(), getLocale());
     }
 
+    public boolean hasFeatureFlag(String flag) {
+        return features != null && features.contains(flag);
+    }
 }

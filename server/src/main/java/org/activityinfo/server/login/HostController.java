@@ -66,7 +66,7 @@ public class HostController {
         }
 
         User authenticatedUser = entityManager.get().find(User.class, authProvider.get().getUserId());
-        if(authenticatedUser.getFeatures().contains("v4")) {
+        if(authenticatedUser.hasFeatureFlag("v4")) {
             return Response.temporaryRedirect(UriBuilder.fromUri("https://v4.activityinfo.org/app").build())
                     .build();
         }
