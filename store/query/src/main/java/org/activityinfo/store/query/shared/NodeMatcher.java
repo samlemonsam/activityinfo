@@ -103,12 +103,8 @@ public class NodeMatcher {
     }
 
     private Collection<NodeMatch> matchNodes(QueryPath queryPath, Iterable<FormTree.Node> fields) {
-        return matchNodes(queryPath, Optional.absent(), fields);
-    }
-
-    private Collection<NodeMatch> matchNodes(QueryPath queryPath, Optional<FormClass> context, Iterable<FormTree.Node> fields) {
         if(queryPath.isLeaf()) {
-            return matchTerminal(queryPath, context, fields);
+            return matchTerminal(queryPath, fields);
         } else {
             return matchReferenceField(queryPath, fields);
         }
@@ -178,21 +174,23 @@ public class NodeMatcher {
             return java.util.Optional.empty();
         }
     }
+
+
     /**
      * Matches a terminal symbol in a query path.
      */
-    private Collection<NodeMatch> matchTerminal(QueryPath path, Optional<FormClass> context, Iterable<FormTree.Node> fields) {
+    private Collection<NodeMatch> matchTerminal(QueryPath path, Iterable<FormTree.Node> fields) {
 
         List<NodeMatch> matches = Lists.newLinkedList();
 
         // Check for a reference to a form label
         if(path.isLeaf() && path.head().equals(ColumnModel.FORM_NAME_SYMBOL)) {
-            matches.add(NodeMatch.forLabel(path.head(), context.or(tree.getRootFormClass())));
+            matches.add(NodeMatch.forLabel(path.head(), tree.getRootFormClass()));
         }
 
         // Check for a reference to a form record id or the form id
         if (path.isLeaf() && path.head().equals(ColumnModel.RECORD_ID_SYMBOL) || path.head().equals(ColumnModel.FORM_ID_SYMBOL)) {
-            matches.add(NodeMatch.forId(path.head(), context.or(tree.getRootFormClass())));
+            matches.add(NodeMatch.forId(path.head(), tree.getRootFormClass()));
         }
 
         // check for a match on the form id of the current form tree
@@ -231,7 +229,7 @@ public class NodeMatcher {
         if(children.isEmpty()) {
             return Collections.emptyList();
         } else {
-            return matchTerminal(path, context, children);
+            return matchTerminal(path, children);
         }
     }
 
@@ -258,11 +256,11 @@ public class NodeMatcher {
                     results.add(NodeMatch.forId(parentField, childForm.get()));
 
                 } else if (path.matches(childForm.get()) || path.matches(parentField)) {
-                    results.addAll(matchNodes(path.next(), childForm, childFields));
+                    results.addAll(matchNodes(path.next(), childFields));
 
                 } else {
                     // Descend the next level
-                    results.addAll(matchNodes(path, childForm, childFields));
+                    results.addAll(matchNodes(path, childFields));
                 }
             }
         }
