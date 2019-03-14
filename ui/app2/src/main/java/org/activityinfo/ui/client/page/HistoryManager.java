@@ -27,7 +27,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.ui.client.AppEvents;
+import org.activityinfo.ui.client.ClientContext;
 import org.activityinfo.ui.client.EventBus;
+import org.activityinfo.ui.client.page.config.DbListPageState;
 import org.activityinfo.ui.client.page.dashboard.DashboardPlace;
 
 /**
@@ -80,7 +82,15 @@ public class HistoryManager {
 
         } else {
             eventBus.fireEvent(new NavigationEvent(
-                    NavigationHandler.NAVIGATION_REQUESTED, new DashboardPlace()));
+                    NavigationHandler.NAVIGATION_REQUESTED, defaultPlace()));
+        }
+    }
+
+    private PageState defaultPlace() {
+        if(ClientContext.isV4Enabled()) {
+            return new DbListPageState();
+        } else {
+            return new DashboardPlace();
         }
     }
 
