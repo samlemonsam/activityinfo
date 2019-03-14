@@ -29,10 +29,10 @@ import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.FolderDTO;
 import org.activityinfo.legacy.shared.model.PartnerDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
-import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.server.database.hibernate.entity.Folder;
@@ -153,15 +153,26 @@ public class GetUsersHandler implements CommandHandler<GetUsers> {
 
         if ("partners".equals(cmd.getSortInfo().getSortField())) {
             models.sort((perm1,perm2) -> {
+                String partners1 = concatenatePartnersForSorting(perm1);
+                String partners2 = concatenatePartnersForSorting(perm2);
                 if (Style.SortDir.ASC.equals(cmd.getSortInfo().getSortDir())) {
-                    return perm1.getPartners().toString().compareTo(perm2.getPartners().toString());
+                    return partners1.compareTo(partners2);
                 } else {
-                    return -perm1.getPartners().toString().compareTo(perm2.getPartners().toString());
+                    return -partners1.compareTo(partners2);
                 }
             });
         }
 
         return new UserResult(models, cmd.getOffset(), queryTotalCount(cmd, currentUser, whereClause, filteredPartners));
+    }
+
+    private static String concatenatePartnersForSorting(UserPermissionDTO perm) {
+        // Concatenate a string of all defined partners to be compared.
+        // Partners are ordered alphabetically (natural String ordering) and then concatenated with
+        return perm.getPartners().stream()
+                .map(PartnerDTO::getName)
+                .sorted()
+                .collect(Collectors.joining(";"));
     }
 
     private List<FolderDTO> folderList(Map<ResourceId, Folder> folderMap, UserPermission perm) {
