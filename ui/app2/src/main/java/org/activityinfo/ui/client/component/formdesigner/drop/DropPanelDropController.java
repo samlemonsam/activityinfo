@@ -152,13 +152,56 @@ public class DropPanelDropController extends FlowPanelDropController implements 
     }
 
     private void insertIntoTargetFormClass(DropPanelDropController panelDropController, WidgetContainer container, FormElement formElement) {
-        int widgetIndex = panelDropController.getDropTarget().getWidgetIndex(container.asWidget());
-
         // target form class
-        FormElementContainer elementContainer = formDesigner.getModel().getElementContainer(panelDropController.getResourceId());
+        FormClass formClass = formDesigner.getModel().getFormClass(panelDropController.getResourceId());
+
+        int widgetIndex = panelDropController.getDropTarget().getWidgetIndex(container.asWidget());
+        int formElementIndex = determineFormElementIndex(widgetIndex, formClass);
 
         // update model
-        elementContainer.insertElement(widgetIndex, formElement);
+        formClass.insertElement(formElementIndex, formElement);
+    }
+
+    /**
+     * There exists a discrepancy between the Form Element index and the Widget index for keyed subforms (Monthly,
+     * Daily, etc.). The period field on a keyed subform is included on the form element list, but is *not* included
+     * as a Widget on the subform drop panel (this is handled specially elsewhere).
+     *
+     * Therefore, when we simply use the widgetIndex when reinserting the element via FormClass::insertElement, we are
+     * in fact offset by -1 from the correct Form Element index. This led to the experience of not being able to move a
+     * form field to the bottom of a subform in the form designer, or the field appearing above where it was intended.
+     *
+     * Further, when a field is moved to the top of a subform, it was able to move the index of the period key field
+     * itself (as the inserted element was index 0 and pushed the period field down the list). As the issue went
+     * unnoticed and unresolved for a significant period of time, an unknown number of form schema have been affected
+     * and we must assume the period field could now reside anywhere on a form element list.
+     *
+     * Therefore, we find the correct form element index by incrementing the widgetIndex by +1 *IF*:
+     *  - The form is a keyed subform
+     *  - The index of the period key form element is less than or equal to the current widgetIndex
+     */
+    private int determineFormElementIndex(int widgetIndex, FormClass formClass) {
+        if (!formClass.isSubForm()) {
+            return widgetIndex;
+        }
+        if (formClass.getSubFormKind() == SubFormKind.REPEATING) {
+            return widgetIndex;
+        }
+
+        List<FormElement> formElements = formDesigner.getModel().getElementContainer(formClass.getId()).getElements();
+
+        // Find the index of the period field
+        int i = 0;
+        while (!formElements.get(i).getId().equals(ResourceId.valueOf("period")) && i < formElements.size()) {
+            i++;
+        }
+
+        // If the period field is less than or equal to the proposed drop index for our widget,
+        // then we must increment the widget index by 1 to get our field element index
+        if (i <= widgetIndex) {
+            return widgetIndex + 1;
+        }
+        return widgetIndex;
     }
 
     private void previewDropNewWidget(final DragContext context) throws VetoDragException {
