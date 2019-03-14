@@ -206,7 +206,7 @@ public class NewDbDetailsPage extends WizardPageAdapter {
             setCopyDataCheckboxState();
         }
         copyUser.setEnabled(dialogData.hasDesignPrivileges());
-        wizardDialog.getDialog().getPrimaryButton().setText(I18N.CONSTANTS.create());
+        wizardDialog.getDialog().getPrimaryButton().setText(I18N.CONSTANTS.newDatabase());
 
     }
 

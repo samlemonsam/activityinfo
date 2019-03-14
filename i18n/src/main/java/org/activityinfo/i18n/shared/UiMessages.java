@@ -63,7 +63,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Filter by ''{0}''")
     String filterBy(String arg0);
 
-    @DefaultMessage("Add new entry for form ''{0}''")
+    @DefaultMessage("Add record for form ''{0}''")
     String addNewSiteForActivity(String activityName);
 
     @DefaultMessage("{0,number} matching sites")
@@ -88,7 +88,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Are you sure you want to delete the report \"{0}\"")
     String confirmDeleteReport(String reportTitle);
 
-    @DefaultMessage("You are not the owner of this report.<br/>Do you want to save a new copy?")
+    @DefaultMessage("You are not the owner of this report.<br/>Do you want to save a copy?")
     String confirmSaveCopy();
 
     @DefaultMessage("{0} minutes ago")
@@ -112,10 +112,10 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("{0,date,dd-MM-yyyy - HH:mm} {1} ({2}) updated the entry:")
     String siteHistoryUpdated(Date date, String userName, String userEmail);
 
-    @DefaultMessage("{0,date,dd-MM-yyyy - HH:mm} {1} ({2}) updated an entry in the {3} sub form.")
+    @DefaultMessage("{0,date,dd-MM-yyyy - HH:mm} {1} ({2}) updated a record in the {3} subform.")
     String siteHistorySubFormUpdated(Date date, String userName, String userEmail, String subFormName);
 
-    @DefaultMessage("No history is available for this form entry.")
+    @DefaultMessage("No history is available for this record.")
     String siteHistoryNotAvailable();
 
     @DefaultMessage("History on form entries is only available from {0,date,dd MMMM yyyy} onward.")
@@ -151,7 +151,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("on <span>{0,date,dd-MM-yyyy}</span>.")
     String geoDigestSiteMsgDateOther(Date date);
 
-    @DefaultMessage("Unmapped Sites")
+    @DefaultMessage("Unmapped records")
     String geoDigestUnmappedSites();
 
     @DefaultMessage("Here is the summary of the updates by user for the ActivityInfo databases you administer over the last {0} days.")
