@@ -54,6 +54,8 @@ public class MailingListClient {
     private final String unsubbed = "unsubscribed";
 
     private final String invitedGroup;
+    private final String invitedGroupV4;
+
     private final String uninvitedGroup;
     private final String unknownGroup;
     private final String noAccountGroup;
@@ -67,6 +69,8 @@ public class MailingListClient {
         this.masterListId = config.getProperty("mailchimp.list.id", "9289430112");
 
         this.invitedGroup = config.getProperty("mailchimp.group.invited", "a39940fdf7");
+        this.invitedGroupV4 = config.getProperty("mailchimp.group.invitedv4", "e223fd459a");
+
         this.uninvitedGroup = config.getProperty("mailchimp.group.uninvited", "25ecbf7449");
         this.unknownGroup = config.getProperty("mailchimp.group.unknown", "cd58ffd8d6");
         this.noAccountGroup = config.getProperty("mailchimp.group.noaccount", "394e27b603");
@@ -82,7 +86,7 @@ public class MailingListClient {
         addToMasterList.status = subbed;
         addToMasterList.mergeVars.email = user.getEmail();
         addToMasterList.mergeVars.firstName = user.getName();
-        setInterests(addToMasterList, invited, newsletter);
+        setInterests(addToMasterList, invited, newsletter, user.hasFeatureFlag("v4"));
 
         try {
             post(addToMasterList, masterListId);
@@ -131,8 +135,9 @@ public class MailingListClient {
         reader.close();
     }
 
-    private void setInterests(AddListMemberMethod method, boolean invited, boolean newsletter) {
-        method.interests.put(invitedGroup, invited);
+    private void setInterests(AddListMemberMethod method, boolean invited, boolean newsletter, boolean v4) {
+        method.interests.put(invitedGroup, invited && !v4);
+        method.interests.put(invitedGroupV4, invited && v4);
         method.interests.put(uninvitedGroup, !invited);
         method.interests.put(unknownGroup, false);
         method.interests.put(noAccountGroup, false);

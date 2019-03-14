@@ -27,9 +27,9 @@ import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.legacy.shared.model.FolderDTO;
 import org.activityinfo.legacy.shared.model.UserPermissionDTO;
-import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.model.database.UserPermissionModel;
 import org.activityinfo.model.legacy.CuidAdapter;
+import org.activityinfo.model.permission.GrantModel;
 import org.activityinfo.server.database.hibernate.dao.*;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
@@ -154,6 +154,11 @@ public class UpdateUserPermissionsHandler implements CommandHandler<UpdateUserPe
 
         User user = UserDAOImpl.createNewUser(dto.getEmail(), dto.getName(), executingUser.getLocale());
         user.setInvitedBy(executingUser);
+
+        if(executingUser.hasFeatureFlag("v4")) {
+            user.setFeatures("v4");
+        }
+
         userDAO.persist(user);
 
         try {
