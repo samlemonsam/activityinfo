@@ -29,7 +29,6 @@ import org.activityinfo.server.login.model.LoginPageModel;
 import org.activityinfo.store.query.UsageTracker;
 
 import javax.inject.Provider;
-import javax.persistence.NoResultException;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.net.URI;
@@ -82,7 +81,16 @@ public class LoginController {
 
         UsageTracker.track(user.getId(), "login");
 
-        URI appUri = UriBuilder.fromUri(baseUri).replacePath(HostController.ENDPOINT).build();
+        URI appUri;
+        if(user.hasFeatureFlag("v4")) {
+            appUri = UriBuilder.fromUri("https://v4.activityinfo.org/app")
+                    .fragment(baseUri.getFragment())
+                    .build();
+        } else {
+            appUri = UriBuilder.fromUri(baseUri)
+                    .replacePath(HostController.ENDPOINT)
+                    .build();
+        }
 
         return Response.seeOther(appUri)
                        .cookie(authTokenProvider.get().createNewAuthCookies(user, baseUri))

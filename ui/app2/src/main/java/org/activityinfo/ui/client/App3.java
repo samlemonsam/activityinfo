@@ -18,6 +18,7 @@
  */
 package org.activityinfo.ui.client;
 
+import com.google.gwt.user.client.Window;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 
@@ -27,6 +28,10 @@ public class App3 {
     }
 
     public static void openNewTable(ResourceId formId) {
-        com.google.gwt.user.client.Window.open("/app?ui=3#table/" + formId.asString(), "_blank", null);
+        if(ClientContext.isV4Enabled()) {
+            Window.Location.assign("https://v4.activityinfo.org/app#form/" + formId.asString() + "/table");
+        } else {
+            Window.open("/app?ui=3#table/" + formId.asString(), "_blank", null);
+        }
     }
 }

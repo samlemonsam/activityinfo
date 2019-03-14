@@ -533,10 +533,18 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
     private void navigateToNewInterface() {
         Optional<Integer> activityId = getCurrentActivityId();
         if(activityId.isPresent()) {
-            ResourceId formClassId = CuidAdapter.activityFormClass(activityId.get());
+            ResourceId formId = CuidAdapter.activityFormClass(activityId.get());
+            openV4Table(formId);
+        }
+    }
+
+    private void openV4Table(ResourceId formId) {
+        if(ClientContext.isV4Enabled()) {
+            Window.Location.assign("https://v4.activityinfo.org/app#form/" + formId.asString() + "/table");
+        } else {
             eventBus.fireEvent(new NavigationEvent(
                     NavigationHandler.NAVIGATION_REQUESTED,
-                    new ResourcePlace(formClassId, ResourcePage.TABLE_PAGE_ID)));
+                    new ResourcePlace(formId, ResourcePage.TABLE_PAGE_ID)));
         }
     }
 

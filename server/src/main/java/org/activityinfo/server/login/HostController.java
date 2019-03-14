@@ -66,15 +66,10 @@ public class HostController {
         }
 
         User authenticatedUser = entityManager.get().find(User.class, authProvider.get().getUserId());
-        if(authenticatedUser.hasFeatureFlag("v4")) {
-            return Response.temporaryRedirect(UriBuilder.fromUri("https://v4.activityinfo.org/app").build())
-                    .build();
-        }
 
         String appUri = uri.getAbsolutePathBuilder().replaceQuery("").build().toString();
 
         HostPageModel model = new HostPageModel(appUri);
-
 
         model.setFeatureFlags(authenticatedUser.getFeatures());
         model.setNewUI("3".equals(ui) || "3dev".equals(ui));

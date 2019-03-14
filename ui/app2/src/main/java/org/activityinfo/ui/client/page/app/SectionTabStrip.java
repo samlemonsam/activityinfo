@@ -23,6 +23,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
@@ -33,6 +34,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Widget;
+import org.activityinfo.ui.client.ClientContext;
 
 public class SectionTabStrip extends Widget implements HasSelectionHandlers<Section> {
 
@@ -59,6 +61,10 @@ public class SectionTabStrip extends Widget implements HasSelectionHandlers<Sect
         setElement(uiBinder.createAndBindUi(this));
         sinkEvents(Event.MOUSEEVENTS);
         sinkEvents(Event.ONCLICK);
+
+        if(ClientContext.isV4Enabled()) {
+            sectionDiv.getStyle().setDisplay(Style.Display.NONE);
+        }
     }
 
     @Override
