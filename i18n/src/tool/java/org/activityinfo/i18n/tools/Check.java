@@ -24,6 +24,7 @@ import org.activityinfo.i18n.tools.model.ResourceClassTerm;
 import org.activityinfo.i18n.tools.parser.InspectingVisitor;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -49,7 +50,7 @@ public class Check {
         }
     }
 
-    private void verifyTermKeysAreGloballyUnique()  {
+    private void verifyTermKeysAreGloballyUnique() throws IOException {
         Map<String, ResourceClass> keys = Maps.newHashMap();
 
         for(String className : Project.INSTANCE.getResourceClasses()) {
@@ -65,6 +66,14 @@ public class Check {
                 }
             }
         }
+
+        File termFile = new File("build/terms.txt");
+        try(FileWriter writer = new FileWriter(termFile)) {
+            for (String key : keys.keySet()) {
+                writer.append(key).append('\n');
+            }
+        }
+
         System.out.println("Found " + keys.size() + " unique term keys");
     }
     
