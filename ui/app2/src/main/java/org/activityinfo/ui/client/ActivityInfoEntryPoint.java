@@ -25,16 +25,12 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.RootPanel;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.ui.client.billing.BillingSupervisor;
-import org.activityinfo.ui.client.component.importDialog.ImportPresenter;
 import org.activityinfo.ui.client.dispatch.state.SafeStateProvider;
 import org.activityinfo.ui.client.inject.AppInjector;
 import org.activityinfo.ui.client.inject.ClientSideAuthProvider;
 import org.activityinfo.ui.client.page.common.ApplicationBundle;
-import org.activityinfo.ui.client.page.print.PrintFormPanel;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -78,37 +74,26 @@ public class ActivityInfoEntryPoint implements EntryPoint {
 
         final AppInjector injector = GWT.create(AppInjector.class);
 
-        if(Window.Location.getHash() != null && Window.Location.getHash().startsWith("#print/")) {
-            // Show form only view appropriate for printing
 
-            openPrintView(injector);
+        // Launch the normal application
 
-        } else if(Window.Location.getHash() != null && Window.Location.getHash().startsWith("#import/")) {
+        injector.createAppLoader();
+        injector.createDashboardLoader();
+        injector.createDataEntryLoader();
+        injector.createReportLoader();
+        injector.createConfigLoader();
+        injector.createFormLoader();
+        injector.getUsageTracker();
 
-            openImport(injector);
-        
-        } else {
+        injector.getHistoryManager();
 
-            // Launch the normal application
-            
-            injector.createAppLoader();
-            injector.createDashboardLoader();
-            injector.createDataEntryLoader();
-            injector.createReportLoader();
-            injector.createConfigLoader();
-            injector.createFormLoader();
-            injector.getUsageTracker();
+        injector.createOfflineController();
 
-            injector.getHistoryManager();
+        createCaches(injector);
 
-            injector.createOfflineController();
+        injector.getAppCacheMonitor().start();
 
-            createCaches(injector);
-
-            injector.getAppCacheMonitor().start();
-
-            new BillingSupervisor().run();
-        }
+        new BillingSupervisor().run();
 
         Log.info("Application: everyone plugged, firing Init event");
 
@@ -128,16 +113,6 @@ public class ActivityInfoEntryPoint implements EntryPoint {
         injector.createAdminCache();
     }
 
-
-    private void openPrintView(AppInjector injector) {
-        PrintFormPanel printFormPanel = injector.createPrintFormPanel();
-
-        RootPanel.get().add(printFormPanel);
-    }
-
-    private void openImport(AppInjector injector) {
-        ImportPresenter.showStandalone(injector.getResourceLocator());
-    }
 
     public static void hideLoadingIndicator() {
         Document.get().getElementById("loading").getStyle().setDisplay(Style.Display.NONE);

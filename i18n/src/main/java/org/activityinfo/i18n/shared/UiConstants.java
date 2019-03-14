@@ -2004,4 +2004,8 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("User must be assigned to at least 1 Partner.")
     String minOnePartnerWarning();
+
+    @DefaultStringValue("Please use ActivityInfo 4.0 to continue importing.")
+    String importV4Message();
+
 }

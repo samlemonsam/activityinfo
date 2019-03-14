@@ -19,10 +19,7 @@
 package org.activityinfo.ui.client.page.entry;
 
 import com.extjs.gxt.ui.client.Style.LayoutRegion;
-import com.extjs.gxt.ui.client.event.BaseEvent;
-import com.extjs.gxt.ui.client.event.Events;
-import com.extjs.gxt.ui.client.event.SelectionChangedEvent;
-import com.extjs.gxt.ui.client.event.SelectionChangedListener;
+import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.util.Margins;
 import com.extjs.gxt.ui.client.widget.*;
 import com.extjs.gxt.ui.client.widget.layout.BorderLayout;
@@ -30,6 +27,8 @@ import com.extjs.gxt.ui.client.widget.layout.BorderLayoutData;
 import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.toolbar.SeparatorToolItem;
 import com.google.common.base.Optional;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
@@ -46,12 +45,9 @@ import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.ui.client.ClientContext;
 import org.activityinfo.ui.client.EventBus;
-import org.activityinfo.ui.client.component.importDialog.ImportPresenter;
-import org.activityinfo.ui.client.component.importDialog.ImportResultEvent;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
-import org.activityinfo.ui.client.dispatch.callback.SuccessCallback;
 import org.activityinfo.ui.client.dispatch.monitor.MaskingAsyncMonitor;
 import org.activityinfo.ui.client.page.*;
 import org.activityinfo.ui.client.page.common.dialog.SaveChangesCallback;
@@ -67,8 +63,8 @@ import org.activityinfo.ui.client.page.entry.grouping.GroupingComboBox;
 import org.activityinfo.ui.client.page.entry.place.DataEntryPlace;
 import org.activityinfo.ui.client.page.entry.sitehistory.SiteHistoryTab;
 import org.activityinfo.ui.client.page.report.ActivityExportTypeDialog;
-import org.activityinfo.ui.client.page.report.ExportDialog;
 import org.activityinfo.ui.client.page.report.DatabaseExportTypeDialog;
+import org.activityinfo.ui.client.page.report.ExportDialog;
 import org.activityinfo.ui.client.page.resource.ResourcePage;
 import org.activityinfo.ui.client.page.resource.ResourcePlace;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
@@ -578,17 +574,22 @@ public class DataEntryPage extends LayoutContainer implements Page, ActionListen
 
     protected void doImport() {
         final int activityId = currentPlace.getFilter().getRestrictedCategory(DimensionType.Activity);
-        ImportPresenter.showPresenter(CuidAdapter.activityFormClass(activityId), resourceLocator)
-                       .then(new SuccessCallback<ImportPresenter>() {
-                           @Override
-                           public void onSuccess(ImportPresenter result) {
-                               result.show(ImportPresenter.Mode.MODAL);
-                               result.getEventBus().addHandler(ImportResultEvent.TYPE, event -> {
-                                   gridPanel.refresh();
-                                   filterPane.getSet().applyBaseFilter(currentPlace.getFilter());
-                               });
-                           }
-                       });
+        MessageBox box = new MessageBox();
+        box.setTitleHtml(SafeHtmlUtils.fromString(I18N.CONSTANTS.importText()));
+        box.setMessage(SafeHtmlUtils.fromString(I18N.CONSTANTS.importV4Message()));
+        box.setIcon(MessageBox.INFO);
+        box.setButtons("okcancel");
+        box.show();
+        box.addCallback(new Listener<MessageBoxEvent>() {
+            @Override
+            public void handleEvent(MessageBoxEvent messageBoxEvent) {
+                if(messageBoxEvent.getButtonClicked().getItemId().equalsIgnoreCase(Dialog.OK)) {
+                    Window.Location.assign("https://v4.activityinfo.org/app#form/" +
+                            CuidAdapter.activityFormClass(activityId).asString() + "/import");
+                }
+
+            }
+        });
     }
 
     private void delete() {

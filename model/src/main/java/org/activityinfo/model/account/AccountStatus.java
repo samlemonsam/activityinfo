@@ -101,7 +101,6 @@ public class AccountStatus implements JsonSerializable {
      * @return human readable string
      */
     public String expiringIn(Date now) {
-        String until;
         int hours = hoursUntilExpiration(now);
         if (hours < 1) {
             return "expired";

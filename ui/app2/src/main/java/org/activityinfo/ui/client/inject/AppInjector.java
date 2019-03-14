@@ -40,7 +40,6 @@ import org.activityinfo.ui.client.page.config.ConfigModule;
 import org.activityinfo.ui.client.page.dashboard.DashboardLoader;
 import org.activityinfo.ui.client.page.entry.DataEntryLoader;
 import org.activityinfo.ui.client.page.entry.EntryModule;
-import org.activityinfo.ui.client.page.print.PrintFormPanel;
 import org.activityinfo.ui.client.page.report.ReportLoader;
 import org.activityinfo.ui.client.page.report.ReportModule;
 
@@ -76,8 +75,6 @@ public interface AppInjector extends Ginjector {
 
     AppLoader createAppLoader();
     
-    PrintFormPanel createPrintFormPanel();
-
     FormPageLoader createFormLoader();
 
     ResourceLocator getResourceLocator();

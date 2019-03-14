@@ -19,9 +19,11 @@
 package org.activityinfo.ui.client.table.view;
 
 import com.google.common.base.Optional;
-import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.user.client.Window;
+import com.sencha.gxt.widget.core.client.Dialog;
+import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
+import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import org.activityinfo.analysis.table.SelectionViewModel;
@@ -203,12 +205,21 @@ public class TableToolBar extends ToolBar {
     }
 
     private void onImport(SelectEvent event) {
-        // Redirect to old app for the moment.
-        UrlBuilder importUrl = Window.Location.createUrlBuilder();
-        importUrl.setHash("#import/" + viewModel.getFormId().asString());
-        importUrl.removeParameter("ui");
+        ConfirmMessageBox mb = new ConfirmMessageBox(I18N.CONSTANTS.importText(), I18N.CONSTANTS.importV4Message());
+        mb.getButton(Dialog.PredefinedButton.YES).setText(I18N.CONSTANTS.ok());
+        mb.getButton(Dialog.PredefinedButton.NO).setText(I18N.CONSTANTS.cancel());
+        mb.addDialogHideHandler(new DialogHideEvent.DialogHideHandler() {
+            @Override
+            public void onDialogHide(DialogHideEvent event) {
+                if(event.getHideButton() == Dialog.PredefinedButton.YES) {
+                    Window.Location.assign("https://v4.activityinfo.org/app#form/" +
+                                viewModel.getFormId().asString() + "/import");
 
-        Window.open(importUrl.buildString(), "_blank", null);
+                }
+            }
+        });
+        mb.setWidth(300);
+        mb.show();
     }
 
     private void onExport(SelectEvent event) {

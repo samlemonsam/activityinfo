@@ -19,8 +19,6 @@
 package org.activityinfo.ui.client.component.importDialog.model.source;
 
 import com.google.common.collect.Lists;
-import org.activityinfo.ui.client.component.importDialog.model.match.ColumnTypeGuesser;
-import org.activityinfo.ui.client.component.importDialog.model.type.converter.FieldParserFactory;
 
 import java.util.Date;
 import java.util.List;
@@ -105,22 +103,6 @@ public class PastedTable implements SourceTable {
         rows.addAll(parsedRows);
         LOGGER.fine("Parsed " + parsedRows.size() + " row(s), takes: " + (new Date().getTime() - startTime));
         return parsedRows;
-    }
-
-    public void guessColumnsType(FieldParserFactory converterFactory) {
-        ensureRowsParsed();
-        for (int i = 0; i < columns.size(); i++) {
-            columns.get(i).setGuessedType(new ColumnTypeGuesser(columnRowValues(i), converterFactory).guessType());
-        }
-    }
-
-    private List<String> columnRowValues(int columnIndex) {
-        List<String> rowValues = Lists.newArrayList();
-
-        for (PastedRow row : rows) {
-            rowValues.add(row.getColumnValue(columnIndex));
-        }
-        return rowValues;
     }
 
     @Override
