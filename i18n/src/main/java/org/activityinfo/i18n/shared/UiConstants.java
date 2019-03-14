@@ -1483,12 +1483,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Measures")
     String measures();
 
-    @DefaultStringValue("Formula")
-    String formula();
-
-    @DefaultStringValue("The formula is valid.")
-    String formulaValid();
-
     @DefaultStringValue("Median")
     String median();
 
@@ -1575,12 +1569,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Please use our new and much improved data entry interface for viewing, adding or updating this form's records.")
     String pleaseUseNewDataEntry();
-
-    @DefaultStringValue("Copied")
-    String copied();
-
-    @DefaultStringValue("Copied to clipboard!")
-    String copiedToClipboard();
 
     @DefaultStringValue("Count distinct")
     String countDistinct();

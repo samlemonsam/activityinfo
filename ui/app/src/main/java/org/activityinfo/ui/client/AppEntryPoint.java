@@ -18,12 +18,10 @@
  */
 package org.activityinfo.ui.client;
 
-import com.google.common.base.Optional;
 import com.google.gwt.activity.shared.ActivityManager;
 import com.google.gwt.activity.shared.ActivityMapper;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.place.shared.PlaceHistoryHandler;
 import com.google.gwt.user.client.Window;
@@ -34,8 +32,8 @@ import com.sencha.gxt.widget.core.client.container.Viewport;
 import org.activityinfo.api.client.ActivityInfoClientAsync;
 import org.activityinfo.api.client.ActivityInfoClientAsyncImpl;
 import org.activityinfo.indexedb.IDBFactoryImpl;
+import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.storage.LocalStorage;
-import org.activityinfo.ui.client.catalog.CatalogPlace;
 import org.activityinfo.ui.client.chrome.AppFrame;
 import org.activityinfo.ui.client.store.FormStore;
 import org.activityinfo.ui.client.store.FormStoreImpl;
@@ -43,6 +41,7 @@ import org.activityinfo.ui.client.store.http.ConnectionListener;
 import org.activityinfo.ui.client.store.http.HttpStore;
 import org.activityinfo.ui.client.store.offline.OfflineStore;
 import org.activityinfo.ui.client.store.offline.RecordSynchronizer;
+import org.activityinfo.ui.client.table.TablePlace;
 import org.activityinfo.ui.icons.Icons;
 
 import java.util.logging.Logger;
@@ -52,7 +51,6 @@ import java.util.logging.Logger;
  */
 public class AppEntryPoint implements EntryPoint {
 
-    public static final Place DEFAULT_PLACE = new CatalogPlace(Optional.absent());
 
     private static final Logger LOGGER = Logger.getLogger(AppEntryPoint.class.getName());
 
@@ -93,7 +91,7 @@ public class AppEntryPoint implements EntryPoint {
 
         AppPlaceHistoryMapper historyMapper = new AppPlaceHistoryMapper();
         PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(historyMapper);
-        historyHandler.register(placeController, eventBus, DEFAULT_PLACE);
+        historyHandler.register(placeController, eventBus, new TablePlace(ResourceId.valueOf("none")));
 
         // Start synchronizer...
         RecordSynchronizer synchronizer = new RecordSynchronizer(httpStore, offlineStore);

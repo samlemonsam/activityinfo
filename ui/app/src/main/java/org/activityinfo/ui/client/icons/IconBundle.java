@@ -164,12 +164,4 @@ public interface IconBundle extends ClientBundle {
     @Source("form.png")
     ImageResource form();
 
-    @Source("database-open.png")
-    ImageResource databaseOpen();
-
-    @Source("database-closed.png")
-    ImageResource databaseClosed();
-
-    @Source("report.png")
-    ImageResource report();
 }
