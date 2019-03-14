@@ -27,6 +27,7 @@ import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.shared.command.GetSchema;
 import org.activityinfo.legacy.shared.model.SchemaDTO;
 import org.activityinfo.legacy.shared.model.UserDatabaseDTO;
+import org.activityinfo.ui.client.ClientContext;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.callback.Got;
 import org.activityinfo.ui.client.page.common.nav.Link;
@@ -34,7 +35,7 @@ import org.activityinfo.ui.client.page.common.nav.Navigator;
 import org.activityinfo.ui.client.page.config.link.IndicatorLinkPlace;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -73,17 +74,22 @@ public class ConfigNavigator implements Navigator {
 
         if (parent == null) {
 
+            List<Link> rootLinks = new ArrayList<>();
             Link dbListLink = Link.to(new DbListPageState())
                                   .labeled(messages.databases())
                                   .withIcon(icons.database())
                                   .build();
+            rootLinks.add(dbListLink);
 
-            Link dbLinksLink = Link.to(new IndicatorLinkPlace())
-                                   .labeled(messages.linkIndicators())
-                                   .withIcon(icons.link())
-                                   .build();
+            if(!ClientContext.isV4Enabled()) {
+                Link dbLinksLink = Link.to(new IndicatorLinkPlace())
+                        .labeled(messages.linkIndicators())
+                        .withIcon(icons.link())
+                        .build();
+                rootLinks.add(dbLinksLink);
+            }
 
-            callback.onSuccess(Arrays.asList(dbListLink, dbLinksLink));
+            callback.onSuccess(rootLinks);
 
         } else {
             Link link = (Link) parent;
