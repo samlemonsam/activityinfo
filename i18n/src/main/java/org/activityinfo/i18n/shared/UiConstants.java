@@ -400,9 +400,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Email subscription")
     String emailSubscription();
 
-    @DefaultStringValue("Publish to website")
-    String embed();
-
     @DefaultStringValue("If you don't wish to receive this email, uncheck the Email notification checkbox in your <a href=\"https://www.activityinfo.org/app#userprofile\" style=\"text-decoration: underline;\">settings</a>.")
     String digestUnsubscribeConstant();
 
@@ -445,9 +442,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Filter by attribute")
     String filterByAttribute();
 
-    @DefaultStringValue("Filter by date")
-    String filterByDate();
-
     @DefaultStringValue("Filter by end date")
     String filterByEndDate();
 
@@ -459,9 +453,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Filter by partner")
     String filterByPartner();
-
-    @DefaultStringValue("Filter by project")
-    String filterByProject();
 
     @DefaultStringValue("Filter by location")
     String filterByLocation();
@@ -574,9 +565,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Location type")
     String locationType();
 
-    @DefaultStringValue("Sites")
-    String locations();
-
     @DefaultStringValue("Manage time locks on databases, projects and activities")
     String lockPanelTitle();
 
@@ -594,9 +582,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Mailing list")
     String mailingList();
-
-    @DefaultStringValue("Manage all users")
-    String manageAllUsers();
 
     @DefaultStringValue("Mandatory")
     String mandatory();
@@ -691,9 +676,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Some administrative levels are disabled because the boundaries are not available or have not yet been loaded.")
     String noPolygonsWarning();
 
-    @DefaultStringValue("Undo")
-    String undo();
-
     @DefaultStringValue("Move up")
     String moveUp();
 
@@ -763,9 +745,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("View, add, change and delete projects")
     String projectManagerDescription();
 
-    @DefaultStringValue("Projects")
-    String projects();
-
     @DefaultStringValue("You have unsaved changes. Do you want to save before continuing?")
     String promptSave();
 
@@ -792,9 +771,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Realized / targeted")
     String realizedOrTargeted();
-
-    @DefaultStringValue("Refresh preview")
-    String refreshPreview();
 
     @DefaultStringValue("A minute ago")
     String relativeTimeMinAgo();
@@ -967,12 +943,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Targeted")
     String targeted();
 
-    @DefaultStringValue("Targets")
-    String targets();
-
-    @DefaultStringValue("Time")
-    String time();
-
     @DefaultStringValue("Locks")
     String timeLocks();
 
@@ -1075,38 +1045,14 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Year/month")
     String yearMonthGrouping();
 
-    @DefaultStringValue("Reset")
-    String reset();
-
-    @DefaultStringValue("Label")
-    String labelFieldLabel();
-
     @DefaultStringValue("Code")
     String codeFieldLabel();
 
     @DefaultStringValue("Geographic coordinates")
     String geographicCoordinatesFieldLabel();
 
-    @DefaultStringValue("Ignore this column")
-    String ignoreColumnAction();
-
-    @DefaultStringValue("Choose Field")
-    String chooseFieldHeading();
-
-    @DefaultStringValue("Ignored")
-    String ignored();
-
-    @DefaultStringValue("Label")
-    String fieldLabel();
-
-    @DefaultStringValue("Type")
-    String fieldType();
-
     @DefaultStringValue("Quantity")
     String fieldTypeQuantity();
-
-    @DefaultStringValue("Date")
-    String fieldTypeDate();
 
     @DefaultStringValue("Text")
     String fieldTypeText();
@@ -1117,26 +1063,11 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Multi-line text")
     String fieldTypeNarrative();
 
-    @DefaultStringValue("To begin, select the table you want to import in Excel, copy it to the clipboard, and then paste here")
-    String pasteSpreadsheetInstructions();
-
-    @DefaultStringValue("Choose the destination field.")
-    String chooseDestinationField();
-
     @DefaultStringValue("Change")
     String change();
 
     @DefaultStringValue("Label")
     String label();
-
-    @DefaultStringValue("Cardinality")
-    String cardinality();
-
-    @DefaultStringValue("Values")
-    String values();
-
-    @DefaultStringValue("« Previous")
-    String previousButton();
 
     @DefaultStringValue("Next »")
     String nextButton();
@@ -1146,12 +1077,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("All columns")
     String allColumns();
-
-    @DefaultStringValue("Filter by name")
-    String filterByName();
-
-    @DefaultStringValue("Add column")
-    String addColumn();
 
     @DefaultStringValue("Double click")
     String drillDownTipHeading();
@@ -1164,27 +1089,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Alternate name")
     String alternateName();
-
-    @DefaultStringValue("Confirmation")
-    String confirmation();
-
-    @DefaultStringValue("Yes")
-    String yes();
-
-    @DefaultStringValue("No")
-    String no();
-
-    @DefaultStringValue("New value")
-    String changeHeaderMessage();
-
-    @DefaultStringValue("Clear filter")
-    String clearFilter();
-
-    @DefaultStringValue("Select all")
-    String selectAll();
-
-    @DefaultStringValue("Deselect all")
-    String deselectAll();
 
     @DefaultStringValue("Confirm deletion")
     String confirmDeletion();
@@ -1207,33 +1111,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Importing...")
     String importing();
 
-    @DefaultStringValue("Import failed")
-    String importFailed();
-
-    @DefaultStringValue("Import data from a spreadsheet")
-    String importDialogTitle();
-
-    @DefaultStringValue("Rows validation result")
-    String rowsValidationResult();
-
-    @DefaultStringValue("Correct any problems with the imported rows and fill in missing columns. Please mouse over on particular cell to see detail explanation.")
-    String correctProblems();
-
-    @DefaultStringValue("Matching references...")
-    String matchingReferences();
-
-    @DefaultStringValue("Matched references")
-    String matchedReferences();
-
-    @DefaultStringValue("Message")
-    String message();
-
-    @DefaultStringValue("Please provide valid comma separated text")
-    String pleaseProvideCommaSeparatedText();
-
-    @DefaultStringValue("Parsing rows...")
-    String parsingRows();
-
     @DefaultStringValue("Looks great!")
     String validSchemaImport();
 
@@ -1251,9 +1128,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Allow editing ONLY by users with 'design' privileges")
     String partOfWorkflow();
-
-    @DefaultStringValue("Line")
-    String line();
 
     @DefaultStringValue("Set expression if you would like to calculate indicator value dynamically (otherwise leave blank). Example: [A]+[B]+([C]/[D])")
     String calculatedIndicatorExplanation();
@@ -1288,9 +1162,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Properties")
     String properties();
 
-    @DefaultStringValue("Read only")
-    String readonly();
-
     @DefaultStringValue("Relevance")
     String relevance();
 
@@ -1300,17 +1171,8 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Define IF")
     String defineRelevanceLogic();
 
-    @DefaultStringValue("Defined")
-    String defined();
-
     @DefaultStringValue("Show in data entry")
     String showInDataEntry();
-
-    @DefaultStringValue("And")
-    String and();
-
-    @DefaultStringValue("Or")
-    String or();
 
     @DefaultStringValue("Open in the new data entry page")
     String tryNewDataEntryInterface();
@@ -1357,20 +1219,8 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Delete selected")
     String removeSelectedLocations();
 
-    @DefaultStringValue("Classic view")
-    String classicView();
-
-    @DefaultStringValue("Try the new (BETA) form layout")
-    String tryNewFormLayout();
-
     @DefaultStringValue("Add form")
     String newForm();
-
-    @DefaultStringValue("Please enter a name for the new form")
-    String enterNameForNewForm();
-
-    @DefaultStringValue("What's this?")
-    String whatsThis();
 
     @DefaultStringValue("Add a new database")
     String createNewDatabase();
@@ -1426,12 +1276,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Alert")
     String alert();
 
-    @DefaultStringValue("New submission")
-    String newSubmission();
-
-    @DefaultStringValue("Edit submission")
-    String editSubmission();
-
     @DefaultStringValue("Barcode")
     String fieldTypeBarcode();
 
@@ -1471,20 +1315,11 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Please type to search for results")
     String suggestBoxPlaceholder();
 
-    @DefaultStringValue("Information")
-    String information();
-
     @DefaultStringValue("This field is built-in and cannot be deleted from the form.")
     String notAllowedToRemoveBuiltinField();
 
     @DefaultStringValue("Warning")
     String warning();
-
-    @DefaultStringValue("Please specify 'from' date")
-    String pleaseSpecifyFromDate();
-
-    @DefaultStringValue("Please specify 'to' date")
-    String pleaseSpecifyToDate();
 
     @DefaultStringValue("Pin to dashboard")
     String pinToDashboard();
@@ -1494,15 +1329,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Single selection")
     String singleSelection();
-
-    @DefaultStringValue("Please select at least one item")
-    String pleaseSelectAtLeastOneItem();
-
-    @DefaultStringValue("Perfect match.")
-    String importPerfectMatchTooltip();
-
-    @DefaultStringValue("Failed to match. Row will not be imported.")
-    String failedToMatchValue();
 
     @DefaultStringValue("Database structure successfully imported.")
     String databaseStructureSuccessfullyImported();
@@ -1534,24 +1360,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Download")
     String download();
 
-    @DefaultStringValue("Present")
-    String present();
-
-    @DefaultStringValue("Filter is not supported.")
-    String filterIsNotSupported();
-
-    @DefaultStringValue("Single")
-    String single();
-
-    @DefaultStringValue("Multiple")
-    String multiple();
-
-    @DefaultStringValue("Determines type of attachment (image or file)")
-    String attachmentTypeDescription();
-
-    @DefaultStringValue("Replace")
-    String replace();
-
     @DefaultStringValue("No attachments")
     String noAttachments();
 
@@ -1570,20 +1378,11 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Tab is not selected.")
     String subFormTabNotSelected();
 
-    @DefaultStringValue("Match each column in your spreadsheet to your form's fields on the right.")
-    String columnMappingHelpLink();
-
-    @DefaultStringValue("Show me")
-    String showMe();
-
     @DefaultStringValue("Blank value is not allowed.")
     String blankValueIsNotAllowed();
 
     @DefaultStringValue("Expression")
     String expression();
-
-    @DefaultStringValue("Example: A+B+(C/D)+[Volume A]")
-    String expressionExample();
 
     @DefaultStringValue("Working online")
     String workingOnline();
@@ -1672,12 +1471,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Select")
     String select();
 
-    @DefaultStringValue("Please choose the reference value by geographical location.")
-    String chooseReferenceByGeoPoint();
-
-    @DefaultStringValue("Choose reference value")
-    String chooseReferenceValue();
-
     @DefaultStringValue("A user with this email address has already been added to the database.")
     String userExistsMessage();
 
@@ -1695,9 +1488,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("The formula is valid.")
     String formulaValid();
-
-    @DefaultStringValue("Percentage")
-    String percentage();
 
     @DefaultStringValue("Median")
     String median();
@@ -1822,9 +1612,6 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Selected columns")
     String selectedColumns();
 
-    @DefaultStringValue("All")
-    String allRows();
-
     @DefaultStringValue("Folders")
     String folders();
 
@@ -1860,12 +1647,6 @@ public interface UiConstants extends Constants {
 
     @DefaultStringValue("Email of new owner")
     String newDatabaseOwnerEmail();
-
-    @DefaultStringValue("Database transfer failed")
-    String transferFailed();
-
-    @DefaultStringValue("Cannot find user")
-    String noUser();
 
     @DefaultStringValue("There is a currently pending transfer for this database. Do you wish to cancel the pending transfer?")
     String pendingTransfer();

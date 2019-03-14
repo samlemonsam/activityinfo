@@ -41,7 +41,7 @@ public class BiWeeklyCursor implements PeriodCursor<BiWeek> {
         return get(currentWeek.plus(i));
     }
 
-    public Tab get(BiWeek week) {
+    private Tab get(BiWeek week) {
         return new Tab(week.toString(), week.toString(), SubFormKind.BIWEEKLY);
     }
 

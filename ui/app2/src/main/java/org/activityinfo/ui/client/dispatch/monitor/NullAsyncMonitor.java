@@ -27,8 +27,6 @@ import org.activityinfo.ui.client.dispatch.AsyncMonitor;
  */
 public class NullAsyncMonitor implements AsyncMonitor {
 
-    public static final AsyncMonitor INSTANCE = new NullAsyncMonitor();
-
     @Override
     public void beforeRequest() {
 

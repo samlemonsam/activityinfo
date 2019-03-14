@@ -40,8 +40,6 @@ import java.util.Set;
  */
 public class DataEntryPlaceParser implements PageStateParser {
 
-    public static final String ALL = "all";
-
     public static String serialize(DataEntryPlace place) {
         StringBuilder fragment = new StringBuilder();
         appendGrouping(fragment, place.getGrouping());

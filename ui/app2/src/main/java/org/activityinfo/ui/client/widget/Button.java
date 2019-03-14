@@ -30,7 +30,7 @@ public class Button extends ButtonWithSize {
 
     @UiConstructor
     public Button(ElementStyle style) {
-        super(style, null);
+        super(style);
     }
 
     public void setLabel(String label) {

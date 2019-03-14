@@ -191,10 +191,6 @@ public class FieldPanel {
         return subformTabContainer;
     }
 
-    public ClickHandler getClickHandler() {
-        return clickHandler;
-    }
-
     public void setClickHandler(ClickHandler clickHandler) {
         this.clickHandler = clickHandler;
     }
@@ -203,9 +199,6 @@ public class FieldPanel {
         this.ignoreClickOneTime = ignoreClickOneTime;
     }
 
-    public boolean isIgnoreClickOneTime() {
-        return ignoreClickOneTime;
-    }
 }
 
 

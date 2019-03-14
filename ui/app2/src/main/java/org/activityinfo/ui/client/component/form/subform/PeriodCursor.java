@@ -28,8 +28,6 @@ public interface PeriodCursor<T> {
      */
     Tab get(int i);
 
-    Tab get(T period);
-
     Tab get(String dataPeriod);
 
     /**

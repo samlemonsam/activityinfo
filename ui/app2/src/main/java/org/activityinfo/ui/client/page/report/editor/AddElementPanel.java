@@ -45,8 +45,6 @@ import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
 public class AddElementPanel extends LayoutContainer {
 
-    private ResourceLocator resourceLocator;
-    private EditorProvider editorProvider;
     private AddCallback addCallback;
     private Provider<ElementDialog> dialogProvider;
 
@@ -57,10 +55,7 @@ public class AddElementPanel extends LayoutContainer {
     @Inject
     public AddElementPanel(final Dispatcher dispatcher,
                            final ResourceLocator resourceLocator,
-                           EditorProvider editorProvider,
                            Provider<ElementDialog> dialogProvider) {
-        this.resourceLocator = resourceLocator;
-        this.editorProvider = editorProvider;
         this.dialogProvider = dialogProvider;
 
         HBoxLayout layout = new HBoxLayout();

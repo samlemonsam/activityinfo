@@ -74,7 +74,7 @@ public class PanelFiller {
                         final FlowPanel subFormFieldPanel = new FlowPanel();
                         subFormFieldPanel.addStyleName(FormPanelStyles.INSTANCE.subformPanel());
                         subFormFieldPanel.add(createHeader(depth + 1, subForm.getLabel()));
-                        subFormFieldPanel.add(widgetCreator.createSubformPanel(subForm, depth + 1, relevanceHandler, this).getLoadingPanel());
+                        subFormFieldPanel.add(widgetCreator.createSubformPanel(subForm, depth + 1, this).getLoadingPanel());
 
                         panel.add(subFormFieldPanel);
                     } else {

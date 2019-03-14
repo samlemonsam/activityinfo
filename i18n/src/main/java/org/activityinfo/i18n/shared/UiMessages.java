@@ -20,6 +20,7 @@ package org.activityinfo.i18n.shared;
 
 import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.safehtml.shared.SafeHtml;
+
 import java.util.Date;
 
 /**
@@ -44,12 +45,6 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("Projects for database {0}")
     String projectsForDatabase(String arg0);
-
-    @DefaultMessage("Importing... {0}/{1}, retries: {2}")
-    String importingData(int completed, int total, int retries);
-
-    @DefaultMessage("Imported {0} rows from {1}. Retry import of {2} failed  rows?")
-    String imported(int completed, int total, int failed);
 
     @DefaultMessage("{0,number,#}Q{1}")
     @Key("quarterName")
@@ -96,12 +91,6 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("You are not the owner of this report.<br/>Do you want to save a new copy?")
     String confirmSaveCopy();
 
-    @DefaultMessage("The form \"{0}\" has not been marked as public by the database owner and so cannot be embedded in a public web page. Please contact the database owner and request that the activity be published.")
-    String activityNotPublic(String name);
-
-    @DefaultMessage("In order to embed this sheet in a public web page, the form \"{0}\" must be made public. Do you want to make this form public now?")
-    String promptPublishActivity(String name);
-
     @DefaultMessage("{0} minutes ago")
     String minutesAgo(int minutes);
 
@@ -137,15 +126,6 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("was: blank")
     String siteHistoryOldValueBlank();
-
-    @DefaultMessage("{0}, {1,date,MMMM yyyy}")
-    String siteHistoryIndicatorName(String name, Date date);
-
-    @DefaultMessage("Added attribute {0}")
-    String siteHistoryAttrAdd(String attrName);
-
-    @DefaultMessage("Deleted attribute {0}")
-    String siteHistoryAttrRemove(String attrName);
 
     @DefaultMessage("ActivityInfo digest for {0,date,dd-MM-yyyy}")
     String digestSubject(Date now);
@@ -189,9 +169,6 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Select a site above.")
     String SelectSiteAbove();
 
-    @DefaultMessage("Showing {0} of {1} columns.")
-    String showColumns(int numberOfColumnsShown, int numberOfColumnsTotal);
-
     @DefaultMessage("Are you sure you want to delete {0} row(s) from {1}?")
     String removeTableRowsConfirmation(int numberOfRows, String formClassLabel);
 
@@ -205,18 +182,6 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Deleting {0} row(s) from {1}...")
     String deletingRows(int size, String formClassLabel);
 
-    @DefaultMessage("<b>Showing {0} of {1} columns.</b> You can choose visible columns with ''{2}'' button")
-    SafeHtml notAllColumnsAreShown(int visibleColumns, int allColumns, String chooseColumnButtonName);
-
-    @DefaultMessage("Field is mandatory but not mapped: {0}")
-    String fieldIsMandatory(String fieldLabel);
-
-    @DefaultMessage("Please map all mandatory columns, missed mapping for {0} required fields: {1}")
-    String missedMapping(int missedColumnCount, String columnLabels);
-
-    @DefaultMessage("{0} rows are invalid and won''t be imported. Continue?")
-    String continueImportWithInvalidRows(int invalidRowsCount);
-
     @DefaultMessage("{0}% Complete")
     String percentComplete(int percent);
 
@@ -225,10 +190,6 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("{0} code does not exist.")
     String doesNotExist(String placeholder);
-
-    @DefaultMessage("Please provide valid comma separated text. Column count does not match in row number {0}.")
-    @Key("provideCsvAtRow")
-    String pleaseProvideCommaSeparatedText(int rowNumber);
 
     @DefaultMessage("Exceeds maximum length of {0} characters.")
     String exceedsMaximumLength(int maxLength);
@@ -245,9 +206,6 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @Messages.DefaultMessage("{0} Users")
     String databaseUserGroup(String databaseName);
 
-    @Messages.DefaultMessage("Matched to ''{0}'' ({1}%)")
-    String importValidationCellTooltip(String matchedValue, int confidencePercent);
-
     @Messages.DefaultMessage("{0,date,medium} to {1,date,medium}")
     String dateRange(Date formDate, Date toDate);
 
@@ -260,9 +218,6 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Option {0,number}")
     String defaultEnumItem(int number);
 
-    @DefaultMessage("Unknown value: {0}. Each selection of ''Multiple selection'' control must have separate column with allowed values: TRUE, FALSE or no value (which is considered as FALSE)")
-    String unknownMultiEnumValue(String value);
-
     @DefaultMessage("Required field ''{0}'' is missing in row {1}")
     String requiredFieldMissing(String fieldName, int rowIndex);
 
@@ -271,9 +226,6 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
 
     @DefaultMessage("For fields of type ''{0}'', a column named ''{1}'', containing the ID of the form to reference, is required.")
     String referenceFieldRequiresRange(String fieldTypeName, String columnName);
-
-    @DefaultMessage("Count of {0}")
-    String countMeasure(String formLabel);
 
     @DefaultMessage("{0} pending changes")
     @AlternateMessage({ "one", "One pending change" })

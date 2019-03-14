@@ -28,7 +28,7 @@ import org.activityinfo.ui.client.component.formdesigner.container.WidgetContain
 public class PanelUpdatedEvent extends GwtEvent<PanelUpdatedEvent.Handler> {
 
     public static enum EventType {
-        ADDED, REMOVED, UPDATED
+        ADDED
     }
 
     public static interface Handler extends EventHandler {
@@ -49,10 +49,6 @@ public class PanelUpdatedEvent extends GwtEvent<PanelUpdatedEvent.Handler> {
     @Override
     public final Type<PanelUpdatedEvent.Handler> getAssociatedType() {
         return (Type) TYPE;
-    }
-
-    public WidgetContainer getWidgetContainer() {
-        return widgetContainer;
     }
 
     public EventType getType() {

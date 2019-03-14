@@ -40,8 +40,6 @@ import org.activityinfo.ui.client.page.config.mvp.CanDelete.ConfirmDeleteEvent;
 import org.activityinfo.ui.client.page.config.mvp.CanDelete.RequestDeleteEvent;
 import org.activityinfo.ui.client.page.config.mvp.CanFilter.FilterEvent;
 import org.activityinfo.ui.client.page.config.mvp.CanRefresh.RefreshEvent;
-import org.activityinfo.ui.client.page.config.mvp.CanUpdate.CancelUpdateEvent;
-import org.activityinfo.ui.client.page.config.mvp.CanUpdate.UpdateEvent;
 import org.activityinfo.ui.client.page.config.mvp.CrudView;
 import org.activityinfo.ui.client.page.config.mvp.ListPresenterBase;
 
@@ -118,7 +116,7 @@ public class LockedPeriodsPresenter extends ListPresenterBase<LockedPeriodDTO, L
     }
 
     @Override
-    public void onUpdate(UpdateEvent event) {
+    public void onUpdate() {
         if (view.hasChangedItems()) {
             // Tell the user we're about to persist his changes
             view.getUpdatingMonitor().beforeRequest();
@@ -142,7 +140,7 @@ public class LockedPeriodsPresenter extends ListPresenterBase<LockedPeriodDTO, L
                     updateParent();
 
                     // Update the view
-                    view.update(null);
+                    view.update();
                 }
 
                 /** Replace changed locks */
@@ -188,7 +186,7 @@ public class LockedPeriodsPresenter extends ListPresenterBase<LockedPeriodDTO, L
     }
 
     @Override
-    public void onCancelUpdate(CancelUpdateEvent updateEvent) {
+    public void onCancelUpdate() {
         //
     }
 

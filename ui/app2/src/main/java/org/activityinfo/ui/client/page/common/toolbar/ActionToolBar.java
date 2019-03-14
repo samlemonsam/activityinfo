@@ -22,7 +22,6 @@ import com.extjs.gxt.ui.client.event.*;
 import com.extjs.gxt.ui.client.widget.Component;
 import com.extjs.gxt.ui.client.widget.button.Button;
 import com.extjs.gxt.ui.client.widget.button.SplitButton;
-import com.extjs.gxt.ui.client.widget.button.ToggleButton;
 import com.extjs.gxt.ui.client.widget.menu.Menu;
 import com.extjs.gxt.ui.client.widget.menu.MenuItem;
 import com.extjs.gxt.ui.client.widget.toolbar.ToolBar;
@@ -48,9 +47,6 @@ public class ActionToolBar extends ToolBar implements Listener<ButtonEvent> {
     private Button removeButton;
     private Button editButton;
     private Button uploadButton;
-    private Button printButton;
-    private Button transferButton;
-    private Button cancelTransferButton;
 
     public ActionToolBar() {
     }
@@ -83,19 +79,6 @@ public class ActionToolBar extends ToolBar implements Listener<ButtonEvent> {
         }
     }
 
-    public ToggleButton addToggleButton(String actionId, String text, AbstractImagePrototype icon) {
-        ToggleButton button = new ToggleButton(text, icon);
-        button.setItemId(actionId);
-        button.addListener(Events.Select, this);
-        add(button);
-
-        return button;
-    }
-
-    public ToggleButtonBuilder addToggleButton() {
-        return new ToggleButtonBuilder();
-    }
-
     public void addCreateButton() {
         this.addButton = addButton(UIActions.ADD, I18N.CONSTANTS.addItem(), IconImageBundle.ICONS.add());
 
@@ -108,10 +91,6 @@ public class ActionToolBar extends ToolBar implements Listener<ButtonEvent> {
     public void addUploadButton() {
         addButton(UIActions.UPLOAD, I18N.CONSTANTS.upload(), IconImageBundle.ICONS.up());
 
-    }
-
-    public void addEditButton() {
-        addEditButton(IconImageBundle.ICONS.editPage());
     }
 
     public void addEditButton(AbstractImagePrototype icon) {
@@ -128,10 +107,6 @@ public class ActionToolBar extends ToolBar implements Listener<ButtonEvent> {
 
     public void addExcelExportButton() {
         addButton(UIActions.EXPORT, I18N.CONSTANTS.export(), IconImageBundle.ICONS.excel());
-    }
-    
-    public void addRefreshButton() {
-        addButton(UIActions.REFRESH, I18N.CONSTANTS.refreshPreview(), IconImageBundle.ICONS.refresh());
     }
 
     public void addSaveSplitButton() {
@@ -197,12 +172,6 @@ public class ActionToolBar extends ToolBar implements Listener<ButtonEvent> {
         }
     }
 
-    public void setPrintEnabled(boolean enabled) {
-        if (printButton != null) {
-            printButton.setEnabled(enabled);
-        }
-    }
-
     public void setUploadEnabled(boolean enabled) {
         if (uploadButton != null) {
             uploadButton.setEnabled(enabled);
@@ -242,40 +211,6 @@ public class ActionToolBar extends ToolBar implements Listener<ButtonEvent> {
         setEnabled(listener != null);
     }
 
-    public void addLockedPeriodsButton() {
-        addButton(UIActions.SHOW_LOCKED_PERIODS, I18N.CONSTANTS.timeLocks(), IconImageBundle.ICONS.lockedPeriod());
-    }
-
-    public class ToggleButtonBuilder {
-
-        private ToggleButton button;
-
-        public ToggleButtonBuilder() {
-            button = new ToggleButton();
-            add(button);
-        }
-
-        public ToggleButtonBuilder withText(String text) {
-            button.setText(text);
-            return this;
-        }
-
-        public ToggleButtonBuilder withIcon(AbstractImagePrototype icon) {
-            button.setIcon(icon);
-            return this;
-        }
-
-        public ToggleButtonBuilder withListener(SelectionListener<ButtonEvent> listener) {
-            button.addSelectionListener(listener);
-            return this;
-        }
-
-        public ToggleButtonBuilder inGroup(String group) {
-            button.setToggleGroup(group);
-            return this;
-        }
-    }
-
     public void addImportButton() {
         addButton(UIActions.IMPORT, I18N.CONSTANTS.importText(), IconImageBundle.ICONS.importIcon());
     }
@@ -284,19 +219,8 @@ public class ActionToolBar extends ToolBar implements Listener<ButtonEvent> {
         addButton(UIActions.TRANSFER_DATABASE, I18N.CONSTANTS.transferDatabaseLabel(), IconImageBundle.ICONS.user());
     }
 
-    public void setTransferEnabled(boolean enabled) {
-        if (transferButton != null) {
-            transferButton.setEnabled(enabled);
-        }
-    }
-
     public void addCancelTransferButton() {
         addButton(UIActions.CANCEL_TRANSFER, I18N.CONSTANTS.cancelTransfer(), IconImageBundle.ICONS.deleteUser());
     }
 
-    public void setCancelTransferEnabled(boolean enabled) {
-        if (transferButton != null) {
-            transferButton.setEnabled(enabled);
-        }
-    }
 }

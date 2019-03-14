@@ -209,7 +209,4 @@ public class PeriodTabStrip extends HTMLPanel implements ClickHandler, HasValue<
         }
     }
 
-    public SubFormKind getKind() {
-        return kind;
-    }
 }

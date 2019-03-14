@@ -62,12 +62,4 @@ public class ProgressBar implements IsWidget {
         screenReaderText.setInnerText(I18N.MESSAGES.percentComplete(percentComplete));
     }
 
-    public void setVisible(boolean visible) {
-        rootElement.setVisible(visible);
-    }
-
-    public boolean isVisible() {
-        return rootElement.isVisible();
-    }
-
 }

@@ -19,7 +19,6 @@
 package org.activityinfo.ui.client.page.entry.form;
 
 import com.extjs.gxt.ui.client.Style.SelectionMode;
-import com.extjs.gxt.ui.client.event.ListViewEvent;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.widget.ListRenderer;
 import com.extjs.gxt.ui.client.widget.ListView;
@@ -52,34 +51,6 @@ public class FormNavigationListView extends ListView<FormSectionModel> {
 
     private void select(FormSectionModel model) {
         getSelectionModel().setSelection(Arrays.asList(model));
-    }
-
-    private void select(int index) {
-        select(store.getAt(index));
-    }
-
-    private void selectAndFire(int index) {
-        select(index);
-        ListViewEvent<FormSectionModel> event = new ListViewEvent<FormSectionModel>(this);
-        event.setModel(getSelectionModel().getSelectedItem());
-    }
-
-    public void prev() {
-        if (!getSelectionModel().getSelection().isEmpty()) {
-            int index = store.indexOf(getSelectionModel().getSelectedItem());
-            if (index > 0) {
-                selectAndFire(index - 1);
-            }
-        }
-    }
-
-    public void next() {
-        if (!getSelectionModel().getSelection().isEmpty()) {
-            int index = store.indexOf(getSelectionModel().getSelectedItem());
-            if (index + 1 < store.getCount()) {
-                selectAndFire(index + 1);
-            }
-        }
     }
 
     private class Renderer extends ListRenderer<FormSectionModel> {

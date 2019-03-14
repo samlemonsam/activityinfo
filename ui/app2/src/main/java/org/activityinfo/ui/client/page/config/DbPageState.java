@@ -32,9 +32,6 @@ public class DbPageState extends AbstractPagingGridPageState {
     private PageId pageId;
     private int databaseId;
 
-    protected DbPageState() {
-    }
-
     public DbPageState(PageId pageId, int databaseId) {
         this.pageId = pageId;
         this.databaseId = databaseId;
@@ -42,10 +39,6 @@ public class DbPageState extends AbstractPagingGridPageState {
 
     public int getDatabaseId() {
         return databaseId;
-    }
-
-    public void setDatabaseId(int databaseId) {
-        this.databaseId = databaseId;
     }
 
     @Override

@@ -26,7 +26,9 @@ import com.extjs.gxt.ui.client.store.Store;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.loader.CommandLoadEvent;
 import org.activityinfo.ui.client.dispatch.state.StateProvider;
-import org.activityinfo.ui.client.page.*;
+import org.activityinfo.ui.client.page.NavigationCallback;
+import org.activityinfo.ui.client.page.Page;
+import org.activityinfo.ui.client.page.PageState;
 import org.activityinfo.ui.client.page.common.toolbar.UIActions;
 
 import java.util.HashMap;
@@ -97,10 +99,6 @@ public abstract class AbstractGridPresenter<ModelT extends ModelData> implements
         } else if (UIActions.ADD.equals(actionId)) {
             onAdd();
         }
-    }
-
-    public int pageFromOffset(int offset) {
-        return (offset / getPageSize()) + 1;
     }
 
     public int offsetFromPage(int pagenum) {
@@ -179,19 +177,6 @@ public abstract class AbstractGridPresenter<ModelT extends ModelData> implements
         }
 
         saveState(stateMap);
-    }
-
-    protected void firePageEvent(AbstractGridPageState place, LoadEvent le) {
-        Object config = le.getConfig();
-        if (config instanceof ListLoadConfig) {
-            place.setSortInfo(((ListLoadConfig) config).getSortInfo());
-        }
-        if (config instanceof PagingLoadConfig && place instanceof AbstractPagingGridPageState) {
-            int offset = ((PagingLoadConfig) config).getOffset();
-            ((AbstractPagingGridPageState) place).setPageNum(pageFromOffset(offset));
-        }
-
-        eventBus.fireEvent(new NavigationEvent(NavigationHandler.NAVIGATION_AGREED, place));
     }
 
     protected void handleGridNavigation(ListLoader loader, AbstractGridPageState gridPlace) {

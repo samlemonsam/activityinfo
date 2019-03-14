@@ -31,7 +31,6 @@ public abstract class AbstractPagingGridPageState extends AbstractGridPageState 
         this.pageNum = pageNum;
     }
 
-    @Override
     protected void appendGridStateToken(StringBuilder sb) {
         if (getSortInfo() != null && getSortInfo().getSortDir() != Style.SortDir.NONE &&
             getSortInfo().getSortField().length() != 0) {
@@ -47,17 +46,4 @@ public abstract class AbstractPagingGridPageState extends AbstractGridPageState 
         }
     }
 
-    @Override
-    public boolean parseGridStateTokens(String t) {
-        if (super.parseGridStateTokens(t)) {
-            return true;
-        }
-
-        if (t.startsWith("p")) {
-            pageNum = Integer.parseInt(t.substring(1));
-        } else {
-            return false;
-        }
-        return true;
-    }
 }

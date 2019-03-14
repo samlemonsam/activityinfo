@@ -30,7 +30,6 @@ import com.google.gwt.user.client.Element;
  */
 public class ColorField extends TriggerField<String> {
     private static final String WHITE_HEX_STRING = "FFFFFF";
-    private static final int WHITE = 0xFFFFFF;
     private ColorMenu menu;
 
     public ColorField() {
@@ -84,10 +83,6 @@ public class ColorField extends TriggerField<String> {
         }
     }
 
-    public void setValue(int value) {
-        setValue(Integer.toHexString(value));
-    }
-
     @Override
     public void render(Element target, int index) {
         super.render(target, index);
@@ -96,27 +91,10 @@ public class ColorField extends TriggerField<String> {
         input.setStyleAttribute("backgroundImage", "none");
     }
 
-    /**
-     * @return the current color value as a 32-bit integer.
-     */
-    public int getIntValue() {
-        return value == null ? WHITE : Integer.parseInt(value, 16);
-    }
-
     @Override
     protected void onBlur(ComponentEvent ce) {
         super.onBlur(ce);
         fireEvent(Events.Select, new FieldEvent(ColorField.this));
-    }
-
-    public void setValue(String bubbleColor, boolean b) {
-        if (b) {
-            setFireChangeEventOnSetValue(false);
-            setValue(bubbleColor);
-            setFireChangeEventOnSetValue(true);
-        } else {
-            setValue(bubbleColor);
-        }
     }
 
 }

@@ -24,9 +24,6 @@ package org.activityinfo.ui.client.widget.form;
 public class GridCol {
 
     public static final String COL_XS = "col-xs";
-    public static final String COL_SM = "col-sm";
-    public static final String COL_MD = "col-md";
-    public static final String COL_LG = "col-lg";
 
     public static final int MAX_COLUMN_COUNT = 12;
     public static final String DEFAULT_COL = COL_XS;

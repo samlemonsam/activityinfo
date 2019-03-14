@@ -38,7 +38,6 @@ import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.legacy.shared.command.GetUsers;
 import org.activityinfo.legacy.shared.command.result.UserResult;
 import org.activityinfo.legacy.shared.model.*;
-import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.state.StateProvider;
@@ -69,7 +68,6 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
     private static final SafeHtml ALL_CATEGORIES = new SafeHtmlBuilder()
             .appendHtmlConstant("<i>").appendEscaped(I18N.CONSTANTS.all()).appendHtmlConstant("</i>").toSafeHtml();
 
-    private final EventBus eventBus;
     private final Dispatcher dispatcher;
 
     private PagingLoader<UserResult> loader;
@@ -85,8 +83,7 @@ public class DbUserEditor extends ContentPanel implements DbPage, ActionListener
 
 
     @Inject
-    public DbUserEditor(EventBus eventBus, Dispatcher service, StateProvider stateMgr) {
-        this.eventBus = eventBus;
+    public DbUserEditor(Dispatcher service, StateProvider stateMgr) {
         this.dispatcher = service;
 
         setHeadingText(I18N.CONSTANTS.users());

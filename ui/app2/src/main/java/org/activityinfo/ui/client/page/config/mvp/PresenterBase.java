@@ -19,7 +19,6 @@
 package org.activityinfo.ui.client.page.config.mvp;
 
 import org.activityinfo.legacy.shared.model.DTO;
-import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 
 /*
@@ -29,12 +28,10 @@ import org.activityinfo.ui.client.dispatch.Dispatcher;
 public class PresenterBase<V extends View<M>, M extends DTO> implements Presenter<V, M> {
 
     protected final Dispatcher service;
-    protected final EventBus eventBus;
     protected final V view;
 
-    public PresenterBase(Dispatcher service, EventBus eventBus, V view) {
+    public PresenterBase(Dispatcher service, V view) {
         this.service = service;
-        this.eventBus = eventBus;
         this.view = view;
 
         addListeners();

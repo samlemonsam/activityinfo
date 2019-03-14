@@ -90,10 +90,6 @@ public class PivotTableBinder extends ReportViewBinder<PivotContent, PivotReport
         }
     }
 
-    private boolean isCached(Filter filter, Set<Dimension> dimensions) {
-        return filter.equals(cachedFilter) && dimensions.equals(cachedDimensions);
-    }
-
 
     private PivotContent generateElement() {
         

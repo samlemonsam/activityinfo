@@ -33,9 +33,6 @@ public class MultilineRenderer<T> implements SafeHtmlRenderer<T> {
         this.renderer = renderer;
     }
 
-    private MultilineRenderer() {
-    }
-
     @Override
     public SafeHtml render(T item) {
         SafeHtmlBuilder builder = new SafeHtmlBuilder();

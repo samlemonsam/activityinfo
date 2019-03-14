@@ -22,7 +22,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.activityinfo.legacy.shared.command.GetActivityForms;
-import org.activityinfo.legacy.shared.command.GetAdminLevels;
 import org.activityinfo.legacy.shared.command.result.ActivityFormResults;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.AdminLevelDTO;
@@ -34,7 +33,6 @@ import org.activityinfo.ui.client.dispatch.Dispatcher;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class Dimensions {
 
@@ -44,7 +42,6 @@ public class Dimensions {
     private final Map<Integer, AdminLevelDTO> levelMap = Maps.newHashMap();
     private final List<AdminLevelDTO> levels = Lists.newArrayList();
 
-    private List<DimensionModel> levelDimensions;
     private List<DimensionModel> attributeDimensions;
 
     private Dimensions(List<ActivityFormDTO> forms) {
@@ -77,12 +74,6 @@ public class Dimensions {
                 return new Dimensions(input.getData());
             }
         });
-    }
-
-    private static GetAdminLevels queryAdminLevels(Set<Integer> indicators) {
-        GetAdminLevels query = new GetAdminLevels();
-        query.setIndicatorIds(indicators);
-        return query;
     }
 
     public List<DimensionModel> getAdminLevelDimensions() {

@@ -27,7 +27,6 @@ import org.activityinfo.ui.client.AppCacheMonitor;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.UsageTracker;
 import org.activityinfo.ui.client.component.report.editor.map.MapModule;
-import org.activityinfo.ui.client.dispatch.ResourceLocator;
 import org.activityinfo.ui.client.dispatch.remote.cache.AdminEntityCache;
 import org.activityinfo.ui.client.dispatch.remote.cache.SchemaCache;
 import org.activityinfo.ui.client.local.LocalController;
@@ -76,8 +75,6 @@ public interface AppInjector extends Ginjector {
     AppLoader createAppLoader();
     
     FormPageLoader createFormLoader();
-
-    ResourceLocator getResourceLocator();
 
     AppCacheMonitor getAppCacheMonitor();
 

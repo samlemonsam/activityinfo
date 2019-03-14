@@ -81,10 +81,6 @@ public class DeleteWidgetContainerAction implements ConfirmDialog.Action {
         return promise;
     }
 
-    public void setSuccessCallback(SuccessCallback<Object> successCallback) {
-        this.successCallback = successCallback;
-    }
-
     @Override
     public void onComplete() {
         formDesigner.getSavedGuard().setSaved(false);

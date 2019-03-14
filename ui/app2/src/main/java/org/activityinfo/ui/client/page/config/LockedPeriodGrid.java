@@ -20,7 +20,10 @@ package org.activityinfo.ui.client.page.config;
 
 import com.bedatadriven.rebar.time.calendar.LocalDate;
 import com.extjs.gxt.ui.client.core.El;
-import com.extjs.gxt.ui.client.event.*;
+import com.extjs.gxt.ui.client.event.ComponentEvent;
+import com.extjs.gxt.ui.client.event.Events;
+import com.extjs.gxt.ui.client.event.GridEvent;
+import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.store.ListStore;
 import com.extjs.gxt.ui.client.store.Record;
 import com.extjs.gxt.ui.client.store.Store;
@@ -49,7 +52,10 @@ import org.activityinfo.ui.client.page.config.LockedPeriodsPresenter.LockedPerio
 import org.activityinfo.ui.client.page.config.mvp.CanCreate;
 import org.activityinfo.ui.client.page.config.mvp.CanUpdate;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEditor {
 
@@ -236,7 +242,7 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
     }
 
     @Override
-    public void update(LockedPeriodDTO item) {
+    public void update() {
         lockedPeriodStore.commitChanges();
     }
 
@@ -281,7 +287,7 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
     }
 
     @Override
-    public void cancelUpdate(LockedPeriodDTO item) {
+    public void cancelUpdate() {
         lockedPeriodDTOGrid.stopEditing(true);
     }
 
@@ -434,11 +440,6 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
     }
 
     @Override
-    public AsyncMonitor getLoadingMonitor() {
-        return loadingMonitor;
-    }
-
-    @Override
     public AsyncMonitor getCreatingMonitor() {
         return form;
     }
@@ -476,11 +477,6 @@ public class LockedPeriodGrid extends ContentPanel implements LockedPeriodListEd
     @Override
     public HandlerRegistration addFilterHandler(FilterHandler filter) {
         return null;
-    }
-
-    @Override
-    public void initialize() {
-        //
     }
 
     @Override

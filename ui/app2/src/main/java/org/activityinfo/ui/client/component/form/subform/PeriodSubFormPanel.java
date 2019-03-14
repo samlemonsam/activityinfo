@@ -30,7 +30,6 @@ import org.activityinfo.model.form.TypedFormRecord;
 import org.activityinfo.promise.Promise;
 import org.activityinfo.ui.client.component.form.FormModel;
 import org.activityinfo.ui.client.component.form.PanelFiller;
-import org.activityinfo.ui.client.component.form.RelevanceHandler;
 import org.activityinfo.ui.client.widget.LoadingPanel;
 
 import java.util.List;
@@ -42,17 +41,15 @@ public class PeriodSubFormPanel implements SubFormPanel {
 
     private final FlowPanel panel;
     private final FormClass subForm;
-    private final RelevanceHandler relevanceHandler;
     private final FormModel formModel;
     private final PanelFiller panelFiller;
     private final int depth;
     private final LoadingPanel<Void> loadingPanel;
     private PeriodTabStrip tabStrip;
 
-    public PeriodSubFormPanel(FormModel formModel, FormClass subForm, RelevanceHandler relevanceHandler, PanelFiller panelFiller, int depth) {
+    public PeriodSubFormPanel(FormModel formModel, FormClass subForm, PanelFiller panelFiller, int depth) {
         this.subForm = subForm;
         this.formModel = formModel;
-        this.relevanceHandler = relevanceHandler;
         this.panelFiller = panelFiller;
         this.depth = depth;
 

@@ -132,13 +132,6 @@ public class AbstractCache {
         }
     }
 
-    /**
-     * @return A set of all cached commands and their results/statistics
-     */
-    protected Set<Map.Entry<Command, CacheEntry>> getCacheEntries() {
-        return results.entrySet();
-    }
-
     public void clear() {
         cache.clear();
     }

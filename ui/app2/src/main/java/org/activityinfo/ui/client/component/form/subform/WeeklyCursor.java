@@ -41,7 +41,7 @@ public class WeeklyCursor implements PeriodCursor<EpiWeek> {
         return get(currentWeek.plus(i));
     }
 
-    public Tab get(EpiWeek week) {
+    private Tab get(EpiWeek week) {
         return new Tab(week.toString(), week.toString(), SubFormKind.WEEKLY);
     }
 

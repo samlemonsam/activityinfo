@@ -33,8 +33,6 @@ import org.activityinfo.ui.client.component.filter.FilterToolBar.RemoveFilterEve
 import org.activityinfo.ui.client.component.filter.FilterToolBar.RemoveFilterHandler;
 import org.activityinfo.ui.client.style.legacy.icon.IconImageBundle;
 
-import java.util.Date;
-
 /**
  * UI Component for selecting a range of dates to be used with a
  * {@link org.activityinfo.legacy.shared.command.Filter}
@@ -135,14 +133,6 @@ public class DateRangePanel extends ContentPanel implements HasValue<Filter>, Fi
         setIcon(IconImageBundle.ICONS.filter());
     }
 
-    /**
-     * Updates the given filter with the user's choice.
-     *
-     * @param filter the filter to update
-     */
-    public void updateFilter(Filter filter) {
-    }
-
     @Override
     public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Filter> handler) {
         return addHandler(handler, ValueChangeEvent.getType());
@@ -188,22 +178,6 @@ public class DateRangePanel extends ContentPanel implements HasValue<Filter>, Fi
         if (fireEvents) {
             ValueChangeEvent.fire(this, getValue());
         }
-    }
-
-    public Date getMinDate() {
-        return minField.getValue();
-    }
-
-    public Date getMaxDate() {
-        return maxField.getValue();
-    }
-
-    public void setMinDate(Date date) {
-        minField.setValue(date);
-    }
-
-    public void setMaxDate(Date date) {
-        maxField.setValue(date);
     }
 
     @Override

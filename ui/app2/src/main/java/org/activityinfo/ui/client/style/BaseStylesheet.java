@@ -36,9 +36,4 @@ public interface BaseStylesheet extends Stylesheet {
     BaseStylesheet INSTANCE = GWT.create(BaseStylesheet.class);
 
 
-    /**
-     * The Bootstrap styles have been enclosed in this style
-     * to avoid messing with rest of the GXT styles for the time being.
-     */
-    String CONTAINER_STYLE = "bs";
 }

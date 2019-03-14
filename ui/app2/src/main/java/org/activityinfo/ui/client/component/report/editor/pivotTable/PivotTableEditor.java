@@ -32,11 +32,8 @@ import org.activityinfo.legacy.shared.reports.model.PivotTableReportElement;
 import org.activityinfo.ui.client.EventBus;
 import org.activityinfo.ui.client.component.report.editor.chart.PivotFilterPanel;
 import org.activityinfo.ui.client.component.report.view.PivotGridPanel;
-import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
-import org.activityinfo.ui.client.dispatch.monitor.MaskingAsyncMonitor;
-import org.activityinfo.ui.client.dispatch.state.StateProvider;
 import org.activityinfo.ui.client.page.report.editor.ReportElementEditor;
 
 import java.util.Arrays;
@@ -47,7 +44,6 @@ public class PivotTableEditor extends LayoutContainer implements ReportElementEd
     private final EventBus eventBus;
     private final Dispatcher service;
     private ResourceLocator locator;
-    private final StateProvider stateMgr;
 
     private PivotTrayPanel pivotPanel;
     private PivotFilterPanel filterPane;
@@ -61,11 +57,10 @@ public class PivotTableEditor extends LayoutContainer implements ReportElementEd
     private PivotTableReportElement model;
 
     @Inject
-    public PivotTableEditor(EventBus eventBus, Dispatcher service, ResourceLocator locator, StateProvider stateMgr) {
+    public PivotTableEditor(EventBus eventBus, Dispatcher service, ResourceLocator locator) {
         this.eventBus = eventBus;
         this.service = service;
         this.locator = locator;
-        this.stateMgr = stateMgr;
 
         initializeComponent();
 
@@ -121,10 +116,6 @@ public class PivotTableEditor extends LayoutContainer implements ReportElementEd
         center.add(gridPanel, new BorderLayoutData(Style.LayoutRegion.CENTER));
 
         viewBinder = new PivotTableBinder(eventBus, service, gridPanel);
-    }
-
-    public AsyncMonitor getMonitor() {
-        return new MaskingAsyncMonitor(this, I18N.CONSTANTS.loading());
     }
 
     @Override

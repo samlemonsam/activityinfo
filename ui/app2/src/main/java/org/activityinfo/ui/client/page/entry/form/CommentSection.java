@@ -43,10 +43,6 @@ public class CommentSection extends FormSectionWithFormLayout<SiteDTO> {
         add(commentField);
     }
 
-    public CommentSection() {
-        this(350, 0);
-    }
-
     @Override
     public boolean validate() {
         return true;

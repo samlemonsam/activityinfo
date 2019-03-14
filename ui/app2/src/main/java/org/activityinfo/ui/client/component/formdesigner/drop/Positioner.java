@@ -54,10 +54,6 @@ public class Positioner implements IsWidget {
         return widget;
     }
 
-    public boolean isForbidded() {
-        return forbidded;
-    }
-
     public void setForbidded(boolean forbidded) {
         this.forbidded = forbidded;
         setStyle();

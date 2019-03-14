@@ -19,13 +19,9 @@
 package org.activityinfo.ui.client;
 
 import com.google.gwt.user.client.Window;
-import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
 
 public class App3 {
-    public static void openNewTable(Integer activityId) {
-        openNewTable( CuidAdapter.activityFormClass(activityId));
-    }
 
     public static void openNewTable(ResourceId formId) {
         if(ClientContext.isV4Enabled()) {

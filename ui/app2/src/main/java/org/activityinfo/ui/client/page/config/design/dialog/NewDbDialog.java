@@ -101,10 +101,6 @@ public class NewDbDialog {
         return this;
     }
 
-    public SuccessCallback<Void> getSuccessCallback() {
-        return successCallback;
-    }
-
     public NewDbDialog setSuccessCallback(SuccessCallback<Void> successCallback) {
         this.successCallback = successCallback;
         return this;

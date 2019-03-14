@@ -40,10 +40,8 @@ import java.util.List;
 public class IndicatorPage extends WizardPage {
     // List of all indicators
     private IndicatorTreePanel treePanel;
-    private ResourceLocator locator;
 
     public IndicatorPage(Dispatcher service, ResourceLocator locator) {
-        this.locator = locator;
 
         VBoxLayout pageLayout = new VBoxLayout();
         pageLayout.setVBoxLayoutAlign(VBoxLayoutAlign.STRETCH);

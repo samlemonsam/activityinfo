@@ -23,8 +23,6 @@ import com.extjs.gxt.ui.client.state.StateManager;
 import com.extjs.gxt.ui.client.util.Theme;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Document;
-import com.google.gwt.dom.client.Style;
 import org.activityinfo.legacy.shared.Log;
 import org.activityinfo.ui.client.billing.BillingSupervisor;
 import org.activityinfo.ui.client.dispatch.state.SafeStateProvider;
@@ -113,9 +111,5 @@ public class ActivityInfoEntryPoint implements EntryPoint {
         injector.createAdminCache();
     }
 
-
-    public static void hideLoadingIndicator() {
-        Document.get().getElementById("loading").getStyle().setDisplay(Style.Display.NONE);
-    }
 
 }

@@ -30,7 +30,6 @@ public class DelimiterGuesser {
 
     private final String text;
     private int firstNotMatchedRow = -1;
-    private boolean isDataSetOfOneColumn = false;
 
     public DelimiterGuesser(String text) {
         this.text = text;
@@ -53,7 +52,6 @@ public class DelimiterGuesser {
         }
 
         // if not, then assume that this is a dataset of 1 column
-        isDataSetOfOneColumn = true;
         return '\0';
     }
 
@@ -101,7 +99,4 @@ public class DelimiterGuesser {
         return firstNotMatchedRow;
     }
 
-    public boolean isDataSetOfOneColumn() {
-        return isDataSetOfOneColumn;
-    }
 }

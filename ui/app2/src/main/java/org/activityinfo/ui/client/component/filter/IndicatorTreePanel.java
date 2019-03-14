@@ -81,7 +81,6 @@ public class IndicatorTreePanel extends ContentPanel {
     private final TreePanel<ModelData> tree;
     private ToolBar toolBar;
     private StoreFilterField filter;
-    private boolean multipleSelection;
 
     interface Templates extends SafeHtmlTemplates {
 
@@ -352,9 +351,7 @@ public class IndicatorTreePanel extends ContentPanel {
     public void select(int indicatorId, boolean select) {
 
         if (select) {
-            if (!multipleSelection) {
-                selection.clear();
-            }
+            selection.clear();
             selection.add(indicatorId);
         } else {
             selection.remove(indicatorId);
@@ -408,13 +405,6 @@ public class IndicatorTreePanel extends ContentPanel {
                 }
             }
             return true;
-        }
-    }
-
-    public void clearSelection() {
-        for (IndicatorDTO indicator : getSelection()) {
-            tree.getSelectionModel().deselect(indicator);
-            tree.setChecked(indicator, false);
         }
     }
 

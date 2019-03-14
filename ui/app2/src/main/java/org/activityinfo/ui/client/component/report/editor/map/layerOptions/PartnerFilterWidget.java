@@ -65,10 +65,6 @@ public class PartnerFilterWidget extends FilterWidget {
         });
     }
 
-    public void clear() {
-
-    }
-
     @Override
     public void updateView() {
         if (getValue().isRestricted(DimensionType.Partner)) {

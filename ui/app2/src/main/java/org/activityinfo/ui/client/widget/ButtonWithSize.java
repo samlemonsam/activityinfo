@@ -31,9 +31,7 @@ public class ButtonWithSize extends com.google.gwt.user.client.ui.Button {
     // bootstrap:  .btn-lg, .btn-sm, or .btn-xs
     public static enum Size {
 
-        LARGE("lg"),
-        SMALL("sm"),
-        EXTRA_SMALL("xs");
+        ;
 
         private final String className;
 
@@ -47,11 +45,8 @@ public class ButtonWithSize extends com.google.gwt.user.client.ui.Button {
     }
 
     @UiConstructor
-    public ButtonWithSize(ElementStyle style, Size size) {
+    public ButtonWithSize(ElementStyle style) {
         String styleName = "btn btn-" + style.name().toLowerCase();
-        if (size != null) {
-            styleName = styleName + " btn-" + size.getClassName();
-        }
         setStyleName(styleName);
     }
 }

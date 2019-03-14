@@ -18,7 +18,6 @@
  */
 package org.activityinfo.ui.client.page.common.grid;
 
-import com.extjs.gxt.ui.client.Style;
 import com.extjs.gxt.ui.client.data.SortInfo;
 import org.activityinfo.ui.client.page.PageState;
 
@@ -33,18 +32,4 @@ public abstract class AbstractGridPageState implements PageState {
         this.sortInfo = sortInfo;
     }
 
-    protected void appendGridStateToken(StringBuilder sb) {
-
-    }
-
-    public boolean parseGridStateTokens(String t) {
-        if (t.startsWith("sort-desc:")) {
-            setSortInfo(new SortInfo(t.substring("sort-desc:".length()), Style.SortDir.DESC));
-        } else if (t.startsWith("sort:")) {
-            setSortInfo(new SortInfo(t.substring("sort:".length()), Style.SortDir.DESC));
-        } else {
-            return false;
-        }
-        return true;
-    }
 }

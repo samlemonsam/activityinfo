@@ -26,23 +26,23 @@ import org.activityinfo.ui.client.dispatch.AsyncMonitor;
 @Deprecated
 public interface CanUpdate<M> {
     interface CancelUpdateHandler extends EventHandler {
-        void onCancelUpdate(CancelUpdateEvent updateEvent);
+        void onCancelUpdate();
     }
 
     interface UpdateHandler extends EventHandler {
-        void onUpdate(UpdateEvent updateEvent);
+        void onUpdate();
     }
 
     interface RequestUpdateHandler extends EventHandler {
-        void onRequestUpdate(RequestUpdateEvent requestUpdateEvent);
+        void onRequestUpdate();
     }
 
     // An item is updated by the presenter, this method updates the item at the
     // view
-    void update(M item);
+    void update();
 
     // Throw away changes of given item
-    void cancelUpdate(M item);
+    void cancelUpdate();
 
     // Throw away all changes for all changed objects
     void cancelUpdateAll();
@@ -75,7 +75,7 @@ public interface CanUpdate<M> {
 
         @Override
         protected void dispatch(UpdateHandler handler) {
-            handler.onUpdate(this);
+            handler.onUpdate();
         }
     }
 
@@ -90,7 +90,7 @@ public interface CanUpdate<M> {
 
         @Override
         protected void dispatch(CancelUpdateHandler handler) {
-            handler.onCancelUpdate(this);
+            handler.onCancelUpdate();
         }
     }
 
@@ -105,7 +105,7 @@ public interface CanUpdate<M> {
 
         @Override
         protected void dispatch(RequestUpdateHandler handler) {
-            handler.onRequestUpdate(this);
+            handler.onRequestUpdate();
         }
     }
 }

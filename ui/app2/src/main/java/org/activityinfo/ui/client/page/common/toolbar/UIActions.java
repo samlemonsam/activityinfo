@@ -37,38 +37,16 @@ public final class UIActions {
     public static final String EDIT = "edit";
 
     public static final String EXPORT = "export";
-    
-    public static final String EXPORT_XLSFORM = "export_xlsform";
 
     public static final String SAVE = "save";
 
-    public static final String CANCEL = "cancel";
-
-    public static final String EMBED = "EMBED";
-
-    public static final String MAP = "map";
-
-    public static final String REFRESH = "refresh";
-
     public static final String DISCARD_CHANGES = "discard";
-
-    public static final String EXPORT_DATA = "exportData";
-
-    public static final String SHOW_LOCKED_PERIODS = "showLockedPeriods";
 
     public static final String PRINT = "print";
 
     public static final String MAILING_LIST = "mailingList";
 
     public static final String UPLOAD = "upload";
-
-    public static final String SUBSCRIBE = "subscribe";
-
-    public static final String ADDCHART = "addChart";
-
-    public static final String ADDMAP = "addMap";
-
-    public static final String ADDTABLE = "addTable";
 
     public static final String IMPORT = "import";
 

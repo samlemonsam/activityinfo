@@ -39,7 +39,7 @@ public class DailyCursor implements PeriodCursor<LocalDate> {
         return get(currentDay.plusDays(i));
     }
 
-    public Tab get(LocalDate day) {
+    private Tab get(LocalDate day) {
         return new Tab(day.toString(), day.toString(), SubFormKind.DAILY);
     }
 

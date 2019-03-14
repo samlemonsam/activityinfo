@@ -36,7 +36,7 @@ public class MonthCursor implements PeriodCursor<Month> {
         return get(currentMonth.plus(i));
     }
 
-    public Tab get(Month month) {
+    private Tab get(Month month) {
         return new Tab(month.toString(), month.toString(), SubFormKind.MONTHLY);
     }
 

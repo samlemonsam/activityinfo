@@ -161,7 +161,7 @@ public class DbEditor implements DbPage, IsWidget {
 
         });
 
-        TreePanelDropTarget target = new DesignTreeDropTarget(db, tree);
+        TreePanelDropTarget target = new DesignTreeDropTarget(tree);
         target.addDNDListener(new DNDListener() {
             @Override
             public void dragDrop(DNDEvent e) {

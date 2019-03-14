@@ -249,16 +249,6 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
     }
 
     @Override
-    public void initialize() {
-        //
-    }
-
-    @Override
-    public AsyncMonitor getLoadingMonitor() {
-        return null;
-    }
-
-    @Override
     public void setValue(LockedPeriodDTO value) {
         if (value != null) {
             textfieldName.setValue(value.getName());
@@ -346,12 +336,12 @@ public class AddLockedPeriodDialog extends FormPanel implements AddLockedPeriodV
     }
 
     @Override
-    public void update(LockedPeriodDTO item) {
+    public void update() {
         //
     }
 
     @Override
-    public void cancelUpdate(LockedPeriodDTO item) {
+    public void cancelUpdate() {
         //
     }
 

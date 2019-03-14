@@ -83,10 +83,6 @@ public class NavigationHandler {
         }
     }
 
-    public EventBus getEventBus() {
-        return eventBus;
-    }
-
     private void onNavigationRequested(NavigationEvent be) {
         if (activeNavigation == null
                 || !activeNavigation.getPlace().equals(be.getPlace())) {

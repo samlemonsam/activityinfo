@@ -30,7 +30,9 @@ import org.activityinfo.ui.client.page.config.mvp.CanFilter.FilterEvent;
 import org.activityinfo.ui.client.page.config.mvp.CanFilter.FilterHandler;
 import org.activityinfo.ui.client.page.config.mvp.CanRefresh.RefreshEvent;
 import org.activityinfo.ui.client.page.config.mvp.CanRefresh.RefreshHandler;
-import org.activityinfo.ui.client.page.config.mvp.CanUpdate.*;
+import org.activityinfo.ui.client.page.config.mvp.CanUpdate.CancelUpdateHandler;
+import org.activityinfo.ui.client.page.config.mvp.CanUpdate.RequestUpdateHandler;
+import org.activityinfo.ui.client.page.config.mvp.CanUpdate.UpdateHandler;
 
 import java.util.List;
 
@@ -43,7 +45,7 @@ public class ListPresenterBase<M extends DTO, L extends List<M>, P extends DTO, 
     protected P parentModel;
 
     public ListPresenterBase(Dispatcher service, EventBus eventBus, V view) {
-        super(service, eventBus, view);
+        super(service, view);
     }
 
     @Override
@@ -87,15 +89,15 @@ public class ListPresenterBase<M extends DTO, L extends List<M>, P extends DTO, 
     }
 
     @Override
-    public void onCancelUpdate(CancelUpdateEvent updateEvent) {
+    public void onCancelUpdate() {
     }
 
     @Override
-    public void onUpdate(UpdateEvent updateEvent) {
+    public void onUpdate() {
     }
 
     @Override
-    public void onRequestUpdate(RequestUpdateEvent requestUpdateEvent) {
+    public void onRequestUpdate() {
     }
 
     @Override

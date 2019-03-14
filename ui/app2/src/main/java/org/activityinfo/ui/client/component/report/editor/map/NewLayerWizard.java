@@ -36,13 +36,11 @@ import org.activityinfo.ui.client.widget.wizard.WizardPage;
 public final class NewLayerWizard extends Wizard {
 
     private IndicatorPage indicatorPage;
-    private ResourceLocator locator;
     private LayerTypePage layerTypePage;
     private AdminLevelPage adminLevelPage;
 
     public NewLayerWizard(Dispatcher dispatcher, ResourceLocator locator) {
         indicatorPage = new IndicatorPage(dispatcher, locator);
-        this.locator = locator;
         indicatorPage.addListener(Events.SelectionChange, new Listener<BaseEvent>() {
 
             @Override
