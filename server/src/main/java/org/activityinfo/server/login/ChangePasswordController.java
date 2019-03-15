@@ -28,6 +28,7 @@ import org.activityinfo.server.login.exception.IncompleteFormException;
 import org.activityinfo.server.login.model.ChangePasswordPageModel;
 import org.activityinfo.server.login.model.InvalidInvitePageModel;
 import org.activityinfo.server.login.model.PageModel;
+import org.activityinfo.store.query.UsageTracker;
 
 import javax.inject.Provider;
 import javax.persistence.NoResultException;
@@ -90,9 +91,9 @@ public class ChangePasswordController {
 
         changePassword(user, password);
 
-        return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/").build())
-                       .cookie(authTokenProvider.createNewAuthCookies(user, uri.getBaseUri()))
-                       .build();
+        UsageTracker.track(user.getId(), "reset-password");
+
+        return LoginController.loginAndRedirectToApp(authTokenProvider, uri, user);
     }
 
     @Transactional

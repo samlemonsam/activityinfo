@@ -32,7 +32,7 @@ import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
 import com.google.common.base.Optional;
 import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.database.hibernate.entity.User;
-import org.activityinfo.server.login.HostController;
+import org.activityinfo.server.login.LoginController;
 import org.activityinfo.store.query.UsageTracker;
 
 import javax.inject.Inject;
@@ -183,11 +183,11 @@ public class HumanitarianId {
         if(existingUser.isEmpty()) {
             // If the user doesn't have an account, create one directly,
             // we are trusting humanitarian.id to verify the user's email address
-            return createNewAccount(uriInfo.getBaseUri(), account);
+            return createNewAccount(uriInfo, account);
         
         } else {
 
-            return redirectToApp(uriInfo.getBaseUri(), existingUser.get(0));
+            return redirectToApp(uriInfo, existingUser.get(0));
         }
     }
 
@@ -198,7 +198,7 @@ public class HumanitarianId {
                 .build();
     }
 
-    private Response createNewAccount(URI baseUri, HumanitarianIdAccount account) {
+    private Response createNewAccount(UriInfo baseUri, HumanitarianIdAccount account) {
 
         entityManager.get().getTransaction().begin();
         
@@ -214,12 +214,9 @@ public class HumanitarianId {
         return redirectToApp(baseUri, user);
     }
 
-    private Response redirectToApp(URI baseUri, User user) {
-
+    private Response redirectToApp(UriInfo baseUri, User user) {
         UsageTracker.track(user.getId(), "login/humanitarian_id");
 
-        return Response.seeOther(UriBuilder.fromUri(baseUri).replacePath(HostController.ENDPOINT).build())
-                .cookie(authTokenProvider.createNewAuthCookies(user, baseUri))
-                .build();
+        return LoginController.loginAndRedirectToApp(authTokenProvider, baseUri, user);
     }
 }

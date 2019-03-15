@@ -45,11 +45,12 @@ import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.database.hibernate.entity.UserPermission;
+import org.activityinfo.server.login.LoginController;
 import org.activityinfo.server.mail.*;
 import org.activityinfo.store.mysql.MySqlStorageProvider;
-import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.spi.FormStorageProvider;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.codehaus.jackson.map.annotate.JsonView;
 
 import javax.persistence.EntityManager;
@@ -60,7 +61,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Optional;
 
 public class DatabaseResource {
 
@@ -311,9 +314,7 @@ public class DatabaseResource {
 
         UsageTracker.track(newOwner.getId(), "db_transfer_complete", database.getResourceId());
 
-        return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/app").fragment("db/" + databaseId).build())
-                .cookie(authTokenProvider.createNewAuthCookies(newOwner, uri.getBaseUri()))
-                .build();
+        return LoginController.loginAndRedirectToApp(authTokenProvider, uri, newOwner);
     }
 
     private void rollbackTransaction() {

@@ -91,11 +91,8 @@ public class ConfirmInviteController {
             mailingList.subscribe(user, true, newsletter);
 
             UsageTracker.track(user.getId(), "invite_confirm_finish");
-            UsageTracker.track(user.getId(), "login");
 
-            return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/app").build())
-                           .cookie(authTokenProvider.createNewAuthCookies(user, uri.getBaseUri()))
-                           .build();
+            return LoginController.loginAndRedirectToApp(authTokenProvider, uri, user);
 
         } catch (EntityNotFoundException e) {
             return Response.ok(new InvalidInvitePageModel().asViewable()).type(MediaType.TEXT_HTML).build();

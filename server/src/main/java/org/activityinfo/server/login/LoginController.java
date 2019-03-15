@@ -74,13 +74,14 @@ public class LoginController {
             return Response.ok(model.asViewable()).type(MediaType.TEXT_HTML).build();
         }
 
-        return loginAndRedirectToApp(uri.getBaseUri(), user);
+        return loginAndRedirectToApp(authTokenProvider.get(), uri, user);
     }
 
-    public Response loginAndRedirectToApp(URI baseUri, User user) {
+    public static Response loginAndRedirectToApp(AuthTokenProvider authTokenProvider, UriInfo uriInfo, User user) {
 
         UsageTracker.track(user.getId(), "login");
 
+        URI baseUri = uriInfo.getBaseUri();
         URI appUri;
         if(user.hasFeatureFlag("v4")) {
             appUri = UriBuilder.fromUri("https://v4.activityinfo.org/app")
@@ -93,7 +94,7 @@ public class LoginController {
         }
 
         return Response.seeOther(appUri)
-                       .cookie(authTokenProvider.get().createNewAuthCookies(user, baseUri))
+                       .cookie(authTokenProvider.createNewAuthCookies(user, baseUri))
                        .build();
     }
 

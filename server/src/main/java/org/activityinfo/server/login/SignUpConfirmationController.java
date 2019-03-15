@@ -127,11 +127,8 @@ public class SignUpConfirmationController {
 
             mailingList.subscribe(user, false, newsletter);
 
-
             // go to the home page
-            return Response.seeOther(uri.getAbsolutePathBuilder().replacePath("/app").build())
-                    .cookie(authTokenProvider.createNewAuthCookies(user, uri.getBaseUri()))
-                    .build();
+            return LoginController.loginAndRedirectToApp(authTokenProvider, uri, user);
 
         } catch (Exception e) {
 
