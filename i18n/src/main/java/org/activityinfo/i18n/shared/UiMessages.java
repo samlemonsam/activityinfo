@@ -20,7 +20,6 @@ package org.activityinfo.i18n.shared;
 
 import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.safehtml.shared.SafeHtml;
-
 import java.util.Date;
 
 /**
@@ -185,7 +184,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("{0}% Complete")
     String percentComplete(int percent);
 
-    @DefaultMessage("Oh no! Your import is missing required column(s): {0}")
+    @DefaultMessage("Your import is missing required column(s): {0}")
     String missingColumns(String missingColumns);
 
     @DefaultMessage("{0} code does not exist.")
@@ -218,7 +217,7 @@ public interface UiMessages extends com.google.gwt.i18n.client.Messages {
     @DefaultMessage("Option {0,number}")
     String defaultEnumItem(int number);
 
-    @DefaultMessage("Required field ''{0}'' is missing in row {1}")
+    @DefaultMessage("Required field ''{0}'' is blank in row {1}")
     String requiredFieldMissing(String fieldName, int rowIndex);
 
     @DefaultMessage("You didn''t provide a column named ''{0}'', so we''ll default to ''{1}''.")
