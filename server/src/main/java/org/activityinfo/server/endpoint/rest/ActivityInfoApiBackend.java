@@ -38,7 +38,6 @@ import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.server.Updater;
 import org.activityinfo.store.query.shared.FormSupervisor;
 import org.activityinfo.store.spi.*;
-import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -86,9 +85,8 @@ public class ActivityInfoApiBackend implements ApiBackend {
     @Override
     public void createNewForm(FormClass formClass) {
         // Check that we have the permission to create in this database
-        UserDatabaseProvider userDatabaseProvider = injector.getInstance(UserDatabaseProvider.class);
         AuthenticatedUser authenticatedUser = getAuthenticatedUser();
-        Optional<UserDatabaseMeta> databaseMeta = userDatabaseProvider.getDatabaseMetadata(
+        Optional<UserDatabaseMeta> databaseMeta = getDatabaseProvider().getDatabaseMetadata(
                 formClass.getDatabaseId(),
                 authenticatedUser.getUserId());
 

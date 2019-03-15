@@ -97,7 +97,6 @@ public class ActivityUpdater {
             throw new RuntimeException("Failed to query location type", e);
         }
 
-
         SqlInsert insert = SqlInsert.insertInto("activity");
         insert.value("activityId", activityId);
         insert.value("databaseId", databaseId);
@@ -111,6 +110,8 @@ public class ActivityUpdater {
         insert.value("reportingFrequency", 0);
         insert.value("sortOrder", 0);
         insert.execute(executor);
+
+        updateDatabaseRow();
     }
 
     private FormClass validateNewFormClass(FormClass formClass) {
