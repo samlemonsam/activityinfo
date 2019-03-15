@@ -50,6 +50,7 @@ public class FormRecordSnapshotEntity {
     private long version;
     
     @Unindex
+    @IgnoreLoad
     private RecordChangeType type;
     
     @Unindex
@@ -144,4 +145,11 @@ public class FormRecordSnapshotEntity {
         this.record = record;
     }
 
+
+    void migrateChangeType(@AlsoLoad("type") String type) {
+        if ("CREATED".equals(type))
+            this.type = RecordChangeType.ADDED;
+        else
+            this.type = RecordChangeType.valueOf(type);
+    }
 }

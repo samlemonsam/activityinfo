@@ -201,7 +201,7 @@ public class SiteFormStorage implements VersionedFormStorage, FormStorageV2 {
         indicatorValues.insert(queryExecutor);
         
         // Write the snapshot to HRD as a first step in the transition
-        dualWriteToHrd(RecordChangeType.CREATED, update, newVersion, update.getChangedFieldValues());
+        dualWriteToHrd(RecordChangeType.ADDED, update, newVersion, update.getChangedFieldValues());
     }
 
     private void dualWriteToHrd(final RecordChangeType changeType, final TypedRecordUpdate update, final long newVersion, final Map<ResourceId, FieldValue> values) {

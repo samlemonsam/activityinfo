@@ -96,7 +96,7 @@ public class ProjectMigrator extends MapOnlyMapper<Integer, Void> {
                         recordEntity.setVersion(1L);
 
                         FormRecordSnapshotEntity snapshot = new FormRecordSnapshotEntity(
-                                userId, RecordChangeType.CREATED, recordEntity);
+                                userId, RecordChangeType.ADDED, recordEntity);
                         snapshot.setTime(updateTime);
                         snapshot.setMigrated(true);
 

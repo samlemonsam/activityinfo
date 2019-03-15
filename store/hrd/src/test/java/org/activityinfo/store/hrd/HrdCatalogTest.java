@@ -176,7 +176,7 @@ public class HrdCatalogTest {
         RecordVersion version = versions1.get(0);
         assertThat(version.getRecordId(), equalTo(village1.getRecordId()));
         assertThat(version.getUserId(), equalTo((long)userId));
-        assertThat(version.getType(), equalTo(RecordChangeType.CREATED));
+        assertThat(version.getType(), equalTo(RecordChangeType.ADDED));
     }
 
     @Test

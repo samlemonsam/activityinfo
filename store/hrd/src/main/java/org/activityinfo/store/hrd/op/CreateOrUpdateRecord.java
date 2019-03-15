@@ -68,7 +68,7 @@ public class CreateOrUpdateRecord extends VoidWork {
 
         } else {
             updated = new FormRecordEntity(formId, update.getRecordId());
-            changeType = RecordChangeType.CREATED;
+            changeType = RecordChangeType.ADDED;
 
             if (update.isDeleted()) {
                 throw new InvalidUpdateException("Creation of entity with deleted flag is not allowed.");
@@ -98,7 +98,7 @@ public class CreateOrUpdateRecord extends VoidWork {
 
         ColumnBlockUpdater blockUpdater = new ColumnBlockUpdater(rootEntity, formClass, Hrd.ofy().getTransaction());
 
-        if(changeType == RecordChangeType.CREATED) {
+        if(changeType == RecordChangeType.ADDED) {
             int newRecordCount = rootEntity.getNumberedRecordCount() + 1;
             int newRecordNumber = newRecordCount;
             updated.setRecordNumber(newRecordNumber);

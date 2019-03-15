@@ -98,7 +98,7 @@ public class SiteHistoryReader {
                 if(jsonObject.hasKey("_DELETE")) {
                     change.setType(RecordChangeType.DELETED);
                 } else {
-                    change.setType(initial ? RecordChangeType.CREATED : RecordChangeType.UPDATED);
+                    change.setType(initial ? RecordChangeType.ADDED : RecordChangeType.UPDATED);
                     change.getValues().putAll(parseChanges(jsonObject));
                 }
 
