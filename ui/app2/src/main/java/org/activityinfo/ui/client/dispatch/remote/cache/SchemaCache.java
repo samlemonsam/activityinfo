@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.activityinfo.legacy.shared.command.*;
 import org.activityinfo.legacy.shared.command.result.ActivityFormResults;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
@@ -39,6 +40,7 @@ import java.util.Set;
 /**
  * Caches the user's schema in-memory for the duration of the session.
  */
+@Singleton
 public class SchemaCache implements DispatchListener {
 
     private SchemaDTO schema = null;
@@ -100,7 +102,7 @@ public class SchemaCache implements DispatchListener {
         }
     }
 
-    private void clearCache() {
+    public void clearCache() {
         schema = null;
         activityFormCache.clear();
     }

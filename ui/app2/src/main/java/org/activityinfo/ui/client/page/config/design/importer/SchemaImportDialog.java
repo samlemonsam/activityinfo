@@ -374,6 +374,7 @@ public class SchemaImportDialog {
         dialog.hideCancelButton();
         dialog.getPrimaryButton().setEnabled(true);
         dialog.getPrimaryButton().setText(I18N.CONSTANTS.close());
+        promise.resolve((Void)null);
     }
 
     private void onImportFailed(Throwable caught) {

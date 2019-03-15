@@ -68,6 +68,7 @@ import org.activityinfo.ui.client.dispatch.Dispatcher;
 import org.activityinfo.ui.client.dispatch.ResourceLocator;
 import org.activityinfo.ui.client.dispatch.callback.SuccessCallback;
 import org.activityinfo.ui.client.dispatch.monitor.MaskingAsyncMonitor;
+import org.activityinfo.ui.client.dispatch.remote.cache.SchemaCache;
 import org.activityinfo.ui.client.dispatch.state.StateProvider;
 import org.activityinfo.ui.client.page.*;
 import org.activityinfo.ui.client.page.common.dialog.*;
@@ -108,6 +109,7 @@ public class DbEditor implements DbPage, IsWidget {
     private final EventBus eventBus;
     private final Dispatcher service;
     private ResourceLocator locator;
+    private final SchemaCache schemaCache;
 
     private UserDatabaseDTO db;
 
@@ -124,11 +126,13 @@ public class DbEditor implements DbPage, IsWidget {
     public DbEditor(EventBus eventBus,
                     Dispatcher service,
                     ResourceLocator locator,
-                    StateProvider stateMgr) {
+                    StateProvider stateMgr,
+                    SchemaCache schemaCache) {
 
         this.eventBus = eventBus;
         this.service = service;
         this.locator = locator;
+        this.schemaCache = schemaCache;
 
         treeStore = new TreeStore<>();
         tree = new TreePanel<>(treeStore);
@@ -360,6 +364,7 @@ public class DbEditor implements DbPage, IsWidget {
                     new SchemaImporterV2(service, db),
                     new SchemaImporterV3(db.getId(), locator));
             dialog.show().then(() -> {
+                schemaCache.clearCache();
                 refresh();
                 return null;
             });
