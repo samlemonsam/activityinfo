@@ -188,7 +188,7 @@ public class UpdatePartnerHandler implements CommandHandler<UpdatePartner> {
 
     private void verifyThatAllActivitesAreInMySQL(Database db) {
         for (Activity activity : db.getActivities()) {
-            boolean storedInHrd = activity.isClassicView();
+            boolean storedInHrd = !activity.isClassicView();
             if(storedInHrd && !activity.isDeleted()) {
                 throw new CommandException("This partner cannot be renamed through the user interface. " +
                         "Contact support@activityinfo.org for assistance.");
