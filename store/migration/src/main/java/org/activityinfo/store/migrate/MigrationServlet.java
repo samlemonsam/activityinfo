@@ -28,6 +28,7 @@ import com.google.appengine.tools.pipeline.PipelineService;
 import com.google.appengine.tools.pipeline.PipelineServiceFactory;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.VoidWork;
+import org.acivityinfo.store.migrate.MigrateSchema;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.hrd.Hrd;
 import org.activityinfo.store.hrd.entity.FormEntity;
@@ -37,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.ResultSet;
 
 /**
  * Starts Map/Reduce jobs
@@ -89,10 +91,17 @@ public class MigrationServlet extends HttpServlet {
                 return zeroRecords(req.getParameter("formId"));
             case "listsubforms":
                 return listsubforms(resp);
+            case "form":
+                return migrateForm(req.getParameter("formId"));
+            case "admin":
+                return migrateAdminForms();
+            case "polygons":
+                return migratePolygons();
             default:
                 throw new IllegalArgumentException("Unknown job: " + job);
         }
     }
+
 
 
     private String listsubforms(HttpServletResponse resp) {
@@ -120,7 +129,7 @@ public class MigrationServlet extends HttpServlet {
         SiteMigrator mapper = new SiteMigrator(fix);
 
         MapSpecification<Integer, Void, Void> spec = new MapSpecification.Builder<Integer, Void, Void>(input, mapper)
-                .setJobName("Migrate site records")
+                .setJobName("Migrate site records " + activityId + ", fix = " + fix)
                 .build();
 
         return MapJob.start(spec, getSettings());
@@ -146,6 +155,25 @@ public class MigrationServlet extends HttpServlet {
                 .build();
 
         return MapJob.start(spec, getSettings());
+    }
+
+    private String migratePolygons() {
+        MySqlRowInput input = new MySqlRowInput(AdminPolygonMigrator.QUERY);
+        AdminPolygonMigrator migrator = new AdminPolygonMigrator();
+
+        MapSpecification<ResultSet, Void, Void> spec = new MapSpecification.Builder<ResultSet, Void, Void>(input, migrator)
+                .setJobName("Migrate MapReduce entities")
+                .build();
+
+        return MapJob.start(spec, getSettings());
+    }
+
+    private String migrateForm(String formId) {
+        return PipelineServiceFactory.newPipelineService().startNewPipeline(new MigrateFormJob(), formId);
+    }
+
+    private String migrateAdminForms() {
+        return PipelineServiceFactory.newPipelineService().startNewPipeline(new MigrateAdminLevelsJob());
     }
 
     private String migrateSchema(int activityId) {

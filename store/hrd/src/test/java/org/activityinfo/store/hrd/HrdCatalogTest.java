@@ -37,6 +37,8 @@ import org.activityinfo.model.type.Cardinality;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
+import org.activityinfo.model.type.geo.GeoPoint;
+import org.activityinfo.model.type.geo.GeoPointType;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -96,6 +98,7 @@ public class HrdCatalogTest {
         ResourceId villageField = ResourceId.valueOf("FV");
         ResourceId countField = ResourceId.valueOf("FC");
         ResourceId popTypeField = ResourceId.valueOf("PT");
+        ResourceId pointField = ResourceId.valueOf("GP");
         
         FormClass formClass = new FormClass(collectionId);
         formClass.setParentFormId(ResourceId.valueOf("foo"));
@@ -116,7 +119,11 @@ public class HrdCatalogTest {
                         new EnumItem(ResourceId.valueOf("POP1"), "Refugees"),
                         new EnumItem(ResourceId.valueOf("POP2"), "IDPs")));
 
-        
+        formClass.addField(pointField)
+                .setLabel("Location")
+                .setCode("GP")
+                .setType(GeoPointType.INSTANCE);
+
         HrdStorageProvider catalog = new HrdStorageProvider();
         catalog.create(formClass);
 
@@ -129,6 +136,7 @@ public class HrdCatalogTest {
         village1.setRecordId(ResourceId.generateSubmissionId(formClass));
         village1.set(villageField, TextValue.valueOf("Rutshuru"));
         village1.set(countField, new Quantity(1000));
+        village1.set(pointField, new GeoPoint(41, 42));
 
 
         TypedRecordUpdate village2 = new TypedRecordUpdate();
@@ -147,6 +155,9 @@ public class HrdCatalogTest {
         queryModel.selectField("BENE").as("family_count");
         queryModel.selectExpr("BENE*5").as("individual_count");
         queryModel.selectExpr("POP").as("pop");
+        queryModel.selectExpr("GP.latitude").as("Y");
+        queryModel.selectExpr("GP.longitude").as("X");
+
 
         QueryPlanBuilder queryPlanBuilder = new QueryPlanBuilder(catalog);
         QueryPlan plan = queryPlanBuilder.build(queryModel);
@@ -168,6 +179,13 @@ public class HrdCatalogTest {
 
         assertThat(columnSet.getColumnView("pop").getString(0), nullValue());
         assertThat(columnSet.getColumnView("pop").getString(1), equalTo("IDPs"));
+
+        assertThat(columnSet.getColumnView("X").getDouble(0), equalTo(42d));
+        assertThat(columnSet.getColumnView("X").isMissing(1), equalTo(true));
+
+
+        assertThat(columnSet.getColumnView("Y").getDouble(0), equalTo(41d));
+        assertThat(columnSet.getColumnView("Y").isMissing(1), equalTo(true));
 
         List<RecordVersion> versions1 = ((VersionedFormStorage) storage.get()).getVersions(village1.getRecordId());
 

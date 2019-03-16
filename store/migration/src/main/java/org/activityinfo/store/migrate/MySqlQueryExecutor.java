@@ -47,6 +47,7 @@ public class MySqlQueryExecutor implements QueryExecutor, AutoCloseable {
         properties.setProperty("useUnicode", "true");
         properties.setProperty("characterEncoding", "utf8");
         properties.setProperty("zeroDateTimeBehavior", "convertToNull");
+        properties.setProperty("emulateLocators", "true");
 
         String connectionUrl;
 

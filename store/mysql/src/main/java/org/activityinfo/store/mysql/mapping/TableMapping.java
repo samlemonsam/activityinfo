@@ -103,4 +103,5 @@ public class TableMapping implements Serializable {
     public long getVersion() {
         return version;
     }
+
 }

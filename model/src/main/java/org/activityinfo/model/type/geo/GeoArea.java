@@ -21,6 +21,8 @@ package org.activityinfo.model.type.geo;
 import org.activityinfo.json.JsonValue;
 import org.activityinfo.model.type.FieldTypeClass;
 
+import java.util.Objects;
+
 import static org.activityinfo.json.Json.createObject;
 
 /* A Field Value describing a geographic area on the Earth's surface
@@ -29,11 +31,9 @@ import static org.activityinfo.json.Json.createObject;
 public class GeoArea implements GeoFieldValue {
 
     private Extents envelope;
-    private String blobId;
 
     public GeoArea(Extents envelope, String blobId) {
         this.envelope = envelope;
-        this.blobId = blobId;
     }
 
     public GeoArea(Extents envelope) {
@@ -45,10 +45,6 @@ public class GeoArea implements GeoFieldValue {
         return envelope;
     }
 
-    public String getBlobId() {
-        return blobId;
-    }
-
     @Override
     public FieldTypeClass getTypeClass() {
         return GeoAreaType.TYPE_CLASS;
@@ -58,9 +54,24 @@ public class GeoArea implements GeoFieldValue {
     @Override
     public JsonValue toJson() {
         JsonValue object = createObject();
-        object.put("blobId", blobId);
         object.put("bbox", envelope.toJsonElement());
         return object;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof GeoArea)) {
+            return false;
+        }
+        GeoArea geoArea = (GeoArea) o;
+        return Objects.equals(envelope, geoArea.envelope);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(envelope);
+    }
 }

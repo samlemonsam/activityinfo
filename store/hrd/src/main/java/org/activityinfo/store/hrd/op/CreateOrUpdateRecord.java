@@ -32,6 +32,7 @@ import org.activityinfo.store.spi.RecordChangeType;
 import org.activityinfo.store.spi.TypedRecordUpdate;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
@@ -40,15 +41,24 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
 public class CreateOrUpdateRecord extends VoidWork {
 
     private ResourceId formId;
-    private TypedRecordUpdate update;
+    private List<TypedRecordUpdate> updates;
 
     public CreateOrUpdateRecord(ResourceId formId, TypedRecordUpdate update) {
         this.formId = formId;
-        this.update = update;
+        this.updates = Collections.singletonList(update);
+    }
+
+    public CreateOrUpdateRecord(ResourceId formId, List<TypedRecordUpdate> batch) {
+        this.formId = formId;
+        this.updates = batch;
     }
 
     @Override
     public void vrun() {
+
+        // Queue up batch
+        List<Object> toSave = new ArrayList<>();
+        List<Key> toDelete = new ArrayList<>();
 
         FormEntity rootEntity = ofy().load().key(FormEntity.key(formId)).safe();
         FormClass formClass = ofy().load().key(FormSchemaEntity.key(formId)).safe().readFormClass();
@@ -58,83 +68,79 @@ public class CreateOrUpdateRecord extends VoidWork {
 
         rootEntity.setVersion(newVersion);
 
-        FormRecordEntity existingEntity = ofy().load().key(FormRecordEntity.key(formClass, update.getRecordId())).now();
-        FormRecordEntity updated;
-        RecordChangeType changeType;
-
-        if(existingEntity != null) {
-            updated = existingEntity;
-            changeType = update.isDeleted() ? RecordChangeType.DELETED : RecordChangeType.UPDATED;
-
-        } else {
-            updated = new FormRecordEntity(formId, update.getRecordId());
-            changeType = RecordChangeType.ADDED;
-
-            if (update.isDeleted()) {
-                throw new InvalidUpdateException("Creation of entity with deleted flag is not allowed.");
-            }
-
-            if (formClass.getParentFormId().isPresent()) {
-                ResourceId parentId = update.getParentId();
-                if (parentId == null) {
-                    throw new InvalidUpdateException("@parent is required for subform submissions");
-                }
-                updated.setParentRecordId(parentId);
-            }
-        }
-        updated.setVersion(newVersion);
-        updated.setSchemaVersion(rootEntity.getSchemaVersion());
-        updated.setFieldValues(formClass, update.getChangedFieldValues());
-
-        // Store a copy as a snapshot
-        FormRecordSnapshotEntity snapshotEntity = new FormRecordSnapshotEntity(update.getUserId(), changeType, updated);
-
-        // Queue up batch
-        List<Object> toSave = new ArrayList<>();
-        List<Key> toDelete = new ArrayList<>();
-
-        // Update column-based storage
-
-
         ColumnBlockUpdater blockUpdater = new ColumnBlockUpdater(rootEntity, formClass, Hrd.ofy().getTransaction());
 
-        if(changeType == RecordChangeType.ADDED) {
-            int newRecordCount = rootEntity.getNumberedRecordCount() + 1;
-            int newRecordNumber = newRecordCount;
-            updated.setRecordNumber(newRecordNumber);
-            rootEntity.setNumberedRecordCount(newRecordCount);
+        for(TypedRecordUpdate update : updates) {
+            FormRecordEntity existingEntity = ofy().load().key(FormRecordEntity.key(formClass, update.getRecordId())).now();
+            FormRecordEntity updated;
+            RecordChangeType changeType;
 
-            blockUpdater.updateId(newRecordNumber, updated.getRecordId().asString());
-            blockUpdater.updateFields(updated.getRecordNumber(), update.getChangedFieldValues());
+            if (existingEntity != null) {
+                updated = existingEntity;
+                changeType = update.isDeleted() ? RecordChangeType.DELETED : RecordChangeType.UPDATED;
 
-            if(formClass.isSubForm()) {
-                blockUpdater.updateParentId(newRecordNumber, updated.getParentRecordId());
+            } else {
+                updated = new FormRecordEntity(formId, update.getRecordId());
+                changeType = RecordChangeType.ADDED;
+
+                if (update.isDeleted()) {
+                    throw new InvalidUpdateException("Creation of entity with deleted flag is not allowed.");
+                }
+
+                if (formClass.getParentFormId().isPresent()) {
+                    ResourceId parentId = update.getParentId();
+                    if (parentId == null) {
+                        throw new InvalidUpdateException("@parent is required for subform submissions");
+                    }
+                    updated.setParentRecordId(parentId);
+                }
             }
+            updated.setVersion(newVersion);
+            updated.setSchemaVersion(rootEntity.getSchemaVersion());
+            updated.setFieldValues(formClass, update.getChangedFieldValues());
 
-        } else if(changeType == RecordChangeType.DELETED) {
-            if(updated.hasRecordNumber()) {
-                rootEntity.setDeletedCount(rootEntity.getDeletedCount() + 1);
-                blockUpdater.updateTombstone(existingEntity.getRecordNumber());
-            }
-        } else if(changeType == RecordChangeType.UPDATED) {
-            if(updated.hasRecordNumber()) {
+            // Store a copy as a snapshot
+            FormRecordSnapshotEntity snapshotEntity = new FormRecordSnapshotEntity(update.getUserId(), changeType, updated);
+
+            // Update column-based storage
+
+            if (changeType == RecordChangeType.ADDED) {
+                int newRecordCount = rootEntity.getNumberedRecordCount() + 1;
+                int newRecordNumber = newRecordCount;
+                updated.setRecordNumber(newRecordNumber);
+                rootEntity.setNumberedRecordCount(newRecordCount);
+
+                blockUpdater.updateId(newRecordNumber, updated.getRecordId().asString());
                 blockUpdater.updateFields(updated.getRecordNumber(), update.getChangedFieldValues());
+
+                if (formClass.isSubForm()) {
+                    blockUpdater.updateParentId(newRecordNumber, updated.getParentRecordId());
+                }
+
+            } else if (changeType == RecordChangeType.DELETED) {
+                if (updated.hasRecordNumber()) {
+                    rootEntity.setDeletedCount(rootEntity.getDeletedCount() + 1);
+                    blockUpdater.updateTombstone(existingEntity.getRecordNumber());
+                }
+            } else if (changeType == RecordChangeType.UPDATED) {
+                if (updated.hasRecordNumber()) {
+                    blockUpdater.updateFields(updated.getRecordNumber(), update.getChangedFieldValues());
+                }
             }
+
+            if (update.isDeleted()) {
+                toDelete.add(Key.create(updated));
+            } else {
+                toSave.add(updated);
+            }
+            toSave.add(snapshotEntity);
         }
-
-        toSave.addAll(blockUpdater.getUpdatedBlocks());
-
-        blockUpdater.cacheUpdatedBlocks();
 
         // Update record-based storage
         toSave.add(rootEntity);
-        toSave.add(snapshotEntity);
+        toSave.addAll(blockUpdater.getUpdatedBlocks());
 
-        if (update.isDeleted()) {
-            toDelete.add(Key.create(updated));
-        } else {
-            toSave.add(updated);
-        }
+        blockUpdater.cacheUpdatedBlocks();
 
         ofy().save().entities(toSave);
         if(!toDelete.isEmpty()) {

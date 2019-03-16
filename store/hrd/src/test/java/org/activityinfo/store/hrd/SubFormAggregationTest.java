@@ -110,22 +110,26 @@ public class SubFormAggregationTest {
 
         TypedRecordUpdate v1 = new TypedRecordUpdate();
         v1.setUserId(userId);
+        v1.setFormId(siteForm.getId());
         v1.setRecordId(ResourceId.generateSubmissionId(siteForm));
         v1.set(villageField.getId(), TextValue.valueOf("Rutshuru"));
 
         TypedRecordUpdate v2 = new TypedRecordUpdate();
         v2.setUserId(userId);
+        v2.setFormId(siteForm.getId());
         v2.setRecordId(ResourceId.generateSubmissionId(siteForm));
         v2.set(villageField.getId(), TextValue.valueOf("Beni"));
 
         TypedRecordUpdate month1 = new TypedRecordUpdate();
         month1.setUserId(userId);
+        month1.setFormId(monthlyForm.getId());
         month1.setRecordId(ResourceId.generateSubmissionId(monthlyForm));
         month1.setParentId(v1.getRecordId());
         month1.set(countField.getId(), new Quantity(40));
 
         TypedRecordUpdate month2 = new TypedRecordUpdate();
         month2.setUserId(userId);
+        month2.setFormId(monthlyForm.getId());
         month2.setRecordId(ResourceId.generateSubmissionId(monthlyForm));
         month2.setParentId(v1.getRecordId());
         month2.set(countField.getId(), new Quantity(30));

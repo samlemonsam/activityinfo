@@ -1,4 +1,4 @@
-package org.activityinfo.store.migrate;
+package org.acivityinfo.store.migrate;
 
 import com.google.appengine.tools.pipeline.Job0;
 import com.google.appengine.tools.pipeline.Value;
@@ -9,12 +9,17 @@ import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.store.hrd.Hrd;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.activityinfo.store.hrd.entity.FormSchemaEntity;
+import org.activityinfo.store.migrate.HrdPrimary;
+import org.activityinfo.store.migrate.MySqlQueryExecutor;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
 
 import java.io.Closeable;
 import java.sql.SQLException;
 
+/**
+ * Step 1: Ensure that the latest version of the schema is stored in HRD
+ */
 public class MigrateSchema extends Job0<Void> {
 
     private ResourceId formId;

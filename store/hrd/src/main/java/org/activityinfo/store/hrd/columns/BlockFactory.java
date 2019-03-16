@@ -73,7 +73,7 @@ public class BlockFactory implements FieldTypeVisitor<BlockManager> {
 
     @Override
     public BlockManager visitGeoArea(GeoAreaType geoAreaType) {
-        throw new UnsupportedOperationException("TODO");
+        return new GeoAreaBlock(fieldName);
     }
 
     @Override

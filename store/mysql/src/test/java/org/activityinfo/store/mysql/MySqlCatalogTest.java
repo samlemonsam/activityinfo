@@ -31,7 +31,12 @@ import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.enumerated.EnumValue;
+import org.activityinfo.model.type.geo.Extents;
+import org.activityinfo.model.type.geo.GeoArea;
+import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.store.hrd.HrdStorageProvider;
 import org.activityinfo.store.mysql.collections.CountryTable;
+import org.activityinfo.store.mysql.mapping.TableMigrator;
 import org.activityinfo.store.mysql.metadata.Activity;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
 import org.activityinfo.store.spi.FormStorage;
@@ -423,5 +428,29 @@ public class MySqlCatalogTest extends AbstractMySqlTest {
         assertThat(column("toDate"), hasValues("2012-01-01"));
         assertThat(column(targetValue12451), hasValues(9999));
         assertThat(column("partner.name"), hasValues("NRC"));
+    }
+
+    @Test
+    public void migrationTest() throws SQLException {
+        ResourceId formId = adminLevelFormClass(1);
+
+        TableMigrator.migrate(formId, catalog.getExecutor());
+
+        //  <adminEntity adminLevelId="1" adminEntityId="4" name="Ituri"
+        //               code="40" x1="0" y1="0" x2="0" y2="0"/>
+
+        HrdStorageProvider hrdStorageProvider = new HrdStorageProvider();
+        FormStorage formStorage = hrdStorageProvider.getForm(formId).get();
+
+        FormRecord ituri = formStorage.get(entity(4)).get();
+        TypedFormRecord typedIturi = TypedFormRecord.toTypedFormRecord(formStorage.getFormClass(), ituri);
+
+        assertThat(typedIturi.get(CuidAdapter.field(formId, NAME_FIELD)), equalTo(TextValue.valueOf("Ituri")));
+        assertThat(typedIturi.get(CuidAdapter.field(formId, CODE_FIELD)), equalTo(TextValue.valueOf("40")));
+        assertThat(typedIturi.get(CuidAdapter.field(formId, GEOMETRY_FIELD)), equalTo(
+                new GeoArea(new Extents(0, 0, 0, 0))));
+
+
+        System.out.println(ituri);
     }
 }

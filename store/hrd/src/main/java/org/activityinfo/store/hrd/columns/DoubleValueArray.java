@@ -11,23 +11,48 @@ public class DoubleValueArray {
 
     public static final int BYTES = 8;
 
-    public static boolean update(Entity blockEntity, String propertyName, int index, double value1, double value2) {
+    /**
+     * Updates a contiguous set of 4 double precision to NaN
+     *
+     * @return true if the block has been updated
+     */
+    public static boolean update4(Entity blockEntity, String propertyName, int index) {
 
         Blob blob = (Blob) blockEntity.getProperty(propertyName);
-        boolean missing = Double.isNaN(value1) && Double.isNaN(value2);
 
         // Values at the end are assumed to be NaN
         int capacity = ValueArrays.length(blob, BYTES);
-        if(missing && (index + 1) >= capacity) {
+        if((index + 3) >= capacity) {
             return false;
-        }
 
-        byte[] bytes = ensureCapacity(blob, index + 1);
-        set(bytes, index, value1);
-        set(bytes, index + 1, value2);
+        } else {
+            byte[] bytes = ensureCapacity(blob, index + 3);
+            set(bytes, index + 0, Double.NaN);
+            set(bytes, index + 1, Double.NaN);
+            set(bytes, index + 2, Double.NaN);
+            set(bytes, index + 3, Double.NaN);
+            return true;
+        }
+    }
+
+    /**
+     * Updates a contiguous set of 4 double precision to the given four values.
+     *
+     * @return true if the block has been updated
+     */
+    public static boolean update4(Entity blockEntity, String propertyName, int index, double v0, double v1, double v2, double v3) {
+
+        Blob blob = (Blob) blockEntity.getProperty(propertyName);
+
+        byte[] bytes = ensureCapacity(blob, index + 3);
+        set(bytes, index + 0, v0);
+        set(bytes, index + 1, v1);
+        set(bytes, index + 2, v2);
+        set(bytes, index + 3, v3);
 
         return true;
     }
+
 
     /**
      * Allocates, if necessary, a larger array to hold up to the element index. Unused space is

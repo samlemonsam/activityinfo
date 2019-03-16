@@ -23,11 +23,13 @@ import org.activityinfo.legacy.shared.command.UpdatePartner;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.command.result.CreateResult;
 import org.activityinfo.legacy.shared.command.result.DuplicateCreateResult;
+import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.exception.IllegalAccessCommandException;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.server.database.hibernate.entity.Activity;
 import org.activityinfo.server.database.hibernate.entity.Database;
 import org.activityinfo.server.database.hibernate.entity.Partner;
 import org.activityinfo.server.database.hibernate.entity.User;
@@ -129,7 +131,7 @@ public class UpdatePartnerHandler implements CommandHandler<UpdatePartner> {
 
         // If this partner is shared, then duplicate and update all references.
         if (shared) {
-            return copyAndReplace(partner, cmd);
+            return copyAndReplace(db, partner, cmd);
         } else {
             return simpleUpdate(partner, cmd);
         }
@@ -143,7 +145,9 @@ public class UpdatePartnerHandler implements CommandHandler<UpdatePartner> {
      * is shared with another database, then create a new copy of the partner with the desired changes,
      * and update all references in this database.</p>
      */
-    private CreateResult copyAndReplace(Partner sharedPartner, UpdatePartner cmd) {
+    private CreateResult copyAndReplace(Database db, Partner sharedPartner, UpdatePartner cmd) {
+
+        verifyThatAllActivitesAreInMySQL(db);
 
         LOGGER.info("Copying and replacing " + sharedPartner + " with " + cmd.getPartner());
 
@@ -180,6 +184,16 @@ public class UpdatePartnerHandler implements CommandHandler<UpdatePartner> {
 
 
         return new CreateResult(newPartner.getId());
+    }
+
+    private void verifyThatAllActivitesAreInMySQL(Database db) {
+        for (Activity activity : db.getActivities()) {
+            boolean storedInHrd = activity.isClassicView();
+            if(storedInHrd && !activity.isDeleted()) {
+                throw new CommandException("This partner cannot be renamed through the user interface. " +
+                        "Contact support@activityinfo.org for assistance.");
+            }
+        }
     }
 
 
