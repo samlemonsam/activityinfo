@@ -196,7 +196,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("change")
     String changeTitle();
 
-    @DefaultStringValue("Change title")
+    @DefaultStringValue("Edit title")
     String changeTitleDialogTitle();
 
     @DefaultStringValue("Type of chart")
@@ -355,7 +355,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Design")
     String design();
 
-    @DefaultStringValue("Add or change the activities and their indicators which are part of this database.")
+    @DefaultStringValue("Add or edit the activities and their indicators which are part of this database.")
     String designDescription();
 
     @DefaultStringValue("Details")
@@ -364,7 +364,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Dimensions")
     String dimensions();
 
-    @DefaultStringValue("Discard Changes")
+    @DefaultStringValue("Discard changes")
     String discardChanges();
 
     @DefaultStringValue("Downloading changes from server")
@@ -742,7 +742,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Project")
     String project();
 
-    @DefaultStringValue("View, add, change and delete projects")
+    @DefaultStringValue("View, add, edit and delete projects")
     String projectManagerDescription();
 
     @DefaultStringValue("You have unsaved changes. Do you want to save before continuing?")
