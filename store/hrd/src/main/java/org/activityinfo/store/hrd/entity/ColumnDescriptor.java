@@ -2,6 +2,7 @@ package org.activityinfo.store.hrd.entity;
 
 import com.google.appengine.api.datastore.Blob;
 import org.activityinfo.store.hrd.columns.IntValueArray;
+import org.activityinfo.store.hrd.columns.LongValueArray;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -23,7 +24,14 @@ public class ColumnDescriptor {
      * An {@link org.activityinfo.store.hrd.columns.IntValueArray} containing the current
      * version of each block that has been written.
      */
+    @Deprecated
     private Blob versionMap;
+
+    /**
+     * An {@link org.activityinfo.store.hrd.columns.LongValueArray} containing the current
+     * version of each block that has been written.
+     */
+    private Blob versionMap64;
 
     public String getColumnId() {
         return columnId;
@@ -67,14 +75,21 @@ public class ColumnDescriptor {
         return recordCount;
     }
 
+    @SuppressWarnings("deprecation")
     public long getBlockVersion(int blockIndex) {
-        return IntValueArray.get(versionMap, blockIndex);
+        if(versionMap != null) {
+            return IntValueArray.get(versionMap, blockIndex);
+        }
+        return LongValueArray.get(versionMap64, blockIndex);
     }
 
     public void setBlockVersion(int blockIndex, long version) {
-        if(version > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("Version " + version + " exceeds " + Integer.MAX_VALUE);
+        // Migrate 32-bit array to 64-bit array
+        if(versionMap != null) {
+            this.versionMap64 = LongValueArray.fromInt32(versionMap);
+            this.versionMap = null;
         }
-        this.versionMap = IntValueArray.update(versionMap, blockIndex, (int) version);
+
+        this.versionMap64 = LongValueArray.update(versionMap64, blockIndex, version);
     }
 }
