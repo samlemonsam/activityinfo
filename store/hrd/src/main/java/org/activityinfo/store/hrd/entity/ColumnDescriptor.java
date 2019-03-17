@@ -77,19 +77,23 @@ public class ColumnDescriptor {
 
     @SuppressWarnings("deprecation")
     public long getBlockVersion(int blockIndex) {
-        if(versionMap != null) {
-            return IntValueArray.get(versionMap, blockIndex);
+        if(versionMap64 != null) {
+            return LongValueArray.get(versionMap64, blockIndex);
         }
-        return LongValueArray.get(versionMap64, blockIndex);
+        return IntValueArray.get(versionMap, blockIndex);
     }
 
     public void setBlockVersion(int blockIndex, long version) {
-        // Migrate 32-bit array to 64-bit array
-        if(versionMap != null) {
+        // Migrate array of 32-bit ints to 64-bit integers
+        // preserve the 32-bit version until all readers and writers have migrated to this change.
+        if(versionMap != null && versionMap64 == null) {
             this.versionMap64 = LongValueArray.fromInt32(versionMap);
-            this.versionMap = null;
         }
-
+        this.versionMap = IntValueArray.update(versionMap, blockIndex, wrapAroundCast(version));
         this.versionMap64 = LongValueArray.update(versionMap64, blockIndex, version);
+    }
+
+    static int wrapAroundCast(long version) {
+        return (int) version;
     }
 }
