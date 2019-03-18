@@ -70,6 +70,9 @@ class MySqlRowReader extends InputReader<ResultSet> {
         boolean hasNext;
         try {
             hasNext = resultSet.next();
+            if(hasNext) {
+                lastId = resultSet.getInt(1);
+            }
         } catch (SQLException e) {
             throw new IOException(e);
         }

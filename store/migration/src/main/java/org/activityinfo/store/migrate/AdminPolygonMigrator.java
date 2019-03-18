@@ -13,8 +13,11 @@ import java.sql.SQLException;
 
 public class AdminPolygonMigrator extends MigratingMapper {
 
-    public static final String QUERY = "select adminentityid, adminlevelid, geometry from adminentity where geometry is not null " +
-            " and adminentityid > ? order by adminentityid";
+    public static final String QUERY = "select adminentityid, adminlevelid, geometry from adminentity " +
+            "where geometry is not null " +
+            "and deleted = 0 " +
+            "and adminentityid > ? " +
+            "order by adminentityid";
 
     @Override
     protected void execute(ResultSet rs) throws SQLException {
@@ -29,23 +32,35 @@ public class AdminPolygonMigrator extends MigratingMapper {
         GcsService gcsService = GcsServiceFactory.createGcsService();
 
         GcsFilename gcsFilename = new GcsFilename("activityinfoeu-geometry",
-                String.format("%s/%s/%s",
+                String.format("%s/%s/%s.1",
                         formId.asString(),
-                        recordId.asString(),
-                        fieldId.asString()));
+                        fieldId.asString(),
+                        recordId.asString()));
 
-        GcsFileOptions options = new GcsFileOptions.Builder()
-                .mimeType("application/octet-stream")
-                .build();
+        if(!exists(gcsService, gcsFilename)) {
 
-        try(GcsOutputChannel outputChannel = gcsService.createOrReplace(gcsFilename, options)) {
-            try(OutputStream outputStream = Channels.newOutputStream(outputChannel)) {
-                try(InputStream inputStream = rs.getBinaryStream(3)) {
-                    ByteStreams.copy(inputStream, outputStream);
+            GcsFileOptions options = new GcsFileOptions.Builder()
+                    .mimeType("application/octet-stream")
+                    .build();
+
+            try (GcsOutputChannel outputChannel = gcsService.createOrReplace(gcsFilename, options)) {
+                try (OutputStream outputStream = Channels.newOutputStream(outputChannel)) {
+                    try (InputStream inputStream = rs.getBinaryStream(3)) {
+                        ByteStreams.copy(inputStream, outputStream);
+                    }
                 }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
+        }
+    }
+
+    private boolean exists(GcsService gcsService, GcsFilename gcsFilename) {
+        try {
+            GcsFileMetadata metadata = gcsService.getMetadata(gcsFilename);
+            return metadata.getLength() > 0;
         } catch (Exception e) {
-          throw new RuntimeException(e);
+            return false;
         }
     }
 }
