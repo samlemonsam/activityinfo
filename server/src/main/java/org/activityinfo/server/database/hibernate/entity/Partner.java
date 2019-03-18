@@ -36,6 +36,7 @@ public class Partner implements java.io.Serializable {
     private String fullName;
     private Set<Database> databases = new HashSet<>(0);
     private Set<Target> targets = new HashSet<>(0);
+    private Set<UserPermission> userPermissions = new HashSet<>(0);
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -85,6 +86,18 @@ public class Partner implements java.io.Serializable {
 
     public void setTargets(Set<Target> targets) {
         this.targets = targets;
+    }
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "GroupAssignment",
+            joinColumns = { @JoinColumn(name = "PartnerId", nullable = false, updatable = false) },
+            inverseJoinColumns = { @JoinColumn(name = "UserPermissionId", nullable = false, updatable = false) })
+    public Set<UserPermission> getUserPermissions() {
+        return this.userPermissions;
+    }
+
+    public void setUserPermissions(Set<UserPermission> userPermissions) {
+        this.userPermissions = userPermissions;
     }
 
     @Override

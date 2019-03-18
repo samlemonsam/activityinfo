@@ -126,10 +126,12 @@ public class ActivityDigestModelBuilder implements DigestModelBuilder {
      */
     @VisibleForTesting @SuppressWarnings("unchecked") List<Partner> findPartners(DatabaseModel databaseModel) {
 
-        Query query = entityManager.get().createQuery("select distinct p.partner from UserPermission p " +
-                                                      "where p.database = :database " +
-                                                      "order by p.partner.name");
+        Query query = entityManager.get().createQuery("select distinct p from Partner p " +
+                                                        "join p.userPermissions up " +
+                                                        "where up.database = :database " +
+                                                        "order by p.name");
         query.setParameter("database", databaseModel.getDatabase());
+
 
         return query.getResultList();
     }
@@ -142,9 +144,10 @@ public class ActivityDigestModelBuilder implements DigestModelBuilder {
     @VisibleForTesting @SuppressWarnings("unchecked") List<User> findUsers(PartnerActivityModel partnerModel) {
 
         Query query = entityManager.get().createQuery("select distinct p.user from UserPermission p " +
-                                                      "where p.database = :database and p.partner = :partner and p" +
-                                                      ".allowEdit = true " +
-                                                      "order by p.user.name");
+                                                        "where p.database = :database " +
+                                                        "and :partner member of p.partners " +
+                                                        "and p.allowEdit = true " +
+                                                        "order by p.user.name");
         query.setParameter("database", partnerModel.getDatabaseModel().getDatabase());
         query.setParameter("partner", partnerModel.getPartner());
 
