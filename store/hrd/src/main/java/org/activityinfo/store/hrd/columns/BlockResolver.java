@@ -109,9 +109,7 @@ public class BlockResolver {
             int numBlocks = numBlocks(descriptor.getRecordCount());
             for (int i = 0; i < numBlocks; i++) {
                 long version = descriptor.getBlockVersion(i);
-                if(version > 0) {
-                    toFetch.add(new Fetch(blockId(descriptor.getColumnId(), i), version));
-                }
+                toFetch.add(new Fetch(blockId(descriptor.getColumnId(), i), version));
             }
         }
     }
