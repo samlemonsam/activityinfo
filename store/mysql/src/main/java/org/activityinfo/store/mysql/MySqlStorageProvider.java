@@ -26,7 +26,9 @@ import com.google.common.cache.LoadingCache;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.legacy.CuidAdapter;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.store.hrd.Hrd;
 import org.activityinfo.store.hrd.HrdStorageProvider;
+import org.activityinfo.store.hrd.op.CreateOrUpdateForm;
 import org.activityinfo.store.mysql.collections.*;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
 import org.activityinfo.store.mysql.metadata.ActivityLoader;
@@ -188,6 +190,9 @@ public class MySqlStorageProvider implements FormStorageProvider, TransactionalS
             ActivityUpdater updater = new ActivityUpdater(activityId, databaseId, executor);
             updater.insert(formClass);
             commit();
+
+            Hrd.ofy().transact(new CreateOrUpdateForm(formClass));
+
         } catch (Exception e) {
             rollback();
             throw e;

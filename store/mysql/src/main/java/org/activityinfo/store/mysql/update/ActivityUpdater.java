@@ -109,6 +109,7 @@ public class ActivityUpdater {
         insert.value("allowEdit", 1);
         insert.value("reportingFrequency", 0);
         insert.value("sortOrder", 0);
+        insert.value("hrd", 1);
         insert.execute(executor);
 
         updateDatabaseRow();
