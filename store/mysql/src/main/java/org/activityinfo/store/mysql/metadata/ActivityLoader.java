@@ -182,7 +182,7 @@ public class ActivityLoader {
     private List<ActivityVersion> queryVersions(Set<Integer> activityId) throws SQLException {
         
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT activityid, schemaVersion, siteVersion FROM activity WHERE activityId IN (");
+        sql.append("SELECT activityid, schemaVersion, siteVersion, hrd FROM activity WHERE activityId IN (");
         Joiner.on(',').appendTo(sql, activityId);
         sql.append(")");
         
@@ -193,7 +193,8 @@ public class ActivityLoader {
                 versions.add(new ActivityVersion(
                         rs.getInt(1),    // activityId
                         rs.getLong(2),   // schema version
-                        rs.getLong(3))); // site (data) versions
+                        rs.getLong(3),
+                        rs.getBoolean(4))); // site (data) versions
             }
         }
         return versions;

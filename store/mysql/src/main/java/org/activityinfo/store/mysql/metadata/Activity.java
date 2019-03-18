@@ -269,7 +269,7 @@ public class Activity implements Serializable {
 
 
     public ActivityVersion getActivityVersion() {
-        return new ActivityVersion(this.getId(), schemaVersion, siteVersion);
+        return new ActivityVersion(this.getId(), schemaVersion, siteVersion, hrd);
     }
     
     void addLink(int destinationIndicatorId, int sourceActivityId, int sourceReportingFrequency, int sourceIndicatorId) {

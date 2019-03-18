@@ -22,15 +22,17 @@ public class ActivityVersion {
     private int id;
     private long schemaVersion;
     private long siteVersion;
+    private final boolean hrd;
 
-    public ActivityVersion(int id, long schemaVersion, long siteVersion) {
+    public ActivityVersion(int id, long schemaVersion, long siteVersion, boolean hrd) {
         this.id = id;
         this.schemaVersion = schemaVersion;
         this.siteVersion = siteVersion;
+        this.hrd = hrd;
     }
 
     public String getSchemaCacheKey() {
-        return "activity:10:metadata:" + id + "@" + schemaVersion;
+        return (hrd ? "hrd" : "activity") + ":10:" + ":metadata:" + id + "@" + schemaVersion;
     }
 
     public int getId() {
