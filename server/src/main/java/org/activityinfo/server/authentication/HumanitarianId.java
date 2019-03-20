@@ -26,9 +26,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.DataStore;
-import com.google.appengine.api.urlfetch.HTTPResponse;
-import com.google.appengine.api.urlfetch.URLFetchService;
-import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
+import com.google.appengine.api.urlfetch.*;
 import com.google.common.base.Optional;
 import com.sun.jersey.api.view.Viewable;
 import org.activityinfo.server.DeploymentConfiguration;
@@ -75,6 +73,8 @@ public class HumanitarianId {
     private final AuthTokenProvider authTokenProvider;
     
     private final Optional<AuthorizationCodeFlow> flow;
+
+    private static final URLFetchService FETCH_SERVICE = URLFetchServiceFactory.getURLFetchService();
 
     @Inject
     public HumanitarianId(DeploymentConfiguration config,
@@ -173,11 +173,14 @@ public class HumanitarianId {
 
             // Now query the user's email address and name
             URL accountUrl = UriBuilder.fromUri("https://auth.humanitarian.id/account.json")
-                    .queryParam("access_token", tokenResponse.getAccessToken())
-                    .build().toURL();
+                    .build()
+                    .toURL();
 
-            URLFetchService fetchService = URLFetchServiceFactory.getURLFetchService();
-            HTTPResponse response = fetchService.fetch(accountUrl);
+            HTTPRequest request = new HTTPRequest(accountUrl);
+            request.setHeader(new HTTPHeader("Authorization", tokenResponse.getAccessToken()));
+
+            HTTPResponse response = FETCH_SERVICE.fetch(request);
+
             account = HumanitarianIdAccount.parse(response.getContent());
 
         } catch (Exception e) {
