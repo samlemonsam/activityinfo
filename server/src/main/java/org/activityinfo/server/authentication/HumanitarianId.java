@@ -30,6 +30,7 @@ import com.google.appengine.api.urlfetch.HTTPResponse;
 import com.google.appengine.api.urlfetch.URLFetchService;
 import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
 import com.google.common.base.Optional;
+import com.sun.jersey.api.view.Viewable;
 import org.activityinfo.server.DeploymentConfiguration;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.LoginController;
@@ -52,6 +53,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -154,26 +156,36 @@ public class HumanitarianId {
                                              @QueryParam("code") String code,
                                              @QueryParam("state") String state) throws IOException {
 
-        if(!flow.isPresent()) {
-            return serviceUnvailable();
-        }
-        
-        // First exchange our authorization code for an access token that we can use 
-        // to request information about the user that has just logged in 
-        TokenResponse tokenResponse = flow.get().newTokenRequest(code)
-                .setScopes(Collections.singletonList("profile"))
-                .setGrantType("authorization_code")
-                .setTokenServerUrl(new GenericUrl("https://auth.humanitarian.id/oauth/access_token"))
-                .execute();
+        HumanitarianIdAccount account;
+        try {
 
-        // Now query the user's email address and name
-        URL accountUrl = UriBuilder.fromUri("https://auth.humanitarian.id/account.json")
-                .queryParam("access_token", tokenResponse.getAccessToken())
-                .build().toURL();
-        
-        URLFetchService fetchService = URLFetchServiceFactory.getURLFetchService();
-        HTTPResponse response = fetchService.fetch(accountUrl);
-        HumanitarianIdAccount account = HumanitarianIdAccount.parse(response.getContent());        
+            if(!flow.isPresent()) {
+                throw new IllegalStateException("Flow is not present");
+            }
+
+            // First exchange our authorization code for an access token that we can use
+            // to request information about the user that has just logged in
+            TokenResponse tokenResponse = flow.get().newTokenRequest(code)
+                    .setScopes(Collections.singletonList("profile"))
+                    .setGrantType("authorization_code")
+                    .setTokenServerUrl(new GenericUrl("https://auth.humanitarian.id/oauth/access_token"))
+                    .execute();
+
+            // Now query the user's email address and name
+            URL accountUrl = UriBuilder.fromUri("https://auth.humanitarian.id/account.json")
+                    .queryParam("access_token", tokenResponse.getAccessToken())
+                    .build().toURL();
+
+            URLFetchService fetchService = URLFetchServiceFactory.getURLFetchService();
+            HTTPResponse response = fetchService.fetch(accountUrl);
+            account = HumanitarianIdAccount.parse(response.getContent());
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to retrieve authorizaton from Humanitarian.id");
+            return Response.status(Response.Status.SERVICE_UNAVAILABLE)
+                    .entity(new Viewable("/page/HumanitarianIdFailure.ftl"))
+                    .build();
+        }
         
         // Now lookup the user's email address in our directory to see if this user already has an account
         List<User> existingUser = entityManager.get().createQuery("SELECT u FROM User u WHERE u.email = :email", User.class)
