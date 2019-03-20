@@ -28,8 +28,8 @@
 
         <p>There was a problem connecting to Humanitarian.id. You can:</p>
         <ul>
-            <li><a href="/login">Login with your ActivityInfo.org account</a></li>
-            <li><a href="/loginProblem">Choose a password for your ActivityInfo.org and login with that password</a></li>
+            <li><a href="/login">Login with your ActivityInfo.org password</a></li>
+            <li><a href="/loginProblem">Choose a password for your ActivityInfo.org account</a></li>
         </ul>
         </div>
     </@content>

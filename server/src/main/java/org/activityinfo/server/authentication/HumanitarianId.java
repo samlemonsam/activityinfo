@@ -177,7 +177,7 @@ public class HumanitarianId {
                     .toURL();
 
             HTTPRequest request = new HTTPRequest(accountUrl);
-            request.setHeader(new HTTPHeader("Authorization", tokenResponse.getAccessToken()));
+            request.setHeader(new HTTPHeader("Authorization", "Bearer " + tokenResponse.getAccessToken()));
 
             HTTPResponse response = FETCH_SERVICE.fetch(request);
 
