@@ -17,4 +17,15 @@ public class ColumnDescriptorTest {
 
     }
 
+    @Test
+    public void serialization() {
+
+        ColumnDescriptor descriptor = new ColumnDescriptor();
+        descriptor.setBlockVersion(1, 2);
+
+        FormEntity form = new FormEntity();
+        form.setId("a0000");
+        form.setVersion(1L);
+    }
+
 }

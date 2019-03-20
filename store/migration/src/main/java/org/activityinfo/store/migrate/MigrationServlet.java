@@ -97,11 +97,25 @@ public class MigrationServlet extends HttpServlet {
                 return migrateAdminForms();
             case "polygons":
                 return migratePolygons();
+            case "versionMap":
+                return fixVersionMap();
             default:
                 throw new IllegalArgumentException("Unknown job: " + job);
         }
     }
 
+    private String fixVersionMap() {
+
+        Query query = new Query("Form");
+        DatastoreInput input = new DatastoreInput(query, 10);
+        FixBlockVersionMap mapper = new FixBlockVersionMap();
+
+        MapSpecification<Entity, Void, Void> spec = new MapSpecification.Builder<Entity, Void, Void>(input, mapper)
+                .setJobName("Fix version map field")
+                .build();
+
+        return MapJob.start(spec, getSettings());
+    }
 
 
     private String listsubforms(HttpServletResponse resp) {

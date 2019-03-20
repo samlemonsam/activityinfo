@@ -24,7 +24,6 @@ public class ColumnDescriptor {
      * An {@link org.activityinfo.store.hrd.columns.IntValueArray} containing the current
      * version of each block that has been written.
      */
-    @Deprecated
     private Blob versionMap;
 
     /**
