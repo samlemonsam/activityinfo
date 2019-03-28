@@ -262,8 +262,7 @@ public class AccountStatus implements JsonSerializable {
     }
 
     public boolean isNewDatabaseAllowed() {
-        // Paid accounts should be able to create new database _unless_ they are suspended
-        return isSuspended();
+        return !isExpired();
     }
 
     public boolean isPaymentExpected() {
