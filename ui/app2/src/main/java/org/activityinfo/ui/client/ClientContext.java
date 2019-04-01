@@ -36,7 +36,7 @@ public final class ClientContext {
         return DICTIONARY.get("version");
     }
 
-    public static String getAppTittle() {
+    public static String getAppTitle() {
         return DICTIONARY.get("title");
     }
 
