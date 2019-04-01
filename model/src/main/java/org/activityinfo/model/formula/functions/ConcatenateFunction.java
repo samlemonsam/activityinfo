@@ -9,8 +9,8 @@ import org.activityinfo.model.query.StringArrayColumnView;
 import org.activityinfo.model.type.FieldType;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.NarrativeType;
-import org.activityinfo.model.type.NarrativeValue;
 import org.activityinfo.model.type.primitive.TextType;
+import org.activityinfo.model.type.primitive.TextValue;
 
 import java.util.List;
 
@@ -77,7 +77,7 @@ public class ConcatenateFunction extends FormulaFunction implements ColumnFuncti
             String value = Casting.toString(arguments.get(i));
             concatenatedString.append(value);
         }
-        return NarrativeValue.valueOf(concatenatedString.toString());
+        return TextValue.valueOf(concatenatedString.toString());
     }
 
     @Override

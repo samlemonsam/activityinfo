@@ -31,6 +31,7 @@ import org.activityinfo.model.resource.TransactionMode;
 import org.activityinfo.model.type.FieldValue;
 import org.activityinfo.model.type.SerialNumber;
 import org.activityinfo.model.type.SerialNumberType;
+import org.activityinfo.model.type.expr.CalculatedFieldType;
 import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.primitive.TextType;
@@ -238,4 +239,50 @@ public class UpdaterTest {
         assertThat(serialValue, equalTo((FieldValue)new SerialNumber("KUNDUZ", 1)));
     }
 
+
+    @Test
+    public void serialNumberWithCalculatedField() throws JsonMappingException {
+        FormClass formClass = new FormClass(ResourceId.valueOf("FORM1"));
+        formClass.addField(ResourceId.valueOf("Q1"))
+                .setType(TextType.SIMPLE)
+                .setLabel("Question 1")
+                .setCode("Q1")
+                .setRequired(true);
+
+        formClass.addField(ResourceId.valueOf("Q2"))
+                .setType(TextType.SIMPLE)
+                .setLabel("Question 2")
+                .setCode("Q2")
+                .setRequired(true);
+
+        formClass.addField(ResourceId.valueOf("Q3"))
+                .setType(new CalculatedFieldType("CONCAT(Q1, Q2)"))
+                .setLabel("Calculated field")
+                .setCode("Q3")
+                .setRequired(true);
+
+        FormField serialNumberField = formClass.addField(ResourceId.valueOf("FIELD1"))
+                .setType(new SerialNumberType("Q3", 5))
+                .setRequired(true)
+                .setLabel("File Number")
+                .setCode("SN");
+
+        JsonValue fields = Json.createObject();
+        fields.put("Q1", "Foo");
+        fields.put("Q2", "bar");
+
+        JsonValue change = createObject();
+        change.put("recordId", "A");
+        change.put("formId", "FORM1");
+        change.put("fields", fields);
+
+        TypedRecordUpdate update = Updater.parseChange(formClass, change, userId);
+
+        TypedFormRecord effectiveRecord = updater.computeEffectiveRecord(formClass, Optional.<FormRecord>absent(), update);
+
+        updater.generateSerialNumber(formClass, serialNumberField, effectiveRecord, update);
+
+        FieldValue serialValue = update.getChangedFieldValues().get(serialNumberField.getId());
+        assertThat(serialValue, equalTo((FieldValue)new SerialNumber("Foobar", 1)));
+    }
 }

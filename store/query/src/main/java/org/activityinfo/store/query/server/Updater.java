@@ -47,7 +47,7 @@ import org.activityinfo.model.type.attachment.AttachmentValue;
 import org.activityinfo.model.type.enumerated.EnumItem;
 import org.activityinfo.model.type.enumerated.EnumType;
 import org.activityinfo.model.type.enumerated.EnumValue;
-import org.activityinfo.model.type.primitive.TextValue;
+import org.activityinfo.model.type.primitive.HasStringValue;
 import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.spi.*;
 
@@ -344,8 +344,8 @@ public class Updater {
             FormulaNode formula = FormulaParser.parse(type.getPrefixFormula());
             FieldValue prefixValue = formula.evaluate(evalContext);
 
-            if(prefixValue instanceof TextValue) {
-                return ((TextValue) prefixValue).asString();
+            if(prefixValue instanceof HasStringValue) {
+                return ((HasStringValue) prefixValue).asString();
             } else {
                 throw new IllegalStateException("Prefix " + type.getPrefixFormula() + " resolves to type " +
                     prefixValue.getTypeClass().getId());
