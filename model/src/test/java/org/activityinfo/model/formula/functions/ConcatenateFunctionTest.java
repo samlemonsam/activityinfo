@@ -13,7 +13,7 @@ import org.junit.Test;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 public class ConcatenateFunctionTest {
 
@@ -23,7 +23,7 @@ public class ConcatenateFunctionTest {
         val1 = TextValue.valueOf("Left");
         val2 = TextValue.valueOf("Middle");
         val3 = TextValue.valueOf("Right");
-        expectedOutput = NarrativeValue.valueOf("LeftMiddleRight");
+        expectedOutput = TextValue.valueOf("LeftMiddleRight");
 
         List<FieldValue> values = Lists.newArrayList(val1, val2, val3);
         List<FieldType> types = values.stream()
@@ -41,7 +41,7 @@ public class ConcatenateFunctionTest {
         val1 = NarrativeValue.valueOf("Left");
         val2 = NarrativeValue.valueOf("Middle");
         val3 = NarrativeValue.valueOf("Right");
-        expectedOutput = NarrativeValue.valueOf("LeftMiddleRight");
+        expectedOutput = TextValue.valueOf("LeftMiddleRight");
 
         List<FieldValue> values = Lists.newArrayList(val1, val2, val3);
         List<FieldType> types = values.stream()
@@ -59,7 +59,7 @@ public class ConcatenateFunctionTest {
         val1 = NarrativeValue.valueOf("Left");
         val2 = TextValue.valueOf("Middle");
         val3 = NarrativeValue.valueOf("Right");
-        expectedOutput = NarrativeValue.valueOf("LeftMiddleRight");
+        expectedOutput = TextValue.valueOf("LeftMiddleRight");
 
         List<FieldValue> values = Lists.newArrayList(val1, val2, val3);
         List<FieldType> types = values.stream()
@@ -99,7 +99,7 @@ public class ConcatenateFunctionTest {
     public void concatenateSingleField() {
         FieldValue val1, expectedOutput;
         val1 = TextValue.valueOf("Left");
-        expectedOutput = NarrativeValue.valueOf("Left");
+        expectedOutput = TextValue.valueOf("Left");
 
         List<FieldValue> values = Lists.newArrayList(val1);
         List<FieldType> types = values.stream()
@@ -117,7 +117,7 @@ public class ConcatenateFunctionTest {
         val1 = TextValue.valueOf("Left");
         val2 = TextValue.valueOf(null);
         val3 = TextValue.valueOf("Right");
-        expectedOutput = NarrativeValue.valueOf("LeftRight");
+        expectedOutput = TextValue.valueOf("LeftRight");
 
         List<FieldValue> values = Lists.newArrayList(val1, val2, val3);
         assertThat(ConcatenateFunction.INSTANCE.apply(values), Matchers.equalTo(expectedOutput));
