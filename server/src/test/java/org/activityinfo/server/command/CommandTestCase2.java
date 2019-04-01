@@ -41,7 +41,6 @@ import org.activityinfo.server.endpoint.gwtrpc.RemoteExecutionContext;
 import org.activityinfo.server.mail.MailSenderStubModule;
 import org.activityinfo.server.util.TemplateModule;
 import org.activityinfo.server.util.config.ConfigModuleStub;
-import org.activityinfo.store.mysql.collections.AdminEntityTable;
 import org.activityinfo.store.mysql.metadata.CountryStructure;
 import org.activityinfo.store.spi.BlobAuthorizerStub;
 import org.activityinfo.store.spi.UserDatabaseProvider;
@@ -85,7 +84,6 @@ public class CommandTestCase2 {
 
         // Clear up MySQL catalog caches
         CountryStructure.clearCache();
-        AdminEntityTable.clearCache();
     }
 
     @After

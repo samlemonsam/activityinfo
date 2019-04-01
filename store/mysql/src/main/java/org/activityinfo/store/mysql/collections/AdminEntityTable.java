@@ -18,8 +18,6 @@
  */
 package org.activityinfo.store.mysql.collections;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.model.form.ApplicationProperties;
 import org.activityinfo.model.form.FormField;
@@ -34,7 +32,6 @@ import org.activityinfo.store.mysql.mapping.*;
 import org.activityinfo.store.mysql.metadata.AdminLevel;
 
 import java.sql.SQLException;
-import java.util.concurrent.TimeUnit;
 
 import static org.activityinfo.model.legacy.CuidAdapter.ADMIN_ENTITY_DOMAIN;
 
@@ -44,15 +41,6 @@ import static org.activityinfo.model.legacy.CuidAdapter.ADMIN_ENTITY_DOMAIN;
 public class AdminEntityTable implements SimpleTable {
     
     public static final String ADMIN_ENTITY_TABLE = "adminentity";
-
-    /**
-     * Admin levels change very infrequently, and then only the name can change, so 
-     * we can safely retain unconditionally for a reasonable period of time.
-     */
-    private static final Cache<Integer, AdminLevel> LEVEL_CACHE = CacheBuilder.newBuilder()
-            .concurrencyLevel(10)
-            .expireAfterWrite(10, TimeUnit.HOURS)
-            .build();
 
     @Override
     public boolean accept(ResourceId formClassId) {
@@ -64,11 +52,7 @@ public class AdminEntityTable implements SimpleTable {
     public TableMapping getMapping(QueryExecutor executor, ResourceId formId) throws SQLException {
 
         int levelId = CuidAdapter.getLegacyIdFromCuid(formId);
-        AdminLevel level = LEVEL_CACHE.getIfPresent(levelId);
-        if(level == null) {
-            level = AdminLevel.fetch(executor, levelId);
-            LEVEL_CACHE.put(levelId, level);
-        }
+        AdminLevel level = AdminLevel.fetch(executor, levelId);
 
         FormField label = new FormField(CuidAdapter.field(formId, CuidAdapter.NAME_FIELD));
         label.setLabel(I18N.CONSTANTS.name());
@@ -118,9 +102,5 @@ public class AdminEntityTable implements SimpleTable {
                     CuidAdapter.adminLevelFormClass(level.getParentId()), ADMIN_ENTITY_DOMAIN)));
         }
         return mapping.build();
-    }
-
-    public static void clearCache() {
-        LEVEL_CACHE.invalidateAll();
     }
 }
