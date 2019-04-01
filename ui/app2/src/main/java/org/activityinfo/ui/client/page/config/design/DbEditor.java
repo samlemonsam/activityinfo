@@ -782,18 +782,20 @@ public class DbEditor implements DbPage, IsWidget {
         toolBar.addImportButton();
 
         Menu exportMenu = new Menu();
+        exportMenu.add(new MenuItem("Export complete database", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
+            @Override
+            public void componentSelected(MenuEvent menuEvent) {
+                exportFullDatabaseBeta();
+            }
+        }));
+
         exportMenu.add(new MenuItem("Export complete database (classic)", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
             @Override
             public void componentSelected(MenuEvent menuEvent) {
                 exportFullDatabase();
             }
         }));
-        exportMenu.add(new MenuItem("Export complete database (beta)", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
-            @Override
-            public void componentSelected(MenuEvent menuEvent) {
-                exportFullDatabaseBeta();
-            }
-        }));
+
         exportMenu.add(new SeparatorMenuItem());
 
         exportMenu.add(new MenuItem("Export selected form as XLSForm", IconImageBundle.ICONS.excel(), new SelectionListener<MenuEvent>() {
