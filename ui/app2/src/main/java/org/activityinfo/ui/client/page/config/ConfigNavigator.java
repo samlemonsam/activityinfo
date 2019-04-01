@@ -81,7 +81,7 @@ public class ConfigNavigator implements Navigator {
                                   .build();
             rootLinks.add(dbListLink);
 
-            if(!ClientContext.isV4Enabled()) {
+            if(ClientContext.isWhitelistedForLinkedIndicators()) {
                 Link dbLinksLink = Link.to(new IndicatorLinkPlace())
                         .labeled(messages.linkIndicators())
                         .withIcon(icons.link())

@@ -36,7 +36,7 @@ public final class ClientContext {
         return DICTIONARY.get("version");
     }
 
-    public static String getAppTitle() {
+    public static String getAppTittle() {
         return DICTIONARY.get("title");
     }
 
@@ -48,8 +48,14 @@ public final class ClientContext {
     }
 
     public static boolean isV4Enabled() {
-        String flags = Strings.nullToEmpty(DICTIONARY.get("featureFlags"));
-        return flags.contains("v4");
+        return getFeatureFlags().contains("v4");
     }
 
+    private static String getFeatureFlags() {
+        return Strings.nullToEmpty(DICTIONARY.get("featureFlags"));
+    }
+
+    public static boolean isWhitelistedForLinkedIndicators() {
+        return getFeatureFlags().contains("links");
+    }
 }
