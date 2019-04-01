@@ -102,6 +102,15 @@ public class HostController {
             model.setAppCacheManifest(String.format("/%s/%s.appcache", module, locale));
         }
 
+        // Once users have migrated to v4, access to v3 is no longer allowed
+        // to access v3. Redirect them to the new application
+        if(model.isNewUI() && authenticatedUser.hasFeatureFlag("v4")) {
+            return Response.temporaryRedirect(
+                    UriBuilder.fromUri("https://v4.activityinfo.org/app").build())
+                    .cacheControl(CacheControl.valueOf("no-cache"))
+                    .build();
+        }
+
         Response.ResponseBuilder response = Response
                 .ok(model.asViewable())
                 .type(MediaType.TEXT_HTML)
