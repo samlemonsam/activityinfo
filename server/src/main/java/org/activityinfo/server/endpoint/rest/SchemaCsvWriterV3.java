@@ -42,9 +42,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class SchemaCsvWriterV3 {
 
+    private static final Logger LOGGER = Logger.getLogger(SchemaCsvWriterV3.class.getName());
 
     private class FieldContext {
 
@@ -293,7 +295,7 @@ public class SchemaCsvWriterV3 {
             if(field.getType() instanceof EnumType) {
                 writeEnumItems(context, field, ((EnumType) field.getType()).getValues());
             } else if(field.getType() instanceof SubFormReferenceType) {
-                writeSubForm(context, field);
+                writeSubForm(context, formClass.getId(), field);
             } else if(!isBuiltinField(formClass, field)) {
                 writeField(context, field);
             }
@@ -309,9 +311,18 @@ public class SchemaCsvWriterV3 {
                 field.getId().equals(CuidAdapter.projectField(activityId));
     }
 
-    private void writeSubForm(FieldContext context, FormField field) throws IOException {
+    private void writeSubForm(FieldContext context, ResourceId formId, FormField field) throws IOException {
         SubFormReferenceType fieldType = (SubFormReferenceType) field.getType();
-        FormClass subFormClass = catalog.getFormClass(fieldType.getClassId());
+        FormClass subFormClass;
+        try {
+            subFormClass = catalog.getFormClass(fieldType.getClassId());
+        } catch (Exception e) {
+            LOGGER.warning(String.format("Could not find subform %s referenced by form %s",
+                    fieldType.getClassId(),
+                    formId));
+            return;
+        }
+
         FieldContext subFormContext = context.subForm(field, subFormClass);
 
         for (FormField subField : subFormClass.getFields()) {
