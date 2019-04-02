@@ -67,7 +67,7 @@ public class SiteExporter {
     private static final int PARTNER_COLUMN_WIDTH = 16;
     private static final int HEADER_CELL_HEIGHT = 75;
     private static final int CHARACTERS_PER_WIDTH_UNIT = 255;
-    private static final int SITE_BATCH_SIZE = 100;
+    private static final int SITE_BATCH_SIZE = 10000;
 
     private final TaskContext context;
 
