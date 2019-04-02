@@ -303,7 +303,7 @@ public class QueryEvaluator {
                 return addColumn(nodes);
             } catch (AmbiguousSymbolException | SymbolNotFoundException e) {
                 // Ambiguous or unknown symbols should result in an empty column, not full failure
-                LOGGER.log(Level.WARNING, e.getMessage(), e);
+                LOGGER.log(Level.WARNING, e.getMessage());
                 return batch.addEmptyColumn(filterLevel, rootFormClass);
             } finally {
                 evaluationStack.pop();
