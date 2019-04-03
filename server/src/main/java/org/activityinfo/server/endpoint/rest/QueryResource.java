@@ -25,16 +25,17 @@ import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class QueryResource {
+
+    private static final Logger LOGGER = Logger.getLogger(QueryResource.class.getName());
 
     private final ApiBackend backend;
 
@@ -48,9 +49,7 @@ public class QueryResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response queryColumns(QueryModel model) {
 
-        ColumnSetBuilder builder = backend.newQueryBuilder();
-
-        final ColumnSet columnSet = builder.build(model);
+        final ColumnSet columnSet = query(model);
 
         final StreamingOutput output = outputStream -> {
             ColumnJsonWriter columnSetWriter = new ColumnJsonWriter(outputStream, Charsets.UTF_8);
@@ -67,9 +66,7 @@ public class QueryResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response queryRows(QueryModel model) {
 
-        ColumnSetBuilder builder = backend.newQueryBuilder();
-
-        final ColumnSet columnSet = builder.build(model);
+        final ColumnSet columnSet = query(model);
 
         final StreamingOutput output = outputStream -> {
             RowBasedJsonWriter writer = new RowBasedJsonWriter(outputStream, Charsets.UTF_8);
@@ -78,6 +75,19 @@ public class QueryResource {
         };
 
         return Response.ok(output).type(MediaType.APPLICATION_JSON_TYPE).build();
+    }
+
+    private ColumnSet query(QueryModel model) {
+        ColumnSet columnSet;
+        ColumnSetBuilder builder = backend.newQueryBuilder();
+
+        try {
+            columnSet = builder.build(model);
+        } catch (OutOfMemoryError e) {
+            LOGGER.log(Level.SEVERE, "Out of memory while executing query", e);
+            throw new WebApplicationException(Response.Status.SERVICE_UNAVAILABLE);
+        }
+        return columnSet;
     }
 
 }
