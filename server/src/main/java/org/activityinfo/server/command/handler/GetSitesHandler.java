@@ -567,13 +567,16 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
                 rootSite.getAdminEntities().forEach(monthlySite::setAdminEntity);
                 rootSite.getProperties()
                         .entrySet().stream()
-                        .filter(GetSitesHandler::attributeProperty)
-                        .map(GetSitesHandler::mapToAttributeValue)
+                        .filter(GetSitesHandler::filterAttributeProperties)
+                        .filter(GetSitesHandler::filterAttributeValues)
+                        .map(GetSitesHandler::mapToAttributeValues)
                         .forEach(attrVal -> monthlySite.setAttributeValue(attrVal.getKey(), attrVal.getValue()));
-                rootSite.getAttributeDisplayMap()
-                        .entrySet().stream()
-                        .flatMap(GetSitesHandler::flatMapToAttributeDisplayValues)
-                        .forEach(displayValue -> monthlySite.addDisplayAttribute(displayValue.getKey(), displayValue.getValue()));
+                if (rootSite.hasAttributeDisplayMap()) {
+                    rootSite.getAttributeDisplayMap()
+                            .entrySet().stream()
+                            .flatMap(GetSitesHandler::flatMapToAttributeDisplayValues)
+                            .forEach(displayValue -> monthlySite.addDisplayAttribute(displayValue.getKey(), displayValue.getValue()));
+                }
             }
         });
 
@@ -581,11 +584,15 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         Trace.endSpan(monthlyMergeTrace);
     }
 
-    private static boolean attributeProperty(Map.Entry<String,Object> prop) {
+    private static boolean filterAttributeProperties(Map.Entry<String,Object> prop) {
         return prop.getKey().startsWith(AttributeDTO.PROPERTY_PREFIX);
     }
 
-    private static Map.Entry<Integer,Boolean> mapToAttributeValue(Map.Entry<String,Object> prop) {
+    private static boolean filterAttributeValues(Map.Entry<String,Object> prop) {
+        return prop.getValue() instanceof Boolean;
+    }
+
+    private static Map.Entry<Integer,Boolean> mapToAttributeValues(Map.Entry<String,Object> prop) {
         return new AbstractMap.SimpleEntry<>(AttributeDTO.idForPropertyName(prop.getKey()), (Boolean) prop.getValue());
     }
 
