@@ -33,6 +33,7 @@ import org.activityinfo.legacy.shared.command.OldGetSites;
 import org.activityinfo.legacy.shared.command.result.SiteResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
 import org.activityinfo.legacy.shared.impl.OldGetSitesHandler;
+import org.activityinfo.legacy.shared.model.AttributeDTO;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
 import org.activityinfo.legacy.shared.model.SiteDTO;
 import org.activityinfo.model.form.FormClass;
@@ -62,8 +63,8 @@ import org.activityinfo.store.mysql.metadata.CountryInstance;
 import org.activityinfo.store.query.server.ColumnSetBuilder;
 import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.shared.FormScanBatch;
-import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.Slot;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 
 import javax.inject.Provider;
 import javax.validation.constraints.NotNull;
@@ -71,6 +72,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 public class GetSitesHandler implements CommandHandler<GetSites> {
 
@@ -561,11 +563,34 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
                 monthlySite.setLocation(rootSite.getLocation());
                 monthlySite.setProject(rootSite.getProject());
                 monthlySite.setPartner(rootSite.getPartner());
+                monthlySite.setComments(rootSite.getComments());
+                rootSite.getAdminEntities().forEach(monthlySite::setAdminEntity);
+                rootSite.getProperties()
+                        .entrySet().stream()
+                        .filter(GetSitesHandler::attributeProperty)
+                        .map(GetSitesHandler::mapToAttributeValue)
+                        .forEach(attrVal -> monthlySite.setAttributeValue(attrVal.getKey(), attrVal.getValue()));
+                rootSite.getAttributeDisplayMap()
+                        .entrySet().stream()
+                        .flatMap(GetSitesHandler::flatMapToAttributeDisplayValues)
+                        .forEach(displayValue -> monthlySite.addDisplayAttribute(displayValue.getKey(), displayValue.getValue()));
             }
         });
 
         monthlyMergeTime.stop();
         Trace.endSpan(monthlyMergeTrace);
+    }
+
+    private static boolean attributeProperty(Map.Entry<String,Object> prop) {
+        return prop.getKey().startsWith(AttributeDTO.PROPERTY_PREFIX);
+    }
+
+    private static Map.Entry<Integer,Boolean> mapToAttributeValue(Map.Entry<String,Object> prop) {
+        return new AbstractMap.SimpleEntry<>(AttributeDTO.idForPropertyName(prop.getKey()), (Boolean) prop.getValue());
+    }
+
+    private static Stream<Map.Entry<String,String>> flatMapToAttributeDisplayValues(Map.Entry<String,List<String>> group) {
+        return group.getValue().stream().map(dv -> new AbstractMap.SimpleEntry<>(group.getKey(),dv));
     }
 
     private void setQuerySort() {
