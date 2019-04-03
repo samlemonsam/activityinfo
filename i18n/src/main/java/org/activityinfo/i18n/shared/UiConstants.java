@@ -406,7 +406,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Your dashboard is empty! You can select which reports appear on your dashboard by starring them in the reports page.")
     String emptyDashboard();
 
-    @DefaultStringValue("(None)")
+    @DefaultStringValue("(Blank)")
     String emptyDimensionCategory();
 
     @DefaultStringValue("Active")
