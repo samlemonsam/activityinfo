@@ -40,7 +40,8 @@ public class ColumnModel implements JsonSerializable {
     public static final String FORM_ID_SYMBOL = "_class";
     public static final String FORM_NAME_SYMBOL = "_class_label";
     public static final String PARENT_SYMBOL = "@parent";
-
+    public static final String DATE_ADDED_SYMBOL = "_date_add";
+    public static final String DATE_EDITED_SYMBOL = "_date_edit";
 
     private String id;
     private FormulaNode formula;
