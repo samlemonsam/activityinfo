@@ -18,6 +18,7 @@
  */
 package org.activityinfo.server.login;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -131,10 +132,18 @@ public class SignUpController {
         }
     }
 
-    private void checkParam(String value, boolean required) {
+    @VisibleForTesting
+    static void checkParam(String value, boolean required) {
         boolean illegal = false;
         illegal |= (required && Strings.isNullOrEmpty(value));
-        illegal |= (value != null && value.length() > MAX_PARAM_LENGTH); // sanity check
+
+        // sanity check
+        illegal |= (value != null && value.length() > MAX_PARAM_LENGTH);
+
+        // Check for spam links
+        // http://
+        // https://
+        illegal |= value.contains("https:") || value.contains("http:");
 
         if (illegal) {
             throw new IllegalArgumentException();
