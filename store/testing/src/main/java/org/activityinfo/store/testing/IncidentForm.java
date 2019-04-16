@@ -68,6 +68,7 @@ public class IncidentForm implements TestForm {
                 .setCode("PCODE")
                 .setLabel("Protection Code")
                 .setType(new ReferenceType(Cardinality.SINGLE, BioDataForm.FORM_ID))
+                .setKey(true)
                 .setRequired(true)
                 .setVisible(true);
 
@@ -85,6 +86,10 @@ public class IncidentForm implements TestForm {
         generator = new RecordGenerator(formClass)
                 .distribution(PROTECTION_CODE_FIELD_ID, new RefGenerator(bioDataForm));
 
+    }
+
+    public FormField getCodeField() {
+        return codeField;
     }
 
     @Override

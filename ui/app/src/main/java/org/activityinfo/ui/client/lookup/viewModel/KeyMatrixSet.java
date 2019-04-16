@@ -82,7 +82,7 @@ public class KeyMatrixSet {
                 continue;
             }
             LookupKey leafKey = lookupKeySet.getLeafKey(referencedFormId);
-            KeyMatrix keyMatrix = new KeyMatrix(formSource, lookupKeySet, leafKey, filter);
+            KeyMatrix keyMatrix = new KeyMatrix(formSource, lookupKeySet, referencedFormId, leafKey, filter);
             map.put(referencedFormId, keyMatrix);
         }
     }

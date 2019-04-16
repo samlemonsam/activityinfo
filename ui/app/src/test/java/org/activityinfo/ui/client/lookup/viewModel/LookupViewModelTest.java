@@ -24,6 +24,7 @@ import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.formTree.FormMetadataProviderStub;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
+import org.activityinfo.model.formTree.LookupKeySet;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
@@ -350,7 +351,26 @@ public class LookupViewModelTest {
         assertThat(province.assertLoaded().get(), equalTo("Province 11"));
         assertThat(territory.assertLoaded().get(), equalTo("Territory 24"));
         assertThat(healthZone.assertLoaded().isPresent(), equalTo(false));
+    }
 
+
+    @Test
+    public void issue2068() {
+
+
+        IncidentForm incidentForm = catalog.getIncidentForm();
+
+        LookupKeySet keySet = new LookupKeySet(catalog.getFormTree(incidentForm.getFormId()), incidentForm.getCodeField());
+        assertThat(keySet.getLookupKeys(), hasSize(1));
+        assertThat(keySet.getLeafKeys(), hasSize(1));
+
+        ReferenceType type = (ReferenceType) incidentForm.getCodeField().getType();
+
+        KeyMatrixSet keyMatrixSet = new KeyMatrixSet(setup.getFormStore(), type, keySet, Observable.just(Optional.absent()));
+        assertThat(keyMatrixSet.getMatrices(), hasSize(1));
+
+        KeyMatrix keyMatrix = keyMatrixSet.getMatrices().iterator().next();
+        assertThat(keyMatrix.getFormId(), equalTo(BioDataForm.FORM_ID));
 
     }
 }

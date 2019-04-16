@@ -58,8 +58,8 @@ class KeyMatrix {
     private final Map<LookupKey, FormulaNode> keyFormulas;
     private final Observable<ColumnSet> keyColumns;
 
-    public KeyMatrix(FormSource formSource, LookupKeySet lookupKeySet, LookupKey leafKey, Observable<Optional<FormulaNode>> filter) {
-        this.formId = leafKey.getFormId();
+    public KeyMatrix(FormSource formSource, LookupKeySet lookupKeySet, ResourceId formId, LookupKey leafKey, Observable<Optional<FormulaNode>> filter) {
+        this.formId = formId;
         this.lookupKeySet = lookupKeySet;
 
         keyFormulas = leafKey.getKeyFormulas();
