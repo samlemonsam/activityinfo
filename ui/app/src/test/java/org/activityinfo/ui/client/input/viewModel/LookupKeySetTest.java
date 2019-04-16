@@ -20,7 +20,9 @@ package org.activityinfo.ui.client.input.viewModel;
 
 import com.google.common.collect.Iterables;
 import org.activityinfo.analysis.ParsedFormula;
+import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
+import org.activityinfo.model.form.FormMetadata;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.LookupKey;
 import org.activityinfo.model.formTree.LookupKeySet;
@@ -29,19 +31,18 @@ import org.activityinfo.model.formula.CompoundExpr;
 import org.activityinfo.model.formula.FormulaNode;
 import org.activityinfo.model.formula.Formulas;
 import org.activityinfo.model.formula.SymbolNode;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
 import org.activityinfo.model.resource.ResourceId;
-import org.activityinfo.model.type.Cardinality;
-import org.activityinfo.model.type.RecordRef;
-import org.activityinfo.model.type.ReferenceType;
-import org.activityinfo.model.type.ReferenceValue;
+import org.activityinfo.model.type.*;
 import org.activityinfo.model.type.primitive.TextType;
 import org.activityinfo.observable.Connection;
 import org.activityinfo.observable.Observable;
 import org.activityinfo.promise.Maybe;
 import org.activityinfo.store.testing.*;
+import org.activityinfo.ui.client.lookup.viewModel.LookupViewModel;
 import org.activityinfo.ui.client.store.TestSetup;
 import org.junit.Test;
 
@@ -352,5 +353,46 @@ public class LookupKeySetTest {
         Map<LookupKey,FormulaNode> formulas = lookupKeySet.getKeyFormulas(refField.getId());
 
         assertThat(formulas.values(), containsInAnyOrder(pathToKey1, pathToKey2));
+    }
+
+    @Test
+    public void issue2068() {
+
+        FormClass intakeForm = new FormClass(ResourceId.valueOf("INTAKE"));
+        intakeForm.setLabel("Intake");
+        intakeForm.addField(ResourceId.valueOf("S"))
+                .setType(new SerialNumberType())
+                .setLabel("Case number");
+
+        FormClass firstForm = new FormClass(ResourceId.valueOf("PHASE1"));
+        firstForm.setLabel("Phase 1");
+        firstForm.addField(ResourceId.valueOf("K1"))
+                .setType(new ReferenceType(Cardinality.SINGLE, intakeForm.getId()))
+                .setLabel("Case number")
+                .setKey(true);
+
+        FormClass secondForm = new FormClass(ResourceId.valueOf("PHASE2"));
+        secondForm.setLabel("Phase 2");
+        secondForm.addField(ResourceId.valueOf("K2"))
+                .setType(new ReferenceType(Cardinality.SINGLE, firstForm.getId()))
+                .setLabel("Case number")
+                .setKey(true);
+
+
+        FormTree formTree = new FormTree(intakeForm.getId());
+        formTree.addFormMetadata(FormMetadata.of(1L, intakeForm, FormPermissions.readonly()));
+        formTree.addFormMetadata(FormMetadata.of(1L, firstForm, FormPermissions.readonly()));
+        formTree.addFormMetadata(FormMetadata.of(1L, secondForm, FormPermissions.readonly()));
+
+        LookupKeySet keySet = new LookupKeySet(formTree, secondForm.getField(ResourceId.valueOf("K2")));
+        assertThat(keySet.getLookupKeys(), hasSize(1));
+        assertThat(keySet.getLeafKeys(), hasSize(1));
+
+        LookupKey lookupKey = keySet.getLookupKeys().get(0);
+        assertThat(lookupKey.getKeyLabel(), equalTo("Case number"));
+
+        Map<LookupKey, FormulaNode> formulas = keySet.getKeyFormulas(new SymbolNode("Z"));
+        assertThat(formulas.get(lookupKey).asExpression(), equalTo("Z.S"));
+
     }
 }
