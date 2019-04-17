@@ -82,6 +82,16 @@ public class RecordTree {
         return root;
     }
 
+    public List<TypedFormRecord> getRelatedRecords() {
+        List<TypedFormRecord> records = new ArrayList<>();
+        for (Maybe<TypedFormRecord> record : relatedRecords.values()) {
+            if(record.isVisible()) {
+                records.add(record.get());
+            }
+        }
+        return records;
+    }
+
     public RecordRef getRootRef() {
         return root.getRef();
     }

@@ -259,6 +259,8 @@ public class LookupKeySet {
      * Composes a human-readable label for a record reference.
      */
     public Maybe<String> label(RecordTree tree, RecordRef ref) {
+
+
         Optional<TypedFormRecord> potentialRecord = tree.getRecord(ref).getIfVisible();
         if (potentialRecord.isPresent()) {
             TypedFormRecord record = potentialRecord.get();
@@ -266,6 +268,23 @@ public class LookupKeySet {
                 if (record.getFormId().equals(lookupKey.getFormId())) {
                     return Maybe.of(lookupKey.label(record));
                 }
+            }
+        }
+
+        // This is a quick fix for AI-2068
+        if(lookupKeys.size() == 1) {
+            return label1(tree, lookupKeys.get(0));
+        }
+
+        return Maybe.notFound();
+    }
+
+    private Maybe<String> label1(RecordTree tree, LookupKey lookupKey) {
+        // Assumes there is only one related record belonging to this key's
+        // form.
+        for (TypedFormRecord record : tree.getRelatedRecords()) {
+            if(record.getFormId().equals(lookupKey.getFormId())) {
+                return Maybe.of(lookupKey.label(record));
             }
         }
         return Maybe.notFound();

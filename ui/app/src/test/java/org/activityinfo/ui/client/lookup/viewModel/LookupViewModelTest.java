@@ -21,10 +21,7 @@ package org.activityinfo.ui.client.lookup.viewModel;
 import com.google.common.base.Optional;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
-import org.activityinfo.model.formTree.FormMetadataProviderStub;
-import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.formTree.FormTreeBuilder;
-import org.activityinfo.model.formTree.LookupKeySet;
+import org.activityinfo.model.formTree.*;
 import org.activityinfo.model.query.ColumnSet;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.QueryModel;
@@ -357,14 +354,15 @@ public class LookupViewModelTest {
     @Test
     public void issue2068() {
 
-
         IncidentForm incidentForm = catalog.getIncidentForm();
 
-        LookupKeySet keySet = new LookupKeySet(catalog.getFormTree(incidentForm.getFormId()), incidentForm.getCodeField());
+        FormTree formTree = catalog.getFormTree(incidentForm.getFormId());
+        FormField referenceField = incidentForm.getCodeField();
+        LookupKeySet keySet = new LookupKeySet(formTree, referenceField);
         assertThat(keySet.getLookupKeys(), hasSize(1));
         assertThat(keySet.getLeafKeys(), hasSize(1));
 
-        ReferenceType type = (ReferenceType) incidentForm.getCodeField().getType();
+        ReferenceType type = (ReferenceType) referenceField.getType();
 
         KeyMatrixSet keyMatrixSet = new KeyMatrixSet(setup.getFormStore(), type, keySet, Observable.just(Optional.absent()));
         assertThat(keyMatrixSet.getMatrices(), hasSize(1));
@@ -372,5 +370,13 @@ public class LookupViewModelTest {
         KeyMatrix keyMatrix = keyMatrixSet.getMatrices().iterator().next();
         assertThat(keyMatrix.getFormId(), equalTo(BioDataForm.FORM_ID));
 
+        // Make sure the details view renders
+
+        RecordRef ref = incidentForm.getRecordRef(0);
+        RecordTree recordTree = setup.connect(setup.getFormStore().getRecordTree(ref))
+                .assertLoaded()
+                .get();
+
+        assertThat(keySet.label(recordTree, ref).get(), equalTo("00311"));
     }
 }
