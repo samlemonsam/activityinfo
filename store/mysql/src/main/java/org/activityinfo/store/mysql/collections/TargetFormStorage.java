@@ -20,11 +20,12 @@ package org.activityinfo.store.mysql.collections;
 
 import com.google.common.base.Optional;
 import com.vividsolutions.jts.geom.Geometry;
+import org.activityinfo.json.Json;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormRecord;
 import org.activityinfo.model.resource.ResourceId;
+import org.activityinfo.model.type.RecordRef;
 import org.activityinfo.store.mysql.cursor.QueryExecutor;
-import org.activityinfo.store.mysql.cursor.RecordFetcher;
 import org.activityinfo.store.mysql.mapping.TableMapping;
 import org.activityinfo.store.mysql.metadata.DatabaseTargetForm;
 import org.activityinfo.store.spi.ColumnQueryBuilder;
@@ -49,7 +50,9 @@ public class TargetFormStorage implements FormStorage {
 
     @Override
     public Optional<FormRecord> get(ResourceId resourceId) {
-        return RecordFetcher.fetch(this, resourceId);
+        return Optional.of(
+                new FormRecord(
+                    new RecordRef(getFormClass().getId(), resourceId), null, Json.createObject()));
     }
 
     @Override
