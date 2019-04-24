@@ -134,6 +134,11 @@ public class SignUpController {
 
     @VisibleForTesting
     static void checkParam(String value, boolean required) {
+        // Null or empty data allowed if field is not required
+        if (Strings.isNullOrEmpty(value) && !required) {
+            return;
+        }
+
         boolean illegal = false;
         illegal |= (required && Strings.isNullOrEmpty(value));
 
