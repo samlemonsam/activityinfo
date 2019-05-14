@@ -353,7 +353,7 @@ public class Indicator implements java.io.Serializable, Orderable, Deleteable, F
      */
     @Override @Transient
     public boolean isDeleted() {
-        return getDateDeleted() == null;
+        return getDateDeleted() != null;
     }
 
 }

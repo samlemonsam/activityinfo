@@ -130,22 +130,16 @@ public class GetSitesHandler implements CommandHandler<GetSites> {
         LOGGER.info("Entering execute()");
         aggregateTime.start();
 
-        try {
-            initialiseHandler(cmd, user);
-            fetchActivityMetadata(cmd.getFilter());
-            checkForLinkedActivities();
-            queryFormTrees();
-            buildAttributeFilterMap();
-            buildQueries();
-            setQuerySort();
-            batchQueries();
-            executeBatch();
-            mergeMonthlyRootSites();
-        } catch (CommandException excp) {
-            // If we catch a CommandException, lets try the legacy method
-            // TODO: Strip this out once robustness is established, and the Linked Indicator feature is disabled
-            return dispatcher.execute(new OldGetSites(cmd));
-        }
+        initialiseHandler(cmd, user);
+        fetchActivityMetadata(cmd.getFilter());
+        checkForLinkedActivities();
+        queryFormTrees();
+        buildAttributeFilterMap();
+        buildQueries();
+        setQuerySort();
+        batchQueries();
+        executeBatch();
+        mergeMonthlyRootSites();
 
         aggregateTime.stop();
         printTimes();

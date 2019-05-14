@@ -74,9 +74,9 @@ public abstract class PointLayerGenerator<T extends PointMapLayer> implements La
             if (indicator.isDeleted()) {
                 continue;
             }
-            if (indicator.getAggregation() == IndicatorDTO.AGGREGATE_SITE_COUNT) {
-                layerFilter.addRestriction(DimensionType.Activity, indicator.getActivity().getId());
-            } else {
+            layerFilter.addRestriction(DimensionType.Activity, indicator.getActivity().getId());
+
+            if (indicator.getAggregation() != IndicatorDTO.AGGREGATE_SITE_COUNT) {
                 layerFilter.addRestriction(DimensionType.Indicator, indicator.getId());
             }
 
