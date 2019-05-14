@@ -331,13 +331,7 @@
   <partner PartnerId="30" FullName="United Nations Children&apos;s Funds" Name="UNICEF"/>
   <userlogin UserId="1070" Email="admin@admin.org" Password="xyz" Locale="fr" Name="Admin" emailnotification="true" dateCreated="1970-01-01"/>
   <userdatabase DatabaseId="1026" FullName="Education Database" Name="EDUCATION" CountryId="379" OwnerUserId="1070" version="1390394200198"/>
-  <partnerindatabase PartnerId="13" DatabaseId="1026"/>
   <partnerindatabase PartnerId="30" DatabaseId="1026"/>
-  <partnerindatabase PartnerId="115" DatabaseId="1026"/>
-  <partnerindatabase PartnerId="238" DatabaseId="1026"/>
-  <partnerindatabase PartnerId="679" DatabaseId="1026"/>
-  <partnerindatabase PartnerId="680" DatabaseId="1026"/>
-  <partnerindatabase PartnerId="1006" DatabaseId="1026"/>
   <activity ActivityId="2509" AllowEdit="false" category="apr&#232;s" Name="r&#233;habilitation reconstruction" ReportingFrequency="0" SortOrder="5" DatabaseId="1026" LocationTypeId="50500" published="1"/>
   <site SiteId="244391543" comments="donnees terrain" Date1="2013-12-02" Date2="2014-04-02" DateCreated="2013-12-18 10:21:29.0" DateEdited="2013-12-18 10:21:29.0" ActivityId="2509" LocationId="1705483153" PartnerId="30" timeEdited="1387362089905"/>
   <site SiteId="371004579" comments="donnees terrain" Date1="2013-12-02" Date2="2014-04-02" DateCreated="2013-12-18 10:19:54.0" DateEdited="2013-12-18 10:19:54.0" ActivityId="2509" LocationId="541557256" PartnerId="30" timeEdited="1387361994634"/>

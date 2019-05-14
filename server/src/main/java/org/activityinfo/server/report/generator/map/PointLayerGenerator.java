@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import org.activityinfo.legacy.shared.command.DimensionType;
 import org.activityinfo.legacy.shared.command.Filter;
 import org.activityinfo.legacy.shared.command.GetSites;
+import org.activityinfo.legacy.shared.command.OldGetSites;
 import org.activityinfo.legacy.shared.model.ActivityFormDTO;
 import org.activityinfo.legacy.shared.model.AdminEntityDTO;
 import org.activityinfo.legacy.shared.model.IndicatorDTO;
@@ -49,7 +50,7 @@ public abstract class PointLayerGenerator<T extends PointMapLayer> implements La
     @Override
     public void query(DispatcherSync dispatcher, Filter effectiveFilter) {
         GetSites query = queryFor(effectiveFilter, layer);
-        this.sites = dispatcher.execute(query).getData();
+        this.sites = dispatcher.execute(new OldGetSites(query)).getData();
     }
 
     /**
