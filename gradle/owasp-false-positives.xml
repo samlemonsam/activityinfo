@@ -44,6 +44,11 @@
         <cpe>cpe:/a:openbsd:openbsd</cpe>
     </suppress>
     <suppress>
+        <notes>This CVE applies to an openbsd library, not the Java version.</notes>
+        <gav regex="true">^org\.mindrot:jbcrypt:.*$</gav>
+        <cve>CVE-2009-0537</cve>
+    </suppress>
+    <suppress>
         <gav regex="true">^com\.googlecode\.objectify:objectify:.*$</gav>
         <cpe>cpe:/a:app_project:app</cpe>
     </suppress>
