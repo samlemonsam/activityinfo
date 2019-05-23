@@ -65,6 +65,14 @@ public class UsageResource {
     }
 
     @GET
+    @Path("accounts/{accountId}/technicalContacts")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getTechnicalContacts(@QueryParam("accessKey") String requestKey, @PathParam("accountId") int accountId) {
+        assertAuthorized(requestKey);
+        return executeQuery("SELECT userid, email, name, billingAccountId from userlogin where billingaccountid = " + accountId);
+    }
+
+    @GET
     @Path("technicalContacts")
     @Produces(MediaType.APPLICATION_JSON)
     public String getTechnicalContacts(@QueryParam("accessKey") String requestKey) {
