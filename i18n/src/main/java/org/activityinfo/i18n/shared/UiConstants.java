@@ -40,7 +40,7 @@ public interface UiConstants extends Constants {
     @DefaultStringValue("Permission/Folder editing locked as user has greater permissions than you have")
     String permissionEditingLockedWarning();
 
-    @DefaultStringValue("Permission/Folder editing locked as user is assigned to Partners you are not ")
+    @DefaultStringValue("Permission/Folder editing locked as user is assigned to Partners you are not")
     String permissionEditingLockedPartnerWarning();
 
     @DefaultStringValue("Copy addresses to clipboard")
