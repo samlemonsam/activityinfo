@@ -27,9 +27,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
-import org.activityinfo.server.database.hibernate.entity.Authentication;
 
-import javax.persistence.EntityManager;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -48,27 +46,27 @@ public class SelectionServlet extends DefaultSelectionServlet {
     private static final long serialVersionUID = 5078231093739821294L;
 
     @Inject
-    public SelectionServlet(Provider<EntityManager> entityManager) {
+    public SelectionServlet(Provider<AuthenticatedUser> userProvider) {
         super();
-        registerProvider("locale", new LocaleProvider(entityManager));
+        registerProvider("locale", new LocaleProvider(userProvider));
         registerProvider("gwt.logging.logLevel", new LogLevelProvider());
     }
 
     private class LocaleProvider implements PropertyProvider {
 
-        private final Provider<EntityManager> entityManager;
+        private final Provider<AuthenticatedUser> userProvider;
 
-        public LocaleProvider(Provider<EntityManager> entityManager) {
-            this.entityManager = entityManager;
+        public LocaleProvider(Provider<AuthenticatedUser> userProvider) {
+            this.userProvider = userProvider;
         }
 
         @Override
         public String get(HttpServletRequest req) {
-            Authentication auth = entityManager.get().find(Authentication.class, getAuthToken(req));
-            if (auth == null) {
+            AuthenticatedUser user = userProvider.get();
+            if(user.isAnonymous()) {
                 throw new UserNotAuthenticatedException("expired authtoken");
             }
-            return auth.getUser().getLocale();
+            return user.getUserLocale();
         }
 
         private String getAuthToken(HttpServletRequest req) {

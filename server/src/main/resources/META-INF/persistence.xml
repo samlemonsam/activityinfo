@@ -32,7 +32,6 @@
     <class>org.activityinfo.server.database.hibernate.entity.Attribute</class>
     <class>org.activityinfo.server.database.hibernate.entity.AttributeGroup</class>
     <class>org.activityinfo.server.database.hibernate.entity.AttributeValue</class>
-    <class>org.activityinfo.server.database.hibernate.entity.Authentication</class>
     <class>org.activityinfo.server.database.hibernate.entity.Bounds</class>
     <class>org.activityinfo.server.database.hibernate.entity.BillingAccount</class>
     <class>org.activityinfo.server.database.hibernate.entity.Country</class>

@@ -26,7 +26,6 @@ public class HibernateDAOModule extends AbstractModule {
     protected void configure() {
         bind(AdminDAO.class).to(AdminHibernateDAO.class);
         bindDAOProxy(ActivityDAO.class);
-        bindDAOProxy(AuthenticationDAO.class);
         bindDAOProxy(CountryDAO.class);
         bindDAOProxy(IndicatorDAO.class);
         bindDAOProxy(ReportDefinitionDAO.class);

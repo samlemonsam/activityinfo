@@ -22,12 +22,16 @@ import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.primitives.Ints;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.googlecode.objectify.Key;
 import net.lightoze.gwt.i18n.server.ThreadLocalLocaleProvider;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
-import org.activityinfo.server.database.hibernate.entity.Authentication;
+import org.activityinfo.server.database.hibernate.entity.User;
+import org.activityinfo.store.hrd.Hrd;
+import org.activityinfo.store.hrd.entity.AuthTokenEntity;
 
 import javax.persistence.EntityManager;
 import javax.servlet.*;
@@ -139,19 +143,29 @@ public class AuthenticationFilter implements Filter {
     }
 
     private AuthenticatedUser queryAuthToken(String authToken) {
-        Authentication entity = entityManager.get().find(Authentication.class, authToken);
-        if (entity == null) {
+
+        User user = queryToken(authToken);
+
+        if(user == null) {
             // try as basic authentication
-            entity = basicAuthenticator.tryAuthenticate(authToken);
+            user = basicAuthenticator.tryAuthenticate(authToken);
         }
-        if (entity == null) {
+        if (user == null) {
             throw new IllegalArgumentException();
         }
         AuthenticatedUser authenticatedUser = new AuthenticatedUser(authToken,
-                entity.getUser().getId(),
-                entity.getUser().getEmail());
-        authenticatedUser.setUserLocale(entity.getUser().getLocale());
+                user.getId(),
+                user.getEmail());
+        authenticatedUser.setUserLocale(user.getLocale());
         return authenticatedUser;
+    }
+
+    private User queryToken(String authToken) {
+        AuthTokenEntity entity = Hrd.ofy().load().key(Key.create(AuthTokenEntity.class, authToken)).now();
+        if(entity == null) {
+            return null;
+        }
+        return entityManager.get().find(User.class, Ints.checkedCast(entity.getUserId()));
     }
 
     private String authTokenFromCookie() {

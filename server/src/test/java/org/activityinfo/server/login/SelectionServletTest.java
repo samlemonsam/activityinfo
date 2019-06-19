@@ -20,11 +20,9 @@ package org.activityinfo.server.login;
 
 import com.google.inject.Provider;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
-import org.activityinfo.server.database.hibernate.entity.Authentication;
 import org.easymock.EasyMock;
 import org.junit.Test;
 
-import javax.persistence.EntityManager;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -35,8 +33,8 @@ import java.io.IOException;
 import java.net.URL;
 
 import static org.easymock.EasyMock.*;
-import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 public class SelectionServletTest {
@@ -70,14 +68,10 @@ public class SelectionServletTest {
         // cache, allowing
         // the user to complete a refresh.
 
-        EntityManager entityManager = createMock(EntityManager.class);
-        expect(entityManager.find(eq(Authentication.class), eq("badtoken")))
-                .andReturn(null);
-        replay(entityManager);
 
         @SuppressWarnings("unchecked")
-        Provider<EntityManager> provider = createMock(Provider.class);
-        expect(provider.get()).andReturn(entityManager);
+        Provider<AuthenticatedUser> provider = createMock(Provider.class);
+        expect(provider.get()).andReturn(AuthenticatedUser.getAnonymous());
         replay(provider);
 
         Cookie[] cookies = new Cookie[]{

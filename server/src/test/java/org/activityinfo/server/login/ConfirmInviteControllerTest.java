@@ -25,9 +25,7 @@ import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.util.Closeable;
 import com.sun.jersey.api.view.Viewable;
 import org.activityinfo.server.authentication.AuthTokenProvider;
-import org.activityinfo.server.database.hibernate.dao.AuthenticationDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDAO;
-import org.activityinfo.server.database.hibernate.entity.Authentication;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.model.ConfirmInvitePageModel;
 import org.activityinfo.server.login.model.InvalidInvitePageModel;
@@ -72,15 +70,10 @@ public class ConfirmInviteControllerTest {
         expect(userDAO.findUserByChangePasswordKey(EasyMock.not(eq(VALID_KEY)))).andThrow(new NoResultException());
         replay(userDAO);
 
-        AuthenticationDAO authDAO = createMock(AuthenticationDAO.class);
-        authDAO.persist(isA(Authentication.class));
-        expectLastCall().anyTimes();
-
         MailingListClient mailingListClient = createNiceMock(MailingListClient.class);
         replay(mailingListClient);
 
-        AuthTokenProvider authTokenProvider = new AuthTokenProvider(
-                Providers.of(authDAO));
+        AuthTokenProvider authTokenProvider = new AuthTokenProvider();
 
         resource = new ConfirmInviteController(
                 Providers.of(userDAO), authTokenProvider, mailingListClient);

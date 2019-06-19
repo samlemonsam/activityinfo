@@ -18,7 +18,6 @@
  */
 package org.activityinfo.server.login;
 
-import org.activityinfo.server.database.hibernate.entity.Authentication;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.server.login.model.HostPageModel;
 import org.junit.Test;
@@ -32,10 +31,6 @@ public class HostViewTest extends ViewTestCase {
         user.setName("Alex");
         user.setEmail("akbertram@gmail.com");
         user.setLocale("fr");
-
-        Authentication auth = new Authentication(user);
-        auth.setId("XYZ12345");
-        auth.setUser(user);
 
         HostPageModel pageModel = new HostPageModel(
                 "http://www.activityinfo.org");

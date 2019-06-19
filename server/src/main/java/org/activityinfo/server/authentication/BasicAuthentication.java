@@ -25,7 +25,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.server.database.hibernate.dao.UserDAO;
-import org.activityinfo.server.database.hibernate.entity.Authentication;
 import org.activityinfo.server.database.hibernate.entity.User;
 
 import javax.persistence.NoResultException;
@@ -49,16 +48,13 @@ public class BasicAuthentication {
         this.authenticator = authenticator;
     }
 
-    public Authentication tryAuthenticate(String authorizationHeader) {
+    public User tryAuthenticate(String authorizationHeader) {
         User user;
         try {
-            user = doAuthentication(authorizationHeader);
+            return doAuthentication(authorizationHeader);
         } catch (IOException e) {
             return null;
         }
-        Authentication auth = new Authentication(user);
-        auth.setId("");
-        return auth;
     }
 
     public User doAuthentication(String auth) throws IOException {

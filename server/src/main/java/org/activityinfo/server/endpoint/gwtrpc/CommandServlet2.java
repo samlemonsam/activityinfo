@@ -26,9 +26,7 @@ import org.activityinfo.legacy.shared.command.Command;
 import org.activityinfo.legacy.shared.command.RemoteCommandService;
 import org.activityinfo.legacy.shared.command.result.CommandResult;
 import org.activityinfo.legacy.shared.exception.CommandException;
-import org.activityinfo.legacy.shared.exception.InvalidAuthTokenException;
 import org.activityinfo.legacy.shared.exception.UnexpectedCommandException;
-import org.activityinfo.server.database.hibernate.entity.Authentication;
 import org.activityinfo.server.database.hibernate.entity.User;
 
 import java.util.ArrayList;
@@ -50,27 +48,10 @@ public class CommandServlet2 extends RemoteServiceServlet implements RemoteComma
 
     @Override
     public List<CommandResult> execute(String authToken, String locale, List<Command> commands) throws CommandException {
-        Authentication auth = retrieveAuthentication(authToken);
-        try {
-            return handleCommands(auth.getUser(), commands);
-
-        } catch (Exception caught) {
-            caught.printStackTrace();
-            throw new CommandException();
-        }
+        throw new UnsupportedOperationException();
     }
 
     public CommandResult execute(String authToken, Command command) throws CommandException {
-        Authentication auth = retrieveAuthentication(authToken);
-        return handleCommand(auth.getUser(), command);
-    }
-
-    private Authentication retrieveAuthentication(String authToken) throws InvalidAuthTokenException {
-        // Authentication auth = userDAO.findAuthenticationByToken(authToken);
-        // if (auth == null) {
-        // throw new InvalidAuthTokenException();
-        // }
-        // return auth;
         throw new UnsupportedOperationException();
     }
 

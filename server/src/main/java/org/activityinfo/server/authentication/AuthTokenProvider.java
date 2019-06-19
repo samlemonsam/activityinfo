@@ -18,17 +18,13 @@
  */
 package org.activityinfo.server.authentication;
 
-import com.google.inject.Inject;
 import org.activityinfo.legacy.shared.AuthenticatedUser;
 import org.activityinfo.server.DeploymentEnvironment;
-import org.activityinfo.server.database.hibernate.dao.AuthenticationDAO;
 import org.activityinfo.server.database.hibernate.dao.Transactional;
-import org.activityinfo.server.database.hibernate.entity.Authentication;
 import org.activityinfo.server.database.hibernate.entity.User;
 import org.activityinfo.store.hrd.Hrd;
 import org.activityinfo.store.hrd.entity.AuthTokenEntity;
 
-import javax.inject.Provider;
 import javax.ws.rs.core.NewCookie;
 import java.net.URI;
 import java.util.ArrayList;
@@ -45,46 +41,38 @@ public class AuthTokenProvider {
     private static final int ONE_YEAR = 365 * 24 * 60 * 60;
     private static final int MAX_NEW_COOKIES = 6;           // Max is 2 sets of 3 cookies (host domain and cross domain)
 
-    private final Provider<AuthenticationDAO> authDAO;
-
-    @Inject
-    public AuthTokenProvider(Provider<AuthenticationDAO> authDAO) {
-        super();
-        this.authDAO = authDAO;
-    }
-
     @Transactional
-    public Authentication createNewAuthToken(User user) {
-        Authentication auth = new Authentication(user);
-        authDAO.get().persist(auth);
+    public String createNewAuthToken(User user) {
+
+        String token = SecureTokenGenerator.generate();
 
         // Dual write to HRD
         AuthTokenEntity entity = new AuthTokenEntity();
         entity.setCreationTime(new Date());
         entity.setUserId(user.getId());
         entity.setEmail(user.getEmail());
-        entity.setToken(auth.getId());
+        entity.setToken(token);
         entity.setExpireTime(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(5)));
 
         Hrd.ofy().save().entity(entity).now();
 
-        return auth;
+        return token;
     }
 
     public NewCookie[] createNewAuthCookies(User user, URI baseUri) {
-        Authentication token = createNewAuthToken(user);
+        String token = createNewAuthToken(user);
         List<NewCookie> newCookies = new ArrayList<>(MAX_NEW_COOKIES);
 
         if (baseUri.getHost().contains(DOMAIN)) {
             // set cross domain cookies
-            newCookies.add(newAuthCookie(AuthenticatedUser.AUTH_TOKEN_COOKIE, token.getId(), DOMAIN));
-            newCookies.add(newAuthCookie(AuthenticatedUser.USER_ID_COOKIE, Integer.toString(token.getUser().getId()), DOMAIN));
+            newCookies.add(newAuthCookie(AuthenticatedUser.AUTH_TOKEN_COOKIE, token, DOMAIN));
+            newCookies.add(newAuthCookie(AuthenticatedUser.USER_ID_COOKIE, Integer.toString(user.getId()), DOMAIN));
             newCookies.add(newAuthCookie(AuthenticatedUser.EMAIL_COOKIE, user.getEmail(), DOMAIN));
         }
 
         // set host domain cookies
-        newCookies.add(newAuthCookie(AuthenticatedUser.AUTH_TOKEN_COOKIE, token.getId(), null));
-        newCookies.add(newAuthCookie(AuthenticatedUser.USER_ID_COOKIE, Integer.toString(token.getUser().getId()), null));
+        newCookies.add(newAuthCookie(AuthenticatedUser.AUTH_TOKEN_COOKIE, token, null));
+        newCookies.add(newAuthCookie(AuthenticatedUser.USER_ID_COOKIE, Integer.toString(user.getId()), null));
         newCookies.add(newAuthCookie(AuthenticatedUser.EMAIL_COOKIE, user.getEmail(), null));
 
         NewCookie[] newCookieArray = new NewCookie[newCookies.size()];
