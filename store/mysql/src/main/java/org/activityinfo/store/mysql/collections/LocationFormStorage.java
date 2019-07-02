@@ -85,6 +85,10 @@ public class LocationFormStorage implements FormStorage {
             if (!rs.next()) {
                 throw new FormNotFoundException(formClassId);
             }
+            boolean migratedToHrd = rs.getBoolean("hrd");
+            if(migratedToHrd) {
+                throw new FormNotFoundException(formClassId);
+            }
             countryId = rs.getInt("countryId");
             Preconditions.checkState(!rs.wasNull());
 
