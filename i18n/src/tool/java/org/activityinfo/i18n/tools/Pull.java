@@ -30,8 +30,8 @@ import org.activityinfo.i18n.tools.parser.DefaultUpdatingVisitor;
 import org.activityinfo.i18n.tools.parser.InspectingVisitor;
 import org.activityinfo.i18n.tools.parser.ValidatingVisitor;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.util.Properties;
 
 
 /**
@@ -167,12 +167,20 @@ public class Pull {
         // Validate messages first to avoid causing compile errors
         TranslationSet validated = validateMessages(resourceClass, translations);
 
+        File resourceFile = resourceClass.getResourceFile(translations.getLanguage());
+
+        // Read in the existing properties
+        Properties existing = new Properties();
+        if(resourceFile.exists()) {
+            try (Reader reader = new InputStreamReader(new FileInputStream(resourceFile), Charsets.UTF_8)) {
+                existing.load(reader);
+            }
+        }
 
         // Write out the properties file
-        PropertiesBuilder properties = new PropertiesBuilder();
+        PropertiesBuilder properties = new PropertiesBuilder(existing);
         properties.addAll(resourceClass, validated);
 
-        File resourceFile = resourceClass.getResourceFile(translations.getLanguage());
 
         if(properties.getMissingCount() > 0) {
             System.err.println(resourceFile.getName() + " is missing " + properties.getMissingCount() + " translations.");

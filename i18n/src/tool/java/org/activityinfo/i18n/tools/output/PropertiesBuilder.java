@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Convenience class for writing Java property files. We use this 
@@ -40,9 +41,14 @@ public class PropertiesBuilder {
 
 
     private final StringBuilder writer = new StringBuilder();
+    private final Properties existing;
     private Function<String, String> translationDecorator = Functions.identity();
     
     private int missingCount = 0;
+
+    public PropertiesBuilder(Properties existing) {
+        this.existing = existing;
+    }
 
 
     public void addAll(ResourceClass resourceClass, TranslationSet translations) {
@@ -66,7 +72,12 @@ public class PropertiesBuilder {
             if(!Strings.isNullOrEmpty(translated)) {
                 add(key, translated);
             } else {
-                missingCount++;
+                String existing = this.existing.getProperty(key);
+                if(!Strings.isNullOrEmpty(existing)) {
+                    add(key, existing);
+                } else {
+                    missingCount++;
+                }
             }
         }
     }
