@@ -25,20 +25,26 @@ import com.extjs.gxt.ui.client.event.Events;
 import com.extjs.gxt.ui.client.event.ListViewEvent;
 import com.extjs.gxt.ui.client.event.Listener;
 import com.extjs.gxt.ui.client.store.ListStore;
-import com.extjs.gxt.ui.client.widget.*;
+import com.extjs.gxt.ui.client.widget.CheckBoxListView;
+import com.extjs.gxt.ui.client.widget.MessageBox;
+import com.extjs.gxt.ui.client.widget.ModelPropertyRenderer;
 import com.extjs.gxt.ui.client.widget.form.*;
-import com.extjs.gxt.ui.client.widget.layout.*;
+import com.extjs.gxt.ui.client.widget.layout.FormLayout;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import org.activityinfo.i18n.shared.I18N;
 import org.activityinfo.i18n.shared.UiConstants;
 import org.activityinfo.legacy.shared.model.*;
+import org.activityinfo.ui.client.ClientContext;
 import org.activityinfo.ui.client.page.common.toolbar.WarningBar;
 import org.activityinfo.ui.client.page.config.design.BlankValidator;
 import org.activityinfo.ui.client.page.entry.form.field.MultilineRenderer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -313,7 +319,9 @@ public class UserForm extends FormPanel {
     }
 
     private boolean showMultiplePartnerEditor(String ownerEmail) {
-        if (ownerEmail.toLowerCase().contains("@bedatadriven.com") || ownerEmail.toLowerCase().contains("@unrwa.org")) {
+        if (ownerEmail.toLowerCase().contains("@bedatadriven.com") ||
+                ownerEmail.toLowerCase().contains("@unrwa.org") ||
+                ClientContext.isMultiplePartnersEnabled()) {
             return true;
         }
         return false;

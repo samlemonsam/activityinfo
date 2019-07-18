@@ -55,6 +55,10 @@ public final class ClientContext {
         return Strings.nullToEmpty(DICTIONARY.get("featureFlags"));
     }
 
+    public static boolean isMultiplePartnersEnabled() {
+        return getFeatureFlags().contains("multipartner");
+    }
+
     public static boolean isWhitelistedForLinkedIndicators() {
         return getFeatureFlags().contains("links");
     }
