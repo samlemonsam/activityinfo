@@ -176,7 +176,11 @@ subprojects {
                 if (details.requested.group == 'org.codehaus.jackson') {
                     details.useVersion jacksonVersion
                 } else if(details.requested.group == 'com.fasterxml.jackson.core') {
-                    details.useVersion jackson2Version
+                    if(details.requested.name == 'jackson-databind') {
+                        details.useVersion '2.9.9.1'
+                    } else {
+                        details.useVersion jackson2Version
+                    }
                 } else if(details.requested.group == 'com.google.appengine') {
                     details.useVersion gaeVersion
                 } else if(details.requested.group == 'org.apache.poi' && details.requested.name == 'poi') {
@@ -194,6 +198,13 @@ subprojects {
                 // Avoid vulnerability CVE-2018-1000632 if dom4j is transitive dependency
                 if(details.requested.group == 'dom4j' && details.requested.name == 'dom4j') {
                     details.useTarget 'org.dom4j:dom4j:2.1.1'
+                }
+
+                // Avoid vulnerability CVE-2018-20200 if okhttp is a transitive dependency
+                if(details.requested.group == 'com.squareup.okhttp3' && details.requested.name == 'okhttp' &&
+                        details.requested.version.startsWith('3.11.')) {
+
+                    details.useVersion '3.12.1'
                 }
             }
         }
