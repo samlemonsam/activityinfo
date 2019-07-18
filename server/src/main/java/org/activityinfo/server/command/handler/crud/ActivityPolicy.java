@@ -33,7 +33,9 @@ import org.activityinfo.model.permission.Operation;
 import org.activityinfo.model.permission.PermissionOracle;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.Cardinality;
+import org.activityinfo.model.type.NarrativeType;
 import org.activityinfo.model.type.ReferenceType;
+import org.activityinfo.model.type.time.LocalDateType;
 import org.activityinfo.server.command.handler.json.JsonHelper;
 import org.activityinfo.server.database.hibernate.dao.ActivityDAO;
 import org.activityinfo.server.database.hibernate.dao.UserDatabaseDAO;
@@ -114,6 +116,18 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
         formClass.setDatabaseId(activity.getDatabase().getResourceId());
         formClass.setSchemaVersion(1L);
 
+        FormField startDate = new FormField(CuidAdapter.field(formClass.getId(), CuidAdapter.START_DATE_FIELD));
+        startDate.setCode("date1");
+        startDate.setLabel(I18N.CONSTANTS.startDate());
+        startDate.setRequired(true);
+        startDate.setType(LocalDateType.INSTANCE);
+
+        FormField endDate = new FormField(CuidAdapter.field(formClass.getId(), CuidAdapter.END_DATE_FIELD));
+        endDate.setCode("date2");
+        endDate.setLabel(I18N.CONSTANTS.endDate());
+        endDate.setRequired(true);
+        endDate.setType(LocalDateType.INSTANCE);
+
         FormField partnerField = new FormField(CuidAdapter.partnerField(activity.getId()));
         partnerField.setLabel(I18N.CONSTANTS.partner());
         partnerField.setRequired(true);
@@ -121,7 +135,26 @@ public class ActivityPolicy implements EntityPolicy<Activity> {
                 CuidAdapter.partnerFormId(activity.getDatabase().getId())));
         partnerField.setVisible(true);
         partnerField.setCode("partner");
+
+
+        FormField projectField = new FormField(CuidAdapter.projectField(activity.getId()));
+        projectField.setLabel(I18N.CONSTANTS.partner());
+        projectField.setRequired(true);
+        projectField.setType(new ReferenceType(Cardinality.SINGLE,
+                CuidAdapter.projectFormClass(activity.getDatabase().getId())));
+        projectField.setVisible(false);
+        projectField.setCode("project");
+
+        FormField commentField = new FormField(CuidAdapter.commentsField(activity.getId()));
+        commentField.setLabel(I18N.CONSTANTS.comments());
+        commentField.setCode("comments");
+        commentField.setType(NarrativeType.INSTANCE);
+
+        formClass.addElement(startDate);
+        formClass.addElement(endDate);
         formClass.addElement(partnerField);
+        formClass.addElement(projectField);
+        formClass.addElement(commentField);
 
         return formClass;
     }
