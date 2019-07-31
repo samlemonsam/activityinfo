@@ -59,7 +59,7 @@ public class ValueArrays {
     }
 
     public static byte[] allocate(int length, int elementSize) {
-        return new byte[requiredSize(length, elementSize)];
+        return new byte[length * elementSize];
     }
 
     public static ByteBuffer asBuffer(Blob valueArray) {

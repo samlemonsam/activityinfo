@@ -2,6 +2,7 @@ package org.activityinfo.store.hrd.columns;
 
 import com.google.appengine.api.datastore.Blob;
 import com.google.appengine.api.datastore.Entity;
+import com.google.common.annotations.VisibleForTesting;
 import org.activityinfo.model.query.ColumnType;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.query.DoubleArrayColumnView;
@@ -33,7 +34,8 @@ public class NumberBlock implements BlockManager {
     private IntReader intReader;
     private IntColumnFactory intColumnFactory;
 
-    private String formatProperty;
+    @VisibleForTesting
+    String formatProperty;
     private String valuesProperty;
 
     public NumberBlock(String fieldName, DoubleReader doubleReader) {
@@ -118,6 +120,7 @@ public class NumberBlock implements BlockManager {
 
             case REAL64_STORAGE:
                 return updateDoubleMissing(blockEntity, recordOffset);
+
         }
         throw new UnsupportedOperationException("storage mode: " + mode);
     }
@@ -193,7 +196,7 @@ public class NumberBlock implements BlockManager {
         }
 
         blockEntity.setUnindexedProperty(formatProperty, REAL64_STORAGE);
-        blockEntity.setProperty(valuesProperty, valueArray);
+        blockEntity.setProperty(valuesProperty, new Blob(updated));
 
         return blockEntity;
     }
@@ -303,6 +306,12 @@ public class NumberBlock implements BlockManager {
             for (int i = 0; i < length; i++) {
                 if(!deleted.get(i)) {
                     values[targetIndex++] = buffer.get(i);
+
+                    // Some blocks have been allocated too large.
+                    // Ignore the extra space and stop.
+                    if(targetIndex >= values.length) {
+                        break;
+                    }
                 }
             }
         }

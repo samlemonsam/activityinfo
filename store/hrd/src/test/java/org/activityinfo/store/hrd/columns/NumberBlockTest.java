@@ -4,6 +4,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterators;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.query.ColumnView;
 import org.activityinfo.model.resource.ResourceId;
@@ -11,6 +12,8 @@ import org.activityinfo.model.type.number.Quantity;
 import org.activityinfo.model.type.number.QuantityType;
 import org.activityinfo.model.type.time.LocalDate;
 import org.activityinfo.model.type.time.LocalDateType;
+import org.activityinfo.model.type.time.YearType;
+import org.activityinfo.model.type.time.YearValue;
 import org.activityinfo.store.hrd.entity.FormEntity;
 import org.junit.After;
 import org.junit.Before;
@@ -26,6 +29,7 @@ import static java.util.Collections.emptyIterator;
 import static org.activityinfo.store.testing.ColumnSetMatchers.hasValues;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class NumberBlockTest {
 
@@ -46,8 +50,7 @@ public class NumberBlockTest {
 
     @Test
     public void integers() {
-        FormField quantityField = new FormField(ResourceId.valueOf("F")).setType(new QuantityType("households"));
-        NumberBlock block = (NumberBlock) BlockFactory.get(quantityField);
+        NumberBlock block = quantityBlock();
 
         Entity blockEntity = new Entity("Block", 1);
 
@@ -82,14 +85,63 @@ public class NumberBlockTest {
         view = block.buildView(header, tombstoneIndex, Arrays.asList(blockEntity).iterator());
 
         assertThat(view, hasValues(1000, 1001, 1003, 1005));
+    }
 
+    @Test
+    public void integersSetBlank() {
+
+        NumberBlock block = quantityBlock();
+
+        Entity blockEntity = new Entity("Block", 1);
+
+        block.update(blockEntity, 0, new Quantity(1000));
+        block.update(blockEntity, 1, new Quantity(1001));
+        block.update(blockEntity, 0, null);
+
+        FormEntity header = new FormEntity();
+        header.setNumberedRecordCount(3);
+
+        TombstoneIndex tombstoneIndex = new TombstoneIndex(header, emptyIterator());
+
+        ColumnView view = block.buildView(header, tombstoneIndex, Arrays.asList(blockEntity).iterator());
+
+        assertThat(view.isMissing(0), equalTo(true));
+        assertThat(view.getDouble(1), equalTo(1001d));
+        assertThat(view.isMissing(2), equalTo(true));
+    }
+
+    @Test
+    public void years() {
+
+        FormField quantityField = new FormField(ResourceId.valueOf("F")).setType(YearType.INSTANCE);
+        NumberBlock block = (NumberBlock) BlockFactory.get(quantityField);
+
+        Entity blockEntity = new Entity("Block", 1);
+
+        block.update(blockEntity, 0, new YearValue(1992));
+        block.update(blockEntity, 1, new YearValue(2004));
+        block.update(blockEntity, 0, null);
+        block.update(blockEntity, 2, new YearValue(2020));
+        block.update(blockEntity, 4, new YearValue(1982));
+
+        FormEntity header = new FormEntity();
+        header.setNumberedRecordCount(5);
+
+        TombstoneIndex tombstoneIndex = new TombstoneIndex(header, emptyIterator());
+
+        ColumnView view = block.buildView(header, tombstoneIndex, Arrays.asList(blockEntity).iterator());
+
+        assertThat(view.isMissing(0), equalTo(true));
+        assertThat(view.getDouble(1), equalTo(2004d));
+        assertThat(view.getDouble(2), equalTo(2020d));
+        assertThat(view.isMissing(3), equalTo(true));
+        assertThat(view.getDouble(4), equalTo(1982d));
     }
 
 
     @Test
     public void doubles() {
-        FormField quantityField = new FormField(ResourceId.valueOf("F")).setType(new QuantityType("households"));
-        NumberBlock block = (NumberBlock) BlockFactory.get(quantityField);
+        NumberBlock block = quantityBlock();
 
         if(block.getBlockSize() != (1024*10)) {
             throw new AssumptionViolatedException("Unit test expects block size of 10k, may require updating");
@@ -130,7 +182,32 @@ public class NumberBlockTest {
         // Next values live on block 3, which starts at 10k * 3 = 30720, but 4 records prior
         // to this block have been deleted
         assertThat(view.getDouble(30726), equalTo(1.5d));
+    }
 
+    @Test
+    public void doubleBlank() {
+
+        NumberBlock block = quantityBlock();
+
+        Entity blockEntity = new Entity("Block", 1);
+
+        block.update(blockEntity, 0, new Quantity(3.14));
+        block.update(blockEntity, 1, new Quantity(55));
+        block.update(blockEntity, 0, null);
+        block.update(blockEntity, 3, null);
+
+
+        FormEntity header = new FormEntity();
+        header.setNumberedRecordCount(4);
+
+        TombstoneIndex tombstoneIndex = new TombstoneIndex(header, emptyIterator());
+
+        ColumnView view = block.buildView(header, tombstoneIndex, Arrays.asList(blockEntity).iterator());
+
+        assertThat(view.isMissing(0), equalTo(true));
+        assertThat(view.getDouble(1), equalTo(55d));
+        assertThat(view.isMissing(2), equalTo(true));
+        assertThat(view.isMissing(3), equalTo(true));
 
     }
 
@@ -177,7 +254,118 @@ public class NumberBlockTest {
         ColumnView selected = view.select(new int[]{1});
         assertThat(selected.numRows(), equalTo(1));
         assertThat(selected.getString(0), equalTo(startDate.plusDays(1).toString()));
-
     }
 
+    @Test
+    public void upgradeToDouble() {
+
+        NumberBlock block = quantityBlock();
+
+        Entity blockEntity = new Entity("Block", 1);
+
+        // The first record is empty
+
+        // The second two updates are integers
+        block.update(blockEntity, 1, new Quantity(1000));
+        block.update(blockEntity, 2, new Quantity(1001));
+
+        // Now we have a double; the whole block needs to be migrated to double precision
+        block.update(blockEntity, 3, new Quantity(1.5));
+
+
+        // Verify that the values are correct
+
+        FormEntity header = new FormEntity();
+        header.setNumberedRecordCount(4);
+
+        TombstoneIndex tombstoneIndex = new TombstoneIndex(header, emptyIterator());
+
+        ColumnView view = block.buildView(header, tombstoneIndex, Arrays.asList(blockEntity).iterator());
+
+        assertThat(view.isMissing(0), equalTo(true));
+        assertThat(view.getDouble(1), equalTo(1000d));
+        assertThat(view.getDouble(2), equalTo(1001d));
+        assertThat(view.getDouble(3), equalTo(1.5));
+    }
+
+
+    @Test
+    public void upgradeToDouble2() {
+
+        NumberBlock block = quantityBlock();
+
+        Entity blockEntity = new Entity("Block", 1);
+
+        // The first record is empty
+
+        // The second two updates are integers
+        block.update(blockEntity, 1, new Quantity(1000));
+        block.update(blockEntity, 2, new Quantity(1001));
+
+        // Now we have a double; the whole block needs to be migrated to double precision
+        block.update(blockEntity, 7, new Quantity(1.5));
+
+
+        // Verify that the values are correct
+
+        FormEntity header = new FormEntity();
+        header.setNumberedRecordCount(10);
+
+        TombstoneIndex tombstoneIndex = new TombstoneIndex(header, emptyIterator());
+
+        ColumnView view = block.buildView(header, tombstoneIndex, Arrays.asList(blockEntity).iterator());
+
+        assertThat(view.isMissing(0), equalTo(true));
+        assertThat(view.getDouble(1), equalTo(1000d));
+        assertThat(view.getDouble(2), equalTo(1001d));
+        assertThat(view.isMissing(3), equalTo(true));
+        assertThat(view.isMissing(4), equalTo(true));
+        assertThat(view.isMissing(5), equalTo(true));
+        assertThat(view.isMissing(6), equalTo(true));
+        assertThat(view.getDouble(7), equalTo(1.5));
+    }
+
+    @Test
+    public void noBlocks() {
+
+        NumberBlock block = quantityBlock();
+
+        // Verify that all values are missing
+
+        FormEntity header = new FormEntity();
+        header.setNumberedRecordCount(1000);
+
+        TombstoneIndex tombstoneIndex = new TombstoneIndex(header, emptyIterator());
+
+        ColumnView view = block.buildView(header, tombstoneIndex, Iterators.forArray());
+
+        for (int i = 0; i < 1000; i++) {
+            assertTrue(view.isMissing(i));
+        }
+    }
+
+
+    private NumberBlock quantityBlock() {
+        FormField quantityField = new FormField(ResourceId.valueOf("F")).setType(new QuantityType("households"));
+        return (NumberBlock) BlockFactory.get(quantityField);
+    }
+
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void unsupportedStorageType() {
+
+        NumberBlock block = quantityBlock();
+
+        Entity blockEntity = new Entity("Block", 1);
+        blockEntity.setUnindexedProperty(block.formatProperty, 9999);
+
+        // Verify that the values are correct
+
+        FormEntity header = new FormEntity();
+        header.setNumberedRecordCount(10);
+
+        TombstoneIndex tombstoneIndex = new TombstoneIndex(header, emptyIterator());
+
+        ColumnView view = block.buildView(header, tombstoneIndex, Arrays.asList(blockEntity).iterator());
+    }
 }

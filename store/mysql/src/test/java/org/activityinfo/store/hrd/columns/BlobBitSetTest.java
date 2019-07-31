@@ -103,6 +103,15 @@ public class BlobBitSetTest {
         assertThat(BlobBitSet.cardinality(b, 18), equalTo(9));
     }
 
+    @Test
+    public void cardinalityPartial() {
+        byte[] a = new byte[] {(byte) 0xFF, 0b1 };
+        assertThat(BlobBitSet.cardinality(a, 1), equalTo(1));
+        assertThat(BlobBitSet.cardinality(a, 2), equalTo(2));
+        assertThat(BlobBitSet.cardinality(a, 3), equalTo(3));
+
+    }
+
     private List<Integer> toList(BitSet bitSet) {
         return bitSet.stream().boxed().collect(Collectors.toList());
     }
