@@ -142,14 +142,7 @@ public class MySqlStorageProvider implements FormStorageProvider, TransactionalS
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        
-        // Finally, verify that all collections were loaded
-        for (ResourceId collectionId : formIds) {
-            if(!resultMap.containsKey(collectionId)) {
-                throw new FormNotFoundException(collectionId);
-            }
-        }
-        
+
         return resultMap;
     }
 
