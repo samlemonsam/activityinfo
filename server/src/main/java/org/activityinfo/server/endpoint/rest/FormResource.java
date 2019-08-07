@@ -49,10 +49,11 @@ import org.activityinfo.model.type.geo.GeoAreaType;
 import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
+import org.activityinfo.store.query.server.FormMetadataProviderAdapter;
 import org.activityinfo.store.query.server.InvalidUpdateException;
-import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.FormNotFoundException;
 import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.VersionedFormStorage;
 
 import javax.ws.rs.*;
@@ -478,7 +479,7 @@ public class FormResource {
 
     private QueryModel buildDefaultQueryModel() {
         QueryModel queryModel;
-        FormTreeBuilder treeBuilder = new FormTreeBuilder(backend.getStorage());
+        FormTreeBuilder treeBuilder = new FormTreeBuilder(new FormMetadataProviderAdapter(backend.getStorage(), backend.getFormSupervisor()));
         FormTree tree = treeBuilder.queryTree(formId);
 
         queryModel = new DefaultQueryBuilder(tree).build();
