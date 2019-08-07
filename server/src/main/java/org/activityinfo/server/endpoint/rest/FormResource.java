@@ -34,7 +34,6 @@ import org.activityinfo.model.database.RecordLock;
 import org.activityinfo.model.database.UserDatabaseMeta;
 import org.activityinfo.model.form.*;
 import org.activityinfo.model.formTree.FormTree;
-import org.activityinfo.model.formTree.FormTreeBuilder;
 import org.activityinfo.model.formTree.FormTreePrettyPrinter;
 import org.activityinfo.model.formTree.JsonFormTreeBuilder;
 import org.activityinfo.model.permission.FormPermissions;
@@ -50,9 +49,9 @@ import org.activityinfo.store.query.UsageTracker;
 import org.activityinfo.store.query.output.ColumnJsonWriter;
 import org.activityinfo.store.query.output.RowBasedJsonWriter;
 import org.activityinfo.store.query.server.InvalidUpdateException;
-import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.FormNotFoundException;
 import org.activityinfo.store.spi.FormStorage;
+import org.activityinfo.store.spi.UserDatabaseProvider;
 import org.activityinfo.store.spi.VersionedFormStorage;
 
 import javax.ws.rs.*;
@@ -478,7 +477,10 @@ public class FormResource {
 
     private QueryModel buildDefaultQueryModel() {
         QueryModel queryModel;
-        FormTreeBuilder treeBuilder = new FormTreeBuilder(backend.getStorage());
+        BatchingFormTreeBuilder treeBuilder = new BatchingFormTreeBuilder(
+                backend.getStorage(),
+                backend.getFormSupervisor(),
+                backend.getAuthenticatedUserId());
         FormTree tree = treeBuilder.queryTree(formId);
 
         queryModel = new DefaultQueryBuilder(tree).build();
