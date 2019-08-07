@@ -23,13 +23,14 @@ import com.google.common.collect.Sets;
 import org.activityinfo.model.form.FormClass;
 import org.activityinfo.model.form.FormField;
 import org.activityinfo.model.form.FormMetadata;
+import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.formTree.FormMetadataProvider;
 import org.activityinfo.model.formTree.FormTree;
 import org.activityinfo.model.formTree.FormTreeBuilder;
-import org.activityinfo.model.permission.FormPermissions;
 import org.activityinfo.model.resource.ResourceId;
 import org.activityinfo.model.type.ReferenceType;
 import org.activityinfo.model.type.subform.SubFormReferenceType;
+import org.activityinfo.store.query.server.FormSupervisorAdapter;
 import org.activityinfo.store.query.shared.FormSupervisor;
 import org.activityinfo.store.spi.FormStorage;
 import org.activityinfo.store.spi.FormStorageProvider;
@@ -61,7 +62,7 @@ public class BatchingFormTreeBuilder {
         this.userId = userId;
     }
 
-    public BatchingFormTreeBuilder(FormStorageProvider catalog, FormSupervisor supervisor, int userId) {
+    public BatchingFormTreeBuilder(FormStorageProvider catalog, FormSupervisorAdapter supervisor, int userId) {
         this(catalog, supervisor, Optional.absent(), userId);
     }
 
